@@ -14,6 +14,8 @@ on:
 jobs:
   build-docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,10 +32,21 @@ jobs:
       - name: Generate API Docs
         run: npx typedoc --options typedoc.json
 
+      - name: Check wiki availability
+        id: wiki-check
+        env:
+          GH_TOKEN: ${{ secrets.WIKI_ACTION_TOKEN || github.token }}
+        run: |
+          if git ls-remote "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git" HEAD >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Sync Wiki
+        if: steps.wiki-check.outputs.exists == 'true'
         uses: Andrew-Chen-Wang/github-wiki-action@v4
         with:
-          wiki_folder: docs/api
-          commit_message: "docs: update API documentation [skip ci]"
-        env:
-          WIKI_PUSH_TOKEN: ${{ secrets.WIKI_ACTION_TOKEN }}
+          token: ${{ secrets.WIKI_ACTION_TOKEN || github.token }}
+          path: docs/api
+          commit-message: "docs: update API documentation [skip ci]"
