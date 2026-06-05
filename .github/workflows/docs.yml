@@ -34,7 +34,7 @@ jobs:
 
       - name: Verify wiki repository availability
         env:
-          GH_TOKEN: ${{ secrets.WIKI_ACTION_TOKEN != '' && secrets.WIKI_ACTION_TOKEN || github.token }}
+          GH_TOKEN: ${{ secrets.WIKI_ACTION_TOKEN || github.token }}
         run: |
           if ! git ls-remote "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git" HEAD >/dev/null 2>&1; then
             echo "::error::GitHub wiki repository is unavailable. Enable the repository wiki and ensure token permissions allow wiki push."
@@ -44,6 +44,6 @@ jobs:
       - name: Sync Wiki
         uses: Andrew-Chen-Wang/github-wiki-action@v4
         with:
-          token: ${{ secrets.WIKI_ACTION_TOKEN != '' && secrets.WIKI_ACTION_TOKEN || github.token }}
+          token: ${{ secrets.WIKI_ACTION_TOKEN || github.token }}
           path: docs/api
           commit-message: "docs: update API documentation [skip ci]"
