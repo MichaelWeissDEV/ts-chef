@@ -53,10 +53,9 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: Andrew-Chen-Wang/github-wiki-action@v4
         with:
-          wiki_folder: test-report
-          commit_message: "docs: update test and coverage reports [skip ci]"
-        env:
-          WIKI_PUSH_TOKEN: ${{ secrets.WIKI_ACTION_TOKEN }}
+          token: ${{ secrets.WIKI_ACTION_TOKEN || github.token }}
+          path: test-report
+          commit-message: "docs: update test and coverage reports [skip ci]"
 
       - name: Job Summary
         run: |
@@ -68,4 +67,3 @@ jobs:
           echo "- **Coverage Report:** Detailed code coverage metrics." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Latest reports are also available on the [GitHub Wiki](https://github.com/${{ github.repository }}/wiki/test-report)." >> $GITHUB_STEP_SUMMARY
-
