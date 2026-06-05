@@ -7,5 +7,10 @@
   "name": "ts-chef API Documentation",
   "excludeExternals": true,
   "githubPages": false,
-  "readme": "README.md"
+  "readme": "docs/README.md",
+  "entryFileName": "Home.md",
+  "flattenOutputFiles": true,
+  "hideBreadcrumbs": true,
+  "indexFormat": "list",
+  "membersWithOwnFile": ["Class", "Interface", "TypeAlias"]
 }

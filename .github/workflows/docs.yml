@@ -13,6 +13,7 @@ on:
 
 jobs:
   build-docs:
+    name: Build & Sync Wiki
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -30,20 +31,12 @@ jobs:
         run: npm install
 
       - name: Generate API Docs
-        run: npx typedoc --options typedoc.json
-
-      - name: Verify wiki repository availability
-        env:
-          GH_TOKEN: ${{ secrets.WIKI_ACTION_TOKEN || github.token }}
-        run: |
-          if ! git ls-remote "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git" HEAD >/dev/null 2>&1; then
-            echo "::error::GitHub wiki repository is unavailable. Enable the repository wiki and ensure token permissions allow wiki push."
-            exit 1
-          fi
+        run: npm run docs
 
       - name: Sync Wiki
         uses: Andrew-Chen-Wang/github-wiki-action@v4
         with:
+          # Use WIKI_ACTION_TOKEN if available, else fall back to github.token
           token: ${{ secrets.WIKI_ACTION_TOKEN || github.token }}
           path: docs/api
           commit-message: "docs: update API documentation [skip ci]"
