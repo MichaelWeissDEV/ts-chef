@@ -33,10 +33,39 @@ jobs:
       - name: Generate API Docs
         run: npm run docs
 
-      - name: Sync Wiki
-        uses: Andrew-Chen-Wang/github-wiki-action@v4
-        with:
-          # Use WIKI_ACTION_TOKEN if available, else fall back to github.token
-          token: ${{ secrets.WIKI_ACTION_TOKEN || github.token }}
-          path: docs/api
-          commit-message: "docs: update API documentation [skip ci]"
+      - name: Sync Wiki manually
+        env:
+          GH_TOKEN: ${{ secrets.WIKI_ACTION_TOKEN || github.token }}
+        run: |
+          # Configure Git
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Clone the wiki repository
+          WIKI_URL="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git"
+          git clone $WIKI_URL wiki-repo
+          
+          # Clean old docs in wiki but keep .git folder
+          find wiki-repo -mindepth 1 -not -name '.git' -delete
+          
+          # Copy newly generated docs (and manually written docs) into the wiki repo
+          cp -r docs/api/* wiki-repo/
+          
+          # Copy manual guides to the wiki repository
+          cp docs/contributing.md wiki-repo/Contributing.md
+          cp docs/operations.md wiki-repo/Operations.md
+          cp docs/usage.md wiki-repo/Usage.md
+          
+          cd wiki-repo
+          
+          # Add all changes
+          git add .
+          
+          # Commit if there are changes
+          if git diff-index --quiet HEAD --; then
+            echo "No changes to documentation."
+          else
+            git commit -m "docs: update wiki documentation [skip ci]"
+            # Push specifically to the 'main' branch
+            git push origin HEAD:main --force
+          fi
