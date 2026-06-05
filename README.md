@@ -13,7 +13,7 @@
     <img src="https://img.shields.io/visual-studio-marketplace/v/michaelweiss.ts-chef?style=flat-square&color=blue" alt="Version" />
   </a>
   <a href="https://github.com/michaelweiss/ts-chef/actions/workflows/ci.yml">
-    <img src="https://github.com/michaelweiss/ts-chef/actions/workflows/ci.yml/badge.svg" alt="CI Status" />
+    <img src="https://github.com/michaelweiss/ts-chef/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI Status" />
   </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/github/license/michaelweiss/ts-chef?style=flat-square&color=green" alt="License" />

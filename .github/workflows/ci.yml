@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 jobs:
@@ -50,7 +50,7 @@ jobs:
           retention-days: 14
 
       - name: Sync Reports to Wiki
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/master'
         uses: Andrew-Chen-Wang/github-wiki-action@v4
         with:
           token: ${{ secrets.WIKI_ACTION_TOKEN || github.token }}
