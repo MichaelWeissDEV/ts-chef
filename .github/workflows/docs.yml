@@ -32,25 +32,18 @@ jobs:
       - name: Generate API Docs
         run: npx typedoc --options typedoc.json
 
-      - name: Check wiki availability
-        id: wiki-check
+      - name: Verify wiki repository availability
         env:
-          GH_TOKEN: ${{ secrets.WIKI_ACTION_TOKEN }}
+          GH_TOKEN: ${{ secrets.WIKI_ACTION_TOKEN != '' && secrets.WIKI_ACTION_TOKEN || github.token }}
         run: |
-          if [ -z "${GH_TOKEN}" ]; then
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          if git ls-remote "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git" HEAD >/dev/null 2>&1; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
+          if ! git ls-remote "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git" HEAD >/dev/null 2>&1; then
+            echo "::error::GitHub wiki repository is unavailable. Enable the repository wiki and ensure token permissions allow wiki push."
+            exit 1
           fi
 
       - name: Sync Wiki
-        if: steps.wiki-check.outputs.exists == 'true'
         uses: Andrew-Chen-Wang/github-wiki-action@v4
         with:
-          token: ${{ secrets.WIKI_ACTION_TOKEN }}
+          token: ${{ secrets.WIKI_ACTION_TOKEN != '' && secrets.WIKI_ACTION_TOKEN || github.token }}
           path: docs/api
           commit-message: "docs: update API documentation [skip ci]"
