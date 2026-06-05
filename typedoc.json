@@ -1,6 +1,6 @@
 {
   "entryPoints": ["src/chef/Operation.ts", "src/chef/operations/"],
-  "out": "wiki-repo",
+  "out": "docs/api",
   "plugin": [
     "typedoc-plugin-markdown",
     "typedoc-github-wiki-theme"

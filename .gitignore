@@ -14,6 +14,7 @@ node_modules/
 /build/
 /internal/
 /wiki-repo/
+/wiki-sync/
 *.log
 .DS_Store
 

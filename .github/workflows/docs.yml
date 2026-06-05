@@ -1,4 +1,4 @@
-name: Build Documentation
+name: Build & Sync Wiki
 
 on:
   push:
@@ -32,42 +32,45 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Generate API Documentation
+        run: npm run docs
+
       - name: Configure Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Clone Wiki Repository
+      - name: Sync to Wiki
         env:
           GH_TOKEN: ${{ secrets.WIKI_ACTION_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
+          # 1. Clone Wiki Repository into a temporary folder
           WIKI_URL="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git"
-          git clone $WIKI_URL wiki-repo
-
-      - name: Generate Wiki Documentation
-        run: npx typedoc --cleanOutputDir false
-
-      - name: Inject Manual Documentation & Guides
-        run: |
-          # Copy manual guides directly into the wiki-repo
-          [ -f "docs/contributing.md" ] && cp docs/contributing.md wiki-repo/Contributing.md
-          [ -f "docs/operations.md" ] && cp docs/operations.md wiki-repo/Operations.md
-          [ -f "docs/usage.md" ] && cp docs/usage.md wiki-repo/Usage.md
+          git clone $WIKI_URL wiki-sync
           
-          # Append Guides to Sidebar if it exists
-          if [ -f "wiki-repo/_Sidebar.md" ]; then
-            echo -e "\n\n## Guides\n* [[Contributing]]\n* [[Operations]]\n* [[Usage]]" >> wiki-repo/_Sidebar.md
+          # 2. Clean existing files (except .git)
+          find wiki-sync -mindepth 1 -not -name '.git' -delete
+          
+          # 3. Copy generated API docs
+          cp -r docs/api/* wiki-sync/
+          
+          # 4. Inject manual guides
+          [ -f "docs/contributing.md" ] && cp docs/contributing.md wiki-sync/Contributing.md
+          [ -f "docs/operations.md" ] && cp docs/operations.md wiki-sync/Operations.md
+          [ -f "docs/usage.md" ] && cp docs/usage.md wiki-sync/Usage.md
+          
+          # 5. Build/Update Sidebar
+          # If typedoc-github-wiki-theme generated a _Sidebar.md, we append to it.
+          # Otherwise we create one.
+          if [ -f "wiki-sync/_Sidebar.md" ]; then
+            echo -e "\n\n## Guides\n* [[Contributing]]\n* [[Operations]]\n* [[Usage]]" >> wiki-sync/_Sidebar.md
           else
-            echo -e "## Guides\n* [[Contributing]]\n* [[Operations]]\n* [[Usage]]" > wiki-repo/_Sidebar.md
+            echo -e "## Guides\n* [[Contributing]]\n* [[Operations]]\n* [[Usage]]" > wiki-sync/_Sidebar.md
           fi
-
-      - name: Commit and Push Changes to Wiki
-        run: |
-          cd wiki-repo
           
-          # Add all changes
+          # 6. Commit and Push
+          cd wiki-sync
           git add .
-          
           if git diff-index --quiet HEAD --; then
             echo "Keine Änderungen an der Dokumentation festgestellt."
           else
