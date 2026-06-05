@@ -44,32 +44,30 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.WIKI_ACTION_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
-          # 1. Clone Wiki Repository into a temporary folder
+          # 1. Clone Wiki Repository into a temporary folder outside workspace
           WIKI_URL="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git"
-          git clone $WIKI_URL wiki-sync
+          git clone $WIKI_URL /tmp/wiki-sync
           
           # 2. Clean existing files (except .git)
-          find wiki-sync -mindepth 1 -not -name '.git' -delete
+          find /tmp/wiki-sync -mindepth 1 -not -name '.git' -delete
           
           # 3. Copy generated API docs
-          cp -r docs/api/* wiki-sync/
+          cp -r docs/api/* /tmp/wiki-sync/
           
           # 4. Inject manual guides
-          [ -f "docs/contributing.md" ] && cp docs/contributing.md wiki-sync/Contributing.md
-          [ -f "docs/operations.md" ] && cp docs/operations.md wiki-sync/Operations.md
-          [ -f "docs/usage.md" ] && cp docs/usage.md wiki-sync/Usage.md
+          [ -f "docs/contributing.md" ] && cp docs/contributing.md /tmp/wiki-sync/Contributing.md
+          [ -f "docs/operations.md" ] && cp docs/operations.md /tmp/wiki-sync/Operations.md
+          [ -f "docs/usage.md" ] && cp docs/usage.md /tmp/wiki-sync/Usage.md
           
           # 5. Build/Update Sidebar
-          # If typedoc-github-wiki-theme generated a _Sidebar.md, we append to it.
-          # Otherwise we create one.
-          if [ -f "wiki-sync/_Sidebar.md" ]; then
-            echo -e "\n\n## Guides\n* [[Contributing]]\n* [[Operations]]\n* [[Usage]]" >> wiki-sync/_Sidebar.md
+          if [ -f "/tmp/wiki-sync/_Sidebar.md" ]; then
+            echo -e "\n\n## Guides\n* [[Contributing]]\n* [[Operations]]\n* [[Usage]]" >> /tmp/wiki-sync/_Sidebar.md
           else
-            echo -e "## Guides\n* [[Contributing]]\n* [[Operations]]\n* [[Usage]]" > wiki-sync/_Sidebar.md
+            echo -e "## Guides\n* [[Contributing]]\n* [[Operations]]\n* [[Usage]]" > /tmp/wiki-sync/_Sidebar.md
           fi
           
           # 6. Commit and Push
-          cd wiki-sync
+          cd /tmp/wiki-sync
           git add .
           if git diff-index --quiet HEAD --; then
             echo "Keine Änderungen an der Dokumentation festgestellt."
