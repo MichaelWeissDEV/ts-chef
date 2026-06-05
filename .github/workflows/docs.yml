@@ -81,7 +81,7 @@ jobs:
             echo "Keine Änderungen an der Dokumentation festgestellt."
           else
             git commit -m "docs: auto-update wiki documentation [skip ci]"
-            # Push specifically to the 'main' branch
-            git push origin HEAD:main --force
+            # Push specifically to the 'master' branch for compatibility
+            git push origin HEAD:master --force
           fi
 
