@@ -1,16 +1,15 @@
 {
   "entryPoints": ["src/chef/Operation.ts", "src/chef/operations/"],
-  "out": "docs/api",
-  "plugin": ["typedoc-plugin-markdown"],
+  "out": "wiki-repo",
+  "plugin": [
+    "typedoc-plugin-markdown",
+    "typedoc-github-wiki-theme"
+  ],
+  "theme": "markdown",
   "hideGenerator": true,
-  "theme": "default",
   "name": "ts-chef API Documentation",
   "excludeExternals": true,
-  "githubPages": false,
   "readme": "docs/README.md",
   "entryFileName": "Home.md",
-  "flattenOutputFiles": true,
-  "hideBreadcrumbs": true,
-  "indexFormat": "list",
-  "membersWithOwnFile": ["Class", "Interface", "TypeAlias"]
+  "flattenOutputFiles": true
 }
