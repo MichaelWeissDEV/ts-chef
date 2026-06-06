@@ -14,6 +14,11 @@
 import { Operation, ArgConfig } from "../Operation";
 import BigNumber from "bignumber.js";
 
+/**
+ * Convert distance operation
+ *
+ * @category Default
+ */
 export class ConvertDistance extends Operation {
     name = "Convert distance";
     module = "Default";
@@ -34,6 +39,13 @@ export class ConvertDistance extends Operation {
         },
     ];
 
+    /**
+     * @param {string} input
+     * @param {any[]} args
+     * @returns {string}
+     *
+     * @see {@link https://wikipedia.org/wiki/Orders_of_magnitude_(length)}
+     */
     run(input: string, args: any[]): string {
         const [inputUnits, outputUnits] = args;
         const bnInput = new BigNumber(input);

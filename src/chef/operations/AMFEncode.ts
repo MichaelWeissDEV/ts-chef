@@ -17,6 +17,8 @@ import { AMF0, AMF3 } from "@astronautlabs/amf";
 
 /**
  * AMF Encode operation
+ *
+ * @category Encodings
  */
 export class AMFEncode extends Operation {
     /**
@@ -43,9 +45,14 @@ export class AMFEncode extends Operation {
     }
 
     /**
-     * @param {any} input
-     * @param {any[]} args
-     * @returns {ArrayBuffer}
+     * Runs the operation.
+     *
+     * @param {any} input - The JSON object to encode.
+     * @param {any[]} args - Operation arguments.
+     * @param {string} args[0] - The format to use (AMF0 or AMF3).
+     * @returns {ArrayBuffer} - The encoded AMF data.
+     *
+     * @see {@link AMFDecode}
      */
     run(input: any, args: any[]): ArrayBuffer {
         const format = args[0];

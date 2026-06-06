@@ -14,6 +14,12 @@
 import { Operation, ArgConfig } from "../Operation";
 import { OperationError } from "../errors/OperationError";
 
+/**
+ * Citrix CTX1 Decode operation
+ *
+ * @category Encodings
+ * @see https://www.reddit.com/r/AskNetsec/comments/1s3r6y/citrix_ctx1_hash_decoding/
+ */
 export class CitrixCTX1Decode extends Operation {
     name = "Citrix CTX1 Decode";
     module = "Encodings";
@@ -23,6 +29,13 @@ export class CitrixCTX1Decode extends Operation {
     outputType = "string";
     args: ArgConfig[] = [];
 
+    /**
+     * Runs the operation.
+     *
+     * @param {ArrayBuffer} input
+     * @param {any[]} args
+     * @returns {string}
+     */
     run(input: ArrayBuffer, args: any[]): string {
         const inputBytes = new Uint8Array(input);
         if (inputBytes.length % 4 !== 0) {

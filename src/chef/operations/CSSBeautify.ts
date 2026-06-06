@@ -14,6 +14,11 @@
 import { Operation, ArgConfig } from "../Operation";
 const vkbeautify = require("vkbeautify");
 
+/**
+ * CSS Beautify operation
+ *
+ * @category Code
+ */
 export class CSSBeautify extends Operation {
     name = "CSS Beautify";
     module = "Code";
@@ -28,6 +33,13 @@ export class CSSBeautify extends Operation {
         },
     ];
 
+    /**
+     * Runs the CSS Beautify operation.
+     *
+     * @param {string} input
+     * @param {any[]} args
+     * @returns {string}
+     */
     run(input: string, args: any[]): string {
         const indentStr = args[0];
         return vkbeautify.css(input, indentStr);

@@ -19,7 +19,15 @@ interface ToggleStringArg {
     option: string;
 }
 
+/**
+ * Count occurrences operation
+ *
+ * @category Default
+ */
 export class CountOccurrences extends Operation {
+    /**
+     * CountOccurrences constructor
+     */
     constructor() {
         super();
         this.name = "Count occurrences";
@@ -38,6 +46,13 @@ export class CountOccurrences extends Operation {
         ];
     }
 
+    /**
+     * Runs the operation.
+     *
+     * @param {string} input
+     * @param {ToggleStringArg[]} args
+     * @returns {number}
+     */
     run(input: string, args: ToggleStringArg[]): number {
         let search = args[0].string;
         const type = args[0].option;

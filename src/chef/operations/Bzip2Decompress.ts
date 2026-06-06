@@ -16,7 +16,10 @@ import OperationError from "../errors/OperationError";
 const Bzip2 = require("libbzip2-wasm");
 
 /**
- * Bzip2 Decompress operation
+ * Decompress data using the Bzip2 algorithm.
+ *
+ * @category Compression
+ * @see https://wikipedia.org/wiki/Bzip2
  */
 export class Bzip2Decompress extends Operation {
     /**
@@ -51,7 +54,17 @@ export class Bzip2Decompress extends Operation {
             throw new OperationError("Please provide an input.");
         }
 
-        const bzip2 = await Bzip2();
+        const bzip2 = await new Promise<any>((resolve) => {
+            const m = Bzip2();
+            if (m.then) {
+                m.then((instance: any) => {
+                    resolve({ decompressBZ2: instance.decompressBZ2.bind(instance) });
+                });
+            } else {
+                resolve({ decompressBZ2: m.decompressBZ2.bind(m) });
+            }
+        });
+        
         const inpArray = new Uint8Array(input);
         const bzip2cc = bzip2.decompressBZ2(inpArray, small ? 1 : 0);
 

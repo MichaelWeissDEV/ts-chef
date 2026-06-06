@@ -16,6 +16,10 @@ import bcrypt from "bcryptjs";
 
 /**
  * Bcrypt operation
+ *
+ * @category Crypto
+ * @see {@link BcryptCompare}
+ * @see {@link BcryptParse}
  */
 export class Bcrypt extends Operation {
     /**
@@ -41,9 +45,12 @@ export class Bcrypt extends Operation {
     }
 
     /**
-     * @param {string} input
-     * @param {any[]} args
-     * @returns {Promise<string>}
+     * Runs the Bcrypt operation.
+     *
+     * @param {string} input - The password to hash.
+     * @param {any[]} args - The operation arguments.
+     * @param {number} args[0] - The number of rounds to use for salt generation.
+     * @returns {Promise<string>} The generated bcrypt hash.
      */
     async run(input: string, args: any[]): Promise<string> {
         const rounds = args[0];

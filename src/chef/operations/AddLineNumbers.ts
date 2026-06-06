@@ -13,7 +13,15 @@
 
 import { Operation } from "../Operation";
 
+/**
+ * Add line numbers operation
+ *
+ * @category Utils
+ */
 export class AddLineNumbers extends Operation {
+    /**
+     * AddLineNumbers constructor
+     */
     constructor() {
         super();
         this.name = "Add line numbers";
@@ -30,6 +38,16 @@ export class AddLineNumbers extends Operation {
         ];
     }
 
+    /**
+     * Runs the operation.
+     *
+     * @param {string} input - The input string.
+     * @param {number[]} args - Operation arguments.
+     * @param {number} args[0] - The starting line number offset.
+     * @returns {string} - The input string with line numbers added.
+     *
+     * @see {@link RemoveLineNumbers}
+     */
     run(input: string, args: number[]): string {
         const lines = input.split("\n");
         const width = lines.length.toString().length;

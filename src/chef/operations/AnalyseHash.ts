@@ -16,6 +16,8 @@ import OperationError from "../errors/OperationError";
 
 /**
  * Analyse hash operation
+ * 
+ * @category Crypto
  */
 export class AnalyseHash extends Operation {
     /**
@@ -35,8 +37,10 @@ export class AnalyseHash extends Operation {
     }
 
     /**
+     * Runs the Analyse Hash operation.
+     * 
      * @param {string} input
-     * @param {any[]} args
+     * @param {any[]} _args
      * @returns {string}
      */
     run(input: string, _args: any[]): string {

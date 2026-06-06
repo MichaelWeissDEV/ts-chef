@@ -14,6 +14,12 @@
 import { Operation, ArgConfig } from "../Operation";
 import { OperationError } from "../errors/OperationError";
 
+/**
+ * CRC Checksum operation
+ *
+ * @category Default
+ * @see https://wikipedia.org/wiki/Cyclic_redundancy_check
+ */
 export class CRCChecksum extends Operation {
     name = "CRC Checksum";
     module = "Default";
@@ -237,6 +243,13 @@ export class CRCChecksum extends Operation {
         },
     ];
 
+    /**
+     * Runs the CRC Checksum operation.
+     *
+     * @param {ArrayBuffer} input
+     * @param {any[]} args
+     * @returns {string}
+     */
     run(input: ArrayBuffer, args: any[]): string {
         const algorithm = args[0];
         const inputBytes = new Uint8Array(input);

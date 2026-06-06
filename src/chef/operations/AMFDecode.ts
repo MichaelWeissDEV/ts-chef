@@ -17,6 +17,10 @@ import { AMF0, AMF3 } from "@astronautlabs/amf";
 
 /**
  * AMF Decode operation
+ *
+ * @category Encodings
+ * @see https://wikipedia.org/wiki/Action_Message_Format
+ * @see AMFEncode
  */
 export class AMFDecode extends Operation {
     /**
@@ -43,15 +47,28 @@ export class AMFDecode extends Operation {
     }
 
     /**
-     * @param {ArrayBuffer} input
-     * @param {any[]} args
-     * @returns {any}
+     * Runs the operation.
+     *
+     * @param {ArrayBuffer} input - The AMF encoded data.
+     * @param {any[]} args - Operation arguments.
+     * @param {string} args[0] - The AMF format version (AMF0 or AMF3).
+     * @returns {any} The decoded object.
      */
     run(input: ArrayBuffer, args: any[]): any {
         const format = args[0];
         const handler = format === "AMF0" ? AMF0 : AMF3;
         const encoded = new Uint8Array(input);
-        return handler.Value.deserialize(encoded);
+        const result = handler.Value.deserialize(encoded);
+        
+        return this.unwrap(result);
+    }
+
+    private unwrap(obj: any): any {
+        if (!obj || typeof obj !== "object") return obj;
+        if (typeof obj.value !== "undefined") return obj.value;
+        if (typeof obj.$value !== "undefined") return obj.$value;
+        if (obj.stringOrReference && typeof obj.stringOrReference.$value !== "undefined") return obj.stringOrReference.$value;
+        return obj;
     }
 }
 

@@ -16,6 +16,12 @@ import { Utils } from "../Utils";
 import { OperationError } from "../errors/OperationError";
 import { blake3 } from "hash-wasm";
 
+/**
+ * BLAKE3 operation
+ * 
+ * @category Hashing
+ * @see https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE3
+ */
 export class BLAKE3 extends Operation {
     constructor() {
         super();
@@ -40,6 +46,13 @@ export class BLAKE3 extends Operation {
         ];
     }
 
+    /**
+     * Runs the operation.
+     * 
+     * @param {string} input
+     * @param {unknown[]} args
+     * @returns {Promise<string>}
+     */
     run(input: string, args: unknown[]): Promise<string> {
         const size = args[0] as number;
         const key = args[1] as string;

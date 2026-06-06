@@ -18,6 +18,12 @@ import OperationError from "../errors/OperationError";
 
 /**
  * AES Encrypt operation
+ *
+ * @category Ciphers
+ * @see https://wikipedia.org/wiki/Advanced_Encryption_Standard
+ * @see AESDecrypt
+ * @see AESKeyWrap
+ * @see AESKeyUnwrap
  */
 export class AESEncrypt extends Operation {
     /**
@@ -104,11 +110,23 @@ export class AESEncrypt extends Operation {
     }
 
     /**
-     * @param {string} input
-     * @param {any[]} args
-     * @returns {string}
+     * Runs the operation.
      *
-     * @throws {OperationError} if invalid key length
+     * @param {string} input - The input string to encrypt.
+     * @param {any[]} args - Operation arguments.
+     * @param {Object} args[0] - The encryption key.
+     * @param {string} args[0].string - The key value.
+     * @param {string} args[0].option - The key format (Hex, UTF8, Latin1, Base64).
+     * @param {Object} args[1] - The initialization vector.
+     * @param {string} args[1].string - The IV value.
+     * @param {string} args[1].option - The IV format (Hex, UTF8, Latin1, Base64).
+     * @param {string} args[2] - The encryption mode (e.g., CBC, GCM).
+     * @param {string} args[3] - The input format (Raw, Hex).
+     * @param {string} args[4] - The output format (Hex, Raw).
+     * @param {Object} args[5] - Additional Authenticated Data (for GCM).
+     * @returns {string} The encrypted string.
+     *
+     * @throws {OperationError} if invalid key length or padding issues.
      */
     run(input: string, args: any[]): string {
         const key = Utils.convertToByteString(args[0].string, args[0].option),

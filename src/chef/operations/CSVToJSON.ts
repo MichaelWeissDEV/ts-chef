@@ -17,6 +17,9 @@ import { Utils } from "../Utils";
 
 /**
  * CSV to JSON operation
+ *
+ * @category Data formats
+ * @see Utils.parseCSV
  */
 export class CSVToJSON extends Operation {
     /**
@@ -51,9 +54,12 @@ export class CSVToJSON extends Operation {
     }
 
     /**
-     * @param {string} input
-     * @param {any[]} args
-     * @returns {JSON}
+     * @param {string} input - The CSV string to convert.
+     * @param {any[]} args - Operation arguments.
+     * @param {string} args[0] - Cell delimiters.
+     * @param {string} args[1] - Row delimiters.
+     * @param {string} args[2] - Format ("Array of dictionaries" or "Array of arrays").
+     * @returns {unknown} - The converted JSON.
      */
     run(input: string, args: any[]): unknown {
         const [cellDelims, rowDelims, format] = args;

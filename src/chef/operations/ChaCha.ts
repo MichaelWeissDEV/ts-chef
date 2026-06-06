@@ -76,6 +76,11 @@ function chacha(key: number[], nonce: number[], counter: number[], rounds: numbe
     return output;
 }
 
+/**
+ * ChaCha operation
+ * 
+ * @category Ciphers
+ */
 export class ChaCha extends Operation {
     name = "ChaCha";
     module = "Ciphers";
@@ -120,6 +125,23 @@ export class ChaCha extends Operation {
         },
     ];
 
+    /**
+     * Runs the ChaCha operation.
+     * 
+     * @param {string} input - The input string to encrypt/decrypt.
+     * @param {any[]} args - The arguments for the operation.
+     * @param {Object} args[0] - The key.
+     * @param {string} args[0].string - The key value.
+     * @param {string} args[0].option - The key format (Hex, UTF8, Latin1, Base64).
+     * @param {Object} args[1] - The nonce.
+     * @param {string} args[1].string - The nonce value.
+     * @param {string} args[1].option - The nonce format (Hex, UTF8, Latin1, Base64, Integer).
+     * @param {number} args[2] - The counter value.
+     * @param {string} args[3] - The number of rounds (20, 12, 8).
+     * @param {string} args[4] - The input format (Hex, Raw).
+     * @param {string} args[5] - The output format (Raw, Hex).
+     * @returns {string} - The resulting string.
+     */
     run(input: string, args: any[]): string {
         const key = Utils.convertToByteArray(args[0].string, args[0].option);
         const nonceType = args[1].option;

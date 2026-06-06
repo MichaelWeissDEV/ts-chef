@@ -14,6 +14,11 @@
 import { Operation, ArgConfig } from "../Operation";
 import BigNumber from "bignumber.js";
 
+/**
+ * Convert area operation
+ *
+ * @category Default
+ */
 export class ConvertArea extends Operation {
     name = "Convert area";
     module = "Default";
@@ -34,6 +39,13 @@ export class ConvertArea extends Operation {
         },
     ];
 
+    /**
+     * @param {string} input
+     * @param {any[]} args
+     * @returns {string}
+     *
+     * @see {@link https://wikipedia.org/wiki/Orders_of_magnitude_(area)}
+     */
     run(input: string, args: any[]): string {
         const [inputUnits, outputUnits] = args;
         const bnInput = new BigNumber(input);

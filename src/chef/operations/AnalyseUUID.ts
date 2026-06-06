@@ -18,6 +18,8 @@ import { toHex } from "../lib/Hex";
 
 /**
  * Analyse UUID operation
+ * 
+ * @category Crypto
  */
 export class AnalyseUUID extends Operation {
     /**
@@ -43,6 +45,8 @@ export class AnalyseUUID extends Operation {
     }
 
     /**
+     * Runs the Analyse UUID operation.
+     * 
      * @param {string} input - Expects a valid UUID string
      * @param {any[]} args
      * @returns {string}

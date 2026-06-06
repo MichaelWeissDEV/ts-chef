@@ -25,6 +25,8 @@ import {
 
 /**
  * Add Text To Image operation
+ *
+ * @category Image
  */
 export class AddTextToImage extends Operation {
     /**
@@ -110,9 +112,22 @@ export class AddTextToImage extends Operation {
     }
 
     /**
-     * @param {ArrayBuffer} input
-     * @param {Object[]} args
-     * @returns {byteArray}
+     * Runs the operation.
+     *
+     * @param {ArrayBuffer} input - The input image buffer.
+     * @param {any[]} args - Operation arguments.
+     * @param {string} args[0] - The text to add.
+     * @param {string} args[1] - Horizontal alignment.
+     * @param {string} args[2] - Vertical alignment.
+     * @param {number} args[3] - X position.
+     * @param {number} args[4] - Y position.
+     * @param {number} args[5] - Font size.
+     * @param {string} args[6] - Font face.
+     * @param {number} args[7] - Red color component (0-255).
+     * @param {number} args[8] - Green color component (0-255).
+     * @param {number} args[9] - Blue color component (0-255).
+     * @param {number} args[10] - Alpha component (0-255).
+     * @returns {Promise<ArrayBuffer>} - The modified image buffer.
      */
     async run(input: any, args: any[]): Promise<any> {
         const text = args[0],

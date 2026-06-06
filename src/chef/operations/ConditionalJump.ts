@@ -13,6 +13,11 @@
 
 import { Operation, ArgConfig } from "../Operation";
 
+/**
+ * Conditional Jump operation
+ *
+ * @category Default
+ */
 export class ConditionalJump extends Operation {
     name = "Conditional Jump";
     module = "Default";
@@ -44,6 +49,11 @@ export class ConditionalJump extends Operation {
         },
     ];
 
+    /**
+     * @param {string} input
+     * @param {any[]} _args
+     * @returns {string}
+     */
     run(input: string, _args: any[]): string {
         return input;
     }

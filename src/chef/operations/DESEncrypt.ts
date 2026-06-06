@@ -18,6 +18,9 @@ import OperationError from "../errors/OperationError";
 
 /**
  * DES Encrypt operation
+ *
+ * @category Ciphers
+ * @see DESDecrypt
  */
 export class DESEncrypt extends Operation {
     /**

@@ -13,6 +13,12 @@
 
 import { Operation } from "../Operation";
 
+/**
+ * Bit shift left operation
+ * 
+ * @category Default
+ * @see https://wikipedia.org/wiki/Bitwise_operation#Bit_shifts
+ */
 export class BitShiftLeft extends Operation {
     constructor() {
         super();
@@ -32,6 +38,14 @@ export class BitShiftLeft extends Operation {
         ];
     }
 
+    /**
+     * Shifts the bits in each byte of the input towards the left.
+     * 
+     * @param {ArrayBuffer} input - The input data.
+     * @param {number[]} args - The operation arguments.
+     * @param {number} args[0] - The number of bits to shift by.
+     * @returns {ArrayBuffer} The shifted data.
+     */
     run(input: ArrayBuffer, args: number[]): ArrayBuffer {
         const amount = args[0];
         const data = new Uint8Array(input);

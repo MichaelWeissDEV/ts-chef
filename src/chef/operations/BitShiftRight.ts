@@ -13,6 +13,12 @@
 
 import { Operation } from "../Operation";
 
+/**
+ * Bit shift right operation
+ * 
+ * @category Default
+ * @see https://wikipedia.org/wiki/Bitwise_operation#Bit_shifts
+ */
 export class BitShiftRight extends Operation {
     constructor() {
         super();
@@ -37,7 +43,16 @@ export class BitShiftRight extends Operation {
         ];
     }
 
-    run(input: ArrayBuffer, args: unknown[]): ArrayBuffer {
+    /**
+     * Shifts the bits in each byte of the input towards the right.
+     * 
+     * @param {ArrayBuffer} input - The input data.
+     * @param {any[]} args - The operation arguments.
+     * @param {number} args[0] - The number of bits to shift by.
+     * @param {string} args[1] - The type of shift ("Logical shift" or "Arithmetic shift").
+     * @returns {ArrayBuffer} The shifted data.
+     */
+    run(input: ArrayBuffer, args: any[]): ArrayBuffer {
         const amount = args[0] as number;
         const type = args[1] as string;
         const mask = type === "Logical shift" ? 0 : 0x80;

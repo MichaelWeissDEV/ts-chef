@@ -17,6 +17,12 @@ import { Utils } from "../Utils";
 import { toHexFast } from "../lib/Hex";
 import * as forge from "node-forge";
 
+/**
+ * CMAC operation
+ *
+ * @category Crypto
+ * @see https://wikipedia.org/wiki/CMAC
+ */
 export class CMAC extends Operation {
     name = "CMAC";
     module = "Crypto";
@@ -39,6 +45,13 @@ export class CMAC extends Operation {
         },
     ];
 
+    /**
+     * Runs the CMAC operation.
+     *
+     * @param {ArrayBuffer} input
+     * @param {any[]} args
+     * @returns {string}
+     */
     run(input: ArrayBuffer, args: any[]): string {
         const key = Utils.convertToByteString(args[0].string, args[0].option);
         const algo = args[1];
@@ -92,13 +105,13 @@ export class CMAC extends Operation {
             return out;
         };
 
-        const cipher = forge.cipher.createCipher(
-            info.algorithm as forge.cipher.Algorithm,
-            forge.util.createBuffer(info.key, "raw")
-        );
         const encrypt = (a: Uint8Array, out?: Uint8Array): Uint8Array => {
             if (!out) out = new Uint8Array(a.length);
-            cipher.start({ iv: "" }); // ECB doesn't need IV but forge might expect an empty one or none
+            const cipher = forge.cipher.createCipher(
+                info.algorithm as forge.cipher.Algorithm,
+                forge.util.createBuffer(info.key, "raw")
+            );
+            cipher.start({ iv: "" });
             cipher.update(forge.util.createBuffer(a as any));
             cipher.finish();
             const cipherText = cipher.output.getBytes();

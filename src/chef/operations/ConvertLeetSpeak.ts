@@ -27,7 +27,16 @@ const FROM_LEET_MAP: Record<string, string> = {
     y: "y", z: "z",
 };
 
+/**
+ * Convert Leet Speak operation
+ *
+ * @category Default
+ * @see https://wikipedia.org/wiki/Leet
+ */
 export class ConvertLeetSpeak extends Operation {
+    /**
+     * ConvertLeetSpeak constructor
+     */
     constructor() {
         super();
         this.name = "Convert Leet Speak";
@@ -46,6 +55,13 @@ export class ConvertLeetSpeak extends Operation {
         ];
     }
 
+    /**
+     * Runs the operation.
+     *
+     * @param {string} input
+     * @param {string[]} args
+     * @returns {string}
+     */
     run(input: string, args: string[]): string {
         const direction = args[0];
 

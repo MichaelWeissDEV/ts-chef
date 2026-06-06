@@ -20,11 +20,20 @@ interface ToggleStringArg {
     option: string;
 }
 
+/**
+ * ADD operation
+ *
+ * @category BitwiseOp
+ * @see https://wikipedia.org/wiki/Bitwise_operation#Bitwise_operators
+ */
 export class ADD extends Operation {
+    /**
+     * ADD constructor
+     */
     constructor() {
         super();
         this.name = "ADD";
-        this.module = "Default";
+        this.module = "Arithmetic";
         this.description = "ADD the input with the given key (e.g. fe023da5), MOD 255";
         this.infoURL = "https://wikipedia.org/wiki/Bitwise_operation#Bitwise_operators";
         this.inputType = "byteArray";
@@ -39,11 +48,25 @@ export class ADD extends Operation {
         ];
     }
 
+    /**
+     * Runs the operation.
+     *
+     * @param {number[]} input
+     * @param {ToggleStringArg[]} args
+     * @returns {number[]}
+     */
     run(input: number[], args: ToggleStringArg[]): number[] {
         const key = Utils.convertToByteArray(args[0].string || "", args[0].option);
         return bitOp(input, key, add);
     }
 
+    /**
+     * Highlight handler.
+     *
+     * @param {Array<{ start: number; end: number }>} pos
+     * @param {unknown[]} _args
+     * @returns {Array<{ start: number; end: number }>}
+     */
     highlight(
         pos: Array<{ start: number; end: number }>,
         _args: unknown[]
@@ -51,6 +74,13 @@ export class ADD extends Operation {
         return pos;
     }
 
+    /**
+     * Highlight reverse handler.
+     *
+     * @param {Array<{ start: number; end: number }>} pos
+     * @param {unknown[]} _args
+     * @returns {Array<{ start: number; end: number }>}
+     */
     highlightReverse(
         pos: Array<{ start: number; end: number }>,
         _args: unknown[]

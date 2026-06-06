@@ -16,6 +16,9 @@ import OperationError from "../errors/OperationError";
 
 /**
  * CSS selector operation
+ *
+ * @category Code
+ * @see https://wikipedia.org/wiki/Cascading_Style_Sheets#Selector
  */
 export class CSSSelector extends Operation {
     /**
@@ -45,6 +48,8 @@ export class CSSSelector extends Operation {
     }
 
     /**
+     * Runs the CSS selector operation.
+     *
      * @param {string} input
      * @param {any[]} args
      * @returns {string}

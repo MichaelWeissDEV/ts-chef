@@ -16,6 +16,14 @@ import { OperationError } from "../errors/OperationError";
 import { ColossusComputer } from "../lib/Colossus";
 import { SWITCHES, VALID_ITA2, ROTOR_SIZES } from "../lib/Lorenz";
 
+/**
+ * Colossus operation
+ *
+ * @category Bletchley
+ * @see https://wikipedia.org/wiki/Colossus_computer
+ * @see https://virtualcolossus.co.uk
+ * @see https://github.com/gchq/CyberChef/wiki/Colossus
+ */
 export class Colossus extends Operation {
     name = "Colossus";
     module = "Bletchley";
@@ -369,6 +377,13 @@ export class Colossus extends Operation {
         },
     ];
 
+    /**
+     * Runs the operation.
+     *
+     * @param {string} input
+     * @param {any[]} args
+     * @returns {any}
+     */
     run(input: string, args: any[]): any {
         input = input.toUpperCase();
         for (const character of input) {

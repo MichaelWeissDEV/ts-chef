@@ -13,7 +13,15 @@
 
 import { Operation } from "../Operation";
 
+/**
+ * Caret/M-decode operation
+ *
+ * @category Default
+ */
 export class CaretMdecode extends Operation {
+    /**
+     * CaretMdecode constructor
+     */
     constructor() {
         super();
         this.name = "Caret/M-decode";
@@ -26,6 +34,11 @@ export class CaretMdecode extends Operation {
         this.args = [];
     }
 
+    /**
+     * @param {string} input - The caret/M-encoded string.
+     * @param {unknown[]} _args - Operation arguments (none).
+     * @returns {number[]} - The decoded byte array.
+     */
     run(input: string, _args: unknown[]): number[] {
         const bytes: number[] = [];
         let prev = "";

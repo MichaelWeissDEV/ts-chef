@@ -24,7 +24,16 @@ const NATO_LOOKUP: Record<string, string> = {
     "9": "Nine ", ",": "Comma ", "/": "Fraction bar ", ".": "Full stop ",
 };
 
+/**
+ * Convert to NATO alphabet operation
+ *
+ * @category Default
+ * @see https://wikipedia.org/wiki/NATO_phonetic_alphabet
+ */
 export class ConvertToNATOAlphabet extends Operation {
+    /**
+     * ConvertToNATOAlphabet constructor
+     */
     constructor() {
         super();
         this.name = "Convert to NATO alphabet";
@@ -37,6 +46,13 @@ export class ConvertToNATOAlphabet extends Operation {
         this.args = [];
     }
 
+    /**
+     * Runs the operation.
+     *
+     * @param {string} input
+     * @param {unknown[]} _args
+     * @returns {string}
+     */
     run(input: string, _args: unknown[]): string {
         return input.replace(/[a-z0-9,/.]/gi, (letter) => {
             return NATO_LOOKUP[letter.toUpperCase()] ?? letter;

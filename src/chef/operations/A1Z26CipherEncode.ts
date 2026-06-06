@@ -15,7 +15,15 @@ import { Operation } from "../Operation";
 import { Utils } from "../Utils";
 import { DELIM_OPTIONS } from "../lib/Delim";
 
+/**
+ * A1Z26 Cipher Encode operation
+ *
+ * @category Ciphers
+ */
 export class A1Z26CipherEncode extends Operation {
+    /**
+     * A1Z26CipherEncode constructor
+     */
     constructor() {
         super();
         this.name = "A1Z26 Cipher Encode";
@@ -34,6 +42,13 @@ export class A1Z26CipherEncode extends Operation {
         ];
     }
 
+    /**
+     * Runs the operation.
+     *
+     * @param {string} input
+     * @param {string[]} args
+     * @returns {string}
+     */
     run(input: string, args: string[]): string {
         const delim = Utils.charRep(args[0] || "Space");
         const sanitized = input.toLowerCase();

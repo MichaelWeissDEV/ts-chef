@@ -14,26 +14,45 @@
 import { Operation, ArgConfig } from "../Operation";
 import BigNumber from "bignumber.js";
 
+/**
+ * Convert speed operation
+ *
+ * @category Default
+ * @see https://wikipedia.org/wiki/Orders_of_magnitude_(speed)
+ */
 export class ConvertSpeed extends Operation {
-    name = "Convert speed";
-    module = "Default";
-    description = "Converts a unit of speed to another format.";
-    infoURL = "https://wikipedia.org/wiki/Orders_of_magnitude_(speed)";
-    inputType = "string";
-    outputType = "string";
-    args: ArgConfig[] = [
-        {
-            name: "Input units",
-            type: "option",
-            value: SPEED_UNITS,
-        },
-        {
-            name: "Output units",
-            type: "option",
-            value: SPEED_UNITS,
-        },
-    ];
+    /**
+     * ConvertSpeed constructor
+     */
+    constructor() {
+        super();
+        this.name = "Convert speed";
+        this.module = "Default";
+        this.description = "Converts a unit of speed to another format.";
+        this.infoURL = "https://wikipedia.org/wiki/Orders_of_magnitude_(speed)";
+        this.inputType = "string";
+        this.outputType = "string";
+        this.args = [
+            {
+                name: "Input units",
+                type: "option",
+                value: SPEED_UNITS,
+            },
+            {
+                name: "Output units",
+                type: "option",
+                value: SPEED_UNITS,
+            },
+        ];
+    }
 
+    /**
+     * Runs the operation.
+     *
+     * @param {string} input
+     * @param {any[]} args
+     * @returns {string}
+     */
     run(input: string, args: any[]): string {
         const [inputUnits, outputUnits] = args;
         const bnInput = new BigNumber(input);

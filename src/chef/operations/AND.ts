@@ -20,7 +20,15 @@ interface ToggleStringArg {
     option: string;
 }
 
+/**
+ * AND operation
+ *
+ * @category Bitwise
+ */
 export class AND extends Operation {
+    /**
+     * AND constructor
+     */
     constructor() {
         super();
         this.name = "AND";
@@ -39,6 +47,18 @@ export class AND extends Operation {
         ];
     }
 
+    /**
+     * Runs the operation.
+     *
+     * @param {number[]} input - The input byte array.
+     * @param {ToggleStringArg[]} args - Operation arguments.
+     * @param {ToggleStringArg} args[0] - The key to AND with.
+     * @returns {number[]} - The result of the AND operation.
+     *
+     * @see {@link OR}
+     * @see {@link XOR}
+     * @see {@link NOT}
+     */
     run(input: number[], args: ToggleStringArg[]): number[] {
         const key = Utils.convertToByteArray(args[0].string || "", args[0].option);
         return bitOp(input, key, and);

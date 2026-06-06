@@ -13,6 +13,11 @@
 
 import { Operation } from "../Operation";
 
+/**
+ * Chi Square operation
+ * 
+ * @category Default
+ */
 export class ChiSquare extends Operation {
     constructor() {
         super();
@@ -25,6 +30,13 @@ export class ChiSquare extends Operation {
         this.args = [];
     }
 
+    /**
+     * Runs the Chi Square operation.
+     * 
+     * @param {ArrayBuffer} input - The input data to analyze.
+     * @param {unknown[]} _args - Unused arguments.
+     * @returns {number} - The Chi Square value.
+     */
     run(input: ArrayBuffer, _args: unknown[]): number {
         const data = new Uint8Array(input);
         const distArray = new Array(256).fill(0);

@@ -16,6 +16,11 @@ import { OperationError } from "../errors/OperationError";
 import { Utils } from "../Utils";
 import { fromHex } from "../lib/Hex";
 
+/**
+ * Change IP format operation
+ * 
+ * @category Default
+ */
 export class ChangeIPFormat extends Operation {
     name = "Change IP format";
     module = "Default";
@@ -36,6 +41,15 @@ export class ChangeIPFormat extends Operation {
         },
     ];
 
+    /**
+     * Runs the Change IP format operation.
+     * 
+     * @param {string} input - The IP address(es) to convert.
+     * @param {string[]} args - The arguments for the operation.
+     * @param {string} args[0] - The input format (Dotted Decimal, Decimal, Octal, Hex).
+     * @param {string} args[1] - The output format (Dotted Decimal, Decimal, Octal, Hex).
+     * @returns {string} - The converted IP address(es).
+     */
     run(input: string, args: any[]): string {
         const inFormat = args[0];
         const outFormat = args[1];

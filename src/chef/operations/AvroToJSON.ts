@@ -17,6 +17,9 @@ import * as avro from "avsc";
 
 /**
  * Avro to JSON operation
+ *
+ * @category Serialise
+ * @see https://wikipedia.org/wiki/Apache_Avro
  */
 export class AvroToJSON extends Operation {
     /**
@@ -41,9 +44,12 @@ export class AvroToJSON extends Operation {
     }
 
     /**
-     * @param {ArrayBuffer} input
-     * @param {any[]} args
-     * @returns {Promise<string>}
+     * Runs the Avro to JSON operation.
+     *
+     * @param {ArrayBuffer} input - The Avro encoded data.
+     * @param {any[]} args - The operation arguments.
+     * @returns {Promise<string>} The resulting JSON string.
+     * @throws {OperationError} If parsing fails or input is empty.
      */
     async run(input: ArrayBuffer, args: any[]): Promise<string> {
         if (input.byteLength <= 0) {

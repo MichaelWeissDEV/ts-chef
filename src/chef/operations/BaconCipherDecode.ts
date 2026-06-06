@@ -21,6 +21,12 @@ import {
     BACON_NORMALIZE_MAP,
     swapZeroAndOne } from "../lib/Bacon";
 
+/**
+ * Bacon Cipher Decode operation
+ *
+ * @category Ciphers
+ * @see {@link BaconCipherEncode}
+ */
 export class BaconCipherDecode extends Operation {
     constructor() {
         super();
@@ -50,6 +56,16 @@ export class BaconCipherDecode extends Operation {
         ];
     }
 
+    /**
+     * Runs the Bacon Cipher Decode operation.
+     *
+     * @param {string} input - The encoded message.
+     * @param {unknown[]} args - The operation arguments.
+     * @param {string} args[0] - The alphabet to use (e.g., "Standard", "Complete").
+     * @param {string} args[1] - The translation method (e.g., "0/1", "A/B", "Case").
+     * @param {boolean} args[2] - Whether to invert the translation.
+     * @returns {string} The decoded message.
+     */
     run(input: string, args: unknown[]): string {
         const [alphabet, translation, invert] = args as [string, string, boolean];
         const alphabetObject = BACON_ALPHABETS[alphabet];

@@ -7,6 +7,9 @@ module.exports = {
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   verbose: true,
+  transformIgnorePatterns: [
+    "node_modules/(?!(geodesy)/)"
+  ],
   reporters: [
     'default',
     ['jest-html-reporters', {

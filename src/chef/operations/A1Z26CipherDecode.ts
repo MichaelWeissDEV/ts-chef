@@ -16,7 +16,15 @@ import { Utils } from "../Utils";
 import { DELIM_OPTIONS } from "../lib/Delim";
 import { OperationError } from "../errors/OperationError";
 
+/**
+ * A1Z26 Cipher Decode operation
+ *
+ * @category Ciphers
+ */
 export class A1Z26CipherDecode extends Operation {
+    /**
+     * A1Z26CipherDecode constructor
+     */
     constructor() {
         super();
         this.name = "A1Z26 Cipher Decode";
@@ -35,6 +43,13 @@ export class A1Z26CipherDecode extends Operation {
         ];
     }
 
+    /**
+     * Runs the operation.
+     *
+     * @param {string} input
+     * @param {string[]} args
+     * @returns {string}
+     */
     run(input: string, args: string[]): string {
         const delim = Utils.charRep(args[0] || "Space");
 
@@ -46,7 +61,7 @@ export class A1Z26CipherDecode extends Operation {
         let latin1 = "";
         for (let i = 0; i < bites.length; i++) {
             const n = parseInt(bites[i], 10);
-            if (n < 1 || n > 26) {
+            if (isNaN(n) || n < 1 || n > 26) {
                 throw new OperationError("Error: all numbers must be between 1 and 26.");
             }
             latin1 += Utils.chr(n + 96);

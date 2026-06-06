@@ -17,6 +17,9 @@ import OperationError from "../errors/OperationError";
 
 /**
  * BSON serialise operation
+ * 
+ * @category Serialise
+ * @see https://wikipedia.org/wiki/BSON
  */
 export class BSONSerialise extends Operation {
     /**
@@ -36,8 +39,10 @@ export class BSONSerialise extends Operation {
     }
 
     /**
+     * Runs the operation.
+     * 
      * @param {string} input
-     * @param {any[]} args
+     * @param {any[]} _args
      * @returns {ArrayBuffer}
      */
     run(input: string, _args: any[]): ArrayBuffer {

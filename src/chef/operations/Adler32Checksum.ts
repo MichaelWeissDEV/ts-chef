@@ -14,6 +14,12 @@
 import { Operation } from "../Operation";
 import { Utils } from "../Utils";
 
+/**
+ * Adler-32 Checksum operation
+ * 
+ * @category Crypto
+ * @see https://wikipedia.org/wiki/Adler-32
+ */
 export class Adler32Checksum extends Operation {
     constructor() {
         super();
@@ -27,6 +33,13 @@ export class Adler32Checksum extends Operation {
         this.args = [];
     }
 
+    /**
+     * Runs the operation.
+     * 
+     * @param {ArrayBuffer} input
+     * @param {unknown[]} _args
+     * @returns {string}
+     */
     run(input: ArrayBuffer, _args: unknown[]): string {
         const MOD_ADLER = 65521;
         let a = 1;

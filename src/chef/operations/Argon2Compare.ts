@@ -16,6 +16,9 @@ import * as argon2 from "argon2";
 
 /**
  * Argon2 compare operation
+ *
+ * @category Crypto
+ * @see https://wikipedia.org/wiki/Argon2
  */
 export class Argon2Compare extends Operation {
     /**
@@ -41,9 +44,11 @@ export class Argon2Compare extends Operation {
     }
 
     /**
-     * @param {string} input
-     * @param {any[]} args
-     * @returns {Promise<string>}
+     * Runs the Argon2 compare operation.
+     *
+     * @param {string} input - The password to verify.
+     * @param {any[]} args - The operation arguments.
+     * @returns {Promise<string>} A string indicating whether it's a match.
      */
     async run(input: string, args: any[]): Promise<string> {
         const encoded = args[0];

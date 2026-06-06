@@ -23,6 +23,12 @@ interface ToggleStringArg {
     option: string;
 }
 
+/**
+ * BLAKE2b operation
+ *
+ * @category Hashing
+ * @see https://wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2b_algorithm
+ */
 export class BLAKE2b extends Operation {
     constructor() {
         super();
@@ -53,6 +59,14 @@ export class BLAKE2b extends Operation {
         ];
     }
 
+    /**
+     * Runs the BLAKE2b operation.
+     *
+     * @param {ArrayBuffer} input - The data to hash.
+     * @param {unknown[]} args - The operation arguments.
+     * @returns {string} The resulting hash.
+     * @throws {OperationError} If key length is invalid or output encoding is unsupported.
+     */
     run(input: ArrayBuffer, args: unknown[]): string {
         const [outSize, outFormat] = args as [string, string];
         let key: Uint8Array | null = new Uint8Array(

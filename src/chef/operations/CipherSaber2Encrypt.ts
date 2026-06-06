@@ -16,6 +16,12 @@ import { encode } from "../lib/CipherSaber2";
 import { Utils } from "../Utils";
 import * as crypto from "crypto";
 
+/**
+ * CipherSaber2 Encrypt operation
+ *
+ * @category Crypto
+ * @see https://wikipedia.org/wiki/CipherSaber
+ */
 export class CipherSaber2Encrypt extends Operation {
     name = "CipherSaber2 Encrypt";
     module = "Crypto";
@@ -38,6 +44,13 @@ export class CipherSaber2Encrypt extends Operation {
         },
     ];
 
+    /**
+     * Runs the operation.
+     *
+     * @param {ArrayBuffer} input
+     * @param {any[]} args
+     * @returns {ArrayBuffer}
+     */
     run(input: ArrayBuffer, args: any[]): ArrayBuffer {
         const inputBytes = new Uint8Array(input);
         const key = Utils.convertToByteArray(args[0].string, args[0].option);

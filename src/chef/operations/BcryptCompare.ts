@@ -16,6 +16,10 @@ import bcrypt from "bcryptjs";
 
 /**
  * Bcrypt compare operation
+ *
+ * @category Crypto
+ * @see {@link Bcrypt}
+ * @see {@link BcryptParse}
  */
 export class BcryptCompare extends Operation {
     /**
@@ -41,9 +45,12 @@ export class BcryptCompare extends Operation {
     }
 
     /**
-     * @param {string} input
-     * @param {any[]} args
-     * @returns {Promise<string>}
+     * Runs the Bcrypt compare operation.
+     *
+     * @param {string} input - The password to check.
+     * @param {any[]} args - The operation arguments.
+     * @param {string} args[0] - The bcrypt hash to compare against.
+     * @returns {Promise<string>} A message indicating whether the password matches the hash.
      */
     async run(input: string, args: any[]): Promise<string> {
         const hash = args[0];

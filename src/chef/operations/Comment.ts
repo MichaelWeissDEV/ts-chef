@@ -13,6 +13,11 @@
 
 import { Operation, ArgConfig } from "../Operation";
 
+/**
+ * Comment operation
+ *
+ * @category Default
+ */
 export class Comment extends Operation {
     name = "Comment";
     module = "Default";
@@ -29,6 +34,11 @@ export class Comment extends Operation {
         },
     ];
 
+    /**
+     * @param {string} input
+     * @param {any[]} _args
+     * @returns {string}
+     */
     run(input: string, _args: any[]): string {
         return input;
     }

@@ -13,7 +13,15 @@
 
 import { Operation } from "../Operation";
 
+/**
+ * Alternating Caps operation
+ * 
+ * @category Default
+ */
 export class AlternatingCaps extends Operation {
+    /**
+     * AlternatingCaps constructor
+     */
     constructor() {
         super();
         this.name = "Alternating Caps";
@@ -26,6 +34,13 @@ export class AlternatingCaps extends Operation {
         this.args = [];
     }
 
+    /**
+     * Runs the Alternating Caps operation.
+     * 
+     * @param {string} input
+     * @param {unknown[]} _args
+     * @returns {string}
+     */
     run(input: string, _args: unknown[]): string {
         let output = "";
         let previousCaps = true;

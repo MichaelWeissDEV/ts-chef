@@ -17,6 +17,10 @@ import bcrypt from "bcryptjs";
 
 /**
  * Bcrypt parse operation
+ *
+ * @category Crypto
+ * @see {@link Bcrypt}
+ * @see {@link BcryptCompare}
  */
 export class BcryptParse extends Operation {
     /**
@@ -36,9 +40,11 @@ export class BcryptParse extends Operation {
     }
 
     /**
-     * @param {string} input
-     * @param {any[]} args
-     * @returns {Promise<string>}
+     * Runs the Bcrypt parse operation.
+     *
+     * @param {string} input - The bcrypt hash to parse.
+     * @param {any[]} _args - The operation arguments (none).
+     * @returns {Promise<string>} A string containing the parsed information (rounds, salt, password hash).
      */
     async run(input: string, _args: any[]): Promise<string> {
         try {

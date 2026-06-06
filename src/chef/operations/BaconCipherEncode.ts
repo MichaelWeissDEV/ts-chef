@@ -18,6 +18,12 @@ import {
     BACON_TRANSLATION_AB,
     swapZeroAndOne } from "../lib/Bacon";
 
+/**
+ * Bacon Cipher Encode operation
+ *
+ * @category Ciphers
+ * @see {@link BaconCipherDecode}
+ */
 export class BaconCipherEncode extends Operation {
     constructor() {
         super();
@@ -52,6 +58,17 @@ export class BaconCipherEncode extends Operation {
         ];
     }
 
+    /**
+     * Runs the Bacon Cipher Encode operation.
+     *
+     * @param {string} input - The message to encode.
+     * @param {unknown[]} args - The operation arguments.
+     * @param {string} args[0] - The alphabet to use (e.g., "Standard", "Complete").
+     * @param {string} args[1] - The translation method (e.g., "0/1", "A/B").
+     * @param {boolean} args[2] - Whether to keep extra characters (non-alphabetical).
+     * @param {boolean} args[3] - Whether to invert the translation.
+     * @returns {string} The encoded message.
+     */
     run(input: string, args: unknown[]): string {
         const [alphabet, translation, keep, invert] = args as [string, string, boolean, boolean];
         const alphabetObject = BACON_ALPHABETS[alphabet];

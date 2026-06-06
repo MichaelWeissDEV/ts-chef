@@ -15,6 +15,9 @@ import Operation from "../Operation";
 
 /**
  * CTPH operation
+ *
+ * @category Hashing
+ * @see https://forensics.wiki/context_triggered_piecewise_hashing/
  */
 export class CTPH extends Operation {
     /**
@@ -34,9 +37,9 @@ export class CTPH extends Operation {
     }
 
     /**
-     * @param {string} input
-     * @param {any[]} args
-     * @returns {string}
+     * @param {string} input - The string to hash.
+     * @param {any[]} args - Operation arguments (none).
+     * @returns {string} - The fuzzy hash.
      */
     run(input: string, args: any[]): string {
         const ctphjs = require("ctph.js");

@@ -23,6 +23,12 @@ interface ToggleStringArg {
     option: string;
 }
 
+/**
+ * BLAKE2s operation
+ * 
+ * @category Hashing
+ * @see https://wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2
+ */
 export class BLAKE2s extends Operation {
     constructor() {
         super();
@@ -53,6 +59,13 @@ export class BLAKE2s extends Operation {
         ];
     }
 
+    /**
+     * Runs the operation.
+     * 
+     * @param {ArrayBuffer} input
+     * @param {unknown[]} args
+     * @returns {string}
+     */
     run(input: ArrayBuffer, args: unknown[]): string {
         const [outSize, outFormat] = args as [string, string];
         let key: Uint8Array | null = new Uint8Array(

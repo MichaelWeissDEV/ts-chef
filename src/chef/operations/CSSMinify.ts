@@ -14,6 +14,11 @@
 import { Operation, ArgConfig } from "../Operation";
 const vkbeautify = require("vkbeautify");
 
+/**
+ * CSS Minify operation
+ *
+ * @category Code
+ */
 export class CSSMinify extends Operation {
     name = "CSS Minify";
     module = "Code";
@@ -28,6 +33,13 @@ export class CSSMinify extends Operation {
         },
     ];
 
+    /**
+     * Runs the CSS Minify operation.
+     *
+     * @param {string} input
+     * @param {any[]} args
+     * @returns {string}
+     */
     run(input: string, args: any[]): string {
         const preserveComments = args[0];
         return vkbeautify.cssmin(input, preserveComments);

@@ -13,6 +13,11 @@
 
 import { Operation } from "../Operation";
 
+/**
+ * Cetacean Cipher Decode operation
+ * 
+ * @category Ciphers
+ */
 export class CetaceanCipherDecode extends Operation {
     constructor() {
         super();
@@ -33,6 +38,13 @@ export class CetaceanCipherDecode extends Operation {
         this.args = [];
     }
 
+    /**
+     * Runs the Cetacean Cipher Decode operation.
+     * 
+     * @param {string} input - The Cetacean Cipher encoded string.
+     * @param {unknown[]} _args - Unused arguments.
+     * @returns {string} - The decoded plaintext string.
+     */
     run(input: string, _args: unknown[]): string {
         const binaryArray: number[] = [];
         for (const char of input) {

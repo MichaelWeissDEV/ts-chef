@@ -13,7 +13,15 @@
 
 import { Operation } from "../Operation";
 
+/**
+ * Caesar Box Cipher operation
+ *
+ * @category Ciphers
+ */
 export class CaesarBoxCipher extends Operation {
+    /**
+     * CaesarBoxCipher constructor
+     */
     constructor() {
         super();
         this.name = "Caesar Box Cipher";
@@ -32,6 +40,12 @@ export class CaesarBoxCipher extends Operation {
         ];
     }
 
+    /**
+     * @param {string} input - The message to encode.
+     * @param {number[]} args - Operation arguments.
+     * @param {number} args[0] - Box height.
+     * @returns {string} - The transposed message.
+     */
     run(input: string, args: number[]): string {
         const tableHeight = args[0];
         const tableWidth = Math.ceil(input.length / tableHeight);

@@ -14,6 +14,12 @@
 import { Operation } from "../Operation";
 import { toBinary } from "../lib/Binary";
 
+/**
+ * Cetacean Cipher Encode operation
+ * 
+ * @category Ciphers
+ * @see CetaceanCipherDecode
+ */
 export class CetaceanCipherEncode extends Operation {
     constructor() {
         super();
@@ -27,6 +33,13 @@ export class CetaceanCipherEncode extends Operation {
         this.args = [];
     }
 
+    /**
+     * Runs the Cetacean Cipher Encode operation.
+     * 
+     * @param {string} input - The plaintext string to encode.
+     * @param {unknown[]} _args - Unused arguments.
+     * @returns {string} - The Cetacean Cipher encoded string.
+     */
     run(input: string, _args: unknown[]): string {
         const result: string[] = [];
 

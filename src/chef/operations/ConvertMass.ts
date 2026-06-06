@@ -14,26 +14,45 @@
 import { Operation, ArgConfig } from "../Operation";
 import BigNumber from "bignumber.js";
 
+/**
+ * Convert mass operation
+ *
+ * @category Default
+ * @see https://wikipedia.org/wiki/Orders_of_magnitude_(mass)
+ */
 export class ConvertMass extends Operation {
-    name = "Convert mass";
-    module = "Default";
-    description = "Converts a unit of mass to another format.";
-    infoURL = "https://wikipedia.org/wiki/Orders_of_magnitude_(mass)";
-    inputType = "string";
-    outputType = "string";
-    args: ArgConfig[] = [
-        {
-            name: "Input units",
-            type: "option",
-            value: MASS_UNITS,
-        },
-        {
-            name: "Output units",
-            type: "option",
-            value: MASS_UNITS,
-        },
-    ];
+    /**
+     * ConvertMass constructor
+     */
+    constructor() {
+        super();
+        this.name = "Convert mass";
+        this.module = "Default";
+        this.description = "Converts a unit of mass to another format.";
+        this.infoURL = "https://wikipedia.org/wiki/Orders_of_magnitude_(mass)";
+        this.inputType = "string";
+        this.outputType = "string";
+        this.args = [
+            {
+                name: "Input units",
+                type: "option",
+                value: MASS_UNITS,
+            },
+            {
+                name: "Output units",
+                type: "option",
+                value: MASS_UNITS,
+            },
+        ];
+    }
 
+    /**
+     * Runs the operation.
+     *
+     * @param {string} input
+     * @param {any[]} args
+     * @returns {string}
+     */
     run(input: string, args: any[]): string {
         const [inputUnits, outputUnits] = args;
         const bnInput = new BigNumber(input);

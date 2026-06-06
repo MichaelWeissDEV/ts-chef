@@ -18,6 +18,9 @@ import * as argon2 from "argon2";
 
 /**
  * Argon2 operation
+ *
+ * @category Crypto
+ * @see https://wikipedia.org/wiki/Argon2
  */
 export class Argon2 extends Operation {
     /**
@@ -75,9 +78,12 @@ export class Argon2 extends Operation {
     }
 
     /**
-     * @param {string} input
-     * @param {any[]} args
-     * @returns {Promise<string>}
+     * Runs the Argon2 operation.
+     *
+     * @param {string} input - The password to hash.
+     * @param {any[]} args - The operation arguments.
+     * @returns {Promise<string>} The generated hash.
+     * @throws {OperationError} If hashing fails.
      */
     async run(input: string, args: any[]): Promise<string> {
         const argon2Types: Record<string, number> = {

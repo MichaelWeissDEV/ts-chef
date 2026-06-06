@@ -59,6 +59,7 @@ export const BACON_CLEARER_MAP: Record<string, RegExp> = {
     [BACON_TRANSLATION_01]: /[^01]/g,
     [BACON_TRANSLATION_AB]: /[^ABab]/g,
     [BACON_TRANSLATION_CASE]: /[^A-Za-z]/g,
+    [BACON_TRANSLATION_AMNZ]: /[^A-Za-z\s]/g,
 };
 
 /** Normalization maps for non-standard Bacon representations. */

@@ -15,6 +15,10 @@ import { Operation } from "../Operation";
 
 /**
  * Decode NetBIOS Name operation
+ *
+ * @category Networking
+ * @see https://wikipedia.org/wiki/NetBIOS
+ * @see RFC 1001
  */
 export class DecodeNetBIOSName extends Operation {
 
@@ -47,11 +51,11 @@ export class DecodeNetBIOSName extends Operation {
     }
 
     /**
-     * @param {byteArray} input
-     * @param {Object[]} args
-     * @returns {byteArray}
+     * @param {number[]} input
+     * @param {any[]} args
+     * @returns {number[]}
      */
-    run(input: any, args: any[]): any {
+    run(input: number[], args: any[]): number[] {
         const output = [],
             offset = args[0];
 

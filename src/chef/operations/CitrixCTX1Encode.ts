@@ -13,6 +13,12 @@
 
 import { Operation, ArgConfig } from "../Operation";
 
+/**
+ * Citrix CTX1 Encode operation
+ *
+ * @category Encodings
+ * @see https://www.reddit.com/r/AskNetsec/comments/1s3r6y/citrix_ctx1_hash_decoding/
+ */
 export class CitrixCTX1Encode extends Operation {
     name = "Citrix CTX1 Encode";
     module = "Encodings";
@@ -22,6 +28,13 @@ export class CitrixCTX1Encode extends Operation {
     outputType = "byteArray";
     args: ArgConfig[] = [];
 
+    /**
+     * Runs the operation.
+     *
+     * @param {string} input
+     * @param {any[]} args
+     * @returns {number[]}
+     */
     run(input: string, args: any[]): number[] {
         const utf16pass = Buffer.from(input, "utf16le");
         const result: number[] = [];

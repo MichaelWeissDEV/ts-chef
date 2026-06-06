@@ -14,6 +14,12 @@
 import { Operation } from "../Operation";
 import { affineEncode } from "../lib/Ciphers";
 
+/**
+ * Atbash Cipher operation
+ *
+ * @category Ciphers
+ * @see https://wikipedia.org/wiki/Atbash
+ */
 export class AtbashCipher extends Operation {
     constructor() {
         super();
@@ -27,6 +33,13 @@ export class AtbashCipher extends Operation {
         this.args = [];
     }
 
+    /**
+     * Runs the Atbash Cipher operation.
+     *
+     * @param {string} input - The text to encode/decode.
+     * @param {unknown[]} _args - The operation arguments (none).
+     * @returns {string} The encoded/decoded text.
+     */
     run(input: string, _args: unknown[]): string {
         return affineEncode(input, [25, 25]);
     }

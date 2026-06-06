@@ -14,10 +14,18 @@
 import { Operation } from "../Operation";
 import { OperationError } from "../errors/OperationError";
 
+/**
+ * Cartesian Product operation
+ *
+ * @category Default
+ */
 export class CartesianProduct extends Operation {
     private sampleDelim: string = "\n\n";
     private itemDelimiter: string = ",";
 
+    /**
+     * CartesianProduct constructor
+     */
     constructor() {
         super();
         this.name = "Cartesian Product";
@@ -60,6 +68,13 @@ export class CartesianProduct extends Operation {
         return result;
     }
 
+    /**
+     * @param {string} input - The sets of data.
+     * @param {string[]} args - Operation arguments.
+     * @param {string} args[0] - Sample delimiter.
+     * @param {string} args[1] - Item delimiter.
+     * @returns {string} - The Cartesian product.
+     */
     run(input: string, args: string[]): string {
         [this.sampleDelim, this.itemDelimiter] = args;
         const sets = input.split(this.sampleDelim);

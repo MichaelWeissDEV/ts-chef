@@ -523,7 +523,7 @@ export class Utils {
     static modInv(x: number, y: number): number {
         x %= y;
         for (let i = 1; i < y; i++) {
-            if ((x * i) % 26 === 1) return i;
+            if ((x * i) % y === 1) return i;
         }
         return 1;
     }
