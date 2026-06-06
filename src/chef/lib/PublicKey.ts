@@ -21,25 +21,24 @@ import { toHex, fromHex } from "./Hex";
  * @returns {string}
  */
 export function formatDnObj(dnObj: any, indent: number): string {
-    let output = "";
+  let output = "";
 
-    const maxKeyLen = dnObj.array.reduce((max: number, item: any) => {
-        return item[0].type.length > max ? item[0].type.length : max;
-    }, 0);
+  const maxKeyLen = dnObj.array.reduce((max: number, item: any) => {
+    return item[0].type.length > max ? item[0].type.length : max;
+  }, 0);
 
-    for (let i = 0; i < dnObj.array.length; i++) {
-        if (!dnObj.array[i].length) continue;
+  for (let i = 0; i < dnObj.array.length; i++) {
+    if (!dnObj.array[i].length) continue;
 
-        const key = dnObj.array[i][0].type;
-        const value = dnObj.array[i][0].value;
-        const str = `${key.padEnd(maxKeyLen, " ")} = ${value}\n`;
+    const key = dnObj.array[i][0].type;
+    const value = dnObj.array[i][0].value;
+    const str = `${key.padEnd(maxKeyLen, " ")} = ${value}\n`;
 
-        output += str.padStart(indent + str.length, " ");
-    }
+    output += str.padStart(indent + str.length, " ");
+  }
 
-    return output.slice(0, -1);
+  return output.slice(0, -1);
 }
-
 
 /**
  * Formats byte strings by adding line breaks and delimiters.
@@ -49,20 +48,24 @@ export function formatDnObj(dnObj: any, indent: number): string {
  * @param {number} indent
  * @returns {string}
  */
-export function formatByteStr(byteStr: string, length: number, indent: number): string {
-    const bytes = fromHex(byteStr);
-    const hex = toHex(bytes, ":");
-    const lineLength = length * 3;
-    let output = "";
+export function formatByteStr(
+  byteStr: string,
+  length: number,
+  indent: number,
+): string {
+  const bytes = fromHex(byteStr);
+  const hex = toHex(bytes, ":");
+  const lineLength = length * 3;
+  let output = "";
 
-    for (let i = 0; i < hex.length; i += lineLength) {
-        const str = hex.slice(i, i + lineLength) + "\n";
-        if (i === 0) {
-            output += str;
-        } else {
-            output += str.padStart(indent + str.length, " ");
-        }
+  for (let i = 0; i < hex.length; i += lineLength) {
+    const str = hex.slice(i, i + lineLength) + "\n";
+    if (i === 0) {
+      output += str;
+    } else {
+      output += str.padStart(indent + str.length, " ");
     }
+  }
 
-    return output.slice(0, output.length - 1);
+  return output.slice(0, output.length - 1);
 }

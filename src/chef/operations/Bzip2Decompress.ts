@@ -22,62 +22,62 @@ const Bzip2 = require("libbzip2-wasm");
  * @see https://wikipedia.org/wiki/Bzip2
  */
 export class Bzip2Decompress extends Operation {
-    /**
-     * Bzip2Decompress constructor
-     */
-    constructor() {
-        super();
+  /**
+   * Bzip2Decompress constructor
+   */
+  constructor() {
+    super();
 
-        this.name = "Bzip2 Decompress";
-        this.module = "Compression";
-        this.description = "Decompress data using the Bzip2 algorithm.";
-        this.infoURL = "https://wikipedia.org/wiki/Bzip2";
-        this.inputType = "ArrayBuffer";
-        this.outputType = "ArrayBuffer";
-        this.args = [
-            {
-                name: "Use low-memory, slower decompression algorithm",
-                type: "boolean",
-                value: false,
-            },
-        ];
+    this.name = "Bzip2 Decompress";
+    this.module = "Compression";
+    this.description = "Decompress data using the Bzip2 algorithm.";
+    this.infoURL = "https://wikipedia.org/wiki/Bzip2";
+    this.inputType = "ArrayBuffer";
+    this.outputType = "ArrayBuffer";
+    this.args = [
+      {
+        name: "Use low-memory, slower decompression algorithm",
+        type: "boolean",
+        value: false,
+      },
+    ];
+  }
+
+  /**
+   * @param {ArrayBuffer} input
+   * @param {any[]} args
+   * @returns {Promise<ArrayBuffer>}
+   */
+  async run(input: ArrayBuffer, args: any[]): Promise<ArrayBuffer> {
+    const [small] = args;
+    if (input.byteLength <= 0) {
+      throw new OperationError("Please provide an input.");
     }
 
-    /**
-     * @param {ArrayBuffer} input
-     * @param {any[]} args
-     * @returns {Promise<ArrayBuffer>}
-     */
-    async run(input: ArrayBuffer, args: any[]): Promise<ArrayBuffer> {
-        const [small] = args;
-        if (input.byteLength <= 0) {
-            throw new OperationError("Please provide an input.");
-        }
-
-        const bzip2 = await new Promise<any>((resolve) => {
-            const m = Bzip2();
-            if (m.then) {
-                m.then((instance: any) => {
-                    resolve({ decompressBZ2: instance.decompressBZ2.bind(instance) });
-                });
-            } else {
-                resolve({ decompressBZ2: m.decompressBZ2.bind(m) });
-            }
+    const bzip2 = await new Promise<any>((resolve) => {
+      const m = Bzip2();
+      if (m.then) {
+        m.then((instance: any) => {
+          resolve({ decompressBZ2: instance.decompressBZ2.bind(instance) });
         });
-        
-        const inpArray = new Uint8Array(input);
-        const bzip2cc = bzip2.decompressBZ2(inpArray, small ? 1 : 0);
+      } else {
+        resolve({ decompressBZ2: m.decompressBZ2.bind(m) });
+      }
+    });
 
-        if (bzip2cc.error !== 0) {
-            throw new OperationError(bzip2cc.error_msg);
-        } else {
-            const output = bzip2cc.output;
-            return output.buffer.slice(
-                output.byteOffset,
-                output.byteLength + output.byteOffset
-            ) as ArrayBuffer;
-        }
+    const inpArray = new Uint8Array(input);
+    const bzip2cc = bzip2.decompressBZ2(inpArray, small ? 1 : 0);
+
+    if (bzip2cc.error !== 0) {
+      throw new OperationError(bzip2cc.error_msg);
+    } else {
+      const output = bzip2cc.output;
+      return output.buffer.slice(
+        output.byteOffset,
+        output.byteLength + output.byteOffset,
+      ) as ArrayBuffer;
     }
+  }
 }
 
 export default Bzip2Decompress;

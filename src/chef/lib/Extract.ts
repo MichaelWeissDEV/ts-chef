@@ -32,63 +32,66 @@
  * @returns {string[]}
  */
 export function search(
-    input: string,
-    searchRegex: RegExp,
-    removeRegex: RegExp | null = null,
-    sortBy: ((a: string, b: string) => number) | null = null,
-    unique: boolean = false
+  input: string,
+  searchRegex: RegExp,
+  removeRegex: RegExp | null = null,
+  sortBy: ((a: string, b: string) => number) | null = null,
+  unique: boolean = false,
 ): string[] {
-    let results: string[] = [];
-    let match: RegExpExecArray | null;
+  let results: string[] = [];
+  let match: RegExpExecArray | null;
 
-    while ((match = searchRegex.exec(input))) {
-        // Moves pointer when an empty string is matched (prevents infinite loop)
-        if (match.index === searchRegex.lastIndex) {
-            searchRegex.lastIndex++;
-        }
-
-        if (removeRegex && removeRegex.test(match[0]))
-            continue;
-
-        results.push(match[0]);
+  while ((match = searchRegex.exec(input))) {
+    // Moves pointer when an empty string is matched (prevents infinite loop)
+    if (match.index === searchRegex.lastIndex) {
+      searchRegex.lastIndex++;
     }
 
-    if (sortBy) {
-        results = results.sort(sortBy);
-    }
+    if (removeRegex && removeRegex.test(match[0])) continue;
 
-    if (unique) {
-        results = [...new Set(results)];
-    }
+    results.push(match[0]);
+  }
 
-    return results;
+  if (sortBy) {
+    results = results.sort(sortBy);
+  }
+
+  if (unique) {
+    results = [...new Set(results)];
+  }
+
+  return results;
 }
 
 /**
  * Email regular expression
  */
-export const EMAIL_REGEX = /(?:[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9](?:[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9-]*[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9])?\.)+[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9](?:[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9-]*[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\])/ig;
-
+export const EMAIL_REGEX =
+  /(?:[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9](?:[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9-]*[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9])?\.)+[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9](?:[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9-]*[\u00A0-\uD7FF\uE000-\uFFFFa-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\])/gi;
 
 /**
  * URL regular expression
  */
 const protocol = "[A-Z]+://",
-    hostname = "[-\\w]+(?:\\.\\w[-\\w]*)+",
-    port = ":\\d+",
-    path = "/[^.!,?\"<>\\[\\]{}\\s\\x7F-\\xFF]*" +
-        "(?:[.!,?]+[^.!,?\"<>\\[\\]{}\\s\\x7F-\\xFF]+)*";
+  hostname = "[-\\w]+(?:\\.\\w[-\\w]*)+",
+  port = ":\\d+",
+  path =
+    '/[^.!,?"<>\\[\\]{}\\s\\x7F-\\xFF]*' +
+    '(?:[.!,?]+[^.!,?"<>\\[\\]{}\\s\\x7F-\\xFF]+)*';
 
-export const URL_REGEX = new RegExp(protocol + hostname + "(?:" + port + ")?(?:" + path + ")?", "ig");
-
+export const URL_REGEX = new RegExp(
+  protocol + hostname + "(?:" + port + ")?(?:" + path + ")?",
+  "ig",
+);
 
 /**
  * Domain name regular expression
  */
-export const DOMAIN_REGEX = /\b((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,63}\b/ig;
-
+export const DOMAIN_REGEX =
+  /\b((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,63}\b/gi;
 
 /**
  * DMARC Domain name regular expression
  */
-export const DMARC_DOMAIN_REGEX = /\b((?=[a-z0-9_-]{1,63}\.)(xn--)?[a-z0-9_]+(-[a-z0-9_]+)*\.)+[a-z]{2,63}\b/ig;
+export const DMARC_DOMAIN_REGEX =
+  /\b((?=[a-z0-9_-]{1,63}\.)(xn--)?[a-z0-9_]+(-[a-z0-9_]+)*\.)+[a-z]{2,63}\b/gi;

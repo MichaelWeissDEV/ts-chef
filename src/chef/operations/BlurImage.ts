@@ -21,92 +21,92 @@ import { Jimp, JimpMime } from "jimp";
  * Blur Image operation
  */
 export class BlurImage extends Operation {
-    /**
-     * BlurImage constructor
-     */
-    constructor() {
-        super();
+  /**
+   * BlurImage constructor
+   */
+  constructor() {
+    super();
 
-        this.name = "Blur Image";
-        this.module = "Image";
-        this.description =
-            "Applies a blur effect to the image.<br><br>Gaussian blur is much slower than fast blur, but produces better results.";
-        this.infoURL = "https://wikipedia.org/wiki/Gaussian_blur";
-        this.inputType = "ArrayBuffer";
-        this.outputType = "ArrayBuffer";
-        this.presentType = "html";
-        this.args = [
-            {
-                name: "Amount",
-                type: "number",
-                value: 5,
-                min: 1,
-            },
-            {
-                name: "Type",
-                type: "option",
-                value: ["Fast", "Gaussian"],
-            },
-        ];
+    this.name = "Blur Image";
+    this.module = "Image";
+    this.description =
+      "Applies a blur effect to the image.<br><br>Gaussian blur is much slower than fast blur, but produces better results.";
+    this.infoURL = "https://wikipedia.org/wiki/Gaussian_blur";
+    this.inputType = "ArrayBuffer";
+    this.outputType = "ArrayBuffer";
+    this.presentType = "html";
+    this.args = [
+      {
+        name: "Amount",
+        type: "number",
+        value: 5,
+        min: 1,
+      },
+      {
+        name: "Type",
+        type: "option",
+        value: ["Fast", "Gaussian"],
+      },
+    ];
+  }
+
+  /**
+   * @param {ArrayBuffer} input
+   * @param {Object[]} args
+   * @returns {byteArray}
+   */
+  async run(input: any, args: any[]): Promise<any> {
+    const [blurAmount, blurType] = args;
+
+    if (!isImage(input)) {
+      throw new OperationError("Invalid file type.");
     }
 
-    /**
-     * @param {ArrayBuffer} input
-     * @param {Object[]} args
-     * @returns {byteArray}
-     */
-    async run(input: any, args: any[]): Promise<any> {
-        const [blurAmount, blurType] = args;
+    let image;
+    try {
+      image = await Jimp.read(input);
+    } catch (err) {
+      throw new OperationError(`Error loading image. (${err})`);
+    }
+    try {
+      switch (blurType) {
+        case "Fast":
+          image.blur(blurAmount);
+          break;
+        case "Gaussian":
+          image.gaussian(blurAmount);
+          break;
+      }
 
-        if (!isImage(input)) {
-            throw new OperationError("Invalid file type.");
-        }
+      let imageBuffer;
+      if (image.mime === "image/gif") {
+        imageBuffer = await image.getBuffer(JimpMime.png);
+      } else {
+        imageBuffer = await image.getBuffer(image.mime as any);
+      }
+      return imageBuffer.buffer;
+    } catch (err) {
+      throw new OperationError(`Error blurring image. (${err})`);
+    }
+  }
 
-        let image;
-        try {
-            image = await Jimp.read(input);
-        } catch (err) {
-            throw new OperationError(`Error loading image. (${err})`);
-        }
-        try {
-            switch (blurType) {
-                case "Fast":
-                                        image.blur(blurAmount);
-                    break;
-                case "Gaussian":
-                                        image.gaussian(blurAmount);
-                    break;
-            }
+  /**
+   * Displays the blurred image using HTML for web apps
+   *
+   * @param {ArrayBuffer} data
+   * @returns {html}
+   */
+  present(data: ArrayBuffer) {
+    if (!data.byteLength) return "";
+    const dataArray = new Uint8Array(data);
 
-            let imageBuffer;
-            if (image.mime === "image/gif") {
-                imageBuffer = await image.getBuffer(JimpMime.png);
-            } else {
-                imageBuffer = await image.getBuffer(image.mime as any);
-            }
-            return imageBuffer.buffer;
-        } catch (err) {
-            throw new OperationError(`Error blurring image. (${err})`);
-        }
+    const type = isImage(dataArray);
+    if (!type) {
+      throw new OperationError("Invalid file type.");
     }
 
-    /**
-     * Displays the blurred image using HTML for web apps
-     *
-     * @param {ArrayBuffer} data
-     * @returns {html}
-     */
-    present(data: ArrayBuffer) {
-        if (!data.byteLength) return "";
-        const dataArray = new Uint8Array(data);
-
-        const type = isImage(dataArray);
-        if (!type) {
-            throw new OperationError("Invalid file type.");
-        }
-
-        return `<img src="data:${type};base64,${toBase64(dataArray)}">`;
-    }
+    return `<img src="data:${type};base64,${toBase64(dataArray)}">`;
+  }
 }
 
 export default BlurImage;

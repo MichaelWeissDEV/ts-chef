@@ -13,22 +13,30 @@
  * @returns {string}
  */
 export function GenerateParagraphs(length = 3): string {
-    const paragraphs: string[] = [];
-    while (paragraphs.length < length) {
-        const paragraphLength = getRandomLength(PARAGRAPH_LENGTH_MEAN, PARAGRAPH_LENGTH_STD_DEV);
-        const sentences: string[] = [];
-        while (sentences.length < paragraphLength) {
-            const sentenceLength = getRandomLength(SENTENCE_LENGTH_MEAN, SENTENCE_LENGTH_STD_DEV);
-            const sentence = getWords(sentenceLength);
-            sentences.push(formatSentence(sentence));
-        }
-        paragraphs.push(formatParagraph(sentences));
+  const paragraphs: string[] = [];
+  while (paragraphs.length < length) {
+    const paragraphLength = getRandomLength(
+      PARAGRAPH_LENGTH_MEAN,
+      PARAGRAPH_LENGTH_STD_DEV,
+    );
+    const sentences: string[] = [];
+    while (sentences.length < paragraphLength) {
+      const sentenceLength = getRandomLength(
+        SENTENCE_LENGTH_MEAN,
+        SENTENCE_LENGTH_STD_DEV,
+      );
+      const sentence = getWords(sentenceLength);
+      sentences.push(formatSentence(sentence));
     }
-    paragraphs[paragraphs.length - 1] = paragraphs[paragraphs.length - 1].slice(0, -2);
-    paragraphs[0] = replaceStart(paragraphs[0]);
-    return paragraphs.join("");
+    paragraphs.push(formatParagraph(sentences));
+  }
+  paragraphs[paragraphs.length - 1] = paragraphs[paragraphs.length - 1].slice(
+    0,
+    -2,
+  );
+  paragraphs[0] = replaceStart(paragraphs[0]);
+  return paragraphs.join("");
 }
-
 
 /**
  * Generate lorem ipsum sentences.
@@ -37,16 +45,18 @@ export function GenerateParagraphs(length = 3): string {
  * @returns {string}
  */
 export function GenerateSentences(length = 3): string {
-    const sentences: string[] = [];
-    while (sentences.length < length) {
-        const sentenceLength = getRandomLength(SENTENCE_LENGTH_MEAN, SENTENCE_LENGTH_STD_DEV);
-        const sentence = getWords(sentenceLength);
-        sentences.push(formatSentence(sentence));
-    }
-    const paragraphs = sentencesToParagraphs(sentences);
-    return paragraphs.join("");
+  const sentences: string[] = [];
+  while (sentences.length < length) {
+    const sentenceLength = getRandomLength(
+      SENTENCE_LENGTH_MEAN,
+      SENTENCE_LENGTH_STD_DEV,
+    );
+    const sentence = getWords(sentenceLength);
+    sentences.push(formatSentence(sentence));
+  }
+  const paragraphs = sentencesToParagraphs(sentences);
+  return paragraphs.join("");
 }
-
 
 /**
  * Generate lorem ipsum words.
@@ -55,12 +65,11 @@ export function GenerateSentences(length = 3): string {
  * @returns {string}
  */
 export function GenerateWords(length = 3): string {
-    const words = getWords(length);
-    const sentences = wordsToSentences(words);
-    const paragraphs = sentencesToParagraphs(sentences);
-    return paragraphs.join("");
+  const words = getWords(length);
+  const sentences = wordsToSentences(words);
+  const paragraphs = sentencesToParagraphs(sentences);
+  return paragraphs.join("");
 }
-
 
 /**
  * Generate lorem ipsum bytes.
@@ -69,10 +78,9 @@ export function GenerateWords(length = 3): string {
  * @returns {string}
  */
 export function GenerateBytes(length = 3): string {
-    const str = GenerateWords(length / 3);
-    return str.slice(0, length);
+  const str = GenerateWords(length / 3);
+  return str.slice(0, length);
 }
-
 
 /**
  * Get array of randomly selected words from the lorem ipsum wordList.
@@ -82,19 +90,18 @@ export function GenerateBytes(length = 3): string {
  * @private
  */
 function getWords(length = 3): string[] {
-    const words: string[] = [];
-    let word: string;
-    let previousWord: string | undefined;
-    while (words.length < length) {
-        do {
-            word = wordList[Math.floor(Math.random() * wordList.length)];
-        } while (previousWord === word);
-        words.push(word);
-        previousWord = word;
-    }
-    return words;
+  const words: string[] = [];
+  let word: string;
+  let previousWord: string | undefined;
+  while (words.length < length) {
+    do {
+      word = wordList[Math.floor(Math.random() * wordList.length)];
+    } while (previousWord === word);
+    words.push(word);
+    previousWord = word;
+  }
+  return words;
 }
-
 
 /**
  * Convert an array of words into an array of sentences
@@ -104,18 +111,20 @@ function getWords(length = 3): string[] {
  * @private
  */
 function wordsToSentences(words: string[]): string[] {
-    const sentences: string[] = [];
-    while (words.length > 0) {
-        const sentenceLength = getRandomLength(SENTENCE_LENGTH_MEAN, SENTENCE_LENGTH_STD_DEV);
-        if (sentenceLength <= words.length) {
-            sentences.push(formatSentence(words.splice(0, sentenceLength)));
-        } else {
-            sentences.push(formatSentence(words.splice(0, words.length)));
-        }
+  const sentences: string[] = [];
+  while (words.length > 0) {
+    const sentenceLength = getRandomLength(
+      SENTENCE_LENGTH_MEAN,
+      SENTENCE_LENGTH_STD_DEV,
+    );
+    if (sentenceLength <= words.length) {
+      sentences.push(formatSentence(words.splice(0, sentenceLength)));
+    } else {
+      sentences.push(formatSentence(words.splice(0, words.length)));
     }
-    return sentences;
+  }
+  return sentences;
 }
-
 
 /**
  * Convert an array of sentences into an array of paragraphs
@@ -125,16 +134,21 @@ function wordsToSentences(words: string[]): string[] {
  * @private
  */
 function sentencesToParagraphs(sentences: string[]): string[] {
-    const paragraphs: string[] = [];
-    while (sentences.length > 0) {
-        const paragraphLength = getRandomLength(PARAGRAPH_LENGTH_MEAN, PARAGRAPH_LENGTH_STD_DEV);
-        paragraphs.push(formatParagraph(sentences.splice(0, paragraphLength)));
-    }
-    paragraphs[paragraphs.length - 1] = paragraphs[paragraphs.length - 1].slice(0, -1);
-    paragraphs[0] = replaceStart(paragraphs[0]);
-    return paragraphs;
+  const paragraphs: string[] = [];
+  while (sentences.length > 0) {
+    const paragraphLength = getRandomLength(
+      PARAGRAPH_LENGTH_MEAN,
+      PARAGRAPH_LENGTH_STD_DEV,
+    );
+    paragraphs.push(formatParagraph(sentences.splice(0, paragraphLength)));
+  }
+  paragraphs[paragraphs.length - 1] = paragraphs[paragraphs.length - 1].slice(
+    0,
+    -1,
+  );
+  paragraphs[0] = replaceStart(paragraphs[0]);
+  return paragraphs;
 }
-
 
 /**
  * Format an array of words into a sentence.
@@ -144,17 +158,16 @@ function sentencesToParagraphs(sentences: string[]): string[] {
  * @private
  */
 function formatSentence(words: string[]): string {
-    // 0.35 chance of a comma being added randomly to the sentence.
-    if (Math.random() < PROBABILITY_OF_A_COMMA) {
-        const pos = Math.round(Math.random() * (words.length - 1));
-        words[pos] += ",";
-    }
-    let sentence = words.join(" ");
-    sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
-    sentence += ".";
-    return sentence;
+  // 0.35 chance of a comma being added randomly to the sentence.
+  if (Math.random() < PROBABILITY_OF_A_COMMA) {
+    const pos = Math.round(Math.random() * (words.length - 1));
+    words[pos] += ",";
+  }
+  let sentence = words.join(" ");
+  sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
+  sentence += ".";
+  return sentence;
 }
-
 
 /**
  * Format an array of sentences into a paragraph.
@@ -164,11 +177,10 @@ function formatSentence(words: string[]): string {
  * @private
  */
 function formatParagraph(sentences: string[]): string {
-    let paragraph = sentences.join(" ");
-    paragraph += "\n\n";
-    return paragraph;
+  let paragraph = sentences.join(" ");
+  paragraph += "\n\n";
+  return paragraph;
 }
-
 
 /**
  * Get a random number based on a mean and standard deviation.
@@ -179,13 +191,18 @@ function formatParagraph(sentences: string[]): string {
  * @private
  */
 function getRandomLength(mean: number, stdDev: number): number {
-    let length: number;
-    do {
-        length = Math.round((Math.random() * 2 - 1) + (Math.random() * 2 - 1) + (Math.random() * 2 - 1) * stdDev + mean);
-    } while (length <= 0);
-    return length;
+  let length: number;
+  do {
+    length = Math.round(
+      Math.random() * 2 -
+        1 +
+        (Math.random() * 2 - 1) +
+        (Math.random() * 2 - 1) * stdDev +
+        mean,
+    );
+  } while (length <= 0);
+  return length;
 }
-
 
 /**
  * Replace first 5 words with "Lorem ipsum dolor sit amet"
@@ -195,19 +212,18 @@ function getRandomLength(mean: number, stdDev: number): number {
  * @private
  */
 function replaceStart(str: string): string {
-    let words = str.split(" ");
-    if (words.length > 5) {
-        words.splice(0, 5, "Lorem", "ipsum", "dolor", "sit", "amet");
-        return words.join(" ");
-    } else {
-        const lorem = ["Lorem", "ipsum", "dolor", "sit", "amet"];
-        words = lorem.slice(0, words.length);
-        str = words.join(" ");
-        str += ".";
-        return str;
-    }
+  let words = str.split(" ");
+  if (words.length > 5) {
+    words.splice(0, 5, "Lorem", "ipsum", "dolor", "sit", "amet");
+    return words.join(" ");
+  } else {
+    const lorem = ["Lorem", "ipsum", "dolor", "sit", "amet"];
+    words = lorem.slice(0, words.length);
+    str = words.join(" ");
+    str += ".";
+    return str;
+  }
 }
-
 
 const SENTENCE_LENGTH_MEAN = 15;
 const SENTENCE_LENGTH_STD_DEV = 9;
@@ -216,15 +232,66 @@ const PARAGRAPH_LENGTH_STD_DEV = 2;
 const PROBABILITY_OF_A_COMMA = 0.35;
 
 const wordList: string[] = [
-    "ad", "adipisicing", "aliqua", "aliquip", "amet", "anim",
-    "aute", "cillum", "commodo", "consectetur", "consequat", "culpa",
-    "cupidatat", "deserunt", "do", "dolor", "dolore", "duis",
-    "ea", "eiusmod", "elit", "enim", "esse", "est",
-    "et", "eu", "ex", "excepteur", "exercitation", "fugiat",
-    "id", "in", "incididunt", "ipsum", "irure", "labore",
-    "laboris", "laborum", "Lorem", "magna", "minim", "mollit",
-    "nisi", "non", "nostrud", "nulla", "occaecat", "officia",
-    "pariatur", "proident", "qui", "quis", "reprehenderit", "sint",
-    "sit", "sunt", "tempor", "ullamco", "ut", "velit",
-    "veniam", "voluptate",
+  "ad",
+  "adipisicing",
+  "aliqua",
+  "aliquip",
+  "amet",
+  "anim",
+  "aute",
+  "cillum",
+  "commodo",
+  "consectetur",
+  "consequat",
+  "culpa",
+  "cupidatat",
+  "deserunt",
+  "do",
+  "dolor",
+  "dolore",
+  "duis",
+  "ea",
+  "eiusmod",
+  "elit",
+  "enim",
+  "esse",
+  "est",
+  "et",
+  "eu",
+  "ex",
+  "excepteur",
+  "exercitation",
+  "fugiat",
+  "id",
+  "in",
+  "incididunt",
+  "ipsum",
+  "irure",
+  "labore",
+  "laboris",
+  "laborum",
+  "Lorem",
+  "magna",
+  "minim",
+  "mollit",
+  "nisi",
+  "non",
+  "nostrud",
+  "nulla",
+  "occaecat",
+  "officia",
+  "pariatur",
+  "proident",
+  "qui",
+  "quis",
+  "reprehenderit",
+  "sint",
+  "sit",
+  "sunt",
+  "tempor",
+  "ullamco",
+  "ut",
+  "velit",
+  "veniam",
+  "voluptate",
 ];

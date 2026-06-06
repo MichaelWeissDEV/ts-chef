@@ -14,34 +14,34 @@
 import { Operation, HighlightPos, HighlightResult } from "../Operation";
 
 export class SwapCase extends Operation {
-    constructor() {
-        super();
-        this.name = "Swap case";
-        this.module = "Default";
-        this.description =
-            "Converts uppercase letters to lowercase ones, and lowercase ones to uppercase ones.";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [];
-    }
+  constructor() {
+    super();
+    this.name = "Swap case";
+    this.module = "Default";
+    this.description =
+      "Converts uppercase letters to lowercase ones, and lowercase ones to uppercase ones.";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [];
+  }
 
-    run(input: string, _args: unknown[]): string {
-        let result = "";
-        for (let i = 0; i < input.length; i++) {
-            const c = input.charAt(i);
-            const upper = c.toUpperCase();
-            result += c === upper ? c.toLowerCase() : upper;
-        }
-        return result;
+  run(input: string, _args: unknown[]): string {
+    let result = "";
+    for (let i = 0; i < input.length; i++) {
+      const c = input.charAt(i);
+      const upper = c.toUpperCase();
+      result += c === upper ? c.toLowerCase() : upper;
     }
+    return result;
+  }
 
-    highlight(pos: HighlightPos, _args: unknown[]): HighlightResult {
-        return pos;
-    }
+  highlight(pos: HighlightPos, _args: unknown[]): HighlightResult {
+    return pos;
+  }
 
-    highlightReverse(pos: HighlightPos, _args: unknown[]): HighlightResult {
-        return pos;
-    }
+  highlightReverse(pos: HighlightPos, _args: unknown[]): HighlightResult {
+    return pos;
+  }
 }
 
 export default SwapCase;

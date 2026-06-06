@@ -14,26 +14,26 @@
 import { Operation } from "../Operation";
 
 export class Label extends Operation {
-    constructor() {
-        super();
-        this.name = "Label";
-        this.module = "Default";
-        this.description =
-            "Provides a location for conditional and fixed jumps to redirect execution to.";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [
-            {
-                name: "Name",
-                type: "shortString",
-                value: "",
-            },
-        ];
-    }
+  constructor() {
+    super();
+    this.name = "Label";
+    this.module = "Default";
+    this.description =
+      "Provides a location for conditional and fixed jumps to redirect execution to.";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [
+      {
+        name: "Name",
+        type: "shortString",
+        value: "",
+      },
+    ];
+  }
 
-    run(input: string, _args: unknown[]): string {
-        return input;
-    }
+  run(input: string, _args: unknown[]): string {
+    return input;
+  }
 }
 
 export default Label;

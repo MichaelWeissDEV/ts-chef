@@ -14,27 +14,26 @@
 import { Operation } from "../Operation";
 
 export class ToKebabCase extends Operation {
-    constructor() {
-        super();
-        this.name = "To kebab case";
-        this.module = "Default";
-        this.description =
-            "Converts the input string to kebab-case format.";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [
-            { name: "Attempt to be intelligent", type: "boolean", value: false },
-        ];
-    }
+  constructor() {
+    super();
+    this.name = "To kebab case";
+    this.module = "Default";
+    this.description = "Converts the input string to kebab-case format.";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [
+      { name: "Attempt to be intelligent", type: "boolean", value: false },
+    ];
+  }
 
-    run(input: string, _args: unknown[]): string {
-        return input
-            .replace(/([A-Z])/g, "-$1")
-            .replace(/[\s_]+/g, "-")
-            .replace(/^-/, "")
-            .replace(/-{2,}/g, "-")
-            .toLowerCase();
-    }
+  run(input: string, _args: unknown[]): string {
+    return input
+      .replace(/([A-Z])/g, "-$1")
+      .replace(/[\s_]+/g, "-")
+      .replace(/^-/, "")
+      .replace(/-{2,}/g, "-")
+      .toLowerCase();
+  }
 }
 
 export default ToKebabCase;

@@ -2,443 +2,3839 @@
 import type { Operation } from "../chef/Operation";
 
 export interface OpMeta {
-    opName: string;
-    displayName: string;
-    module: string;
-    factory: () => Operation;
+  opName: string;
+  displayName: string;
+  module: string;
+  factory: () => Operation;
 }
 
 const registry: OpMeta[] = [
-    { opName: "A1Z26CipherDecode", displayName: "A1Z26 Cipher Decode", module: "Ciphers", factory: () => { const m = require("../chef/operations/A1Z26CipherDecode"); return new (m.A1Z26CipherDecode || m.default)(); } },
-    { opName: "A1Z26CipherEncode", displayName: "A1Z26 Cipher Encode", module: "Ciphers", factory: () => { const m = require("../chef/operations/A1Z26CipherEncode"); return new (m.A1Z26CipherEncode || m.default)(); } },
-    { opName: "ADD", displayName: "ADD", module: "Default", factory: () => { const m = require("../chef/operations/ADD"); return new (m.ADD || m.default)(); } },
-    { opName: "AddLineNumbers", displayName: "Add line numbers", module: "Default", factory: () => { const m = require("../chef/operations/AddLineNumbers"); return new (m.AddLineNumbers || m.default)(); } },
-    { opName: "AddTextToImage", displayName: "Add Text To Image", module: "Image", factory: () => { const m = require("../chef/operations/AddTextToImage"); return new (m.AddTextToImage || m.default)(); } },
-    { opName: "Adler32Checksum", displayName: "Adler-32 Checksum", module: "Crypto", factory: () => { const m = require("../chef/operations/Adler32Checksum"); return new (m.Adler32Checksum || m.default)(); } },
-    { opName: "AESDecrypt", displayName: "AES Decrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/AESDecrypt"); return new (m.AESDecrypt || m.default)(); } },
-    { opName: "AESEncrypt", displayName: "AES Encrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/AESEncrypt"); return new (m.AESEncrypt || m.default)(); } },
-    { opName: "AESKeyUnwrap", displayName: "AES Key Unwrap", module: "Ciphers", factory: () => { const m = require("../chef/operations/AESKeyUnwrap"); return new (m.AESKeyUnwrap || m.default)(); } },
-    { opName: "AESKeyWrap", displayName: "AES Key Wrap", module: "Ciphers", factory: () => { const m = require("../chef/operations/AESKeyWrap"); return new (m.AESKeyWrap || m.default)(); } },
-    { opName: "AffineCipherDecode", displayName: "Affine Cipher Decode", module: "Ciphers", factory: () => { const m = require("../chef/operations/AffineCipherDecode"); return new (m.AffineCipherDecode || m.default)(); } },
-    { opName: "AffineCipherEncode", displayName: "Affine Cipher Encode", module: "Ciphers", factory: () => { const m = require("../chef/operations/AffineCipherEncode"); return new (m.AffineCipherEncode || m.default)(); } },
-    { opName: "AlternatingCaps", displayName: "Alternating Caps", module: "Default", factory: () => { const m = require("../chef/operations/AlternatingCaps"); return new (m.AlternatingCaps || m.default)(); } },
-    { opName: "AMFDecode", displayName: "AMF Decode", module: "Encodings", factory: () => { const m = require("../chef/operations/AMFDecode"); return new (m.AMFDecode || m.default)(); } },
-    { opName: "AMFEncode", displayName: "AMF Encode", module: "Encodings", factory: () => { const m = require("../chef/operations/AMFEncode"); return new (m.AMFEncode || m.default)(); } },
-    { opName: "AnalyseHash", displayName: "Analyse hash", module: "Crypto", factory: () => { const m = require("../chef/operations/AnalyseHash"); return new (m.AnalyseHash || m.default)(); } },
-    { opName: "AnalyseUUID", displayName: "Analyse UUID", module: "Crypto", factory: () => { const m = require("../chef/operations/AnalyseUUID"); return new (m.AnalyseUUID || m.default)(); } },
-    { opName: "AND", displayName: "AND", module: "Default", factory: () => { const m = require("../chef/operations/AND"); return new (m.AND || m.default)(); } },
-    { opName: "AtbashCipher", displayName: "Atbash Cipher", module: "Ciphers", factory: () => { const m = require("../chef/operations/AtbashCipher"); return new (m.AtbashCipher || m.default)(); } },
-    { opName: "AvroToJSON", displayName: "Avro to JSON", module: "Serialise", factory: () => { const m = require("../chef/operations/AvroToJSON"); return new (m.AvroToJSON || m.default)(); } },
-    { opName: "BaconCipherDecode", displayName: "Bacon Cipher Decode", module: "Default", factory: () => { const m = require("../chef/operations/BaconCipherDecode"); return new (m.BaconCipherDecode || m.default)(); } },
-    { opName: "BaconCipherEncode", displayName: "Bacon Cipher Encode", module: "Default", factory: () => { const m = require("../chef/operations/BaconCipherEncode"); return new (m.BaconCipherEncode || m.default)(); } },
-    { opName: "Bcrypt", displayName: "Bcrypt", module: "Crypto", factory: () => { const m = require("../chef/operations/Bcrypt"); return new (m.Bcrypt || m.default)(); } },
-    { opName: "BcryptCompare", displayName: "Bcrypt compare", module: "Crypto", factory: () => { const m = require("../chef/operations/BcryptCompare"); return new (m.BcryptCompare || m.default)(); } },
-    { opName: "BcryptParse", displayName: "Bcrypt parse", module: "Crypto", factory: () => { const m = require("../chef/operations/BcryptParse"); return new (m.BcryptParse || m.default)(); } },
-    { opName: "BifidCipherDecode", displayName: "Bifid Cipher Decode", module: "Ciphers", factory: () => { const m = require("../chef/operations/BifidCipherDecode"); return new (m.BifidCipherDecode || m.default)(); } },
-    { opName: "BifidCipherEncode", displayName: "Bifid Cipher Encode", module: "Ciphers", factory: () => { const m = require("../chef/operations/BifidCipherEncode"); return new (m.BifidCipherEncode || m.default)(); } },
-    { opName: "BitShiftLeft", displayName: "Bit shift left", module: "Default", factory: () => { const m = require("../chef/operations/BitShiftLeft"); return new (m.BitShiftLeft || m.default)(); } },
-    { opName: "BitShiftRight", displayName: "Bit shift right", module: "Default", factory: () => { const m = require("../chef/operations/BitShiftRight"); return new (m.BitShiftRight || m.default)(); } },
-    { opName: "BLAKE2b", displayName: "BLAKE2b", module: "Hashing", factory: () => { const m = require("../chef/operations/BLAKE2b"); return new (m.BLAKE2b || m.default)(); } },
-    { opName: "BLAKE2s", displayName: "BLAKE2s", module: "Hashing", factory: () => { const m = require("../chef/operations/BLAKE2s"); return new (m.BLAKE2s || m.default)(); } },
-    { opName: "BLAKE3", displayName: "BLAKE3", module: "Hashing", factory: () => { const m = require("../chef/operations/BLAKE3"); return new (m.BLAKE3 || m.default)(); } },
-    { opName: "BlowfishDecrypt", displayName: "Blowfish Decrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/BlowfishDecrypt"); return new (m.BlowfishDecrypt || m.default)(); } },
-    { opName: "BlowfishEncrypt", displayName: "Blowfish Encrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/BlowfishEncrypt"); return new (m.BlowfishEncrypt || m.default)(); } },
-    { opName: "BlurImage", displayName: "Blur Image", module: "Image", factory: () => { const m = require("../chef/operations/BlurImage"); return new (m.BlurImage || m.default)(); } },
-    { opName: "Bombe", displayName: "Bombe", module: "Bletchley", factory: () => { const m = require("../chef/operations/Bombe"); return new (m.Bombe || m.default)(); } },
-    { opName: "BSONDeserialise", displayName: "BSON deserialise", module: "Serialise", factory: () => { const m = require("../chef/operations/BSONDeserialise"); return new (m.BSONDeserialise || m.default)(); } },
-    { opName: "BSONSerialise", displayName: "BSON serialise", module: "Serialise", factory: () => { const m = require("../chef/operations/BSONSerialise"); return new (m.BSONSerialise || m.default)(); } },
-    { opName: "CaesarBoxCipher", displayName: "Caesar Box Cipher", module: "Ciphers", factory: () => { const m = require("../chef/operations/CaesarBoxCipher"); return new (m.CaesarBoxCipher || m.default)(); } },
-    { opName: "CaretMdecode", displayName: "Caret/M-decode", module: "Default", factory: () => { const m = require("../chef/operations/CaretMdecode"); return new (m.CaretMdecode || m.default)(); } },
-    { opName: "CartesianProduct", displayName: "Cartesian Product", module: "Default", factory: () => { const m = require("../chef/operations/CartesianProduct"); return new (m.CartesianProduct || m.default)(); } },
-    { opName: "CBORDecode", displayName: "CBOR Decode", module: "Serialise", factory: () => { const m = require("../chef/operations/CBORDecode"); return new (m.CBORDecode || m.default)(); } },
-    { opName: "CBOREncode", displayName: "CBOR Encode", module: "Serialise", factory: () => { const m = require("../chef/operations/CBOREncode"); return new (m.CBOREncode || m.default)(); } },
-    { opName: "CetaceanCipherDecode", displayName: "Cetacean Cipher Decode", module: "Ciphers", factory: () => { const m = require("../chef/operations/CetaceanCipherDecode"); return new (m.CetaceanCipherDecode || m.default)(); } },
-    { opName: "CetaceanCipherEncode", displayName: "Cetacean Cipher Encode", module: "Ciphers", factory: () => { const m = require("../chef/operations/CetaceanCipherEncode"); return new (m.CetaceanCipherEncode || m.default)(); } },
-    { opName: "ChaCha", displayName: "ChaCha", module: "Ciphers", factory: () => { const m = require("../chef/operations/ChaCha"); return new (m.ChaCha || m.default)(); } },
-    { opName: "ChangeIPFormat", displayName: "Change IP format", module: "Default", factory: () => { const m = require("../chef/operations/ChangeIPFormat"); return new (m.ChangeIPFormat || m.default)(); } },
-    { opName: "ChiSquare", displayName: "Chi Square", module: "Default", factory: () => { const m = require("../chef/operations/ChiSquare"); return new (m.ChiSquare || m.default)(); } },
-    { opName: "CipherSaber2Decrypt", displayName: "CipherSaber2 Decrypt", module: "Crypto", factory: () => { const m = require("../chef/operations/CipherSaber2Decrypt"); return new (m.CipherSaber2Decrypt || m.default)(); } },
-    { opName: "CipherSaber2Encrypt", displayName: "CipherSaber2 Encrypt", module: "Crypto", factory: () => { const m = require("../chef/operations/CipherSaber2Encrypt"); return new (m.CipherSaber2Encrypt || m.default)(); } },
-    { opName: "CitrixCTX1Decode", displayName: "Citrix CTX1 Decode", module: "Encodings", factory: () => { const m = require("../chef/operations/CitrixCTX1Decode"); return new (m.CitrixCTX1Decode || m.default)(); } },
-    { opName: "CitrixCTX1Encode", displayName: "Citrix CTX1 Encode", module: "Encodings", factory: () => { const m = require("../chef/operations/CitrixCTX1Encode"); return new (m.CitrixCTX1Encode || m.default)(); } },
-    { opName: "CMAC", displayName: "CMAC", module: "Crypto", factory: () => { const m = require("../chef/operations/CMAC"); return new (m.CMAC || m.default)(); } },
-    { opName: "Colossus", displayName: "Colossus", module: "Bletchley", factory: () => { const m = require("../chef/operations/Colossus"); return new (m.Colossus || m.default)(); } },
-    { opName: "Comment", displayName: "Comment", module: "Default", factory: () => { const m = require("../chef/operations/Comment"); return new (m.Comment || m.default)(); } },
-    { opName: "CompareCTPHHashes", displayName: "Compare CTPH hashes", module: "Crypto", factory: () => { const m = require("../chef/operations/CompareCTPHHashes"); return new (m.CompareCTPHHashes || m.default)(); } },
-    { opName: "CompareSSDEEPHashes", displayName: "Compare SSDEEP hashes", module: "Crypto", factory: () => { const m = require("../chef/operations/CompareSSDEEPHashes"); return new (m.CompareSSDEEPHashes || m.default)(); } },
-    { opName: "ConditionalJump", displayName: "Conditional Jump", module: "Default", factory: () => { const m = require("../chef/operations/ConditionalJump"); return new (m.ConditionalJump || m.default)(); } },
-    { opName: "ContainImage", displayName: "Contain Image", module: "Image", factory: () => { const m = require("../chef/operations/ContainImage"); return new (m.ContainImage || m.default)(); } },
-    { opName: "ConvertArea", displayName: "Convert area", module: "Default", factory: () => { const m = require("../chef/operations/ConvertArea"); return new (m.ConvertArea || m.default)(); } },
-    { opName: "ConvertCoordinateFormat", displayName: "Convert co-ordinate format", module: "Hashing", factory: () => { const m = require("../chef/operations/ConvertCoordinateFormat"); return new (m.ConvertCoordinateFormat || m.default)(); } },
-    { opName: "ConvertDataUnits", displayName: "Convert data units", module: "Default", factory: () => { const m = require("../chef/operations/ConvertDataUnits"); return new (m.ConvertDataUnits || m.default)(); } },
-    { opName: "ConvertDistance", displayName: "Convert distance", module: "Default", factory: () => { const m = require("../chef/operations/ConvertDistance"); return new (m.ConvertDistance || m.default)(); } },
-    { opName: "ConvertImageFormat", displayName: "Convert Image Format", module: "Image", factory: () => { const m = require("../chef/operations/ConvertImageFormat"); return new (m.ConvertImageFormat || m.default)(); } },
-    { opName: "ConvertLeetSpeak", displayName: "Convert Leet Speak", module: "Default", factory: () => { const m = require("../chef/operations/ConvertLeetSpeak"); return new (m.ConvertLeetSpeak || m.default)(); } },
-    { opName: "ConvertMass", displayName: "Convert mass", module: "Default", factory: () => { const m = require("../chef/operations/ConvertMass"); return new (m.ConvertMass || m.default)(); } },
-    { opName: "ConvertSpeed", displayName: "Convert speed", module: "Default", factory: () => { const m = require("../chef/operations/ConvertSpeed"); return new (m.ConvertSpeed || m.default)(); } },
-    { opName: "ConvertToNATOAlphabet", displayName: "Convert to NATO alphabet", module: "Default", factory: () => { const m = require("../chef/operations/ConvertToNATOAlphabet"); return new (m.ConvertToNATOAlphabet || m.default)(); } },
-    { opName: "CountOccurrences", displayName: "Count occurrences", module: "Default", factory: () => { const m = require("../chef/operations/CountOccurrences"); return new (m.CountOccurrences || m.default)(); } },
-    { opName: "CoverImage", displayName: "Cover Image", module: "Image", factory: () => { const m = require("../chef/operations/CoverImage"); return new (m.CoverImage || m.default)(); } },
-    { opName: "CRCChecksum", displayName: "CRC Checksum", module: "Default", factory: () => { const m = require("../chef/operations/CRCChecksum"); return new (m.CRCChecksum || m.default)(); } },
-    { opName: "CropImage", displayName: "Crop Image", module: "Image", factory: () => { const m = require("../chef/operations/CropImage"); return new (m.CropImage || m.default)(); } },
-    { opName: "CSSBeautify", displayName: "CSS Beautify", module: "Code", factory: () => { const m = require("../chef/operations/CSSBeautify"); return new (m.CSSBeautify || m.default)(); } },
-    { opName: "CSSMinify", displayName: "CSS Minify", module: "Code", factory: () => { const m = require("../chef/operations/CSSMinify"); return new (m.CSSMinify || m.default)(); } },
-    { opName: "CSVToJSON", displayName: "CSV to JSON", module: "Default", factory: () => { const m = require("../chef/operations/CSVToJSON"); return new (m.CSVToJSON || m.default)(); } },
-    { opName: "CTPH", displayName: "CTPH", module: "Crypto", factory: () => { const m = require("../chef/operations/CTPH"); return new (m.CTPH || m.default)(); } },
-    { opName: "DateTimeDelta", displayName: "DateTime Delta", module: "Default", factory: () => { const m = require("../chef/operations/DateTimeDelta"); return new (m.DateTimeDelta || m.default)(); } },
-    { opName: "DechunkHTTPResponse", displayName: "Dechunk HTTP response", module: "Default", factory: () => { const m = require("../chef/operations/DechunkHTTPResponse"); return new (m.DechunkHTTPResponse || m.default)(); } },
-    { opName: "DecodeNetBIOSName", displayName: "Decode NetBIOS Name", module: "Default", factory: () => { const m = require("../chef/operations/DecodeNetBIOSName"); return new (m.DecodeNetBIOSName || m.default)(); } },
-    { opName: "DecodeText", displayName: "Decode text", module: "Encodings", factory: () => { const m = require("../chef/operations/DecodeText"); return new (m.DecodeText || m.default)(); } },
-    { opName: "DefangIPAddresses", displayName: "Defang IP Addresses", module: "Default", factory: () => { const m = require("../chef/operations/DefangIPAddresses"); return new (m.DefangIPAddresses || m.default)(); } },
-    { opName: "DefangURL", displayName: "Defang URL", module: "Default", factory: () => { const m = require("../chef/operations/DefangURL"); return new (m.DefangURL || m.default)(); } },
-    { opName: "DeriveEVPKey", displayName: "Derive EVP key", module: "Ciphers", factory: () => { const m = require("../chef/operations/DeriveEVPKey"); return new (m.DeriveEVPKey || m.default)(); } },
-    { opName: "DerivePBKDF2Key", displayName: "Derive PBKDF2 key", module: "Ciphers", factory: () => { const m = require("../chef/operations/DerivePBKDF2Key"); return new (m.DerivePBKDF2Key || m.default)(); } },
-    { opName: "DESDecrypt", displayName: "DES Decrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/DESDecrypt"); return new (m.DESDecrypt || m.default)(); } },
-    { opName: "DESEncrypt", displayName: "DES Encrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/DESEncrypt"); return new (m.DESEncrypt || m.default)(); } },
-    { opName: "DetectFileType", displayName: "Detect File Type", module: "Default", factory: () => { const m = require("../chef/operations/DetectFileType"); return new (m.DetectFileType || m.default)(); } },
-    { opName: "Diff", displayName: "Diff", module: "Diff", factory: () => { const m = require("../chef/operations/Diff"); return new (m.Diff || m.default)(); } },
-    { opName: "DisassembleX86", displayName: "Disassemble x86", module: "Shellcode", factory: () => { const m = require("../chef/operations/DisassembleX86"); return new (m.DisassembleX86 || m.default)(); } },
-    { opName: "DitherImage", displayName: "Dither Image", module: "Image", factory: () => { const m = require("../chef/operations/DitherImage"); return new (m.DitherImage || m.default)(); } },
-    { opName: "Divide", displayName: "Divide", module: "Default", factory: () => { const m = require("../chef/operations/Divide"); return new (m.Divide || m.default)(); } },
-    { opName: "DNSOverHTTPS", displayName: "DNS over HTTPS", module: "Default", factory: () => { const m = require("../chef/operations/DNSOverHTTPS"); return new (m.DNSOverHTTPS || m.default)(); } },
-    { opName: "DropBytes", displayName: "Drop bytes", module: "Default", factory: () => { const m = require("../chef/operations/DropBytes"); return new (m.DropBytes || m.default)(); } },
-    { opName: "DropNthBytes", displayName: "Drop nth bytes", module: "Default", factory: () => { const m = require("../chef/operations/DropNthBytes"); return new (m.DropNthBytes || m.default)(); } },
-    { opName: "ECDSASign", displayName: "ECDSA Sign", module: "Ciphers", factory: () => { const m = require("../chef/operations/ECDSASign"); return new (m.ECDSASign || m.default)(); } },
-    { opName: "ECDSASignatureConversion", displayName: "ECDSA Signature Conversion", module: "Ciphers", factory: () => { const m = require("../chef/operations/ECDSASignatureConversion"); return new (m.ECDSASignatureConversion || m.default)(); } },
-    { opName: "ECDSAVerify", displayName: "ECDSA Verify", module: "Ciphers", factory: () => { const m = require("../chef/operations/ECDSAVerify"); return new (m.ECDSAVerify || m.default)(); } },
-    { opName: "ELFInfo", displayName: "ELF Info", module: "Default", factory: () => { const m = require("../chef/operations/ELFInfo"); return new (m.ELFInfo || m.default)(); } },
-    { opName: "EncodeNetBIOSName", displayName: "Encode NetBIOS Name", module: "Default", factory: () => { const m = require("../chef/operations/EncodeNetBIOSName"); return new (m.EncodeNetBIOSName || m.default)(); } },
-    { opName: "EncodeText", displayName: "Encode text", module: "Encodings", factory: () => { const m = require("../chef/operations/EncodeText"); return new (m.EncodeText || m.default)(); } },
-    { opName: "Enigma", displayName: "Enigma", module: "Bletchley", factory: () => { const m = require("../chef/operations/Enigma"); return new (m.Enigma || m.default)(); } },
-    { opName: "Entropy", displayName: "Entropy", module: "Charts", factory: () => { const m = require("../chef/operations/Entropy"); return new (m.Entropy || m.default)(); } },
-    { opName: "EscapeString", displayName: "Escape string", module: "Default", factory: () => { const m = require("../chef/operations/EscapeString"); return new (m.EscapeString || m.default)(); } },
-    { opName: "EscapeUnicodeCharacters", displayName: "Escape Unicode Characters", module: "Default", factory: () => { const m = require("../chef/operations/EscapeUnicodeCharacters"); return new (m.EscapeUnicodeCharacters || m.default)(); } },
-    { opName: "ExpandAlphabetRange", displayName: "Expand alphabet range", module: "Default", factory: () => { const m = require("../chef/operations/ExpandAlphabetRange"); return new (m.ExpandAlphabetRange || m.default)(); } },
-    { opName: "ExtractAudioMetadata", displayName: "Extract Audio Metadata", module: "Default", factory: () => { const m = require("../chef/operations/ExtractAudioMetadata"); return new (m.ExtractAudioMetadata || m.default)(); } },
-    { opName: "ExtractDates", displayName: "Extract dates", module: "Regex", factory: () => { const m = require("../chef/operations/ExtractDates"); return new (m.ExtractDates || m.default)(); } },
-    { opName: "ExtractDomains", displayName: "Extract domains", module: "Regex", factory: () => { const m = require("../chef/operations/ExtractDomains"); return new (m.ExtractDomains || m.default)(); } },
-    { opName: "ExtractEmailAddresses", displayName: "Extract email addresses", module: "Regex", factory: () => { const m = require("../chef/operations/ExtractEmailAddresses"); return new (m.ExtractEmailAddresses || m.default)(); } },
-    { opName: "ExtractEXIF", displayName: "Extract EXIF", module: "Image", factory: () => { const m = require("../chef/operations/ExtractEXIF"); return new (m.ExtractEXIF || m.default)(); } },
-    { opName: "ExtractFilePaths", displayName: "Extract file paths", module: "Regex", factory: () => { const m = require("../chef/operations/ExtractFilePaths"); return new (m.ExtractFilePaths || m.default)(); } },
-    { opName: "ExtractFiles", displayName: "Extract Files", module: "Default", factory: () => { const m = require("../chef/operations/ExtractFiles"); return new (m.ExtractFiles || m.default)(); } },
-    { opName: "ExtractHashes", displayName: "Extract hashes", module: "Regex", factory: () => { const m = require("../chef/operations/ExtractHashes"); return new (m.ExtractHashes || m.default)(); } },
-    { opName: "ExtractID3", displayName: "Extract ID3", module: "Default", factory: () => { const m = require("../chef/operations/ExtractID3"); return new (m.ExtractID3 || m.default)(); } },
-    { opName: "ExtractIPAddresses", displayName: "Extract IP addresses", module: "Regex", factory: () => { const m = require("../chef/operations/ExtractIPAddresses"); return new (m.ExtractIPAddresses || m.default)(); } },
-    { opName: "ExtractLSB", displayName: "Extract LSB", module: "Image", factory: () => { const m = require("../chef/operations/ExtractLSB"); return new (m.ExtractLSB || m.default)(); } },
-    { opName: "ExtractMACAddresses", displayName: "Extract MAC addresses", module: "Regex", factory: () => { const m = require("../chef/operations/ExtractMACAddresses"); return new (m.ExtractMACAddresses || m.default)(); } },
-    { opName: "ExtractRGBA", displayName: "Extract RGBA", module: "Image", factory: () => { const m = require("../chef/operations/ExtractRGBA"); return new (m.ExtractRGBA || m.default)(); } },
-    { opName: "ExtractURLs", displayName: "Extract URLs", module: "Regex", factory: () => { const m = require("../chef/operations/ExtractURLs"); return new (m.ExtractURLs || m.default)(); } },
-    { opName: "FangURL", displayName: "Fang URL", module: "Default", factory: () => { const m = require("../chef/operations/FangURL"); return new (m.FangURL || m.default)(); } },
-    { opName: "FileTree", displayName: "File Tree", module: "Default", factory: () => { const m = require("../chef/operations/FileTree"); return new (m.FileTree || m.default)(); } },
-    { opName: "Filter", displayName: "Filter", module: "Regex", factory: () => { const m = require("../chef/operations/Filter"); return new (m.Filter || m.default)(); } },
-    { opName: "FindReplace", displayName: "Find / Replace", module: "Regex", factory: () => { const m = require("../chef/operations/FindReplace"); return new (m.FindReplace || m.default)(); } },
-    { opName: "FlaskSessionDecode", displayName: "Flask Session Decode", module: "Crypto", factory: () => { const m = require("../chef/operations/FlaskSessionDecode"); return new (m.FlaskSessionDecode || m.default)(); } },
-    { opName: "Fletcher16Checksum", displayName: "Fletcher-16 Checksum", module: "Crypto", factory: () => { const m = require("../chef/operations/Fletcher16Checksum"); return new (m.Fletcher16Checksum || m.default)(); } },
-    { opName: "Fletcher32Checksum", displayName: "Fletcher-32 Checksum", module: "Crypto", factory: () => { const m = require("../chef/operations/Fletcher32Checksum"); return new (m.Fletcher32Checksum || m.default)(); } },
-    { opName: "Fletcher64Checksum", displayName: "Fletcher-64 Checksum", module: "Crypto", factory: () => { const m = require("../chef/operations/Fletcher64Checksum"); return new (m.Fletcher64Checksum || m.default)(); } },
-    { opName: "Fletcher8Checksum", displayName: "Fletcher-8 Checksum", module: "Crypto", factory: () => { const m = require("../chef/operations/Fletcher8Checksum"); return new (m.Fletcher8Checksum || m.default)(); } },
-    { opName: "FlipImage", displayName: "Flip Image", module: "Image", factory: () => { const m = require("../chef/operations/FlipImage"); return new (m.FlipImage || m.default)(); } },
-    { opName: "Fork", displayName: "Fork", module: "Default", factory: () => { const m = require("../chef/operations/Fork"); return new (m.Fork || m.default)(); } },
-    { opName: "FormatMACAddresses", displayName: "Format MAC addresses", module: "Default", factory: () => { const m = require("../chef/operations/FormatMACAddresses"); return new (m.FormatMACAddresses || m.default)(); } },
-    { opName: "FrequencyDistribution", displayName: "Frequency distribution", module: "Default", factory: () => { const m = require("../chef/operations/FrequencyDistribution"); return new (m.FrequencyDistribution || m.default)(); } },
-    { opName: "FromBase", displayName: "From Base", module: "Default", factory: () => { const m = require("../chef/operations/FromBase"); return new (m.FromBase || m.default)(); } },
-    { opName: "FromBase32", displayName: "From Base32", module: "Default", factory: () => { const m = require("../chef/operations/FromBase32"); return new (m.FromBase32 || m.default)(); } },
-    { opName: "FromBase45", displayName: "From Base45", module: "Default", factory: () => { const m = require("../chef/operations/FromBase45"); return new (m.FromBase45 || m.default)(); } },
-    { opName: "FromBase58", displayName: "From Base58", module: "Default", factory: () => { const m = require("../chef/operations/FromBase58"); return new (m.FromBase58 || m.default)(); } },
-    { opName: "FromBase62", displayName: "From Base62", module: "Default", factory: () => { const m = require("../chef/operations/FromBase62"); return new (m.FromBase62 || m.default)(); } },
-    { opName: "FromBase64", displayName: "From Base64", module: "Default", factory: () => { const m = require("../chef/operations/FromBase64"); return new (m.FromBase64 || m.default)(); } },
-    { opName: "FromBase85", displayName: "From Base85", module: "Default", factory: () => { const m = require("../chef/operations/FromBase85"); return new (m.FromBase85 || m.default)(); } },
-    { opName: "FromBase92", displayName: "From Base92", module: "Default", factory: () => { const m = require("../chef/operations/FromBase92"); return new (m.FromBase92 || m.default)(); } },
-    { opName: "FromBCD", displayName: "From BCD", module: "Default", factory: () => { const m = require("../chef/operations/FromBCD"); return new (m.FromBCD || m.default)(); } },
-    { opName: "FromBech32", displayName: "From Bech32", module: "Default", factory: () => { const m = require("../chef/operations/FromBech32"); return new (m.FromBech32 || m.default)(); } },
-    { opName: "FromBinary", displayName: "From Binary", module: "Default", factory: () => { const m = require("../chef/operations/FromBinary"); return new (m.FromBinary || m.default)(); } },
-    { opName: "FromBraille", displayName: "From Braille", module: "Default", factory: () => { const m = require("../chef/operations/FromBraille"); return new (m.FromBraille || m.default)(); } },
-    { opName: "FromCaseInsensitiveRegex", displayName: "From Case Insensitive Regex", module: "Default", factory: () => { const m = require("../chef/operations/FromCaseInsensitiveRegex"); return new (m.FromCaseInsensitiveRegex || m.default)(); } },
-    { opName: "FromCharcode", displayName: "From Charcode", module: "Default", factory: () => { const m = require("../chef/operations/FromCharcode"); return new (m.FromCharcode || m.default)(); } },
-    { opName: "FromDecimal", displayName: "From Decimal", module: "Default", factory: () => { const m = require("../chef/operations/FromDecimal"); return new (m.FromDecimal || m.default)(); } },
-    { opName: "FromFloat", displayName: "From Float", module: "Default", factory: () => { const m = require("../chef/operations/FromFloat"); return new (m.FromFloat || m.default)(); } },
-    { opName: "FromHex", displayName: "From Hex", module: "Default", factory: () => { const m = require("../chef/operations/FromHex"); return new (m.FromHex || m.default)(); } },
-    { opName: "FromHexContent", displayName: "From Hex Content", module: "Default", factory: () => { const m = require("../chef/operations/FromHexContent"); return new (m.FromHexContent || m.default)(); } },
-    { opName: "FromHexdump", displayName: "From Hexdump", module: "Default", factory: () => { const m = require("../chef/operations/FromHexdump"); return new (m.FromHexdump || m.default)(); } },
-    { opName: "FromHTMLEntity", displayName: "From HTML Entity", module: "Encodings", factory: () => { const m = require("../chef/operations/FromHTMLEntity"); return new (m.FromHTMLEntity || m.default)(); } },
-    { opName: "FromMessagePack", displayName: "From MessagePack", module: "Code", factory: () => { const m = require("../chef/operations/FromMessagePack"); return new (m.FromMessagePack || m.default)(); } },
-    { opName: "FromModhex", displayName: "From Modhex", module: "Default", factory: () => { const m = require("../chef/operations/FromModhex"); return new (m.FromModhex || m.default)(); } },
-    { opName: "FromMorseCode", displayName: "From Morse Code", module: "Default", factory: () => { const m = require("../chef/operations/FromMorseCode"); return new (m.FromMorseCode || m.default)(); } },
-    { opName: "FromOctal", displayName: "From Octal", module: "Default", factory: () => { const m = require("../chef/operations/FromOctal"); return new (m.FromOctal || m.default)(); } },
-    { opName: "FromPunycode", displayName: "From Punycode", module: "Encodings", factory: () => { const m = require("../chef/operations/FromPunycode"); return new (m.FromPunycode || m.default)(); } },
-    { opName: "FromQuotedPrintable", displayName: "From Quoted Printable", module: "Default", factory: () => { const m = require("../chef/operations/FromQuotedPrintable"); return new (m.FromQuotedPrintable || m.default)(); } },
-    { opName: "FromRadix", displayName: "From Radix", module: "Default", factory: () => { const m = require("../chef/operations/FromRadix"); return new (m.FromRadix || m.default)(); } },
-    { opName: "FromUNIXTimestamp", displayName: "From UNIX Timestamp", module: "Default", factory: () => { const m = require("../chef/operations/FromUNIXTimestamp"); return new (m.FromUNIXTimestamp || m.default)(); } },
-    { opName: "FuzzyMatch", displayName: "Fuzzy Match", module: "Default", factory: () => { const m = require("../chef/operations/FuzzyMatch"); return new (m.FuzzyMatch || m.default)(); } },
-    { opName: "GenerateAllChecksums", displayName: "Generate all checksums", module: "Crypto", factory: () => { const m = require("../chef/operations/GenerateAllChecksums"); return new (m.GenerateAllChecksums || m.default)(); } },
-    { opName: "GenerateDeBruijnSequence", displayName: "Generate De Bruijn Sequence", module: "Default", factory: () => { const m = require("../chef/operations/GenerateDeBruijnSequence"); return new (m.GenerateDeBruijnSequence || m.default)(); } },
-    { opName: "GenerateECDSAKeyPair", displayName: "Generate ECDSA Key Pair", module: "Ciphers", factory: () => { const m = require("../chef/operations/GenerateECDSAKeyPair"); return new (m.GenerateECDSAKeyPair || m.default)(); } },
-    { opName: "GenerateImage", displayName: "Generate Image", module: "Image", factory: () => { const m = require("../chef/operations/GenerateImage"); return new (m.GenerateImage || m.default)(); } },
-    { opName: "GenerateLoremIpsum", displayName: "Generate Lorem Ipsum", module: "Default", factory: () => { const m = require("../chef/operations/GenerateLoremIpsum"); return new (m.GenerateLoremIpsum || m.default)(); } },
-    { opName: "GenerateRSAKeyPair", displayName: "Generate RSA Key Pair", module: "Ciphers", factory: () => { const m = require("../chef/operations/GenerateRSAKeyPair"); return new (m.GenerateRSAKeyPair || m.default)(); } },
-    { opName: "GenerateUUID", displayName: "Generate UUID", module: "Crypto", factory: () => { const m = require("../chef/operations/GenerateUUID"); return new (m.GenerateUUID || m.default)(); } },
-    { opName: "GenericCodeBeautify", displayName: "Generic Code Beautify", module: "Code", factory: () => { const m = require("../chef/operations/GenericCodeBeautify"); return new (m.GenericCodeBeautify || m.default)(); } },
-    { opName: "GetAllCasings", displayName: "Get All Casings", module: "Default", factory: () => { const m = require("../chef/operations/GetAllCasings"); return new (m.GetAllCasings || m.default)(); } },
-    { opName: "GetTime", displayName: "Get Time", module: "Default", factory: () => { const m = require("../chef/operations/GetTime"); return new (m.GetTime || m.default)(); } },
-    { opName: "GOSTHash", displayName: "GOST Hash", module: "Hashing", factory: () => { const m = require("../chef/operations/GOSTHash"); return new (m.GOSTHash || m.default)(); } },
-    { opName: "GroupIPAddresses", displayName: "Group IP addresses", module: "Default", factory: () => { const m = require("../chef/operations/GroupIPAddresses"); return new (m.GroupIPAddresses || m.default)(); } },
-    { opName: "Gunzip", displayName: "Gunzip", module: "Compression", factory: () => { const m = require("../chef/operations/Gunzip"); return new (m.Gunzip || m.default)(); } },
-    { opName: "Gzip", displayName: "Gzip", module: "Compression", factory: () => { const m = require("../chef/operations/Gzip"); return new (m.Gzip || m.default)(); } },
-    { opName: "HammingDistance", displayName: "Hamming Distance", module: "Default", factory: () => { const m = require("../chef/operations/HammingDistance"); return new (m.HammingDistance || m.default)(); } },
-    { opName: "HaversineDistance", displayName: "Haversine distance", module: "Default", factory: () => { const m = require("../chef/operations/HaversineDistance"); return new (m.HaversineDistance || m.default)(); } },
-    { opName: "Head", displayName: "Head", module: "Default", factory: () => { const m = require("../chef/operations/Head"); return new (m.Head || m.default)(); } },
-    { opName: "HeatmapChart", displayName: "Heatmap chart", module: "Charts", factory: () => { const m = require("../chef/operations/HeatmapChart"); return new (m.HeatmapChart || m.default)(); } },
-    { opName: "HexDensityChart", displayName: "Hex Density chart", module: "Charts", factory: () => { const m = require("../chef/operations/HexDensityChart"); return new (m.HexDensityChart || m.default)(); } },
-    { opName: "HexToObjectIdentifier", displayName: "Hex to Object Identifier", module: "PublicKey", factory: () => { const m = require("../chef/operations/HexToObjectIdentifier"); return new (m.HexToObjectIdentifier || m.default)(); } },
-    { opName: "HexToPEM", displayName: "Hex to PEM", module: "PublicKey", factory: () => { const m = require("../chef/operations/HexToPEM"); return new (m.HexToPEM || m.default)(); } },
-    { opName: "HTMLToText", displayName: "HTML To Text", module: "Default", factory: () => { const m = require("../chef/operations/HTMLToText"); return new (m.HTMLToText || m.default)(); } },
-    { opName: "HTTPRequest", displayName: "HTTP request", module: "Default", factory: () => { const m = require("../chef/operations/HTTPRequest"); return new (m.HTTPRequest || m.default)(); } },
-    { opName: "ImageBrightnessContrast", displayName: "Image Brightness / Contrast", module: "Image", factory: () => { const m = require("../chef/operations/ImageBrightnessContrast"); return new (m.ImageBrightnessContrast || m.default)(); } },
-    { opName: "ImageFilter", displayName: "Image Filter", module: "Image", factory: () => { const m = require("../chef/operations/ImageFilter"); return new (m.ImageFilter || m.default)(); } },
-    { opName: "ImageHueSaturationLightness", displayName: "Image Hue/Saturation/Lightness", module: "Image", factory: () => { const m = require("../chef/operations/ImageHueSaturationLightness"); return new (m.ImageHueSaturationLightness || m.default)(); } },
-    { opName: "ImageOpacity", displayName: "Image Opacity", module: "Image", factory: () => { const m = require("../chef/operations/ImageOpacity"); return new (m.ImageOpacity || m.default)(); } },
-    { opName: "IndexOfCoincidence", displayName: "Index of Coincidence", module: "Default", factory: () => { const m = require("../chef/operations/IndexOfCoincidence"); return new (m.IndexOfCoincidence || m.default)(); } },
-    { opName: "InvertImage", displayName: "Invert Image", module: "Image", factory: () => { const m = require("../chef/operations/InvertImage"); return new (m.InvertImage || m.default)(); } },
-    { opName: "IPv6TransitionAddresses", displayName: "IPv6 Transition Addresses", module: "Default", factory: () => { const m = require("../chef/operations/IPv6TransitionAddresses"); return new (m.IPv6TransitionAddresses || m.default)(); } },
-    { opName: "JavaScriptParser", displayName: "JavaScript Parser", module: "Code", factory: () => { const m = require("../chef/operations/JavaScriptParser"); return new (m.JavaScriptParser || m.default)(); } },
-    { opName: "JSONBeautify", displayName: "JSON Beautify", module: "Code", factory: () => { const m = require("../chef/operations/JSONBeautify"); return new (m.JSONBeautify || m.default)(); } },
-    { opName: "JSONMinify", displayName: "JSON Minify", module: "Code", factory: () => { const m = require("../chef/operations/JSONMinify"); return new (m.JSONMinify || m.default)(); } },
-    { opName: "JSONToCSV", displayName: "JSON to CSV", module: "Default", factory: () => { const m = require("../chef/operations/JSONToCSV"); return new (m.JSONToCSV || m.default)(); } },
-    { opName: "JSONtoYAML", displayName: "JSON to YAML", module: "Default", factory: () => { const m = require("../chef/operations/JSONtoYAML"); return new (m.JSONtoYAML || m.default)(); } },
-    { opName: "Jump", displayName: "Jump", module: "Default", factory: () => { const m = require("../chef/operations/Jump"); return new (m.Jump || m.default)(); } },
-    { opName: "JWKToPem", displayName: "JWK to PEM", module: "PublicKey", factory: () => { const m = require("../chef/operations/JWKToPem"); return new (m.JWKToPem || m.default)(); } },
-    { opName: "JWTDecode", displayName: "JWT Decode", module: "Crypto", factory: () => { const m = require("../chef/operations/JWTDecode"); return new (m.JWTDecode || m.default)(); } },
-    { opName: "JWTSign", displayName: "JWT Sign", module: "Crypto", factory: () => { const m = require("../chef/operations/JWTSign"); return new (m.JWTSign || m.default)(); } },
-    { opName: "JWTVerify", displayName: "JWT Verify", module: "Crypto", factory: () => { const m = require("../chef/operations/JWTVerify"); return new (m.JWTVerify || m.default)(); } },
-    { opName: "Keccak", displayName: "Keccak", module: "Crypto", factory: () => { const m = require("../chef/operations/Keccak"); return new (m.Keccak || m.default)(); } },
-    { opName: "Label", displayName: "Label", module: "Default", factory: () => { const m = require("../chef/operations/Label"); return new (m.Label || m.default)(); } },
-    { opName: "LevenshteinDistance", displayName: "Levenshtein Distance", module: "Default", factory: () => { const m = require("../chef/operations/LevenshteinDistance"); return new (m.LevenshteinDistance || m.default)(); } },
-    { opName: "LMHash", displayName: "LM Hash", module: "Crypto", factory: () => { const m = require("../chef/operations/LMHash"); return new (m.LMHash || m.default)(); } },
-    { opName: "Lorenz", displayName: "Lorenz", module: "Bletchley", factory: () => { const m = require("../chef/operations/Lorenz"); return new (m.Lorenz || m.default)(); } },
-    { opName: "LS47Decrypt", displayName: "LS47 Decrypt", module: "Crypto", factory: () => { const m = require("../chef/operations/LS47Decrypt"); return new (m.LS47Decrypt || m.default)(); } },
-    { opName: "LS47Encrypt", displayName: "LS47 Encrypt", module: "Crypto", factory: () => { const m = require("../chef/operations/LS47Encrypt"); return new (m.LS47Encrypt || m.default)(); } },
-    { opName: "LuhnChecksum", displayName: "Luhn Checksum", module: "Default", factory: () => { const m = require("../chef/operations/LuhnChecksum"); return new (m.LuhnChecksum || m.default)(); } },
-    { opName: "LZ4Compress", displayName: "LZ4 Compress", module: "Compression", factory: () => { const m = require("../chef/operations/LZ4Compress"); return new (m.LZ4Compress || m.default)(); } },
-    { opName: "LZ4Decompress", displayName: "LZ4 Decompress", module: "Compression", factory: () => { const m = require("../chef/operations/LZ4Decompress"); return new (m.LZ4Decompress || m.default)(); } },
-    { opName: "LZNT1Decompress", displayName: "LZNT1 Decompress", module: "Compression", factory: () => { const m = require("../chef/operations/LZNT1Decompress"); return new (m.LZNT1Decompress || m.default)(); } },
-    { opName: "LZStringCompress", displayName: "LZString Compress", module: "Compression", factory: () => { const m = require("../chef/operations/LZStringCompress"); return new (m.LZStringCompress || m.default)(); } },
-    { opName: "LZStringDecompress", displayName: "LZString Decompress", module: "Compression", factory: () => { const m = require("../chef/operations/LZStringDecompress"); return new (m.LZStringDecompress || m.default)(); } },
-    { opName: "Magic", displayName: "Magic", module: "Default", factory: () => { const m = require("../chef/operations/Magic"); return new (m.Magic || m.default)(); } },
-    { opName: "Mean", displayName: "Mean", module: "Default", factory: () => { const m = require("../chef/operations/Mean"); return new (m.Mean || m.default)(); } },
-    { opName: "Median", displayName: "Median", module: "Default", factory: () => { const m = require("../chef/operations/Median"); return new (m.Median || m.default)(); } },
-    { opName: "Merge", displayName: "Merge", module: "Default", factory: () => { const m = require("../chef/operations/Merge"); return new (m.Merge || m.default)(); } },
-    { opName: "MicrosoftScriptDecoder", displayName: "Microsoft Script Decoder", module: "Default", factory: () => { const m = require("../chef/operations/MicrosoftScriptDecoder"); return new (m.MicrosoftScriptDecoder || m.default)(); } },
-    { opName: "MIMEDecoding", displayName: "MIME Decoding", module: "Default", factory: () => { const m = require("../chef/operations/MIMEDecoding"); return new (m.MIMEDecoding || m.default)(); } },
-    { opName: "MultipleBombe", displayName: "Multiple Bombe", module: "Bletchley", factory: () => { const m = require("../chef/operations/MultipleBombe"); return new (m.MultipleBombe || m.default)(); } },
-    { opName: "Multiply", displayName: "Multiply", module: "Default", factory: () => { const m = require("../chef/operations/Multiply"); return new (m.Multiply || m.default)(); } },
-    { opName: "MurmurHash3", displayName: "MurmurHash3", module: "Hashing", factory: () => { const m = require("../chef/operations/MurmurHash3"); return new (m.MurmurHash3 || m.default)(); } },
-    { opName: "NormaliseImage", displayName: "Normalise Image", module: "Image", factory: () => { const m = require("../chef/operations/NormaliseImage"); return new (m.NormaliseImage || m.default)(); } },
-    { opName: "NormaliseUnicode", displayName: "Normalise Unicode", module: "Encodings", factory: () => { const m = require("../chef/operations/NormaliseUnicode"); return new (m.NormaliseUnicode || m.default)(); } },
-    { opName: "NOT", displayName: "NOT", module: "Default", factory: () => { const m = require("../chef/operations/NOT"); return new (m.NOT || m.default)(); } },
-    { opName: "Numberwang", displayName: "Numberwang", module: "Default", factory: () => { const m = require("../chef/operations/Numberwang"); return new (m.Numberwang || m.default)(); } },
-    { opName: "ObjectIdentifierToHex", displayName: "Object Identifier to Hex", module: "PublicKey", factory: () => { const m = require("../chef/operations/ObjectIdentifierToHex"); return new (m.ObjectIdentifierToHex || m.default)(); } },
-    { opName: "OffsetChecker", displayName: "Offset checker", module: "Default", factory: () => { const m = require("../chef/operations/OffsetChecker"); return new (m.OffsetChecker || m.default)(); } },
-    { opName: "OR", displayName: "OR", module: "Default", factory: () => { const m = require("../chef/operations/OR"); return new (m.OR || m.default)(); } },
-    { opName: "PLISTViewer", displayName: "P-list Viewer", module: "Default", factory: () => { const m = require("../chef/operations/PLISTViewer"); return new (m.PLISTViewer || m.default)(); } },
-    { opName: "PadLines", displayName: "Pad lines", module: "Default", factory: () => { const m = require("../chef/operations/PadLines"); return new (m.PadLines || m.default)(); } },
-    { opName: "ParityBit", displayName: "Parity Bit", module: "Default", factory: () => { const m = require("../chef/operations/ParityBit"); return new (m.ParityBit || m.default)(); } },
-    { opName: "ParseASN1HexString", displayName: "Parse ASN.1 hex string", module: "PublicKey", factory: () => { const m = require("../chef/operations/ParseASN1HexString"); return new (m.ParseASN1HexString || m.default)(); } },
-    { opName: "ParseColourCode", displayName: "Parse colour code", module: "Default", factory: () => { const m = require("../chef/operations/ParseColourCode"); return new (m.ParseColourCode || m.default)(); } },
-    { opName: "ParseCSR", displayName: "Parse CSR", module: "PublicKey", factory: () => { const m = require("../chef/operations/ParseCSR"); return new (m.ParseCSR || m.default)(); } },
-    { opName: "ParseDateTime", displayName: "Parse DateTime", module: "Default", factory: () => { const m = require("../chef/operations/ParseDateTime"); return new (m.ParseDateTime || m.default)(); } },
-    { opName: "ParseEthernetFrame", displayName: "Parse Ethernet frame", module: "Default", factory: () => { const m = require("../chef/operations/ParseEthernetFrame"); return new (m.ParseEthernetFrame || m.default)(); } },
-    { opName: "ParseIPRange", displayName: "Parse IP range", module: "Default", factory: () => { const m = require("../chef/operations/ParseIPRange"); return new (m.ParseIPRange || m.default)(); } },
-    { opName: "ParseIPv4Header", displayName: "Parse IPv4 header", module: "Default", factory: () => { const m = require("../chef/operations/ParseIPv4Header"); return new (m.ParseIPv4Header || m.default)(); } },
-    { opName: "ParseIPv6Address", displayName: "Parse IPv6 address", module: "Default", factory: () => { const m = require("../chef/operations/ParseIPv6Address"); return new (m.ParseIPv6Address || m.default)(); } },
-    { opName: "ParseObjectIDTimestamp", displayName: "Parse ObjectID timestamp", module: "Serialise", factory: () => { const m = require("../chef/operations/ParseObjectIDTimestamp"); return new (m.ParseObjectIDTimestamp || m.default)(); } },
-    { opName: "ParseSSHHostKey", displayName: "Parse SSH Host Key", module: "Default", factory: () => { const m = require("../chef/operations/ParseSSHHostKey"); return new (m.ParseSSHHostKey || m.default)(); } },
-    { opName: "ParseTCP", displayName: "Parse TCP", module: "Default", factory: () => { const m = require("../chef/operations/ParseTCP"); return new (m.ParseTCP || m.default)(); } },
-    { opName: "ParseTLSRecord", displayName: "Parse TLS record", module: "Default", factory: () => { const m = require("../chef/operations/ParseTLSRecord"); return new (m.ParseTLSRecord || m.default)(); } },
-    { opName: "ParseTLV", displayName: "Parse TLV", module: "Default", factory: () => { const m = require("../chef/operations/ParseTLV"); return new (m.ParseTLV || m.default)(); } },
-    { opName: "ParseUDP", displayName: "Parse UDP", module: "Default", factory: () => { const m = require("../chef/operations/ParseUDP"); return new (m.ParseUDP || m.default)(); } },
-    { opName: "ParseUNIXFilePermissions", displayName: "Parse UNIX file permissions", module: "Default", factory: () => { const m = require("../chef/operations/ParseUNIXFilePermissions"); return new (m.ParseUNIXFilePermissions || m.default)(); } },
-    { opName: "ParseURI", displayName: "Parse URI", module: "URL", factory: () => { const m = require("../chef/operations/ParseURI"); return new (m.ParseURI || m.default)(); } },
-    { opName: "ParseX509CRL", displayName: "Parse X.509 CRL", module: "PublicKey", factory: () => { const m = require("../chef/operations/ParseX509CRL"); return new (m.ParseX509CRL || m.default)(); } },
-    { opName: "PEMToHex", displayName: "PEM to Hex", module: "Default", factory: () => { const m = require("../chef/operations/PEMToHex"); return new (m.PEMToHex || m.default)(); } },
-    { opName: "PEMToJWK", displayName: "PEM to JWK", module: "PublicKey", factory: () => { const m = require("../chef/operations/PEMToJWK"); return new (m.PEMToJWK || m.default)(); } },
-    { opName: "PHPDeserialize", displayName: "PHP Deserialize", module: "Default", factory: () => { const m = require("../chef/operations/PHPDeserialize"); return new (m.PHPDeserialize || m.default)(); } },
-    { opName: "PHPSerialize", displayName: "PHP Serialize", module: "Default", factory: () => { const m = require("../chef/operations/PHPSerialize"); return new (m.PHPSerialize || m.default)(); } },
-    { opName: "PlayMedia", displayName: "Play Media", module: "Default", factory: () => { const m = require("../chef/operations/PlayMedia"); return new (m.PlayMedia || m.default)(); } },
-    { opName: "PowerSet", displayName: "Power Set", module: "Default", factory: () => { const m = require("../chef/operations/PowerSet"); return new (m.PowerSet || m.default)(); } },
-    { opName: "PseudoRandomIntegerGenerator", displayName: "Pseudo-Random Integer Generator", module: "Ciphers", factory: () => { const m = require("../chef/operations/PseudoRandomIntegerGenerator"); return new (m.PseudoRandomIntegerGenerator || m.default)(); } },
-    { opName: "PseudoRandomNumberGenerator", displayName: "Pseudo-Random Number Generator", module: "Ciphers", factory: () => { const m = require("../chef/operations/PseudoRandomNumberGenerator"); return new (m.PseudoRandomNumberGenerator || m.default)(); } },
-    { opName: "PubKeyFromCert", displayName: "Public Key from Certificate", module: "PublicKey", factory: () => { const m = require("../chef/operations/PubKeyFromCert"); return new (m.PubKeyFromCert || m.default)(); } },
-    { opName: "PubKeyFromPrivKey", displayName: "Public Key from Private Key", module: "PublicKey", factory: () => { const m = require("../chef/operations/PubKeyFromPrivKey"); return new (m.PubKeyFromPrivKey || m.default)(); } },
-    { opName: "Rabbit", displayName: "Rabbit", module: "Ciphers", factory: () => { const m = require("../chef/operations/Rabbit"); return new (m.Rabbit || m.default)(); } },
-    { opName: "RailFenceCipherDecode", displayName: "Rail Fence Cipher Decode", module: "Ciphers", factory: () => { const m = require("../chef/operations/RailFenceCipherDecode"); return new (m.RailFenceCipherDecode || m.default)(); } },
-    { opName: "RailFenceCipherEncode", displayName: "Rail Fence Cipher Encode", module: "Ciphers", factory: () => { const m = require("../chef/operations/RailFenceCipherEncode"); return new (m.RailFenceCipherEncode || m.default)(); } },
-    { opName: "RAKE", displayName: "RAKE", module: "Default", factory: () => { const m = require("../chef/operations/RAKE"); return new (m.RAKE || m.default)(); } },
-    { opName: "RawDeflate", displayName: "Raw Deflate", module: "Compression", factory: () => { const m = require("../chef/operations/RawDeflate"); return new (m.RawDeflate || m.default)(); } },
-    { opName: "RawInflate", displayName: "Raw Inflate", module: "Compression", factory: () => { const m = require("../chef/operations/RawInflate"); return new (m.RawInflate || m.default)(); } },
-    { opName: "RC2Decrypt", displayName: "RC2 Decrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/RC2Decrypt"); return new (m.RC2Decrypt || m.default)(); } },
-    { opName: "RC2Encrypt", displayName: "RC2 Encrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/RC2Encrypt"); return new (m.RC2Encrypt || m.default)(); } },
-    { opName: "RC4", displayName: "RC4", module: "Ciphers", factory: () => { const m = require("../chef/operations/RC4"); return new (m.RC4 || m.default)(); } },
-    { opName: "RC4Drop", displayName: "RC4 Drop", module: "Ciphers", factory: () => { const m = require("../chef/operations/RC4Drop"); return new (m.RC4Drop || m.default)(); } },
-    { opName: "RC6Decrypt", displayName: "RC6 Decrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/RC6Decrypt"); return new (m.RC6Decrypt || m.default)(); } },
-    { opName: "RC6Encrypt", displayName: "RC6 Encrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/RC6Encrypt"); return new (m.RC6Encrypt || m.default)(); } },
-    { opName: "Register", displayName: "Register", module: "Regex", factory: () => { const m = require("../chef/operations/Register"); return new (m.Register || m.default)(); } },
-    { opName: "RegularExpression", displayName: "Regular expression", module: "Regex", factory: () => { const m = require("../chef/operations/RegularExpression"); return new (m.RegularExpression || m.default)(); } },
-    { opName: "RemoveDiacritics", displayName: "Remove Diacritics", module: "Default", factory: () => { const m = require("../chef/operations/RemoveDiacritics"); return new (m.RemoveDiacritics || m.default)(); } },
-    { opName: "RemoveEXIF", displayName: "Remove EXIF", module: "Image", factory: () => { const m = require("../chef/operations/RemoveEXIF"); return new (m.RemoveEXIF || m.default)(); } },
-    { opName: "RemoveLineNumbers", displayName: "Remove line numbers", module: "Default", factory: () => { const m = require("../chef/operations/RemoveLineNumbers"); return new (m.RemoveLineNumbers || m.default)(); } },
-    { opName: "RemoveNullBytes", displayName: "Remove null bytes", module: "Default", factory: () => { const m = require("../chef/operations/RemoveNullBytes"); return new (m.RemoveNullBytes || m.default)(); } },
-    { opName: "RemoveWhitespace", displayName: "Remove whitespace", module: "Default", factory: () => { const m = require("../chef/operations/RemoveWhitespace"); return new (m.RemoveWhitespace || m.default)(); } },
-    { opName: "RenderImage", displayName: "Render Image", module: "Image", factory: () => { const m = require("../chef/operations/RenderImage"); return new (m.RenderImage || m.default)(); } },
-    { opName: "RenderMarkdown", displayName: "Render Markdown", module: "Code", factory: () => { const m = require("../chef/operations/RenderMarkdown"); return new (m.RenderMarkdown || m.default)(); } },
-    { opName: "ResizeImage", displayName: "Resize Image", module: "Image", factory: () => { const m = require("../chef/operations/ResizeImage"); return new (m.ResizeImage || m.default)(); } },
-    { opName: "Return", displayName: "Return", module: "Default", factory: () => { const m = require("../chef/operations/Return"); return new (m.Return || m.default)(); } },
-    { opName: "Reverse", displayName: "Reverse", module: "Default", factory: () => { const m = require("../chef/operations/Reverse"); return new (m.Reverse || m.default)(); } },
-    { opName: "RisonDecode", displayName: "Rison Decode", module: "Encodings", factory: () => { const m = require("../chef/operations/RisonDecode"); return new (m.RisonDecode || m.default)(); } },
-    { opName: "RisonEncode", displayName: "Rison Encode", module: "Encodings", factory: () => { const m = require("../chef/operations/RisonEncode"); return new (m.RisonEncode || m.default)(); } },
-    { opName: "ROT13", displayName: "ROT13", module: "Default", factory: () => { const m = require("../chef/operations/ROT13"); return new (m.ROT13 || m.default)(); } },
-    { opName: "ROT13BruteForce", displayName: "ROT13 Brute Force", module: "Default", factory: () => { const m = require("../chef/operations/ROT13BruteForce"); return new (m.ROT13BruteForce || m.default)(); } },
-    { opName: "ROT47", displayName: "ROT47", module: "Default", factory: () => { const m = require("../chef/operations/ROT47"); return new (m.ROT47 || m.default)(); } },
-    { opName: "ROT47BruteForce", displayName: "ROT47 Brute Force", module: "Default", factory: () => { const m = require("../chef/operations/ROT47BruteForce"); return new (m.ROT47BruteForce || m.default)(); } },
-    { opName: "ROT8000", displayName: "ROT8000", module: "Default", factory: () => { const m = require("../chef/operations/ROT8000"); return new (m.ROT8000 || m.default)(); } },
-    { opName: "RotateImage", displayName: "Rotate Image", module: "Image", factory: () => { const m = require("../chef/operations/RotateImage"); return new (m.RotateImage || m.default)(); } },
-    { opName: "RotateLeft", displayName: "Rotate left", module: "Default", factory: () => { const m = require("../chef/operations/RotateLeft"); return new (m.RotateLeft || m.default)(); } },
-    { opName: "RotateRight", displayName: "Rotate right", module: "Default", factory: () => { const m = require("../chef/operations/RotateRight"); return new (m.RotateRight || m.default)(); } },
-    { opName: "RSADecrypt", displayName: "RSA Decrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/RSADecrypt"); return new (m.RSADecrypt || m.default)(); } },
-    { opName: "RSAEncrypt", displayName: "RSA Encrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/RSAEncrypt"); return new (m.RSAEncrypt || m.default)(); } },
-    { opName: "RSASign", displayName: "RSA Sign", module: "Ciphers", factory: () => { const m = require("../chef/operations/RSASign"); return new (m.RSASign || m.default)(); } },
-    { opName: "RSAVerify", displayName: "RSA Verify", module: "Ciphers", factory: () => { const m = require("../chef/operations/RSAVerify"); return new (m.RSAVerify || m.default)(); } },
-    { opName: "Salsa20", displayName: "Salsa20", module: "Ciphers", factory: () => { const m = require("../chef/operations/Salsa20"); return new (m.Salsa20 || m.default)(); } },
-    { opName: "ScanForEmbeddedFiles", displayName: "Scan for Embedded Files", module: "Default", factory: () => { const m = require("../chef/operations/ScanForEmbeddedFiles"); return new (m.ScanForEmbeddedFiles || m.default)(); } },
-    { opName: "ScatterChart", displayName: "Scatter chart", module: "Charts", factory: () => { const m = require("../chef/operations/ScatterChart"); return new (m.ScatterChart || m.default)(); } },
-    { opName: "Scrypt", displayName: "Scrypt", module: "Crypto", factory: () => { const m = require("../chef/operations/Scrypt"); return new (m.Scrypt || m.default)(); } },
-    { opName: "SeriesChart", displayName: "Series chart", module: "Charts", factory: () => { const m = require("../chef/operations/SeriesChart"); return new (m.SeriesChart || m.default)(); } },
-    { opName: "SetDifference", displayName: "Set Difference", module: "Default", factory: () => { const m = require("../chef/operations/SetDifference"); return new (m.SetDifference || m.default)(); } },
-    { opName: "SetIntersection", displayName: "Set Intersection", module: "Default", factory: () => { const m = require("../chef/operations/SetIntersection"); return new (m.SetIntersection || m.default)(); } },
-    { opName: "SetUnion", displayName: "Set Union", module: "Default", factory: () => { const m = require("../chef/operations/SetUnion"); return new (m.SetUnion || m.default)(); } },
-    { opName: "SHA0", displayName: "SHA0", module: "Crypto", factory: () => { const m = require("../chef/operations/SHA0"); return new (m.SHA0 || m.default)(); } },
-    { opName: "SHA1", displayName: "SHA1", module: "Crypto", factory: () => { const m = require("../chef/operations/SHA1"); return new (m.SHA1 || m.default)(); } },
-    { opName: "SHA2", displayName: "SHA2", module: "Crypto", factory: () => { const m = require("../chef/operations/SHA2"); return new (m.SHA2 || m.default)(); } },
-    { opName: "SHA3", displayName: "SHA3", module: "Crypto", factory: () => { const m = require("../chef/operations/SHA3"); return new (m.SHA3 || m.default)(); } },
-    { opName: "Shake", displayName: "Shake", module: "Crypto", factory: () => { const m = require("../chef/operations/Shake"); return new (m.Shake || m.default)(); } },
-    { opName: "SharpenImage", displayName: "Sharpen Image", module: "Image", factory: () => { const m = require("../chef/operations/SharpenImage"); return new (m.SharpenImage || m.default)(); } },
-    { opName: "ShowBase64Offsets", displayName: "Show Base64 offsets", module: "Default", factory: () => { const m = require("../chef/operations/ShowBase64Offsets"); return new (m.ShowBase64Offsets || m.default)(); } },
-    { opName: "ShowOnMap", displayName: "Show on map", module: "Hashing", factory: () => { const m = require("../chef/operations/ShowOnMap"); return new (m.ShowOnMap || m.default)(); } },
-    { opName: "Shuffle", displayName: "Shuffle", module: "Default", factory: () => { const m = require("../chef/operations/Shuffle"); return new (m.Shuffle || m.default)(); } },
-    { opName: "SIGABA", displayName: "SIGABA", module: "Bletchley", factory: () => { const m = require("../chef/operations/SIGABA"); return new (m.SIGABA || m.default)(); } },
-    { opName: "Sleep", displayName: "Sleep", module: "Default", factory: () => { const m = require("../chef/operations/Sleep"); return new (m.Sleep || m.default)(); } },
-    { opName: "SM2Decrypt", displayName: "SM2 Decrypt", module: "Crypto", factory: () => { const m = require("../chef/operations/SM2Decrypt"); return new (m.SM2Decrypt || m.default)(); } },
-    { opName: "SM2Encrypt", displayName: "SM2 Encrypt", module: "Crypto", factory: () => { const m = require("../chef/operations/SM2Encrypt"); return new (m.SM2Encrypt || m.default)(); } },
-    { opName: "SM3", displayName: "SM3", module: "Crypto", factory: () => { const m = require("../chef/operations/SM3"); return new (m.SM3 || m.default)(); } },
-    { opName: "SM4Decrypt", displayName: "SM4 Decrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/SM4Decrypt"); return new (m.SM4Decrypt || m.default)(); } },
-    { opName: "SM4Encrypt", displayName: "SM4 Encrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/SM4Encrypt"); return new (m.SM4Encrypt || m.default)(); } },
-    { opName: "Snefru", displayName: "Snefru", module: "Hashing", factory: () => { const m = require("../chef/operations/Snefru"); return new (m.Snefru || m.default)(); } },
-    { opName: "Sort", displayName: "Sort", module: "Default", factory: () => { const m = require("../chef/operations/Sort"); return new (m.Sort || m.default)(); } },
-    { opName: "Split", displayName: "Split", module: "Default", factory: () => { const m = require("../chef/operations/Split"); return new (m.Split || m.default)(); } },
-    { opName: "SplitColourChannels", displayName: "Split Colour Channels", module: "Image", factory: () => { const m = require("../chef/operations/SplitColourChannels"); return new (m.SplitColourChannels || m.default)(); } },
-    { opName: "SQLBeautify", displayName: "SQL Beautify", module: "Code", factory: () => { const m = require("../chef/operations/SQLBeautify"); return new (m.SQLBeautify || m.default)(); } },
-    { opName: "SQLMinify", displayName: "SQL Minify", module: "Code", factory: () => { const m = require("../chef/operations/SQLMinify"); return new (m.SQLMinify || m.default)(); } },
-    { opName: "SSDEEP", displayName: "SSDEEP", module: "Crypto", factory: () => { const m = require("../chef/operations/SSDEEP"); return new (m.SSDEEP || m.default)(); } },
-    { opName: "StandardDeviation", displayName: "Standard Deviation", module: "Default", factory: () => { const m = require("../chef/operations/StandardDeviation"); return new (m.StandardDeviation || m.default)(); } },
-    { opName: "Streebog", displayName: "Streebog", module: "Hashing", factory: () => { const m = require("../chef/operations/Streebog"); return new (m.Streebog || m.default)(); } },
-    { opName: "Strings", displayName: "Strings", module: "Regex", factory: () => { const m = require("../chef/operations/Strings"); return new (m.Strings || m.default)(); } },
-    { opName: "StripHTMLTags", displayName: "Strip HTML tags", module: "Default", factory: () => { const m = require("../chef/operations/StripHTMLTags"); return new (m.StripHTMLTags || m.default)(); } },
-    { opName: "StripHTTPHeaders", displayName: "Strip HTTP headers", module: "Default", factory: () => { const m = require("../chef/operations/StripHTTPHeaders"); return new (m.StripHTTPHeaders || m.default)(); } },
-    { opName: "StripIPv4Header", displayName: "Strip IPv4 header", module: "Default", factory: () => { const m = require("../chef/operations/StripIPv4Header"); return new (m.StripIPv4Header || m.default)(); } },
-    { opName: "StripTCPHeader", displayName: "Strip TCP header", module: "Default", factory: () => { const m = require("../chef/operations/StripTCPHeader"); return new (m.StripTCPHeader || m.default)(); } },
-    { opName: "StripUDPHeader", displayName: "Strip UDP header", module: "Default", factory: () => { const m = require("../chef/operations/StripUDPHeader"); return new (m.StripUDPHeader || m.default)(); } },
-    { opName: "SUB", displayName: "SUB", module: "Default", factory: () => { const m = require("../chef/operations/SUB"); return new (m.SUB || m.default)(); } },
-    { opName: "Subsection", displayName: "Subsection", module: "Default", factory: () => { const m = require("../chef/operations/Subsection"); return new (m.Subsection || m.default)(); } },
-    { opName: "Substitute", displayName: "Substitute", module: "Default", factory: () => { const m = require("../chef/operations/Substitute"); return new (m.Substitute || m.default)(); } },
-    { opName: "Subtract", displayName: "Subtract", module: "Default", factory: () => { const m = require("../chef/operations/Subtract"); return new (m.Subtract || m.default)(); } },
-    { opName: "Sum", displayName: "Sum", module: "Default", factory: () => { const m = require("../chef/operations/Sum"); return new (m.Sum || m.default)(); } },
-    { opName: "SwapCase", displayName: "Swap case", module: "Default", factory: () => { const m = require("../chef/operations/SwapCase"); return new (m.SwapCase || m.default)(); } },
-    { opName: "SwapEndianness", displayName: "Swap endianness", module: "Default", factory: () => { const m = require("../chef/operations/SwapEndianness"); return new (m.SwapEndianness || m.default)(); } },
-    { opName: "SymmetricDifference", displayName: "Symmetric Difference", module: "Default", factory: () => { const m = require("../chef/operations/SymmetricDifference"); return new (m.SymmetricDifference || m.default)(); } },
-    { opName: "SyntaxHighlighter", displayName: "Syntax highlighter", module: "Code", factory: () => { const m = require("../chef/operations/SyntaxHighlighter"); return new (m.SyntaxHighlighter || m.default)(); } },
-    { opName: "Tail", displayName: "Tail", module: "Default", factory: () => { const m = require("../chef/operations/Tail"); return new (m.Tail || m.default)(); } },
-    { opName: "TakeBytes", displayName: "Take bytes", module: "Default", factory: () => { const m = require("../chef/operations/TakeBytes"); return new (m.TakeBytes || m.default)(); } },
-    { opName: "TakeNthBytes", displayName: "Take nth bytes", module: "Default", factory: () => { const m = require("../chef/operations/TakeNthBytes"); return new (m.TakeNthBytes || m.default)(); } },
-    { opName: "Tar", displayName: "Tar", module: "Compression", factory: () => { const m = require("../chef/operations/Tar"); return new (m.Tar || m.default)(); } },
-    { opName: "TCPIPChecksum", displayName: "TCP/IP Checksum", module: "Crypto", factory: () => { const m = require("../chef/operations/TCPIPChecksum"); return new (m.TCPIPChecksum || m.default)(); } },
-    { opName: "Template", displayName: "Template", module: "Handlebars", factory: () => { const m = require("../chef/operations/Template"); return new (m.Template || m.default)(); } },
-    { opName: "TextEncodingBruteForce", displayName: "Text Encoding Brute Force", module: "Encodings", factory: () => { const m = require("../chef/operations/TextEncodingBruteForce"); return new (m.TextEncodingBruteForce || m.default)(); } },
-    { opName: "TextIntegerConverter", displayName: "Text-Integer Conversion", module: "Default", factory: () => { const m = require("../chef/operations/TextIntegerConverter"); return new (m.TextIntegerConverter || m.default)(); } },
-    { opName: "ToBase", displayName: "To Base", module: "Default", factory: () => { const m = require("../chef/operations/ToBase"); return new (m.ToBase || m.default)(); } },
-    { opName: "ToBase32", displayName: "To Base32", module: "Default", factory: () => { const m = require("../chef/operations/ToBase32"); return new (m.ToBase32 || m.default)(); } },
-    { opName: "ToBase45", displayName: "To Base45", module: "Default", factory: () => { const m = require("../chef/operations/ToBase45"); return new (m.ToBase45 || m.default)(); } },
-    { opName: "ToBase58", displayName: "To Base58", module: "Default", factory: () => { const m = require("../chef/operations/ToBase58"); return new (m.ToBase58 || m.default)(); } },
-    { opName: "ToBase62", displayName: "To Base62", module: "Default", factory: () => { const m = require("../chef/operations/ToBase62"); return new (m.ToBase62 || m.default)(); } },
-    { opName: "ToBase64", displayName: "To Base64", module: "Default", factory: () => { const m = require("../chef/operations/ToBase64"); return new (m.ToBase64 || m.default)(); } },
-    { opName: "ToBase85", displayName: "To Base85", module: "Default", factory: () => { const m = require("../chef/operations/ToBase85"); return new (m.ToBase85 || m.default)(); } },
-    { opName: "ToBase92", displayName: "To Base92", module: "Default", factory: () => { const m = require("../chef/operations/ToBase92"); return new (m.ToBase92 || m.default)(); } },
-    { opName: "ToBCD", displayName: "To BCD", module: "Default", factory: () => { const m = require("../chef/operations/ToBCD"); return new (m.ToBCD || m.default)(); } },
-    { opName: "ToBech32", displayName: "To Bech32", module: "Default", factory: () => { const m = require("../chef/operations/ToBech32"); return new (m.ToBech32 || m.default)(); } },
-    { opName: "ToBinary", displayName: "To binary", module: "Default", factory: () => { const m = require("../chef/operations/ToBinary"); return new (m.ToBinary || m.default)(); } },
-    { opName: "ToBraille", displayName: "To Braille", module: "Default", factory: () => { const m = require("../chef/operations/ToBraille"); return new (m.ToBraille || m.default)(); } },
-    { opName: "ToCamelCase", displayName: "To camel case", module: "Default", factory: () => { const m = require("../chef/operations/ToCamelCase"); return new (m.ToCamelCase || m.default)(); } },
-    { opName: "ToCaseInsensitiveRegex", displayName: "To case insensitive regex", module: "Default", factory: () => { const m = require("../chef/operations/ToCaseInsensitiveRegex"); return new (m.ToCaseInsensitiveRegex || m.default)(); } },
-    { opName: "ToCharcode", displayName: "To charcode", module: "Default", factory: () => { const m = require("../chef/operations/ToCharcode"); return new (m.ToCharcode || m.default)(); } },
-    { opName: "ToDecimal", displayName: "To decimal", module: "Default", factory: () => { const m = require("../chef/operations/ToDecimal"); return new (m.ToDecimal || m.default)(); } },
-    { opName: "ToFloat", displayName: "To float", module: "Default", factory: () => { const m = require("../chef/operations/ToFloat"); return new (m.ToFloat || m.default)(); } },
-    { opName: "ToHex", displayName: "To hex", module: "Default", factory: () => { const m = require("../chef/operations/ToHex"); return new (m.ToHex || m.default)(); } },
-    { opName: "ToHexContent", displayName: "To hex content", module: "Default", factory: () => { const m = require("../chef/operations/ToHexContent"); return new (m.ToHexContent || m.default)(); } },
-    { opName: "ToHexdump", displayName: "To hexdump", module: "Default", factory: () => { const m = require("../chef/operations/ToHexdump"); return new (m.ToHexdump || m.default)(); } },
-    { opName: "ToHTMLEntity", displayName: "To HTML entity", module: "Default", factory: () => { const m = require("../chef/operations/ToHTMLEntity"); return new (m.ToHTMLEntity || m.default)(); } },
-    { opName: "ToKebabCase", displayName: "To kebab case", module: "Default", factory: () => { const m = require("../chef/operations/ToKebabCase"); return new (m.ToKebabCase || m.default)(); } },
-    { opName: "ToLowerCase", displayName: "To lower case", module: "Default", factory: () => { const m = require("../chef/operations/ToLowerCase"); return new (m.ToLowerCase || m.default)(); } },
-    { opName: "ToMessagePack", displayName: "To MessagePack", module: "Code", factory: () => { const m = require("../chef/operations/ToMessagePack"); return new (m.ToMessagePack || m.default)(); } },
-    { opName: "ToModhex", displayName: "To Modhex", module: "Default", factory: () => { const m = require("../chef/operations/ToModhex"); return new (m.ToModhex || m.default)(); } },
-    { opName: "ToMorseCode", displayName: "To Morse Code", module: "Default", factory: () => { const m = require("../chef/operations/ToMorseCode"); return new (m.ToMorseCode || m.default)(); } },
-    { opName: "ToOctal", displayName: "To octal", module: "Default", factory: () => { const m = require("../chef/operations/ToOctal"); return new (m.ToOctal || m.default)(); } },
-    { opName: "ToPunycode", displayName: "To Punycode", module: "Default", factory: () => { const m = require("../chef/operations/ToPunycode"); return new (m.ToPunycode || m.default)(); } },
-    { opName: "ToQuotedPrintable", displayName: "To quoted-printable", module: "Default", factory: () => { const m = require("../chef/operations/ToQuotedPrintable"); return new (m.ToQuotedPrintable || m.default)(); } },
-    { opName: "ToRadix", displayName: "To Radix", module: "Default", factory: () => { const m = require("../chef/operations/ToRadix"); return new (m.ToRadix || m.default)(); } },
-    { opName: "ToSnakeCase", displayName: "To snake case", module: "Default", factory: () => { const m = require("../chef/operations/ToSnakeCase"); return new (m.ToSnakeCase || m.default)(); } },
-    { opName: "ToTable", displayName: "To table", module: "Default", factory: () => { const m = require("../chef/operations/ToTable"); return new (m.ToTable || m.default)(); } },
-    { opName: "ToUNIXTimestamp", displayName: "To UNIX Timestamp", module: "Default", factory: () => { const m = require("../chef/operations/ToUNIXTimestamp"); return new (m.ToUNIXTimestamp || m.default)(); } },
-    { opName: "ToUpperCase", displayName: "To upper case", module: "Default", factory: () => { const m = require("../chef/operations/ToUpperCase"); return new (m.ToUpperCase || m.default)(); } },
-    { opName: "TranslateDateTimeFormat", displayName: "Translate DateTime format", module: "Default", factory: () => { const m = require("../chef/operations/TranslateDateTimeFormat"); return new (m.TranslateDateTimeFormat || m.default)(); } },
-    { opName: "TripleDESDecrypt", displayName: "Triple DES Decrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/TripleDESDecrypt"); return new (m.TripleDESDecrypt || m.default)(); } },
-    { opName: "TripleDESEncrypt", displayName: "Triple DES Encrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/TripleDESEncrypt"); return new (m.TripleDESEncrypt || m.default)(); } },
-    { opName: "Typex", displayName: "Typex", module: "Bletchley", factory: () => { const m = require("../chef/operations/Typex"); return new (m.Typex || m.default)(); } },
-    { opName: "UnescapeString", displayName: "Unescape string", module: "Default", factory: () => { const m = require("../chef/operations/UnescapeString"); return new (m.UnescapeString || m.default)(); } },
-    { opName: "UnescapeUnicodeCharacters", displayName: "Unescape Unicode Characters", module: "Default", factory: () => { const m = require("../chef/operations/UnescapeUnicodeCharacters"); return new (m.UnescapeUnicodeCharacters || m.default)(); } },
-    { opName: "UnicodeTextFormat", displayName: "Unicode Text Format", module: "Default", factory: () => { const m = require("../chef/operations/UnicodeTextFormat"); return new (m.UnicodeTextFormat || m.default)(); } },
-    { opName: "Unique", displayName: "Unique", module: "Default", factory: () => { const m = require("../chef/operations/Unique"); return new (m.Unique || m.default)(); } },
-    { opName: "UNIXTimestampToWindowsFiletime", displayName: "UNIX Timestamp to Windows Filetime", module: "Default", factory: () => { const m = require("../chef/operations/UNIXTimestampToWindowsFiletime"); return new (m.UNIXTimestampToWindowsFiletime || m.default)(); } },
-    { opName: "Untar", displayName: "Untar", module: "Compression", factory: () => { const m = require("../chef/operations/Untar"); return new (m.Untar || m.default)(); } },
-    { opName: "Unzip", displayName: "Unzip", module: "Compression", factory: () => { const m = require("../chef/operations/Unzip"); return new (m.Unzip || m.default)(); } },
-    { opName: "URLDecode", displayName: "URL decode", module: "URL", factory: () => { const m = require("../chef/operations/URLDecode"); return new (m.URLDecode || m.default)(); } },
-    { opName: "URLEncode", displayName: "URL encode", module: "URL", factory: () => { const m = require("../chef/operations/URLEncode"); return new (m.URLEncode || m.default)(); } },
-    { opName: "VarIntDecode", displayName: "VarInt Decode", module: "Default", factory: () => { const m = require("../chef/operations/VarIntDecode"); return new (m.VarIntDecode || m.default)(); } },
-    { opName: "VarIntEncode", displayName: "VarInt Encode", module: "Default", factory: () => { const m = require("../chef/operations/VarIntEncode"); return new (m.VarIntEncode || m.default)(); } },
-    { opName: "ViewBitPlane", displayName: "View Bit Plane", module: "Image", factory: () => { const m = require("../chef/operations/ViewBitPlane"); return new (m.ViewBitPlane || m.default)(); } },
-    { opName: "VigenèreDecode", displayName: "Vigenère Decode", module: "Ciphers", factory: () => { const m = require("../chef/operations/VigenèreDecode"); return new (m.VigenèreDecode || m.default)(); } },
-    { opName: "VigenèreEncode", displayName: "Vigenère Encode", module: "Ciphers", factory: () => { const m = require("../chef/operations/VigenèreEncode"); return new (m.VigenèreEncode || m.default)(); } },
-    { opName: "Whirlpool", displayName: "Whirlpool", module: "Hashing", factory: () => { const m = require("../chef/operations/Whirlpool"); return new (m.Whirlpool || m.default)(); } },
-    { opName: "WindowsFiletimeToUNIXTimestamp", displayName: "Windows Filetime to UNIX Timestamp", module: "Default", factory: () => { const m = require("../chef/operations/WindowsFiletimeToUNIXTimestamp"); return new (m.WindowsFiletimeToUNIXTimestamp || m.default)(); } },
-    { opName: "Wrap", displayName: "Wrap", module: "Default", factory: () => { const m = require("../chef/operations/Wrap"); return new (m.Wrap || m.default)(); } },
-    { opName: "XKCDRandomNumber", displayName: "XKCD Random Number", module: "Default", factory: () => { const m = require("../chef/operations/XKCDRandomNumber"); return new (m.XKCDRandomNumber || m.default)(); } },
-    { opName: "XMLBeautify", displayName: "XML Beautify", module: "Default", factory: () => { const m = require("../chef/operations/XMLBeautify"); return new (m.XMLBeautify || m.default)(); } },
-    { opName: "XMLMinify", displayName: "XML Minify", module: "Default", factory: () => { const m = require("../chef/operations/XMLMinify"); return new (m.XMLMinify || m.default)(); } },
-    { opName: "XOR", displayName: "XOR", module: "Default", factory: () => { const m = require("../chef/operations/XOR"); return new (m.XOR || m.default)(); } },
-    { opName: "XORBruteForce", displayName: "XOR brute force", module: "Default", factory: () => { const m = require("../chef/operations/XORBruteForce"); return new (m.XORBruteForce || m.default)(); } },
-    { opName: "XORChecksum", displayName: "XOR checksum", module: "Default", factory: () => { const m = require("../chef/operations/XORChecksum"); return new (m.XORChecksum || m.default)(); } },
-    { opName: "XPathExpression", displayName: "XPath expression", module: "Code", factory: () => { const m = require("../chef/operations/XPathExpression"); return new (m.XPathExpression || m.default)(); } },
-    { opName: "XSalsa20", displayName: "XSalsa20", module: "Ciphers", factory: () => { const m = require("../chef/operations/XSalsa20"); return new (m.XSalsa20 || m.default)(); } },
-    { opName: "XXTEADecrypt", displayName: "XXTEA Decrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/XXTEADecrypt"); return new (m.XXTEADecrypt || m.default)(); } },
-    { opName: "XXTEAEncrypt", displayName: "XXTEA Encrypt", module: "Ciphers", factory: () => { const m = require("../chef/operations/XXTEAEncrypt"); return new (m.XXTEAEncrypt || m.default)(); } },
-    { opName: "YAMLToJSON", displayName: "YAML to JSON", module: "Default", factory: () => { const m = require("../chef/operations/YAMLToJSON"); return new (m.YAMLToJSON || m.default)(); } },
-    { opName: "YARARules", displayName: "YARA Rules", module: "Yara", factory: () => { const m = require("../chef/operations/YARARules"); return new (m.YARARules || m.default)(); } },
-    { opName: "Zip", displayName: "Zip", module: "Compression", factory: () => { const m = require("../chef/operations/Zip"); return new (m.Zip || m.default)(); } },
-    { opName: "ZlibDeflate", displayName: "Zlib deflate", module: "Compression", factory: () => { const m = require("../chef/operations/ZlibDeflate"); return new (m.ZlibDeflate || m.default)(); } },
-    { opName: "ZlibInflate", displayName: "Zlib inflate", module: "Compression", factory: () => { const m = require("../chef/operations/ZlibInflate"); return new (m.ZlibInflate || m.default)(); } },
+  {
+    opName: "A1Z26CipherDecode",
+    displayName: "A1Z26 Cipher Decode",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/A1Z26CipherDecode");
+      return new (m.A1Z26CipherDecode || m.default)();
+    },
+  },
+  {
+    opName: "A1Z26CipherEncode",
+    displayName: "A1Z26 Cipher Encode",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/A1Z26CipherEncode");
+      return new (m.A1Z26CipherEncode || m.default)();
+    },
+  },
+  {
+    opName: "ADD",
+    displayName: "ADD",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ADD");
+      return new (m.ADD || m.default)();
+    },
+  },
+  {
+    opName: "AddLineNumbers",
+    displayName: "Add line numbers",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/AddLineNumbers");
+      return new (m.AddLineNumbers || m.default)();
+    },
+  },
+  {
+    opName: "AddTextToImage",
+    displayName: "Add Text To Image",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/AddTextToImage");
+      return new (m.AddTextToImage || m.default)();
+    },
+  },
+  {
+    opName: "Adler32Checksum",
+    displayName: "Adler-32 Checksum",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/Adler32Checksum");
+      return new (m.Adler32Checksum || m.default)();
+    },
+  },
+  {
+    opName: "AESDecrypt",
+    displayName: "AES Decrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/AESDecrypt");
+      return new (m.AESDecrypt || m.default)();
+    },
+  },
+  {
+    opName: "AESEncrypt",
+    displayName: "AES Encrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/AESEncrypt");
+      return new (m.AESEncrypt || m.default)();
+    },
+  },
+  {
+    opName: "AESKeyUnwrap",
+    displayName: "AES Key Unwrap",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/AESKeyUnwrap");
+      return new (m.AESKeyUnwrap || m.default)();
+    },
+  },
+  {
+    opName: "AESKeyWrap",
+    displayName: "AES Key Wrap",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/AESKeyWrap");
+      return new (m.AESKeyWrap || m.default)();
+    },
+  },
+  {
+    opName: "AffineCipherDecode",
+    displayName: "Affine Cipher Decode",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/AffineCipherDecode");
+      return new (m.AffineCipherDecode || m.default)();
+    },
+  },
+  {
+    opName: "AffineCipherEncode",
+    displayName: "Affine Cipher Encode",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/AffineCipherEncode");
+      return new (m.AffineCipherEncode || m.default)();
+    },
+  },
+  {
+    opName: "AlternatingCaps",
+    displayName: "Alternating Caps",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/AlternatingCaps");
+      return new (m.AlternatingCaps || m.default)();
+    },
+  },
+  {
+    opName: "AMFDecode",
+    displayName: "AMF Decode",
+    module: "Encodings",
+    factory: () => {
+      const m = require("../chef/operations/AMFDecode");
+      return new (m.AMFDecode || m.default)();
+    },
+  },
+  {
+    opName: "AMFEncode",
+    displayName: "AMF Encode",
+    module: "Encodings",
+    factory: () => {
+      const m = require("../chef/operations/AMFEncode");
+      return new (m.AMFEncode || m.default)();
+    },
+  },
+  {
+    opName: "AnalyseHash",
+    displayName: "Analyse hash",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/AnalyseHash");
+      return new (m.AnalyseHash || m.default)();
+    },
+  },
+  {
+    opName: "AnalyseUUID",
+    displayName: "Analyse UUID",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/AnalyseUUID");
+      return new (m.AnalyseUUID || m.default)();
+    },
+  },
+  {
+    opName: "AND",
+    displayName: "AND",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/AND");
+      return new (m.AND || m.default)();
+    },
+  },
+  {
+    opName: "AtbashCipher",
+    displayName: "Atbash Cipher",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/AtbashCipher");
+      return new (m.AtbashCipher || m.default)();
+    },
+  },
+  {
+    opName: "AvroToJSON",
+    displayName: "Avro to JSON",
+    module: "Serialise",
+    factory: () => {
+      const m = require("../chef/operations/AvroToJSON");
+      return new (m.AvroToJSON || m.default)();
+    },
+  },
+  {
+    opName: "BaconCipherDecode",
+    displayName: "Bacon Cipher Decode",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/BaconCipherDecode");
+      return new (m.BaconCipherDecode || m.default)();
+    },
+  },
+  {
+    opName: "BaconCipherEncode",
+    displayName: "Bacon Cipher Encode",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/BaconCipherEncode");
+      return new (m.BaconCipherEncode || m.default)();
+    },
+  },
+  {
+    opName: "Bcrypt",
+    displayName: "Bcrypt",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/Bcrypt");
+      return new (m.Bcrypt || m.default)();
+    },
+  },
+  {
+    opName: "BcryptCompare",
+    displayName: "Bcrypt compare",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/BcryptCompare");
+      return new (m.BcryptCompare || m.default)();
+    },
+  },
+  {
+    opName: "BcryptParse",
+    displayName: "Bcrypt parse",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/BcryptParse");
+      return new (m.BcryptParse || m.default)();
+    },
+  },
+  {
+    opName: "BifidCipherDecode",
+    displayName: "Bifid Cipher Decode",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/BifidCipherDecode");
+      return new (m.BifidCipherDecode || m.default)();
+    },
+  },
+  {
+    opName: "BifidCipherEncode",
+    displayName: "Bifid Cipher Encode",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/BifidCipherEncode");
+      return new (m.BifidCipherEncode || m.default)();
+    },
+  },
+  {
+    opName: "BitShiftLeft",
+    displayName: "Bit shift left",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/BitShiftLeft");
+      return new (m.BitShiftLeft || m.default)();
+    },
+  },
+  {
+    opName: "BitShiftRight",
+    displayName: "Bit shift right",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/BitShiftRight");
+      return new (m.BitShiftRight || m.default)();
+    },
+  },
+  {
+    opName: "BLAKE2b",
+    displayName: "BLAKE2b",
+    module: "Hashing",
+    factory: () => {
+      const m = require("../chef/operations/BLAKE2b");
+      return new (m.BLAKE2b || m.default)();
+    },
+  },
+  {
+    opName: "BLAKE2s",
+    displayName: "BLAKE2s",
+    module: "Hashing",
+    factory: () => {
+      const m = require("../chef/operations/BLAKE2s");
+      return new (m.BLAKE2s || m.default)();
+    },
+  },
+  {
+    opName: "BLAKE3",
+    displayName: "BLAKE3",
+    module: "Hashing",
+    factory: () => {
+      const m = require("../chef/operations/BLAKE3");
+      return new (m.BLAKE3 || m.default)();
+    },
+  },
+  {
+    opName: "BlowfishDecrypt",
+    displayName: "Blowfish Decrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/BlowfishDecrypt");
+      return new (m.BlowfishDecrypt || m.default)();
+    },
+  },
+  {
+    opName: "BlowfishEncrypt",
+    displayName: "Blowfish Encrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/BlowfishEncrypt");
+      return new (m.BlowfishEncrypt || m.default)();
+    },
+  },
+  {
+    opName: "BlurImage",
+    displayName: "Blur Image",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/BlurImage");
+      return new (m.BlurImage || m.default)();
+    },
+  },
+  {
+    opName: "Bombe",
+    displayName: "Bombe",
+    module: "Bletchley",
+    factory: () => {
+      const m = require("../chef/operations/Bombe");
+      return new (m.Bombe || m.default)();
+    },
+  },
+  {
+    opName: "BSONDeserialise",
+    displayName: "BSON deserialise",
+    module: "Serialise",
+    factory: () => {
+      const m = require("../chef/operations/BSONDeserialise");
+      return new (m.BSONDeserialise || m.default)();
+    },
+  },
+  {
+    opName: "BSONSerialise",
+    displayName: "BSON serialise",
+    module: "Serialise",
+    factory: () => {
+      const m = require("../chef/operations/BSONSerialise");
+      return new (m.BSONSerialise || m.default)();
+    },
+  },
+  {
+    opName: "CaesarBoxCipher",
+    displayName: "Caesar Box Cipher",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/CaesarBoxCipher");
+      return new (m.CaesarBoxCipher || m.default)();
+    },
+  },
+  {
+    opName: "CaretMdecode",
+    displayName: "Caret/M-decode",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/CaretMdecode");
+      return new (m.CaretMdecode || m.default)();
+    },
+  },
+  {
+    opName: "CartesianProduct",
+    displayName: "Cartesian Product",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/CartesianProduct");
+      return new (m.CartesianProduct || m.default)();
+    },
+  },
+  {
+    opName: "CBORDecode",
+    displayName: "CBOR Decode",
+    module: "Serialise",
+    factory: () => {
+      const m = require("../chef/operations/CBORDecode");
+      return new (m.CBORDecode || m.default)();
+    },
+  },
+  {
+    opName: "CBOREncode",
+    displayName: "CBOR Encode",
+    module: "Serialise",
+    factory: () => {
+      const m = require("../chef/operations/CBOREncode");
+      return new (m.CBOREncode || m.default)();
+    },
+  },
+  {
+    opName: "CetaceanCipherDecode",
+    displayName: "Cetacean Cipher Decode",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/CetaceanCipherDecode");
+      return new (m.CetaceanCipherDecode || m.default)();
+    },
+  },
+  {
+    opName: "CetaceanCipherEncode",
+    displayName: "Cetacean Cipher Encode",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/CetaceanCipherEncode");
+      return new (m.CetaceanCipherEncode || m.default)();
+    },
+  },
+  {
+    opName: "ChaCha",
+    displayName: "ChaCha",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/ChaCha");
+      return new (m.ChaCha || m.default)();
+    },
+  },
+  {
+    opName: "ChangeIPFormat",
+    displayName: "Change IP format",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ChangeIPFormat");
+      return new (m.ChangeIPFormat || m.default)();
+    },
+  },
+  {
+    opName: "ChiSquare",
+    displayName: "Chi Square",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ChiSquare");
+      return new (m.ChiSquare || m.default)();
+    },
+  },
+  {
+    opName: "CipherSaber2Decrypt",
+    displayName: "CipherSaber2 Decrypt",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/CipherSaber2Decrypt");
+      return new (m.CipherSaber2Decrypt || m.default)();
+    },
+  },
+  {
+    opName: "CipherSaber2Encrypt",
+    displayName: "CipherSaber2 Encrypt",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/CipherSaber2Encrypt");
+      return new (m.CipherSaber2Encrypt || m.default)();
+    },
+  },
+  {
+    opName: "CitrixCTX1Decode",
+    displayName: "Citrix CTX1 Decode",
+    module: "Encodings",
+    factory: () => {
+      const m = require("../chef/operations/CitrixCTX1Decode");
+      return new (m.CitrixCTX1Decode || m.default)();
+    },
+  },
+  {
+    opName: "CitrixCTX1Encode",
+    displayName: "Citrix CTX1 Encode",
+    module: "Encodings",
+    factory: () => {
+      const m = require("../chef/operations/CitrixCTX1Encode");
+      return new (m.CitrixCTX1Encode || m.default)();
+    },
+  },
+  {
+    opName: "CMAC",
+    displayName: "CMAC",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/CMAC");
+      return new (m.CMAC || m.default)();
+    },
+  },
+  {
+    opName: "Colossus",
+    displayName: "Colossus",
+    module: "Bletchley",
+    factory: () => {
+      const m = require("../chef/operations/Colossus");
+      return new (m.Colossus || m.default)();
+    },
+  },
+  {
+    opName: "Comment",
+    displayName: "Comment",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Comment");
+      return new (m.Comment || m.default)();
+    },
+  },
+  {
+    opName: "CompareCTPHHashes",
+    displayName: "Compare CTPH hashes",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/CompareCTPHHashes");
+      return new (m.CompareCTPHHashes || m.default)();
+    },
+  },
+  {
+    opName: "CompareSSDEEPHashes",
+    displayName: "Compare SSDEEP hashes",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/CompareSSDEEPHashes");
+      return new (m.CompareSSDEEPHashes || m.default)();
+    },
+  },
+  {
+    opName: "ConditionalJump",
+    displayName: "Conditional Jump",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ConditionalJump");
+      return new (m.ConditionalJump || m.default)();
+    },
+  },
+  {
+    opName: "ContainImage",
+    displayName: "Contain Image",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/ContainImage");
+      return new (m.ContainImage || m.default)();
+    },
+  },
+  {
+    opName: "ConvertArea",
+    displayName: "Convert area",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ConvertArea");
+      return new (m.ConvertArea || m.default)();
+    },
+  },
+  {
+    opName: "ConvertCoordinateFormat",
+    displayName: "Convert co-ordinate format",
+    module: "Hashing",
+    factory: () => {
+      const m = require("../chef/operations/ConvertCoordinateFormat");
+      return new (m.ConvertCoordinateFormat || m.default)();
+    },
+  },
+  {
+    opName: "ConvertDataUnits",
+    displayName: "Convert data units",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ConvertDataUnits");
+      return new (m.ConvertDataUnits || m.default)();
+    },
+  },
+  {
+    opName: "ConvertDistance",
+    displayName: "Convert distance",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ConvertDistance");
+      return new (m.ConvertDistance || m.default)();
+    },
+  },
+  {
+    opName: "ConvertImageFormat",
+    displayName: "Convert Image Format",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/ConvertImageFormat");
+      return new (m.ConvertImageFormat || m.default)();
+    },
+  },
+  {
+    opName: "ConvertLeetSpeak",
+    displayName: "Convert Leet Speak",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ConvertLeetSpeak");
+      return new (m.ConvertLeetSpeak || m.default)();
+    },
+  },
+  {
+    opName: "ConvertMass",
+    displayName: "Convert mass",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ConvertMass");
+      return new (m.ConvertMass || m.default)();
+    },
+  },
+  {
+    opName: "ConvertSpeed",
+    displayName: "Convert speed",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ConvertSpeed");
+      return new (m.ConvertSpeed || m.default)();
+    },
+  },
+  {
+    opName: "ConvertToNATOAlphabet",
+    displayName: "Convert to NATO alphabet",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ConvertToNATOAlphabet");
+      return new (m.ConvertToNATOAlphabet || m.default)();
+    },
+  },
+  {
+    opName: "CountOccurrences",
+    displayName: "Count occurrences",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/CountOccurrences");
+      return new (m.CountOccurrences || m.default)();
+    },
+  },
+  {
+    opName: "CoverImage",
+    displayName: "Cover Image",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/CoverImage");
+      return new (m.CoverImage || m.default)();
+    },
+  },
+  {
+    opName: "CRCChecksum",
+    displayName: "CRC Checksum",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/CRCChecksum");
+      return new (m.CRCChecksum || m.default)();
+    },
+  },
+  {
+    opName: "CropImage",
+    displayName: "Crop Image",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/CropImage");
+      return new (m.CropImage || m.default)();
+    },
+  },
+  {
+    opName: "CSSBeautify",
+    displayName: "CSS Beautify",
+    module: "Code",
+    factory: () => {
+      const m = require("../chef/operations/CSSBeautify");
+      return new (m.CSSBeautify || m.default)();
+    },
+  },
+  {
+    opName: "CSSMinify",
+    displayName: "CSS Minify",
+    module: "Code",
+    factory: () => {
+      const m = require("../chef/operations/CSSMinify");
+      return new (m.CSSMinify || m.default)();
+    },
+  },
+  {
+    opName: "CSVToJSON",
+    displayName: "CSV to JSON",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/CSVToJSON");
+      return new (m.CSVToJSON || m.default)();
+    },
+  },
+  {
+    opName: "CTPH",
+    displayName: "CTPH",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/CTPH");
+      return new (m.CTPH || m.default)();
+    },
+  },
+  {
+    opName: "DateTimeDelta",
+    displayName: "DateTime Delta",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/DateTimeDelta");
+      return new (m.DateTimeDelta || m.default)();
+    },
+  },
+  {
+    opName: "DechunkHTTPResponse",
+    displayName: "Dechunk HTTP response",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/DechunkHTTPResponse");
+      return new (m.DechunkHTTPResponse || m.default)();
+    },
+  },
+  {
+    opName: "DecodeNetBIOSName",
+    displayName: "Decode NetBIOS Name",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/DecodeNetBIOSName");
+      return new (m.DecodeNetBIOSName || m.default)();
+    },
+  },
+  {
+    opName: "DecodeText",
+    displayName: "Decode text",
+    module: "Encodings",
+    factory: () => {
+      const m = require("../chef/operations/DecodeText");
+      return new (m.DecodeText || m.default)();
+    },
+  },
+  {
+    opName: "DefangIPAddresses",
+    displayName: "Defang IP Addresses",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/DefangIPAddresses");
+      return new (m.DefangIPAddresses || m.default)();
+    },
+  },
+  {
+    opName: "DefangURL",
+    displayName: "Defang URL",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/DefangURL");
+      return new (m.DefangURL || m.default)();
+    },
+  },
+  {
+    opName: "DeriveEVPKey",
+    displayName: "Derive EVP key",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/DeriveEVPKey");
+      return new (m.DeriveEVPKey || m.default)();
+    },
+  },
+  {
+    opName: "DerivePBKDF2Key",
+    displayName: "Derive PBKDF2 key",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/DerivePBKDF2Key");
+      return new (m.DerivePBKDF2Key || m.default)();
+    },
+  },
+  {
+    opName: "DESDecrypt",
+    displayName: "DES Decrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/DESDecrypt");
+      return new (m.DESDecrypt || m.default)();
+    },
+  },
+  {
+    opName: "DESEncrypt",
+    displayName: "DES Encrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/DESEncrypt");
+      return new (m.DESEncrypt || m.default)();
+    },
+  },
+  {
+    opName: "DetectFileType",
+    displayName: "Detect File Type",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/DetectFileType");
+      return new (m.DetectFileType || m.default)();
+    },
+  },
+  {
+    opName: "Diff",
+    displayName: "Diff",
+    module: "Diff",
+    factory: () => {
+      const m = require("../chef/operations/Diff");
+      return new (m.Diff || m.default)();
+    },
+  },
+  {
+    opName: "DisassembleX86",
+    displayName: "Disassemble x86",
+    module: "Shellcode",
+    factory: () => {
+      const m = require("../chef/operations/DisassembleX86");
+      return new (m.DisassembleX86 || m.default)();
+    },
+  },
+  {
+    opName: "DitherImage",
+    displayName: "Dither Image",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/DitherImage");
+      return new (m.DitherImage || m.default)();
+    },
+  },
+  {
+    opName: "Divide",
+    displayName: "Divide",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Divide");
+      return new (m.Divide || m.default)();
+    },
+  },
+  {
+    opName: "DNSOverHTTPS",
+    displayName: "DNS over HTTPS",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/DNSOverHTTPS");
+      return new (m.DNSOverHTTPS || m.default)();
+    },
+  },
+  {
+    opName: "DropBytes",
+    displayName: "Drop bytes",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/DropBytes");
+      return new (m.DropBytes || m.default)();
+    },
+  },
+  {
+    opName: "DropNthBytes",
+    displayName: "Drop nth bytes",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/DropNthBytes");
+      return new (m.DropNthBytes || m.default)();
+    },
+  },
+  {
+    opName: "ECDSASign",
+    displayName: "ECDSA Sign",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/ECDSASign");
+      return new (m.ECDSASign || m.default)();
+    },
+  },
+  {
+    opName: "ECDSASignatureConversion",
+    displayName: "ECDSA Signature Conversion",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/ECDSASignatureConversion");
+      return new (m.ECDSASignatureConversion || m.default)();
+    },
+  },
+  {
+    opName: "ECDSAVerify",
+    displayName: "ECDSA Verify",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/ECDSAVerify");
+      return new (m.ECDSAVerify || m.default)();
+    },
+  },
+  {
+    opName: "ELFInfo",
+    displayName: "ELF Info",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ELFInfo");
+      return new (m.ELFInfo || m.default)();
+    },
+  },
+  {
+    opName: "EncodeNetBIOSName",
+    displayName: "Encode NetBIOS Name",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/EncodeNetBIOSName");
+      return new (m.EncodeNetBIOSName || m.default)();
+    },
+  },
+  {
+    opName: "EncodeText",
+    displayName: "Encode text",
+    module: "Encodings",
+    factory: () => {
+      const m = require("../chef/operations/EncodeText");
+      return new (m.EncodeText || m.default)();
+    },
+  },
+  {
+    opName: "Enigma",
+    displayName: "Enigma",
+    module: "Bletchley",
+    factory: () => {
+      const m = require("../chef/operations/Enigma");
+      return new (m.Enigma || m.default)();
+    },
+  },
+  {
+    opName: "Entropy",
+    displayName: "Entropy",
+    module: "Charts",
+    factory: () => {
+      const m = require("../chef/operations/Entropy");
+      return new (m.Entropy || m.default)();
+    },
+  },
+  {
+    opName: "EscapeString",
+    displayName: "Escape string",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/EscapeString");
+      return new (m.EscapeString || m.default)();
+    },
+  },
+  {
+    opName: "EscapeUnicodeCharacters",
+    displayName: "Escape Unicode Characters",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/EscapeUnicodeCharacters");
+      return new (m.EscapeUnicodeCharacters || m.default)();
+    },
+  },
+  {
+    opName: "ExpandAlphabetRange",
+    displayName: "Expand alphabet range",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ExpandAlphabetRange");
+      return new (m.ExpandAlphabetRange || m.default)();
+    },
+  },
+  {
+    opName: "ExtractAudioMetadata",
+    displayName: "Extract Audio Metadata",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ExtractAudioMetadata");
+      return new (m.ExtractAudioMetadata || m.default)();
+    },
+  },
+  {
+    opName: "ExtractDates",
+    displayName: "Extract dates",
+    module: "Regex",
+    factory: () => {
+      const m = require("../chef/operations/ExtractDates");
+      return new (m.ExtractDates || m.default)();
+    },
+  },
+  {
+    opName: "ExtractDomains",
+    displayName: "Extract domains",
+    module: "Regex",
+    factory: () => {
+      const m = require("../chef/operations/ExtractDomains");
+      return new (m.ExtractDomains || m.default)();
+    },
+  },
+  {
+    opName: "ExtractEmailAddresses",
+    displayName: "Extract email addresses",
+    module: "Regex",
+    factory: () => {
+      const m = require("../chef/operations/ExtractEmailAddresses");
+      return new (m.ExtractEmailAddresses || m.default)();
+    },
+  },
+  {
+    opName: "ExtractEXIF",
+    displayName: "Extract EXIF",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/ExtractEXIF");
+      return new (m.ExtractEXIF || m.default)();
+    },
+  },
+  {
+    opName: "ExtractFilePaths",
+    displayName: "Extract file paths",
+    module: "Regex",
+    factory: () => {
+      const m = require("../chef/operations/ExtractFilePaths");
+      return new (m.ExtractFilePaths || m.default)();
+    },
+  },
+  {
+    opName: "ExtractFiles",
+    displayName: "Extract Files",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ExtractFiles");
+      return new (m.ExtractFiles || m.default)();
+    },
+  },
+  {
+    opName: "ExtractHashes",
+    displayName: "Extract hashes",
+    module: "Regex",
+    factory: () => {
+      const m = require("../chef/operations/ExtractHashes");
+      return new (m.ExtractHashes || m.default)();
+    },
+  },
+  {
+    opName: "ExtractID3",
+    displayName: "Extract ID3",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ExtractID3");
+      return new (m.ExtractID3 || m.default)();
+    },
+  },
+  {
+    opName: "ExtractIPAddresses",
+    displayName: "Extract IP addresses",
+    module: "Regex",
+    factory: () => {
+      const m = require("../chef/operations/ExtractIPAddresses");
+      return new (m.ExtractIPAddresses || m.default)();
+    },
+  },
+  {
+    opName: "ExtractLSB",
+    displayName: "Extract LSB",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/ExtractLSB");
+      return new (m.ExtractLSB || m.default)();
+    },
+  },
+  {
+    opName: "ExtractMACAddresses",
+    displayName: "Extract MAC addresses",
+    module: "Regex",
+    factory: () => {
+      const m = require("../chef/operations/ExtractMACAddresses");
+      return new (m.ExtractMACAddresses || m.default)();
+    },
+  },
+  {
+    opName: "ExtractRGBA",
+    displayName: "Extract RGBA",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/ExtractRGBA");
+      return new (m.ExtractRGBA || m.default)();
+    },
+  },
+  {
+    opName: "ExtractURLs",
+    displayName: "Extract URLs",
+    module: "Regex",
+    factory: () => {
+      const m = require("../chef/operations/ExtractURLs");
+      return new (m.ExtractURLs || m.default)();
+    },
+  },
+  {
+    opName: "FangURL",
+    displayName: "Fang URL",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FangURL");
+      return new (m.FangURL || m.default)();
+    },
+  },
+  {
+    opName: "FileTree",
+    displayName: "File Tree",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FileTree");
+      return new (m.FileTree || m.default)();
+    },
+  },
+  {
+    opName: "Filter",
+    displayName: "Filter",
+    module: "Regex",
+    factory: () => {
+      const m = require("../chef/operations/Filter");
+      return new (m.Filter || m.default)();
+    },
+  },
+  {
+    opName: "FindReplace",
+    displayName: "Find / Replace",
+    module: "Regex",
+    factory: () => {
+      const m = require("../chef/operations/FindReplace");
+      return new (m.FindReplace || m.default)();
+    },
+  },
+  {
+    opName: "FlaskSessionDecode",
+    displayName: "Flask Session Decode",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/FlaskSessionDecode");
+      return new (m.FlaskSessionDecode || m.default)();
+    },
+  },
+  {
+    opName: "Fletcher16Checksum",
+    displayName: "Fletcher-16 Checksum",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/Fletcher16Checksum");
+      return new (m.Fletcher16Checksum || m.default)();
+    },
+  },
+  {
+    opName: "Fletcher32Checksum",
+    displayName: "Fletcher-32 Checksum",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/Fletcher32Checksum");
+      return new (m.Fletcher32Checksum || m.default)();
+    },
+  },
+  {
+    opName: "Fletcher64Checksum",
+    displayName: "Fletcher-64 Checksum",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/Fletcher64Checksum");
+      return new (m.Fletcher64Checksum || m.default)();
+    },
+  },
+  {
+    opName: "Fletcher8Checksum",
+    displayName: "Fletcher-8 Checksum",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/Fletcher8Checksum");
+      return new (m.Fletcher8Checksum || m.default)();
+    },
+  },
+  {
+    opName: "FlipImage",
+    displayName: "Flip Image",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/FlipImage");
+      return new (m.FlipImage || m.default)();
+    },
+  },
+  {
+    opName: "Fork",
+    displayName: "Fork",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Fork");
+      return new (m.Fork || m.default)();
+    },
+  },
+  {
+    opName: "FormatMACAddresses",
+    displayName: "Format MAC addresses",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FormatMACAddresses");
+      return new (m.FormatMACAddresses || m.default)();
+    },
+  },
+  {
+    opName: "FrequencyDistribution",
+    displayName: "Frequency distribution",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FrequencyDistribution");
+      return new (m.FrequencyDistribution || m.default)();
+    },
+  },
+  {
+    opName: "FromBase",
+    displayName: "From Base",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromBase");
+      return new (m.FromBase || m.default)();
+    },
+  },
+  {
+    opName: "FromBase32",
+    displayName: "From Base32",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromBase32");
+      return new (m.FromBase32 || m.default)();
+    },
+  },
+  {
+    opName: "FromBase45",
+    displayName: "From Base45",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromBase45");
+      return new (m.FromBase45 || m.default)();
+    },
+  },
+  {
+    opName: "FromBase58",
+    displayName: "From Base58",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromBase58");
+      return new (m.FromBase58 || m.default)();
+    },
+  },
+  {
+    opName: "FromBase62",
+    displayName: "From Base62",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromBase62");
+      return new (m.FromBase62 || m.default)();
+    },
+  },
+  {
+    opName: "FromBase64",
+    displayName: "From Base64",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromBase64");
+      return new (m.FromBase64 || m.default)();
+    },
+  },
+  {
+    opName: "FromBase85",
+    displayName: "From Base85",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromBase85");
+      return new (m.FromBase85 || m.default)();
+    },
+  },
+  {
+    opName: "FromBase92",
+    displayName: "From Base92",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromBase92");
+      return new (m.FromBase92 || m.default)();
+    },
+  },
+  {
+    opName: "FromBCD",
+    displayName: "From BCD",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromBCD");
+      return new (m.FromBCD || m.default)();
+    },
+  },
+  {
+    opName: "FromBech32",
+    displayName: "From Bech32",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromBech32");
+      return new (m.FromBech32 || m.default)();
+    },
+  },
+  {
+    opName: "FromBinary",
+    displayName: "From Binary",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromBinary");
+      return new (m.FromBinary || m.default)();
+    },
+  },
+  {
+    opName: "FromBraille",
+    displayName: "From Braille",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromBraille");
+      return new (m.FromBraille || m.default)();
+    },
+  },
+  {
+    opName: "FromCaseInsensitiveRegex",
+    displayName: "From Case Insensitive Regex",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromCaseInsensitiveRegex");
+      return new (m.FromCaseInsensitiveRegex || m.default)();
+    },
+  },
+  {
+    opName: "FromCharcode",
+    displayName: "From Charcode",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromCharcode");
+      return new (m.FromCharcode || m.default)();
+    },
+  },
+  {
+    opName: "FromDecimal",
+    displayName: "From Decimal",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromDecimal");
+      return new (m.FromDecimal || m.default)();
+    },
+  },
+  {
+    opName: "FromFloat",
+    displayName: "From Float",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromFloat");
+      return new (m.FromFloat || m.default)();
+    },
+  },
+  {
+    opName: "FromHex",
+    displayName: "From Hex",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromHex");
+      return new (m.FromHex || m.default)();
+    },
+  },
+  {
+    opName: "FromHexContent",
+    displayName: "From Hex Content",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromHexContent");
+      return new (m.FromHexContent || m.default)();
+    },
+  },
+  {
+    opName: "FromHexdump",
+    displayName: "From Hexdump",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromHexdump");
+      return new (m.FromHexdump || m.default)();
+    },
+  },
+  {
+    opName: "FromHTMLEntity",
+    displayName: "From HTML Entity",
+    module: "Encodings",
+    factory: () => {
+      const m = require("../chef/operations/FromHTMLEntity");
+      return new (m.FromHTMLEntity || m.default)();
+    },
+  },
+  {
+    opName: "FromMessagePack",
+    displayName: "From MessagePack",
+    module: "Code",
+    factory: () => {
+      const m = require("../chef/operations/FromMessagePack");
+      return new (m.FromMessagePack || m.default)();
+    },
+  },
+  {
+    opName: "FromModhex",
+    displayName: "From Modhex",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromModhex");
+      return new (m.FromModhex || m.default)();
+    },
+  },
+  {
+    opName: "FromMorseCode",
+    displayName: "From Morse Code",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromMorseCode");
+      return new (m.FromMorseCode || m.default)();
+    },
+  },
+  {
+    opName: "FromOctal",
+    displayName: "From Octal",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromOctal");
+      return new (m.FromOctal || m.default)();
+    },
+  },
+  {
+    opName: "FromPunycode",
+    displayName: "From Punycode",
+    module: "Encodings",
+    factory: () => {
+      const m = require("../chef/operations/FromPunycode");
+      return new (m.FromPunycode || m.default)();
+    },
+  },
+  {
+    opName: "FromQuotedPrintable",
+    displayName: "From Quoted Printable",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromQuotedPrintable");
+      return new (m.FromQuotedPrintable || m.default)();
+    },
+  },
+  {
+    opName: "FromRadix",
+    displayName: "From Radix",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromRadix");
+      return new (m.FromRadix || m.default)();
+    },
+  },
+  {
+    opName: "FromUNIXTimestamp",
+    displayName: "From UNIX Timestamp",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FromUNIXTimestamp");
+      return new (m.FromUNIXTimestamp || m.default)();
+    },
+  },
+  {
+    opName: "FuzzyMatch",
+    displayName: "Fuzzy Match",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/FuzzyMatch");
+      return new (m.FuzzyMatch || m.default)();
+    },
+  },
+  {
+    opName: "GenerateAllChecksums",
+    displayName: "Generate all checksums",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/GenerateAllChecksums");
+      return new (m.GenerateAllChecksums || m.default)();
+    },
+  },
+  {
+    opName: "GenerateDeBruijnSequence",
+    displayName: "Generate De Bruijn Sequence",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/GenerateDeBruijnSequence");
+      return new (m.GenerateDeBruijnSequence || m.default)();
+    },
+  },
+  {
+    opName: "GenerateECDSAKeyPair",
+    displayName: "Generate ECDSA Key Pair",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/GenerateECDSAKeyPair");
+      return new (m.GenerateECDSAKeyPair || m.default)();
+    },
+  },
+  {
+    opName: "GenerateImage",
+    displayName: "Generate Image",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/GenerateImage");
+      return new (m.GenerateImage || m.default)();
+    },
+  },
+  {
+    opName: "GenerateLoremIpsum",
+    displayName: "Generate Lorem Ipsum",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/GenerateLoremIpsum");
+      return new (m.GenerateLoremIpsum || m.default)();
+    },
+  },
+  {
+    opName: "GenerateRSAKeyPair",
+    displayName: "Generate RSA Key Pair",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/GenerateRSAKeyPair");
+      return new (m.GenerateRSAKeyPair || m.default)();
+    },
+  },
+  {
+    opName: "GenerateUUID",
+    displayName: "Generate UUID",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/GenerateUUID");
+      return new (m.GenerateUUID || m.default)();
+    },
+  },
+  {
+    opName: "GenericCodeBeautify",
+    displayName: "Generic Code Beautify",
+    module: "Code",
+    factory: () => {
+      const m = require("../chef/operations/GenericCodeBeautify");
+      return new (m.GenericCodeBeautify || m.default)();
+    },
+  },
+  {
+    opName: "GetAllCasings",
+    displayName: "Get All Casings",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/GetAllCasings");
+      return new (m.GetAllCasings || m.default)();
+    },
+  },
+  {
+    opName: "GetTime",
+    displayName: "Get Time",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/GetTime");
+      return new (m.GetTime || m.default)();
+    },
+  },
+  {
+    opName: "GOSTHash",
+    displayName: "GOST Hash",
+    module: "Hashing",
+    factory: () => {
+      const m = require("../chef/operations/GOSTHash");
+      return new (m.GOSTHash || m.default)();
+    },
+  },
+  {
+    opName: "GroupIPAddresses",
+    displayName: "Group IP addresses",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/GroupIPAddresses");
+      return new (m.GroupIPAddresses || m.default)();
+    },
+  },
+  {
+    opName: "Gunzip",
+    displayName: "Gunzip",
+    module: "Compression",
+    factory: () => {
+      const m = require("../chef/operations/Gunzip");
+      return new (m.Gunzip || m.default)();
+    },
+  },
+  {
+    opName: "Gzip",
+    displayName: "Gzip",
+    module: "Compression",
+    factory: () => {
+      const m = require("../chef/operations/Gzip");
+      return new (m.Gzip || m.default)();
+    },
+  },
+  {
+    opName: "HammingDistance",
+    displayName: "Hamming Distance",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/HammingDistance");
+      return new (m.HammingDistance || m.default)();
+    },
+  },
+  {
+    opName: "HaversineDistance",
+    displayName: "Haversine distance",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/HaversineDistance");
+      return new (m.HaversineDistance || m.default)();
+    },
+  },
+  {
+    opName: "Head",
+    displayName: "Head",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Head");
+      return new (m.Head || m.default)();
+    },
+  },
+  {
+    opName: "HeatmapChart",
+    displayName: "Heatmap chart",
+    module: "Charts",
+    factory: () => {
+      const m = require("../chef/operations/HeatmapChart");
+      return new (m.HeatmapChart || m.default)();
+    },
+  },
+  {
+    opName: "HexDensityChart",
+    displayName: "Hex Density chart",
+    module: "Charts",
+    factory: () => {
+      const m = require("../chef/operations/HexDensityChart");
+      return new (m.HexDensityChart || m.default)();
+    },
+  },
+  {
+    opName: "HexToObjectIdentifier",
+    displayName: "Hex to Object Identifier",
+    module: "PublicKey",
+    factory: () => {
+      const m = require("../chef/operations/HexToObjectIdentifier");
+      return new (m.HexToObjectIdentifier || m.default)();
+    },
+  },
+  {
+    opName: "HexToPEM",
+    displayName: "Hex to PEM",
+    module: "PublicKey",
+    factory: () => {
+      const m = require("../chef/operations/HexToPEM");
+      return new (m.HexToPEM || m.default)();
+    },
+  },
+  {
+    opName: "HTMLToText",
+    displayName: "HTML To Text",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/HTMLToText");
+      return new (m.HTMLToText || m.default)();
+    },
+  },
+  {
+    opName: "HTTPRequest",
+    displayName: "HTTP request",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/HTTPRequest");
+      return new (m.HTTPRequest || m.default)();
+    },
+  },
+  {
+    opName: "ImageBrightnessContrast",
+    displayName: "Image Brightness / Contrast",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/ImageBrightnessContrast");
+      return new (m.ImageBrightnessContrast || m.default)();
+    },
+  },
+  {
+    opName: "ImageFilter",
+    displayName: "Image Filter",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/ImageFilter");
+      return new (m.ImageFilter || m.default)();
+    },
+  },
+  {
+    opName: "ImageHueSaturationLightness",
+    displayName: "Image Hue/Saturation/Lightness",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/ImageHueSaturationLightness");
+      return new (m.ImageHueSaturationLightness || m.default)();
+    },
+  },
+  {
+    opName: "ImageOpacity",
+    displayName: "Image Opacity",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/ImageOpacity");
+      return new (m.ImageOpacity || m.default)();
+    },
+  },
+  {
+    opName: "IndexOfCoincidence",
+    displayName: "Index of Coincidence",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/IndexOfCoincidence");
+      return new (m.IndexOfCoincidence || m.default)();
+    },
+  },
+  {
+    opName: "InvertImage",
+    displayName: "Invert Image",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/InvertImage");
+      return new (m.InvertImage || m.default)();
+    },
+  },
+  {
+    opName: "IPv6TransitionAddresses",
+    displayName: "IPv6 Transition Addresses",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/IPv6TransitionAddresses");
+      return new (m.IPv6TransitionAddresses || m.default)();
+    },
+  },
+  {
+    opName: "JavaScriptParser",
+    displayName: "JavaScript Parser",
+    module: "Code",
+    factory: () => {
+      const m = require("../chef/operations/JavaScriptParser");
+      return new (m.JavaScriptParser || m.default)();
+    },
+  },
+  {
+    opName: "JSONBeautify",
+    displayName: "JSON Beautify",
+    module: "Code",
+    factory: () => {
+      const m = require("../chef/operations/JSONBeautify");
+      return new (m.JSONBeautify || m.default)();
+    },
+  },
+  {
+    opName: "JSONMinify",
+    displayName: "JSON Minify",
+    module: "Code",
+    factory: () => {
+      const m = require("../chef/operations/JSONMinify");
+      return new (m.JSONMinify || m.default)();
+    },
+  },
+  {
+    opName: "JSONToCSV",
+    displayName: "JSON to CSV",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/JSONToCSV");
+      return new (m.JSONToCSV || m.default)();
+    },
+  },
+  {
+    opName: "JSONtoYAML",
+    displayName: "JSON to YAML",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/JSONtoYAML");
+      return new (m.JSONtoYAML || m.default)();
+    },
+  },
+  {
+    opName: "Jump",
+    displayName: "Jump",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Jump");
+      return new (m.Jump || m.default)();
+    },
+  },
+  {
+    opName: "JWKToPem",
+    displayName: "JWK to PEM",
+    module: "PublicKey",
+    factory: () => {
+      const m = require("../chef/operations/JWKToPem");
+      return new (m.JWKToPem || m.default)();
+    },
+  },
+  {
+    opName: "JWTDecode",
+    displayName: "JWT Decode",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/JWTDecode");
+      return new (m.JWTDecode || m.default)();
+    },
+  },
+  {
+    opName: "JWTSign",
+    displayName: "JWT Sign",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/JWTSign");
+      return new (m.JWTSign || m.default)();
+    },
+  },
+  {
+    opName: "JWTVerify",
+    displayName: "JWT Verify",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/JWTVerify");
+      return new (m.JWTVerify || m.default)();
+    },
+  },
+  {
+    opName: "Keccak",
+    displayName: "Keccak",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/Keccak");
+      return new (m.Keccak || m.default)();
+    },
+  },
+  {
+    opName: "Label",
+    displayName: "Label",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Label");
+      return new (m.Label || m.default)();
+    },
+  },
+  {
+    opName: "LevenshteinDistance",
+    displayName: "Levenshtein Distance",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/LevenshteinDistance");
+      return new (m.LevenshteinDistance || m.default)();
+    },
+  },
+  {
+    opName: "LMHash",
+    displayName: "LM Hash",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/LMHash");
+      return new (m.LMHash || m.default)();
+    },
+  },
+  {
+    opName: "Lorenz",
+    displayName: "Lorenz",
+    module: "Bletchley",
+    factory: () => {
+      const m = require("../chef/operations/Lorenz");
+      return new (m.Lorenz || m.default)();
+    },
+  },
+  {
+    opName: "LS47Decrypt",
+    displayName: "LS47 Decrypt",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/LS47Decrypt");
+      return new (m.LS47Decrypt || m.default)();
+    },
+  },
+  {
+    opName: "LS47Encrypt",
+    displayName: "LS47 Encrypt",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/LS47Encrypt");
+      return new (m.LS47Encrypt || m.default)();
+    },
+  },
+  {
+    opName: "LuhnChecksum",
+    displayName: "Luhn Checksum",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/LuhnChecksum");
+      return new (m.LuhnChecksum || m.default)();
+    },
+  },
+  {
+    opName: "LZ4Compress",
+    displayName: "LZ4 Compress",
+    module: "Compression",
+    factory: () => {
+      const m = require("../chef/operations/LZ4Compress");
+      return new (m.LZ4Compress || m.default)();
+    },
+  },
+  {
+    opName: "LZ4Decompress",
+    displayName: "LZ4 Decompress",
+    module: "Compression",
+    factory: () => {
+      const m = require("../chef/operations/LZ4Decompress");
+      return new (m.LZ4Decompress || m.default)();
+    },
+  },
+  {
+    opName: "LZNT1Decompress",
+    displayName: "LZNT1 Decompress",
+    module: "Compression",
+    factory: () => {
+      const m = require("../chef/operations/LZNT1Decompress");
+      return new (m.LZNT1Decompress || m.default)();
+    },
+  },
+  {
+    opName: "LZStringCompress",
+    displayName: "LZString Compress",
+    module: "Compression",
+    factory: () => {
+      const m = require("../chef/operations/LZStringCompress");
+      return new (m.LZStringCompress || m.default)();
+    },
+  },
+  {
+    opName: "LZStringDecompress",
+    displayName: "LZString Decompress",
+    module: "Compression",
+    factory: () => {
+      const m = require("../chef/operations/LZStringDecompress");
+      return new (m.LZStringDecompress || m.default)();
+    },
+  },
+  {
+    opName: "Magic",
+    displayName: "Magic",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Magic");
+      return new (m.Magic || m.default)();
+    },
+  },
+  {
+    opName: "Mean",
+    displayName: "Mean",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Mean");
+      return new (m.Mean || m.default)();
+    },
+  },
+  {
+    opName: "Median",
+    displayName: "Median",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Median");
+      return new (m.Median || m.default)();
+    },
+  },
+  {
+    opName: "Merge",
+    displayName: "Merge",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Merge");
+      return new (m.Merge || m.default)();
+    },
+  },
+  {
+    opName: "MicrosoftScriptDecoder",
+    displayName: "Microsoft Script Decoder",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/MicrosoftScriptDecoder");
+      return new (m.MicrosoftScriptDecoder || m.default)();
+    },
+  },
+  {
+    opName: "MIMEDecoding",
+    displayName: "MIME Decoding",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/MIMEDecoding");
+      return new (m.MIMEDecoding || m.default)();
+    },
+  },
+  {
+    opName: "MultipleBombe",
+    displayName: "Multiple Bombe",
+    module: "Bletchley",
+    factory: () => {
+      const m = require("../chef/operations/MultipleBombe");
+      return new (m.MultipleBombe || m.default)();
+    },
+  },
+  {
+    opName: "Multiply",
+    displayName: "Multiply",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Multiply");
+      return new (m.Multiply || m.default)();
+    },
+  },
+  {
+    opName: "MurmurHash3",
+    displayName: "MurmurHash3",
+    module: "Hashing",
+    factory: () => {
+      const m = require("../chef/operations/MurmurHash3");
+      return new (m.MurmurHash3 || m.default)();
+    },
+  },
+  {
+    opName: "NormaliseImage",
+    displayName: "Normalise Image",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/NormaliseImage");
+      return new (m.NormaliseImage || m.default)();
+    },
+  },
+  {
+    opName: "NormaliseUnicode",
+    displayName: "Normalise Unicode",
+    module: "Encodings",
+    factory: () => {
+      const m = require("../chef/operations/NormaliseUnicode");
+      return new (m.NormaliseUnicode || m.default)();
+    },
+  },
+  {
+    opName: "NOT",
+    displayName: "NOT",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/NOT");
+      return new (m.NOT || m.default)();
+    },
+  },
+  {
+    opName: "Numberwang",
+    displayName: "Numberwang",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Numberwang");
+      return new (m.Numberwang || m.default)();
+    },
+  },
+  {
+    opName: "ObjectIdentifierToHex",
+    displayName: "Object Identifier to Hex",
+    module: "PublicKey",
+    factory: () => {
+      const m = require("../chef/operations/ObjectIdentifierToHex");
+      return new (m.ObjectIdentifierToHex || m.default)();
+    },
+  },
+  {
+    opName: "OffsetChecker",
+    displayName: "Offset checker",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/OffsetChecker");
+      return new (m.OffsetChecker || m.default)();
+    },
+  },
+  {
+    opName: "OR",
+    displayName: "OR",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/OR");
+      return new (m.OR || m.default)();
+    },
+  },
+  {
+    opName: "PLISTViewer",
+    displayName: "P-list Viewer",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/PLISTViewer");
+      return new (m.PLISTViewer || m.default)();
+    },
+  },
+  {
+    opName: "PadLines",
+    displayName: "Pad lines",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/PadLines");
+      return new (m.PadLines || m.default)();
+    },
+  },
+  {
+    opName: "ParityBit",
+    displayName: "Parity Bit",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ParityBit");
+      return new (m.ParityBit || m.default)();
+    },
+  },
+  {
+    opName: "ParseASN1HexString",
+    displayName: "Parse ASN.1 hex string",
+    module: "PublicKey",
+    factory: () => {
+      const m = require("../chef/operations/ParseASN1HexString");
+      return new (m.ParseASN1HexString || m.default)();
+    },
+  },
+  {
+    opName: "ParseColourCode",
+    displayName: "Parse colour code",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ParseColourCode");
+      return new (m.ParseColourCode || m.default)();
+    },
+  },
+  {
+    opName: "ParseCSR",
+    displayName: "Parse CSR",
+    module: "PublicKey",
+    factory: () => {
+      const m = require("../chef/operations/ParseCSR");
+      return new (m.ParseCSR || m.default)();
+    },
+  },
+  {
+    opName: "ParseDateTime",
+    displayName: "Parse DateTime",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ParseDateTime");
+      return new (m.ParseDateTime || m.default)();
+    },
+  },
+  {
+    opName: "ParseEthernetFrame",
+    displayName: "Parse Ethernet frame",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ParseEthernetFrame");
+      return new (m.ParseEthernetFrame || m.default)();
+    },
+  },
+  {
+    opName: "ParseIPRange",
+    displayName: "Parse IP range",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ParseIPRange");
+      return new (m.ParseIPRange || m.default)();
+    },
+  },
+  {
+    opName: "ParseIPv4Header",
+    displayName: "Parse IPv4 header",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ParseIPv4Header");
+      return new (m.ParseIPv4Header || m.default)();
+    },
+  },
+  {
+    opName: "ParseIPv6Address",
+    displayName: "Parse IPv6 address",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ParseIPv6Address");
+      return new (m.ParseIPv6Address || m.default)();
+    },
+  },
+  {
+    opName: "ParseObjectIDTimestamp",
+    displayName: "Parse ObjectID timestamp",
+    module: "Serialise",
+    factory: () => {
+      const m = require("../chef/operations/ParseObjectIDTimestamp");
+      return new (m.ParseObjectIDTimestamp || m.default)();
+    },
+  },
+  {
+    opName: "ParseSSHHostKey",
+    displayName: "Parse SSH Host Key",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ParseSSHHostKey");
+      return new (m.ParseSSHHostKey || m.default)();
+    },
+  },
+  {
+    opName: "ParseTCP",
+    displayName: "Parse TCP",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ParseTCP");
+      return new (m.ParseTCP || m.default)();
+    },
+  },
+  {
+    opName: "ParseTLSRecord",
+    displayName: "Parse TLS record",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ParseTLSRecord");
+      return new (m.ParseTLSRecord || m.default)();
+    },
+  },
+  {
+    opName: "ParseTLV",
+    displayName: "Parse TLV",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ParseTLV");
+      return new (m.ParseTLV || m.default)();
+    },
+  },
+  {
+    opName: "ParseUDP",
+    displayName: "Parse UDP",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ParseUDP");
+      return new (m.ParseUDP || m.default)();
+    },
+  },
+  {
+    opName: "ParseUNIXFilePermissions",
+    displayName: "Parse UNIX file permissions",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ParseUNIXFilePermissions");
+      return new (m.ParseUNIXFilePermissions || m.default)();
+    },
+  },
+  {
+    opName: "ParseURI",
+    displayName: "Parse URI",
+    module: "URL",
+    factory: () => {
+      const m = require("../chef/operations/ParseURI");
+      return new (m.ParseURI || m.default)();
+    },
+  },
+  {
+    opName: "ParseX509CRL",
+    displayName: "Parse X.509 CRL",
+    module: "PublicKey",
+    factory: () => {
+      const m = require("../chef/operations/ParseX509CRL");
+      return new (m.ParseX509CRL || m.default)();
+    },
+  },
+  {
+    opName: "PEMToHex",
+    displayName: "PEM to Hex",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/PEMToHex");
+      return new (m.PEMToHex || m.default)();
+    },
+  },
+  {
+    opName: "PEMToJWK",
+    displayName: "PEM to JWK",
+    module: "PublicKey",
+    factory: () => {
+      const m = require("../chef/operations/PEMToJWK");
+      return new (m.PEMToJWK || m.default)();
+    },
+  },
+  {
+    opName: "PHPDeserialize",
+    displayName: "PHP Deserialize",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/PHPDeserialize");
+      return new (m.PHPDeserialize || m.default)();
+    },
+  },
+  {
+    opName: "PHPSerialize",
+    displayName: "PHP Serialize",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/PHPSerialize");
+      return new (m.PHPSerialize || m.default)();
+    },
+  },
+  {
+    opName: "PlayMedia",
+    displayName: "Play Media",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/PlayMedia");
+      return new (m.PlayMedia || m.default)();
+    },
+  },
+  {
+    opName: "PowerSet",
+    displayName: "Power Set",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/PowerSet");
+      return new (m.PowerSet || m.default)();
+    },
+  },
+  {
+    opName: "PseudoRandomIntegerGenerator",
+    displayName: "Pseudo-Random Integer Generator",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/PseudoRandomIntegerGenerator");
+      return new (m.PseudoRandomIntegerGenerator || m.default)();
+    },
+  },
+  {
+    opName: "PseudoRandomNumberGenerator",
+    displayName: "Pseudo-Random Number Generator",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/PseudoRandomNumberGenerator");
+      return new (m.PseudoRandomNumberGenerator || m.default)();
+    },
+  },
+  {
+    opName: "PubKeyFromCert",
+    displayName: "Public Key from Certificate",
+    module: "PublicKey",
+    factory: () => {
+      const m = require("../chef/operations/PubKeyFromCert");
+      return new (m.PubKeyFromCert || m.default)();
+    },
+  },
+  {
+    opName: "PubKeyFromPrivKey",
+    displayName: "Public Key from Private Key",
+    module: "PublicKey",
+    factory: () => {
+      const m = require("../chef/operations/PubKeyFromPrivKey");
+      return new (m.PubKeyFromPrivKey || m.default)();
+    },
+  },
+  {
+    opName: "Rabbit",
+    displayName: "Rabbit",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/Rabbit");
+      return new (m.Rabbit || m.default)();
+    },
+  },
+  {
+    opName: "RailFenceCipherDecode",
+    displayName: "Rail Fence Cipher Decode",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/RailFenceCipherDecode");
+      return new (m.RailFenceCipherDecode || m.default)();
+    },
+  },
+  {
+    opName: "RailFenceCipherEncode",
+    displayName: "Rail Fence Cipher Encode",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/RailFenceCipherEncode");
+      return new (m.RailFenceCipherEncode || m.default)();
+    },
+  },
+  {
+    opName: "RAKE",
+    displayName: "RAKE",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/RAKE");
+      return new (m.RAKE || m.default)();
+    },
+  },
+  {
+    opName: "RawDeflate",
+    displayName: "Raw Deflate",
+    module: "Compression",
+    factory: () => {
+      const m = require("../chef/operations/RawDeflate");
+      return new (m.RawDeflate || m.default)();
+    },
+  },
+  {
+    opName: "RawInflate",
+    displayName: "Raw Inflate",
+    module: "Compression",
+    factory: () => {
+      const m = require("../chef/operations/RawInflate");
+      return new (m.RawInflate || m.default)();
+    },
+  },
+  {
+    opName: "RC2Decrypt",
+    displayName: "RC2 Decrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/RC2Decrypt");
+      return new (m.RC2Decrypt || m.default)();
+    },
+  },
+  {
+    opName: "RC2Encrypt",
+    displayName: "RC2 Encrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/RC2Encrypt");
+      return new (m.RC2Encrypt || m.default)();
+    },
+  },
+  {
+    opName: "RC4",
+    displayName: "RC4",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/RC4");
+      return new (m.RC4 || m.default)();
+    },
+  },
+  {
+    opName: "RC4Drop",
+    displayName: "RC4 Drop",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/RC4Drop");
+      return new (m.RC4Drop || m.default)();
+    },
+  },
+  {
+    opName: "RC6Decrypt",
+    displayName: "RC6 Decrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/RC6Decrypt");
+      return new (m.RC6Decrypt || m.default)();
+    },
+  },
+  {
+    opName: "RC6Encrypt",
+    displayName: "RC6 Encrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/RC6Encrypt");
+      return new (m.RC6Encrypt || m.default)();
+    },
+  },
+  {
+    opName: "Register",
+    displayName: "Register",
+    module: "Regex",
+    factory: () => {
+      const m = require("../chef/operations/Register");
+      return new (m.Register || m.default)();
+    },
+  },
+  {
+    opName: "RegularExpression",
+    displayName: "Regular expression",
+    module: "Regex",
+    factory: () => {
+      const m = require("../chef/operations/RegularExpression");
+      return new (m.RegularExpression || m.default)();
+    },
+  },
+  {
+    opName: "RemoveDiacritics",
+    displayName: "Remove Diacritics",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/RemoveDiacritics");
+      return new (m.RemoveDiacritics || m.default)();
+    },
+  },
+  {
+    opName: "RemoveEXIF",
+    displayName: "Remove EXIF",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/RemoveEXIF");
+      return new (m.RemoveEXIF || m.default)();
+    },
+  },
+  {
+    opName: "RemoveLineNumbers",
+    displayName: "Remove line numbers",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/RemoveLineNumbers");
+      return new (m.RemoveLineNumbers || m.default)();
+    },
+  },
+  {
+    opName: "RemoveNullBytes",
+    displayName: "Remove null bytes",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/RemoveNullBytes");
+      return new (m.RemoveNullBytes || m.default)();
+    },
+  },
+  {
+    opName: "RemoveWhitespace",
+    displayName: "Remove whitespace",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/RemoveWhitespace");
+      return new (m.RemoveWhitespace || m.default)();
+    },
+  },
+  {
+    opName: "RenderImage",
+    displayName: "Render Image",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/RenderImage");
+      return new (m.RenderImage || m.default)();
+    },
+  },
+  {
+    opName: "RenderMarkdown",
+    displayName: "Render Markdown",
+    module: "Code",
+    factory: () => {
+      const m = require("../chef/operations/RenderMarkdown");
+      return new (m.RenderMarkdown || m.default)();
+    },
+  },
+  {
+    opName: "ResizeImage",
+    displayName: "Resize Image",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/ResizeImage");
+      return new (m.ResizeImage || m.default)();
+    },
+  },
+  {
+    opName: "Return",
+    displayName: "Return",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Return");
+      return new (m.Return || m.default)();
+    },
+  },
+  {
+    opName: "Reverse",
+    displayName: "Reverse",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Reverse");
+      return new (m.Reverse || m.default)();
+    },
+  },
+  {
+    opName: "RisonDecode",
+    displayName: "Rison Decode",
+    module: "Encodings",
+    factory: () => {
+      const m = require("../chef/operations/RisonDecode");
+      return new (m.RisonDecode || m.default)();
+    },
+  },
+  {
+    opName: "RisonEncode",
+    displayName: "Rison Encode",
+    module: "Encodings",
+    factory: () => {
+      const m = require("../chef/operations/RisonEncode");
+      return new (m.RisonEncode || m.default)();
+    },
+  },
+  {
+    opName: "ROT13",
+    displayName: "ROT13",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ROT13");
+      return new (m.ROT13 || m.default)();
+    },
+  },
+  {
+    opName: "ROT13BruteForce",
+    displayName: "ROT13 Brute Force",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ROT13BruteForce");
+      return new (m.ROT13BruteForce || m.default)();
+    },
+  },
+  {
+    opName: "ROT47",
+    displayName: "ROT47",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ROT47");
+      return new (m.ROT47 || m.default)();
+    },
+  },
+  {
+    opName: "ROT47BruteForce",
+    displayName: "ROT47 Brute Force",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ROT47BruteForce");
+      return new (m.ROT47BruteForce || m.default)();
+    },
+  },
+  {
+    opName: "ROT8000",
+    displayName: "ROT8000",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ROT8000");
+      return new (m.ROT8000 || m.default)();
+    },
+  },
+  {
+    opName: "RotateImage",
+    displayName: "Rotate Image",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/RotateImage");
+      return new (m.RotateImage || m.default)();
+    },
+  },
+  {
+    opName: "RotateLeft",
+    displayName: "Rotate left",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/RotateLeft");
+      return new (m.RotateLeft || m.default)();
+    },
+  },
+  {
+    opName: "RotateRight",
+    displayName: "Rotate right",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/RotateRight");
+      return new (m.RotateRight || m.default)();
+    },
+  },
+  {
+    opName: "RSADecrypt",
+    displayName: "RSA Decrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/RSADecrypt");
+      return new (m.RSADecrypt || m.default)();
+    },
+  },
+  {
+    opName: "RSAEncrypt",
+    displayName: "RSA Encrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/RSAEncrypt");
+      return new (m.RSAEncrypt || m.default)();
+    },
+  },
+  {
+    opName: "RSASign",
+    displayName: "RSA Sign",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/RSASign");
+      return new (m.RSASign || m.default)();
+    },
+  },
+  {
+    opName: "RSAVerify",
+    displayName: "RSA Verify",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/RSAVerify");
+      return new (m.RSAVerify || m.default)();
+    },
+  },
+  {
+    opName: "Salsa20",
+    displayName: "Salsa20",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/Salsa20");
+      return new (m.Salsa20 || m.default)();
+    },
+  },
+  {
+    opName: "ScanForEmbeddedFiles",
+    displayName: "Scan for Embedded Files",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ScanForEmbeddedFiles");
+      return new (m.ScanForEmbeddedFiles || m.default)();
+    },
+  },
+  {
+    opName: "ScatterChart",
+    displayName: "Scatter chart",
+    module: "Charts",
+    factory: () => {
+      const m = require("../chef/operations/ScatterChart");
+      return new (m.ScatterChart || m.default)();
+    },
+  },
+  {
+    opName: "Scrypt",
+    displayName: "Scrypt",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/Scrypt");
+      return new (m.Scrypt || m.default)();
+    },
+  },
+  {
+    opName: "SeriesChart",
+    displayName: "Series chart",
+    module: "Charts",
+    factory: () => {
+      const m = require("../chef/operations/SeriesChart");
+      return new (m.SeriesChart || m.default)();
+    },
+  },
+  {
+    opName: "SetDifference",
+    displayName: "Set Difference",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/SetDifference");
+      return new (m.SetDifference || m.default)();
+    },
+  },
+  {
+    opName: "SetIntersection",
+    displayName: "Set Intersection",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/SetIntersection");
+      return new (m.SetIntersection || m.default)();
+    },
+  },
+  {
+    opName: "SetUnion",
+    displayName: "Set Union",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/SetUnion");
+      return new (m.SetUnion || m.default)();
+    },
+  },
+  {
+    opName: "SHA0",
+    displayName: "SHA0",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/SHA0");
+      return new (m.SHA0 || m.default)();
+    },
+  },
+  {
+    opName: "SHA1",
+    displayName: "SHA1",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/SHA1");
+      return new (m.SHA1 || m.default)();
+    },
+  },
+  {
+    opName: "SHA2",
+    displayName: "SHA2",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/SHA2");
+      return new (m.SHA2 || m.default)();
+    },
+  },
+  {
+    opName: "SHA3",
+    displayName: "SHA3",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/SHA3");
+      return new (m.SHA3 || m.default)();
+    },
+  },
+  {
+    opName: "Shake",
+    displayName: "Shake",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/Shake");
+      return new (m.Shake || m.default)();
+    },
+  },
+  {
+    opName: "SharpenImage",
+    displayName: "Sharpen Image",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/SharpenImage");
+      return new (m.SharpenImage || m.default)();
+    },
+  },
+  {
+    opName: "ShowBase64Offsets",
+    displayName: "Show Base64 offsets",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ShowBase64Offsets");
+      return new (m.ShowBase64Offsets || m.default)();
+    },
+  },
+  {
+    opName: "ShowOnMap",
+    displayName: "Show on map",
+    module: "Hashing",
+    factory: () => {
+      const m = require("../chef/operations/ShowOnMap");
+      return new (m.ShowOnMap || m.default)();
+    },
+  },
+  {
+    opName: "Shuffle",
+    displayName: "Shuffle",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Shuffle");
+      return new (m.Shuffle || m.default)();
+    },
+  },
+  {
+    opName: "SIGABA",
+    displayName: "SIGABA",
+    module: "Bletchley",
+    factory: () => {
+      const m = require("../chef/operations/SIGABA");
+      return new (m.SIGABA || m.default)();
+    },
+  },
+  {
+    opName: "Sleep",
+    displayName: "Sleep",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Sleep");
+      return new (m.Sleep || m.default)();
+    },
+  },
+  {
+    opName: "SM2Decrypt",
+    displayName: "SM2 Decrypt",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/SM2Decrypt");
+      return new (m.SM2Decrypt || m.default)();
+    },
+  },
+  {
+    opName: "SM2Encrypt",
+    displayName: "SM2 Encrypt",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/SM2Encrypt");
+      return new (m.SM2Encrypt || m.default)();
+    },
+  },
+  {
+    opName: "SM3",
+    displayName: "SM3",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/SM3");
+      return new (m.SM3 || m.default)();
+    },
+  },
+  {
+    opName: "SM4Decrypt",
+    displayName: "SM4 Decrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/SM4Decrypt");
+      return new (m.SM4Decrypt || m.default)();
+    },
+  },
+  {
+    opName: "SM4Encrypt",
+    displayName: "SM4 Encrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/SM4Encrypt");
+      return new (m.SM4Encrypt || m.default)();
+    },
+  },
+  {
+    opName: "Snefru",
+    displayName: "Snefru",
+    module: "Hashing",
+    factory: () => {
+      const m = require("../chef/operations/Snefru");
+      return new (m.Snefru || m.default)();
+    },
+  },
+  {
+    opName: "Sort",
+    displayName: "Sort",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Sort");
+      return new (m.Sort || m.default)();
+    },
+  },
+  {
+    opName: "Split",
+    displayName: "Split",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Split");
+      return new (m.Split || m.default)();
+    },
+  },
+  {
+    opName: "SplitColourChannels",
+    displayName: "Split Colour Channels",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/SplitColourChannels");
+      return new (m.SplitColourChannels || m.default)();
+    },
+  },
+  {
+    opName: "SQLBeautify",
+    displayName: "SQL Beautify",
+    module: "Code",
+    factory: () => {
+      const m = require("../chef/operations/SQLBeautify");
+      return new (m.SQLBeautify || m.default)();
+    },
+  },
+  {
+    opName: "SQLMinify",
+    displayName: "SQL Minify",
+    module: "Code",
+    factory: () => {
+      const m = require("../chef/operations/SQLMinify");
+      return new (m.SQLMinify || m.default)();
+    },
+  },
+  {
+    opName: "SSDEEP",
+    displayName: "SSDEEP",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/SSDEEP");
+      return new (m.SSDEEP || m.default)();
+    },
+  },
+  {
+    opName: "StandardDeviation",
+    displayName: "Standard Deviation",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/StandardDeviation");
+      return new (m.StandardDeviation || m.default)();
+    },
+  },
+  {
+    opName: "Streebog",
+    displayName: "Streebog",
+    module: "Hashing",
+    factory: () => {
+      const m = require("../chef/operations/Streebog");
+      return new (m.Streebog || m.default)();
+    },
+  },
+  {
+    opName: "Strings",
+    displayName: "Strings",
+    module: "Regex",
+    factory: () => {
+      const m = require("../chef/operations/Strings");
+      return new (m.Strings || m.default)();
+    },
+  },
+  {
+    opName: "StripHTMLTags",
+    displayName: "Strip HTML tags",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/StripHTMLTags");
+      return new (m.StripHTMLTags || m.default)();
+    },
+  },
+  {
+    opName: "StripHTTPHeaders",
+    displayName: "Strip HTTP headers",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/StripHTTPHeaders");
+      return new (m.StripHTTPHeaders || m.default)();
+    },
+  },
+  {
+    opName: "StripIPv4Header",
+    displayName: "Strip IPv4 header",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/StripIPv4Header");
+      return new (m.StripIPv4Header || m.default)();
+    },
+  },
+  {
+    opName: "StripTCPHeader",
+    displayName: "Strip TCP header",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/StripTCPHeader");
+      return new (m.StripTCPHeader || m.default)();
+    },
+  },
+  {
+    opName: "StripUDPHeader",
+    displayName: "Strip UDP header",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/StripUDPHeader");
+      return new (m.StripUDPHeader || m.default)();
+    },
+  },
+  {
+    opName: "SUB",
+    displayName: "SUB",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/SUB");
+      return new (m.SUB || m.default)();
+    },
+  },
+  {
+    opName: "Subsection",
+    displayName: "Subsection",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Subsection");
+      return new (m.Subsection || m.default)();
+    },
+  },
+  {
+    opName: "Substitute",
+    displayName: "Substitute",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Substitute");
+      return new (m.Substitute || m.default)();
+    },
+  },
+  {
+    opName: "Subtract",
+    displayName: "Subtract",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Subtract");
+      return new (m.Subtract || m.default)();
+    },
+  },
+  {
+    opName: "Sum",
+    displayName: "Sum",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Sum");
+      return new (m.Sum || m.default)();
+    },
+  },
+  {
+    opName: "SwapCase",
+    displayName: "Swap case",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/SwapCase");
+      return new (m.SwapCase || m.default)();
+    },
+  },
+  {
+    opName: "SwapEndianness",
+    displayName: "Swap endianness",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/SwapEndianness");
+      return new (m.SwapEndianness || m.default)();
+    },
+  },
+  {
+    opName: "SymmetricDifference",
+    displayName: "Symmetric Difference",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/SymmetricDifference");
+      return new (m.SymmetricDifference || m.default)();
+    },
+  },
+  {
+    opName: "SyntaxHighlighter",
+    displayName: "Syntax highlighter",
+    module: "Code",
+    factory: () => {
+      const m = require("../chef/operations/SyntaxHighlighter");
+      return new (m.SyntaxHighlighter || m.default)();
+    },
+  },
+  {
+    opName: "Tail",
+    displayName: "Tail",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Tail");
+      return new (m.Tail || m.default)();
+    },
+  },
+  {
+    opName: "TakeBytes",
+    displayName: "Take bytes",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/TakeBytes");
+      return new (m.TakeBytes || m.default)();
+    },
+  },
+  {
+    opName: "TakeNthBytes",
+    displayName: "Take nth bytes",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/TakeNthBytes");
+      return new (m.TakeNthBytes || m.default)();
+    },
+  },
+  {
+    opName: "Tar",
+    displayName: "Tar",
+    module: "Compression",
+    factory: () => {
+      const m = require("../chef/operations/Tar");
+      return new (m.Tar || m.default)();
+    },
+  },
+  {
+    opName: "TCPIPChecksum",
+    displayName: "TCP/IP Checksum",
+    module: "Crypto",
+    factory: () => {
+      const m = require("../chef/operations/TCPIPChecksum");
+      return new (m.TCPIPChecksum || m.default)();
+    },
+  },
+  {
+    opName: "Template",
+    displayName: "Template",
+    module: "Handlebars",
+    factory: () => {
+      const m = require("../chef/operations/Template");
+      return new (m.Template || m.default)();
+    },
+  },
+  {
+    opName: "TextEncodingBruteForce",
+    displayName: "Text Encoding Brute Force",
+    module: "Encodings",
+    factory: () => {
+      const m = require("../chef/operations/TextEncodingBruteForce");
+      return new (m.TextEncodingBruteForce || m.default)();
+    },
+  },
+  {
+    opName: "TextIntegerConverter",
+    displayName: "Text-Integer Conversion",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/TextIntegerConverter");
+      return new (m.TextIntegerConverter || m.default)();
+    },
+  },
+  {
+    opName: "ToBase",
+    displayName: "To Base",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToBase");
+      return new (m.ToBase || m.default)();
+    },
+  },
+  {
+    opName: "ToBase32",
+    displayName: "To Base32",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToBase32");
+      return new (m.ToBase32 || m.default)();
+    },
+  },
+  {
+    opName: "ToBase45",
+    displayName: "To Base45",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToBase45");
+      return new (m.ToBase45 || m.default)();
+    },
+  },
+  {
+    opName: "ToBase58",
+    displayName: "To Base58",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToBase58");
+      return new (m.ToBase58 || m.default)();
+    },
+  },
+  {
+    opName: "ToBase62",
+    displayName: "To Base62",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToBase62");
+      return new (m.ToBase62 || m.default)();
+    },
+  },
+  {
+    opName: "ToBase64",
+    displayName: "To Base64",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToBase64");
+      return new (m.ToBase64 || m.default)();
+    },
+  },
+  {
+    opName: "ToBase85",
+    displayName: "To Base85",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToBase85");
+      return new (m.ToBase85 || m.default)();
+    },
+  },
+  {
+    opName: "ToBase92",
+    displayName: "To Base92",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToBase92");
+      return new (m.ToBase92 || m.default)();
+    },
+  },
+  {
+    opName: "ToBCD",
+    displayName: "To BCD",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToBCD");
+      return new (m.ToBCD || m.default)();
+    },
+  },
+  {
+    opName: "ToBech32",
+    displayName: "To Bech32",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToBech32");
+      return new (m.ToBech32 || m.default)();
+    },
+  },
+  {
+    opName: "ToBinary",
+    displayName: "To binary",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToBinary");
+      return new (m.ToBinary || m.default)();
+    },
+  },
+  {
+    opName: "ToBraille",
+    displayName: "To Braille",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToBraille");
+      return new (m.ToBraille || m.default)();
+    },
+  },
+  {
+    opName: "ToCamelCase",
+    displayName: "To camel case",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToCamelCase");
+      return new (m.ToCamelCase || m.default)();
+    },
+  },
+  {
+    opName: "ToCaseInsensitiveRegex",
+    displayName: "To case insensitive regex",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToCaseInsensitiveRegex");
+      return new (m.ToCaseInsensitiveRegex || m.default)();
+    },
+  },
+  {
+    opName: "ToCharcode",
+    displayName: "To charcode",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToCharcode");
+      return new (m.ToCharcode || m.default)();
+    },
+  },
+  {
+    opName: "ToDecimal",
+    displayName: "To decimal",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToDecimal");
+      return new (m.ToDecimal || m.default)();
+    },
+  },
+  {
+    opName: "ToFloat",
+    displayName: "To float",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToFloat");
+      return new (m.ToFloat || m.default)();
+    },
+  },
+  {
+    opName: "ToHex",
+    displayName: "To hex",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToHex");
+      return new (m.ToHex || m.default)();
+    },
+  },
+  {
+    opName: "ToHexContent",
+    displayName: "To hex content",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToHexContent");
+      return new (m.ToHexContent || m.default)();
+    },
+  },
+  {
+    opName: "ToHexdump",
+    displayName: "To hexdump",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToHexdump");
+      return new (m.ToHexdump || m.default)();
+    },
+  },
+  {
+    opName: "ToHTMLEntity",
+    displayName: "To HTML entity",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToHTMLEntity");
+      return new (m.ToHTMLEntity || m.default)();
+    },
+  },
+  {
+    opName: "ToKebabCase",
+    displayName: "To kebab case",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToKebabCase");
+      return new (m.ToKebabCase || m.default)();
+    },
+  },
+  {
+    opName: "ToLowerCase",
+    displayName: "To lower case",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToLowerCase");
+      return new (m.ToLowerCase || m.default)();
+    },
+  },
+  {
+    opName: "ToMessagePack",
+    displayName: "To MessagePack",
+    module: "Code",
+    factory: () => {
+      const m = require("../chef/operations/ToMessagePack");
+      return new (m.ToMessagePack || m.default)();
+    },
+  },
+  {
+    opName: "ToModhex",
+    displayName: "To Modhex",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToModhex");
+      return new (m.ToModhex || m.default)();
+    },
+  },
+  {
+    opName: "ToMorseCode",
+    displayName: "To Morse Code",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToMorseCode");
+      return new (m.ToMorseCode || m.default)();
+    },
+  },
+  {
+    opName: "ToOctal",
+    displayName: "To octal",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToOctal");
+      return new (m.ToOctal || m.default)();
+    },
+  },
+  {
+    opName: "ToPunycode",
+    displayName: "To Punycode",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToPunycode");
+      return new (m.ToPunycode || m.default)();
+    },
+  },
+  {
+    opName: "ToQuotedPrintable",
+    displayName: "To quoted-printable",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToQuotedPrintable");
+      return new (m.ToQuotedPrintable || m.default)();
+    },
+  },
+  {
+    opName: "ToRadix",
+    displayName: "To Radix",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToRadix");
+      return new (m.ToRadix || m.default)();
+    },
+  },
+  {
+    opName: "ToSnakeCase",
+    displayName: "To snake case",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToSnakeCase");
+      return new (m.ToSnakeCase || m.default)();
+    },
+  },
+  {
+    opName: "ToTable",
+    displayName: "To table",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToTable");
+      return new (m.ToTable || m.default)();
+    },
+  },
+  {
+    opName: "ToUNIXTimestamp",
+    displayName: "To UNIX Timestamp",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToUNIXTimestamp");
+      return new (m.ToUNIXTimestamp || m.default)();
+    },
+  },
+  {
+    opName: "ToUpperCase",
+    displayName: "To upper case",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/ToUpperCase");
+      return new (m.ToUpperCase || m.default)();
+    },
+  },
+  {
+    opName: "TranslateDateTimeFormat",
+    displayName: "Translate DateTime format",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/TranslateDateTimeFormat");
+      return new (m.TranslateDateTimeFormat || m.default)();
+    },
+  },
+  {
+    opName: "TripleDESDecrypt",
+    displayName: "Triple DES Decrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/TripleDESDecrypt");
+      return new (m.TripleDESDecrypt || m.default)();
+    },
+  },
+  {
+    opName: "TripleDESEncrypt",
+    displayName: "Triple DES Encrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/TripleDESEncrypt");
+      return new (m.TripleDESEncrypt || m.default)();
+    },
+  },
+  {
+    opName: "Typex",
+    displayName: "Typex",
+    module: "Bletchley",
+    factory: () => {
+      const m = require("../chef/operations/Typex");
+      return new (m.Typex || m.default)();
+    },
+  },
+  {
+    opName: "UnescapeString",
+    displayName: "Unescape string",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/UnescapeString");
+      return new (m.UnescapeString || m.default)();
+    },
+  },
+  {
+    opName: "UnescapeUnicodeCharacters",
+    displayName: "Unescape Unicode Characters",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/UnescapeUnicodeCharacters");
+      return new (m.UnescapeUnicodeCharacters || m.default)();
+    },
+  },
+  {
+    opName: "UnicodeTextFormat",
+    displayName: "Unicode Text Format",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/UnicodeTextFormat");
+      return new (m.UnicodeTextFormat || m.default)();
+    },
+  },
+  {
+    opName: "Unique",
+    displayName: "Unique",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Unique");
+      return new (m.Unique || m.default)();
+    },
+  },
+  {
+    opName: "UNIXTimestampToWindowsFiletime",
+    displayName: "UNIX Timestamp to Windows Filetime",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/UNIXTimestampToWindowsFiletime");
+      return new (m.UNIXTimestampToWindowsFiletime || m.default)();
+    },
+  },
+  {
+    opName: "Untar",
+    displayName: "Untar",
+    module: "Compression",
+    factory: () => {
+      const m = require("../chef/operations/Untar");
+      return new (m.Untar || m.default)();
+    },
+  },
+  {
+    opName: "Unzip",
+    displayName: "Unzip",
+    module: "Compression",
+    factory: () => {
+      const m = require("../chef/operations/Unzip");
+      return new (m.Unzip || m.default)();
+    },
+  },
+  {
+    opName: "URLDecode",
+    displayName: "URL decode",
+    module: "URL",
+    factory: () => {
+      const m = require("../chef/operations/URLDecode");
+      return new (m.URLDecode || m.default)();
+    },
+  },
+  {
+    opName: "URLEncode",
+    displayName: "URL encode",
+    module: "URL",
+    factory: () => {
+      const m = require("../chef/operations/URLEncode");
+      return new (m.URLEncode || m.default)();
+    },
+  },
+  {
+    opName: "VarIntDecode",
+    displayName: "VarInt Decode",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/VarIntDecode");
+      return new (m.VarIntDecode || m.default)();
+    },
+  },
+  {
+    opName: "VarIntEncode",
+    displayName: "VarInt Encode",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/VarIntEncode");
+      return new (m.VarIntEncode || m.default)();
+    },
+  },
+  {
+    opName: "ViewBitPlane",
+    displayName: "View Bit Plane",
+    module: "Image",
+    factory: () => {
+      const m = require("../chef/operations/ViewBitPlane");
+      return new (m.ViewBitPlane || m.default)();
+    },
+  },
+  {
+    opName: "VigenèreDecode",
+    displayName: "Vigenère Decode",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/VigenèreDecode");
+      return new (m.VigenèreDecode || m.default)();
+    },
+  },
+  {
+    opName: "VigenèreEncode",
+    displayName: "Vigenère Encode",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/VigenèreEncode");
+      return new (m.VigenèreEncode || m.default)();
+    },
+  },
+  {
+    opName: "Whirlpool",
+    displayName: "Whirlpool",
+    module: "Hashing",
+    factory: () => {
+      const m = require("../chef/operations/Whirlpool");
+      return new (m.Whirlpool || m.default)();
+    },
+  },
+  {
+    opName: "WindowsFiletimeToUNIXTimestamp",
+    displayName: "Windows Filetime to UNIX Timestamp",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/WindowsFiletimeToUNIXTimestamp");
+      return new (m.WindowsFiletimeToUNIXTimestamp || m.default)();
+    },
+  },
+  {
+    opName: "Wrap",
+    displayName: "Wrap",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/Wrap");
+      return new (m.Wrap || m.default)();
+    },
+  },
+  {
+    opName: "XKCDRandomNumber",
+    displayName: "XKCD Random Number",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/XKCDRandomNumber");
+      return new (m.XKCDRandomNumber || m.default)();
+    },
+  },
+  {
+    opName: "XMLBeautify",
+    displayName: "XML Beautify",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/XMLBeautify");
+      return new (m.XMLBeautify || m.default)();
+    },
+  },
+  {
+    opName: "XMLMinify",
+    displayName: "XML Minify",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/XMLMinify");
+      return new (m.XMLMinify || m.default)();
+    },
+  },
+  {
+    opName: "XOR",
+    displayName: "XOR",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/XOR");
+      return new (m.XOR || m.default)();
+    },
+  },
+  {
+    opName: "XORBruteForce",
+    displayName: "XOR brute force",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/XORBruteForce");
+      return new (m.XORBruteForce || m.default)();
+    },
+  },
+  {
+    opName: "XORChecksum",
+    displayName: "XOR checksum",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/XORChecksum");
+      return new (m.XORChecksum || m.default)();
+    },
+  },
+  {
+    opName: "XPathExpression",
+    displayName: "XPath expression",
+    module: "Code",
+    factory: () => {
+      const m = require("../chef/operations/XPathExpression");
+      return new (m.XPathExpression || m.default)();
+    },
+  },
+  {
+    opName: "XSalsa20",
+    displayName: "XSalsa20",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/XSalsa20");
+      return new (m.XSalsa20 || m.default)();
+    },
+  },
+  {
+    opName: "XXTEADecrypt",
+    displayName: "XXTEA Decrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/XXTEADecrypt");
+      return new (m.XXTEADecrypt || m.default)();
+    },
+  },
+  {
+    opName: "XXTEAEncrypt",
+    displayName: "XXTEA Encrypt",
+    module: "Ciphers",
+    factory: () => {
+      const m = require("../chef/operations/XXTEAEncrypt");
+      return new (m.XXTEAEncrypt || m.default)();
+    },
+  },
+  {
+    opName: "YAMLToJSON",
+    displayName: "YAML to JSON",
+    module: "Default",
+    factory: () => {
+      const m = require("../chef/operations/YAMLToJSON");
+      return new (m.YAMLToJSON || m.default)();
+    },
+  },
+  {
+    opName: "YARARules",
+    displayName: "YARA Rules",
+    module: "Yara",
+    factory: () => {
+      const m = require("../chef/operations/YARARules");
+      return new (m.YARARules || m.default)();
+    },
+  },
+  {
+    opName: "Zip",
+    displayName: "Zip",
+    module: "Compression",
+    factory: () => {
+      const m = require("../chef/operations/Zip");
+      return new (m.Zip || m.default)();
+    },
+  },
+  {
+    opName: "ZlibDeflate",
+    displayName: "Zlib deflate",
+    module: "Compression",
+    factory: () => {
+      const m = require("../chef/operations/ZlibDeflate");
+      return new (m.ZlibDeflate || m.default)();
+    },
+  },
+  {
+    opName: "ZlibInflate",
+    displayName: "Zlib inflate",
+    module: "Compression",
+    factory: () => {
+      const m = require("../chef/operations/ZlibInflate");
+      return new (m.ZlibInflate || m.default)();
+    },
+  },
 ];
 
 export default registry;
 
 export function findOp(displayName: string): OpMeta | undefined {
-    return registry.find(e => e.displayName.toLowerCase() === displayName.toLowerCase());
+  return registry.find(
+    (e) => e.displayName.toLowerCase() === displayName.toLowerCase(),
+  );
 }
 
-export function allOps(): OpMeta[] { return registry; }
+export function allOps(): OpMeta[] {
+  return registry;
+}

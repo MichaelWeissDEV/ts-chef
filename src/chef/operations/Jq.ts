@@ -19,54 +19,55 @@ import jq from "jq-web";
  * jq operation
  */
 export class Jq extends Operation {
+  /**
+   * Jq constructor
+   */
+  constructor() {
+    super();
 
-    /**
-     * Jq constructor
-     */
-    constructor() {
-        super();
+    this.name = "Jq";
+    this.module = "Jq";
+    this.description =
+      "jq is a lightweight and flexible command-line JSON processor.";
+    this.infoURL = "https://github.com/jqlang/jq";
+    this.inputType = "JSON";
+    this.outputType = "string";
+    this.args = [
+      {
+        name: "Query",
+        type: "string",
+        value: "",
+      },
+      {
+        name: "Raw",
+        type: "boolean",
+        value: false,
+      },
+    ];
+  }
 
-        this.name = "Jq";
-        this.module = "Jq";
-        this.description = "jq is a lightweight and flexible command-line JSON processor.";
-        this.infoURL = "https://github.com/jqlang/jq";
-        this.inputType = "JSON";
-        this.outputType = "string";
-        this.args = [
-            {
-                name: "Query",
-                type: "string",
-                value: ""
-            },
-            {
-                name: "Raw",
-                type: "boolean",
-                value: false
-            },
-        ];
+  /**
+   * @param {JSON} input
+   * @param {Object[]} args
+   * @returns {string}
+   */
+  run(input: any, args: any[]): any {
+    const [query, raw] = args;
+    let result;
+
+    try {
+      result = jq.json(input, query);
+    } catch (err) {
+      throw new OperationError(
+        `Invalid jq expression: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
-
-    /**
-     * @param {JSON} input
-     * @param {Object[]} args
-     * @returns {string}
-     */
-    run(input: any, args: any[]): any {
-        const [query, raw] = args;
-        let result;
-
-        try {
-            result = jq.json(input, query);
-        } catch (err) {
-            throw new OperationError(`Invalid jq expression: ${err instanceof Error ? err.message : String(err)}`);
-        }
-        if (raw && typeof result === "string") {
-            return result;
-        } else {
-            return JSON.stringify(result);
-        }
+    if (raw && typeof result === "string") {
+      return result;
+    } else {
+      return JSON.stringify(result);
     }
-
+  }
 }
 
 export default Jq;

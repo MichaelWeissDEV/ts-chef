@@ -23,43 +23,43 @@ import bcrypt from "bcryptjs";
  * @see {@link BcryptCompare}
  */
 export class BcryptParse extends Operation {
-    /**
-     * BcryptParse constructor
-     */
-    constructor() {
-        super();
+  /**
+   * BcryptParse constructor
+   */
+  constructor() {
+    super();
 
-        this.name = "Bcrypt parse";
-        this.module = "Crypto";
-        this.description =
-            "Parses a bcrypt hash to determine the number of rounds used, the salt, and the password hash.";
-        this.infoURL = "https://wikipedia.org/wiki/Bcrypt";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [];
-    }
+    this.name = "Bcrypt parse";
+    this.module = "Crypto";
+    this.description =
+      "Parses a bcrypt hash to determine the number of rounds used, the salt, and the password hash.";
+    this.infoURL = "https://wikipedia.org/wiki/Bcrypt";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [];
+  }
 
-    /**
-     * Runs the Bcrypt parse operation.
-     *
-     * @param {string} input - The bcrypt hash to parse.
-     * @param {any[]} _args - The operation arguments (none).
-     * @returns {Promise<string>} A string containing the parsed information (rounds, salt, password hash).
-     */
-    async run(input: string, _args: any[]): Promise<string> {
-        try {
-            const rounds = bcrypt.getRounds(input);
-            const salt = bcrypt.getSalt(input);
-            const hash = input.split(salt)[1];
+  /**
+   * Runs the Bcrypt parse operation.
+   *
+   * @param {string} input - The bcrypt hash to parse.
+   * @param {any[]} _args - The operation arguments (none).
+   * @returns {Promise<string>} A string containing the parsed information (rounds, salt, password hash).
+   */
+  async run(input: string, _args: any[]): Promise<string> {
+    try {
+      const rounds = bcrypt.getRounds(input);
+      const salt = bcrypt.getSalt(input);
+      const hash = input.split(salt)[1];
 
-            return `Rounds: ${rounds}
+      return `Rounds: ${rounds}
 Salt: ${salt}
 Password hash: ${hash}
 Full hash: ${input}`;
-        } catch (err: any) {
-            throw new OperationError("Error: " + err.toString());
-        }
+    } catch (err: any) {
+      throw new OperationError("Error: " + err.toString());
     }
+  }
 }
 
 export default BcryptParse;

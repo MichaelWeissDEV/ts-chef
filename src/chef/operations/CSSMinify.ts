@@ -20,30 +20,30 @@ const vkbeautify = require("vkbeautify");
  * @category Code
  */
 export class CSSMinify extends Operation {
-    name = "CSS Minify";
-    module = "Code";
-    description = "Compresses Cascading Style Sheets (CSS) code.";
-    inputType = "string";
-    outputType = "string";
-    args: ArgConfig[] = [
-        {
-            name: "Preserve comments",
-            type: "boolean",
-            value: false,
-        },
-    ];
+  name = "CSS Minify";
+  module = "Code";
+  description = "Compresses Cascading Style Sheets (CSS) code.";
+  inputType = "string";
+  outputType = "string";
+  args: ArgConfig[] = [
+    {
+      name: "Preserve comments",
+      type: "boolean",
+      value: false,
+    },
+  ];
 
-    /**
-     * Runs the CSS Minify operation.
-     *
-     * @param {string} input
-     * @param {any[]} args
-     * @returns {string}
-     */
-    run(input: string, args: any[]): string {
-        const preserveComments = args[0];
-        return vkbeautify.cssmin(input, preserveComments);
-    }
+  /**
+   * Runs the CSS Minify operation.
+   *
+   * @param {string} input
+   * @param {any[]} args
+   * @returns {string}
+   */
+  run(input: string, args: any[]): string {
+    const preserveComments = args[0];
+    return vkbeautify.cssmin(input, preserveComments);
+  }
 }
 
 export default CSSMinify;

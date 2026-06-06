@@ -20,30 +20,30 @@ const vkbeautify = require("vkbeautify");
  * @category Code
  */
 export class CSSBeautify extends Operation {
-    name = "CSS Beautify";
-    module = "Code";
-    description = "Indents and prettifies Cascading Style Sheets (CSS) code.";
-    inputType = "string";
-    outputType = "string";
-    args: ArgConfig[] = [
-        {
-            name: "Indent string",
-            type: "binaryShortString",
-            value: "\\t",
-        },
-    ];
+  name = "CSS Beautify";
+  module = "Code";
+  description = "Indents and prettifies Cascading Style Sheets (CSS) code.";
+  inputType = "string";
+  outputType = "string";
+  args: ArgConfig[] = [
+    {
+      name: "Indent string",
+      type: "binaryShortString",
+      value: "\\t",
+    },
+  ];
 
-    /**
-     * Runs the CSS Beautify operation.
-     *
-     * @param {string} input
-     * @param {any[]} args
-     * @returns {string}
-     */
-    run(input: string, args: any[]): string {
-        const indentStr = args[0];
-        return vkbeautify.css(input, indentStr);
-    }
+  /**
+   * Runs the CSS Beautify operation.
+   *
+   * @param {string} input
+   * @param {any[]} args
+   * @returns {string}
+   */
+  run(input: string, args: any[]): string {
+    const indentStr = args[0];
+    return vkbeautify.css(input, indentStr);
+  }
 }
 
 export default CSSBeautify;

@@ -19,34 +19,32 @@ import * as terser from "terser";
  * JavaScript Minify operation
  */
 export class JavaScriptMinify extends Operation {
+  /**
+   * JavaScriptMinify constructor
+   */
+  constructor() {
+    super();
 
-    /**
-     * JavaScriptMinify constructor
-     */
-    constructor() {
-        super();
+    this.name = "JavaScript Minify";
+    this.module = "Code";
+    this.description = "Compresses JavaScript code.";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [];
+  }
 
-        this.name = "JavaScript Minify";
-        this.module = "Code";
-        this.description = "Compresses JavaScript code.";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [];
+  /**
+   * @param {string} input
+   * @param {Object[]} args
+   * @returns {string}
+   */
+  async run(input: any, args: any[]): Promise<any> {
+    const result = await terser.minify(input);
+    if (result.error) {
+      throw new OperationError(`Error minifying JavaScript. (${result.error})`);
     }
-
-    /**
-     * @param {string} input
-     * @param {Object[]} args
-     * @returns {string}
-     */
-    async run(input: any, args: any[]): Promise<any> {
-        const result = await terser.minify(input);
-        if (result.error) {
-            throw new OperationError(`Error minifying JavaScript. (${result.error})`);
-        }
-        return result.code;
-    }
-
+    return result.code;
+  }
 }
 
 export default JavaScriptMinify;

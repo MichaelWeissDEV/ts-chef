@@ -5,104 +5,140 @@ import { log } from "../logger";
 import registry from "../generated/opsRegistry";
 
 export class PipelinePanel {
-    private static current: PipelinePanel | undefined;
-    private readonly panel: vscode.WebviewPanel;
+  private static current: PipelinePanel | undefined;
+  private readonly panel: vscode.WebviewPanel;
 
-    static open(context: vscode.ExtensionContext, store: PipelineStore, initial?: Pipeline): void {
-        if (PipelinePanel.current) {
-            PipelinePanel.current.panel.reveal();
-            return;
+  static open(
+    context: vscode.ExtensionContext,
+    store: PipelineStore,
+    initial?: Pipeline,
+  ): void {
+    if (PipelinePanel.current) {
+      PipelinePanel.current.panel.reveal();
+      return;
+    }
+    const panel = vscode.window.createWebviewPanel(
+      "tschef.pipelineEditor",
+      "ts-chef Pipeline Editor",
+      vscode.ViewColumn.Beside,
+      { enableScripts: true, retainContextWhenHidden: true },
+    );
+    PipelinePanel.current = new PipelinePanel(panel, store, context, initial);
+  }
+
+  private constructor(
+    panel: vscode.WebviewPanel,
+    private store: PipelineStore,
+    private context: vscode.ExtensionContext,
+    initial?: Pipeline,
+  ) {
+    this.panel = panel;
+    panel.webview.html = this.buildHtml(initial);
+    panel.onDidDispose(() => {
+      PipelinePanel.current = undefined;
+    });
+    panel.webview.onDidReceiveMessage((msg) => this.handleMessage(msg));
+  }
+
+  private handleMessage(msg: { type: string; [k: string]: unknown }): void {
+    switch (msg.type) {
+      case "run": {
+        const input = msg.input as string;
+        try {
+          let result: string;
+          if (msg.steps) {
+            result = runPipeline(input, msg.steps as PipelineStep[]);
+            log(
+              `Pipeline ran: ${(msg.steps as PipelineStep[]).length} step(s), input ${input.length} chars → ${result.length} chars`,
+            );
+          } else {
+            const steps = parsePipeline(msg.raw as string);
+            result = runPipeline(input, steps);
+            log(
+              `Pipeline ran (text): "${msg.raw}", input ${input.length} chars → ${result.length} chars`,
+            );
+          }
+          this.panel.webview.postMessage({ type: "result", value: result });
+        } catch (e) {
+          log(`Pipeline error: ${e}`);
+          this.panel.webview.postMessage({ type: "error", value: String(e) });
         }
-        const panel = vscode.window.createWebviewPanel(
-            "tschef.pipelineEditor",
-            "ts-chef Pipeline Editor",
-            vscode.ViewColumn.Beside,
-            { enableScripts: true, retainContextWhenHidden: true }
-        );
-        PipelinePanel.current = new PipelinePanel(panel, store, context, initial);
-    }
-
-    private constructor(
-        panel: vscode.WebviewPanel,
-        private store: PipelineStore,
-        private context: vscode.ExtensionContext,
-        initial?: Pipeline
-    ) {
-        this.panel = panel;
-        panel.webview.html = this.buildHtml(initial);
-        panel.onDidDispose(() => { PipelinePanel.current = undefined; });
-        panel.webview.onDidReceiveMessage(msg => this.handleMessage(msg));
-    }
-
-    private handleMessage(msg: { type: string; [k: string]: unknown }): void {
-        switch (msg.type) {
-            case "run": {
-                const input = msg.input as string;
-                try {
-                    let result: string;
-                    if (msg.steps) {
-                        result = runPipeline(input, msg.steps as PipelineStep[]);
-                        log(`Pipeline ran: ${(msg.steps as PipelineStep[]).length} step(s), input ${input.length} chars → ${result.length} chars`);
-                    } else {
-                        const steps = parsePipeline(msg.raw as string);
-                        result = runPipeline(input, steps);
-                        log(`Pipeline ran (text): "${msg.raw}", input ${input.length} chars → ${result.length} chars`);
-                    }
-                    this.panel.webview.postMessage({ type: "result", value: result });
-                } catch (e) {
-                    log(`Pipeline error: ${e}`);
-                    this.panel.webview.postMessage({ type: "error", value: String(e) });
-                }
-                break;
-            }
-            case "save": {
-                const name = (msg.name as string).trim();
-                if (!name) { vscode.window.showWarningMessage("Pipeline name required."); return; }
-                try {
-                    const steps = msg.steps
-                        ? (msg.steps as PipelineStep[])
-                        : parsePipeline(msg.raw as string);
-                    const raw = msg.raw as string || steps.map(s => s.opName).join(" | ");
-                    this.store.upsert({ name, raw, steps, description: msg.description as string | undefined });
-                    vscode.commands.executeCommand("tschef.refreshPipelines");
-                    log(`Pipeline "${name}" saved (${steps.length} step(s))`);
-                    vscode.window.showInformationMessage(`ts-chef: Pipeline "${name}" saved.`);
-                } catch (e) {
-                    vscode.window.showErrorMessage(`ts-chef parse error: ${e}`);
-                }
-                break;
-            }
-            case "getOps": {
-                const ops = registry.map(e => {
-                    const inst = e.factory();
-                    return { opName: e.opName, displayName: e.displayName, module: e.module, args: inst.args };
-                });
-                this.panel.webview.postMessage({ type: "opsList", ops });
-                break;
-            }
-            case "runSelection": {
-                const editor = vscode.window.activeTextEditor;
-                const text = editor?.document.getText(editor.selection) ?? editor?.document.getText() ?? "";
-                this.panel.webview.postMessage({ type: "inputLoaded", value: text });
-                break;
-            }
+        break;
+      }
+      case "save": {
+        const name = (msg.name as string).trim();
+        if (!name) {
+          vscode.window.showWarningMessage("Pipeline name required.");
+          return;
         }
+        try {
+          const steps = msg.steps
+            ? (msg.steps as PipelineStep[])
+            : parsePipeline(msg.raw as string);
+          const raw =
+            (msg.raw as string) || steps.map((s) => s.opName).join(" | ");
+          this.store.upsert({
+            name,
+            raw,
+            steps,
+            description: msg.description as string | undefined,
+          });
+          vscode.commands.executeCommand("tschef.refreshPipelines");
+          log(`Pipeline "${name}" saved (${steps.length} step(s))`);
+          vscode.window.showInformationMessage(
+            `ts-chef: Pipeline "${name}" saved.`,
+          );
+        } catch (e) {
+          vscode.window.showErrorMessage(`ts-chef parse error: ${e}`);
+        }
+        break;
+      }
+      case "getOps": {
+        const ops = registry.map((e) => {
+          const inst = e.factory();
+          return {
+            opName: e.opName,
+            displayName: e.displayName,
+            module: e.module,
+            args: inst.args,
+          };
+        });
+        this.panel.webview.postMessage({ type: "opsList", ops });
+        break;
+      }
+      case "runSelection": {
+        const editor = vscode.window.activeTextEditor;
+        const text =
+          editor?.document.getText(editor.selection) ??
+          editor?.document.getText() ??
+          "";
+        this.panel.webview.postMessage({ type: "inputLoaded", value: text });
+        break;
+      }
     }
+  }
 
-    private buildHtml(initial?: Pipeline): string {
-        const initialName = initial?.name ?? "";
-        const initialDesc = initial?.description ?? "";
-        const initialRaw = initial?.raw ?? "";
+  private buildHtml(initial?: Pipeline): string {
+    const initialName = initial?.name ?? "";
+    const initialDesc = initial?.description ?? "";
+    const initialRaw = initial?.raw ?? "";
 
-        // Build initial steps data: op names + stored args
-        const initialSteps = (initial?.steps ?? []).map(step => {
-            const entry = registry.find(e => e.opName === step.opName);
-            if (!entry) return null;
-            const inst = entry.factory();
-            return { opName: step.opName, displayName: entry.displayName, args: step.args, argDefs: inst.args };
-        }).filter(Boolean);
+    // Build initial steps data: op names + stored args
+    const initialSteps = (initial?.steps ?? [])
+      .map((step) => {
+        const entry = registry.find((e) => e.opName === step.opName);
+        if (!entry) return null;
+        const inst = entry.factory();
+        return {
+          opName: step.opName,
+          displayName: entry.displayName,
+          args: step.args,
+          argDefs: inst.args,
+        };
+      })
+      .filter(Boolean);
 
-        return /* html */`<!DOCTYPE html>
+    return /* html */ `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -621,13 +657,17 @@ const INITIAL_RAW   = ${JSON.stringify(initialRaw)};
 </script>
 </body>
 </html>`;
-    }
+  }
 }
 
 function escHtmlAttr(s: string): string {
-    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 function escHtml(s: string): string {
-    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }

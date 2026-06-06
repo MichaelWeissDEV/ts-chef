@@ -17,49 +17,51 @@ import { INPUT_DELIM_OPTIONS } from "../lib/Delim";
 import { OperationError } from "../errors/OperationError";
 
 export class Filter extends Operation {
-    constructor() {
-        super();
-        this.name = "Filter";
-        this.module = "Regex";
-        this.description =
-            "Splits up the input using the specified delimiter and then filters each branch based on a regular expression.";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [
-            {
-                name: "Delimiter",
-                type: "option",
-                value: INPUT_DELIM_OPTIONS,
-            },
-            {
-                name: "Regex",
-                type: "string",
-                value: "",
-            },
-            {
-                name: "Invert condition",
-                type: "boolean",
-                value: false,
-            },
-        ];
+  constructor() {
+    super();
+    this.name = "Filter";
+    this.module = "Regex";
+    this.description =
+      "Splits up the input using the specified delimiter and then filters each branch based on a regular expression.";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [
+      {
+        name: "Delimiter",
+        type: "option",
+        value: INPUT_DELIM_OPTIONS,
+      },
+      {
+        name: "Regex",
+        type: "string",
+        value: "",
+      },
+      {
+        name: "Invert condition",
+        type: "boolean",
+        value: false,
+      },
+    ];
+  }
+
+  run(input: string, args: unknown[]): string {
+    const delim = Utils.charRep(args[0] as string);
+    const reverse = args[2] as boolean;
+    let regex: RegExp;
+
+    try {
+      regex = new RegExp(args[1] as string);
+    } catch (err) {
+      throw new OperationError(
+        `Invalid regex. Details: ${(err as Error).message}`,
+      );
     }
 
-    run(input: string, args: unknown[]): string {
-        const delim = Utils.charRep(args[0] as string);
-        const reverse = args[2] as boolean;
-        let regex: RegExp;
-
-        try {
-            regex = new RegExp(args[1] as string);
-        } catch (err) {
-            throw new OperationError(`Invalid regex. Details: ${(err as Error).message}`);
-        }
-
-        return input
-            .split(delim)
-            .filter((value) => (reverse ? !regex.test(value) : regex.test(value)))
-            .join(delim);
-    }
+    return input
+      .split(delim)
+      .filter((value) => (reverse ? !regex.test(value) : regex.test(value)))
+      .join(delim);
+  }
 }
 
 export default Filter;

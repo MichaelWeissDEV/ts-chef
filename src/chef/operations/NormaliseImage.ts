@@ -21,70 +21,78 @@ import { Jimp, JimpMime } from "jimp";
  * Normalise Image operation
  */
 export class NormaliseImage extends Operation {
-    /**
-     * NormaliseImage constructor
-     */
-    constructor() {
-        super();
+  /**
+   * NormaliseImage constructor
+   */
+  constructor() {
+    super();
 
-        this.name = "Normalise Image";
-        this.module = "Image";
-        this.description = "Normalise the image colours.";
-        this.infoURL = "";
-        this.inputType = "ArrayBuffer";
-        this.outputType = "ArrayBuffer";
-        this.presentType = "html";
-        this.args = [];
+    this.name = "Normalise Image";
+    this.module = "Image";
+    this.description = "Normalise the image colours.";
+    this.infoURL = "";
+    this.inputType = "ArrayBuffer";
+    this.outputType = "ArrayBuffer";
+    this.presentType = "html";
+    this.args = [];
+  }
+
+  /**
+   * @param {ArrayBuffer} input
+   * @param {Object[]} args
+   * @returns {byteArray}
+   */
+  async run(input: any, args: any[]): Promise<any> {
+    if (!isImage(input)) {
+      throw new OperationError("Invalid file type.");
     }
 
-    /**
-     * @param {ArrayBuffer} input
-     * @param {Object[]} args
-     * @returns {byteArray}
-     */
-    async run(input: any, args: any[]): Promise<any> {
-        if (!isImage(input)) {
-            throw new OperationError("Invalid file type.");
-        }
-
-        let image;
-        try {
-            image = await Jimp.read(input);
-        } catch (err) {
-            throw new OperationError(`Error opening image file. (${err})`);
-        }
-
-        try {
-            image.normalize();
-
-            let imageBuffer;
-            if (image.mime === "image/gif") {
-                imageBuffer = await image.getBuffer(JimpMime.png);
-            } else {
-                imageBuffer = await image.getBuffer(image.mime as "image/jpeg" | "image/gif" | "image/png" | "image/tiff" | "image/bmp" | "image/x-ms-bmp");
-            }
-            return imageBuffer.buffer;
-        } catch (err) {
-            throw new OperationError(`Error normalising image. (${err})`);
-        }
+    let image;
+    try {
+      image = await Jimp.read(input);
+    } catch (err) {
+      throw new OperationError(`Error opening image file. (${err})`);
     }
 
-    /**
-     * Displays the normalised image using HTML for web apps
-     * @param {ArrayBuffer} data
-     * @returns {html}
-     */
-    present(data: ArrayBuffer) {
-        if (!data.byteLength) return "";
-        const dataArray = new Uint8Array(data);
+    try {
+      image.normalize();
 
-        const type = isImage(dataArray);
-        if (!type) {
-            throw new OperationError("Invalid file type.");
-        }
-
-        return `<img src="data:${type};base64,${toBase64(dataArray)}">`;
+      let imageBuffer;
+      if (image.mime === "image/gif") {
+        imageBuffer = await image.getBuffer(JimpMime.png);
+      } else {
+        imageBuffer = await image.getBuffer(
+          image.mime as
+            | "image/jpeg"
+            | "image/gif"
+            | "image/png"
+            | "image/tiff"
+            | "image/bmp"
+            | "image/x-ms-bmp",
+        );
+      }
+      return imageBuffer.buffer;
+    } catch (err) {
+      throw new OperationError(`Error normalising image. (${err})`);
     }
+  }
+
+  /**
+   * Displays the normalised image using HTML for web apps
+   * @param {ArrayBuffer} data
+   * @returns {html}
+   */
+  present(data: ArrayBuffer) {
+    if (!data.byteLength) return "";
+    const dataArray = new Uint8Array(data);
+
+    const type = isImage(dataArray);
+    if (!type) {
+      throw new OperationError("Invalid file type.");
+    }
+
+    return `<img src="data:${type};base64,${toBase64(dataArray)}">`;
+  }
 }
 
 export default NormaliseImage;

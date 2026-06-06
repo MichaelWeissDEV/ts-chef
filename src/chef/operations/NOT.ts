@@ -15,28 +15,28 @@ import { Operation, HighlightPos, HighlightResult } from "../Operation";
 import { bitOp, not } from "../lib/BitwiseOp";
 
 export class NOT extends Operation {
-    constructor() {
-        super();
-        this.name = "NOT";
-        this.module = "Default";
-        this.description = "Returns the inverse of each byte.";
-        this.infoURL = "https://wikipedia.org/wiki/Bitwise_operation#NOT";
-        this.inputType = "ArrayBuffer";
-        this.outputType = "byteArray";
-        this.args = [];
-    }
+  constructor() {
+    super();
+    this.name = "NOT";
+    this.module = "Default";
+    this.description = "Returns the inverse of each byte.";
+    this.infoURL = "https://wikipedia.org/wiki/Bitwise_operation#NOT";
+    this.inputType = "ArrayBuffer";
+    this.outputType = "byteArray";
+    this.args = [];
+  }
 
-    run(input: ArrayBuffer, _args: unknown[]): number[] {
-        return bitOp(Array.from(new Uint8Array(input)), null, not);
-    }
+  run(input: ArrayBuffer, _args: unknown[]): number[] {
+    return bitOp(Array.from(new Uint8Array(input)), null, not);
+  }
 
-    highlight(pos: HighlightPos, _args: unknown[]): HighlightResult {
-        return pos;
-    }
+  highlight(pos: HighlightPos, _args: unknown[]): HighlightResult {
+    return pos;
+  }
 
-    highlightReverse(pos: HighlightPos, _args: unknown[]): HighlightResult {
-        return pos;
-    }
+  highlightReverse(pos: HighlightPos, _args: unknown[]): HighlightResult {
+    return pos;
+  }
 }
 
 export default NOT;

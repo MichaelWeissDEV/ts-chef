@@ -14,26 +14,26 @@
 import { Operation } from "../Operation";
 
 export class Merge extends Operation {
-    constructor() {
-        super();
-        this.name = "Merge";
-        this.module = "Default";
-        this.description =
-            "Consolidate all branches back into a single trunk. The opposite of Fork.";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [
-            {
-                name: "Merge All",
-                type: "boolean",
-                value: true,
-            },
-        ];
-    }
+  constructor() {
+    super();
+    this.name = "Merge";
+    this.module = "Default";
+    this.description =
+      "Consolidate all branches back into a single trunk. The opposite of Fork.";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [
+      {
+        name: "Merge All",
+        type: "boolean",
+        value: true,
+      },
+    ];
+  }
 
-    run(input: string, _args: unknown[]): string {
-        return input;
-    }
+  run(input: string, _args: unknown[]): string {
+    return input;
+  }
 }
 
 export default Merge;

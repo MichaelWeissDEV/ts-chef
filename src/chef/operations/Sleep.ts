@@ -14,22 +14,22 @@
 import { Operation } from "../Operation";
 
 export class Sleep extends Operation {
-    constructor() {
-        super();
-        this.name = "Sleep";
-        this.module = "Default";
-        this.description =
-            "Sleep causes the recipe to wait for a specified number of milliseconds before continuing execution.";
-        this.inputType = "ArrayBuffer";
-        this.outputType = "ArrayBuffer";
-        this.args = [{ name: "Time (ms)", type: "number", value: 1000 }];
-    }
+  constructor() {
+    super();
+    this.name = "Sleep";
+    this.module = "Default";
+    this.description =
+      "Sleep causes the recipe to wait for a specified number of milliseconds before continuing execution.";
+    this.inputType = "ArrayBuffer";
+    this.outputType = "ArrayBuffer";
+    this.args = [{ name: "Time (ms)", type: "number", value: 1000 }];
+  }
 
-    async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
-        const ms = args[0] as number;
-        await new Promise((r) => setTimeout(r, ms));
-        return input;
-    }
+  async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
+    const ms = args[0] as number;
+    await new Promise((r) => setTimeout(r, ms));
+    return input;
+  }
 }
 
 export default Sleep;

@@ -15,23 +15,21 @@ import { createHash } from "crypto";
 import { Operation } from "../Operation";
 
 export class SHA1 extends Operation {
-    constructor() {
-        super();
-        this.name = "SHA1";
-        this.module = "Crypto";
-        this.description =
-            "The SHA (Secure Hash Algorithm) hash functions were designed by the NSA. SHA-1 is the most established of the existing SHA hash functions and is used in a variety of security applications and protocols.";
-        this.infoURL = "https://wikipedia.org/wiki/SHA-1";
-        this.inputType = "ArrayBuffer";
-        this.outputType = "string";
-        this.args = [
-            { name: "Rounds", type: "number", value: 80, min: 16 },
-        ];
-    }
+  constructor() {
+    super();
+    this.name = "SHA1";
+    this.module = "Crypto";
+    this.description =
+      "The SHA (Secure Hash Algorithm) hash functions were designed by the NSA. SHA-1 is the most established of the existing SHA hash functions and is used in a variety of security applications and protocols.";
+    this.infoURL = "https://wikipedia.org/wiki/SHA-1";
+    this.inputType = "ArrayBuffer";
+    this.outputType = "string";
+    this.args = [{ name: "Rounds", type: "number", value: 80, min: 16 }];
+  }
 
-    run(input: ArrayBuffer, _args: unknown[]): string {
-        return createHash("sha1").update(Buffer.from(input)).digest("hex");
-    }
+  run(input: ArrayBuffer, _args: unknown[]): string {
+    return createHash("sha1").update(Buffer.from(input)).digest("hex");
+  }
 }
 
 export default SHA1;

@@ -19,36 +19,35 @@ import * as BSON from "bson";
  * Parse ObjectID timestamp operation
  */
 export class ParseObjectIDTimestamp extends Operation {
+  /**
+   * ParseObjectIDTimestamp constructor
+   */
+  constructor() {
+    super();
 
-    /**
-     * ParseObjectIDTimestamp constructor
-     */
-    constructor() {
-        super();
+    this.name = "Parse ObjectID timestamp";
+    this.module = "Serialise";
+    this.description = "Parse timestamp from MongoDB/BSON ObjectID hex string.";
+    this.infoURL =
+      "https://docs.mongodb.com/manual/reference/method/ObjectId.getTimestamp/";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [];
+  }
 
-        this.name = "Parse ObjectID timestamp";
-        this.module = "Serialise";
-        this.description = "Parse timestamp from MongoDB/BSON ObjectID hex string.";
-        this.infoURL = "https://docs.mongodb.com/manual/reference/method/ObjectId.getTimestamp/";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [];
+  /**
+   * @param {string} input
+   * @param {Object[]} args
+   * @returns {string}
+   */
+  run(input: any, args: any[]): any {
+    try {
+      const objectId = new BSON.ObjectId(input);
+      return objectId.getTimestamp().toISOString();
+    } catch (err) {
+      throw new OperationError(err);
     }
-
-    /**
-     * @param {string} input
-     * @param {Object[]} args
-     * @returns {string}
-     */
-    run(input: any, args: any[]): any {
-        try {
-            const objectId = new BSON.ObjectId(input);
-            return objectId.getTimestamp().toISOString();
-        } catch (err) {
-            throw new OperationError(err);
-        }
-    }
-
+  }
 }
 
 export default ParseObjectIDTimestamp;

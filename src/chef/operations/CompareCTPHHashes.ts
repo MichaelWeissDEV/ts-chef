@@ -18,26 +18,27 @@ import { HASH_DELIM_OPTIONS } from "../lib/Delim";
 import * as ctphjs from "ctph.js";
 
 export class CompareCTPHHashes extends Operation {
-    name = "Compare CTPH hashes";
-    module = "Crypto";
-    description =
-        "Compares two Context Triggered Piecewise Hashing (CTPH) fuzzy hashes to determine the similarity between them on a scale of 0 to 100.";
-    infoURL = "https://forensics.wiki/context_triggered_piecewise_hashing/";
-    inputType = "string";
-    outputType = "number";
-    args: ArgConfig[] = [
-        {
-            name: "Delimiter",
-            type: "option",
-            value: HASH_DELIM_OPTIONS,
-        },
-    ];
+  name = "Compare CTPH hashes";
+  module = "Crypto";
+  description =
+    "Compares two Context Triggered Piecewise Hashing (CTPH) fuzzy hashes to determine the similarity between them on a scale of 0 to 100.";
+  infoURL = "https://forensics.wiki/context_triggered_piecewise_hashing/";
+  inputType = "string";
+  outputType = "number";
+  args: ArgConfig[] = [
+    {
+      name: "Delimiter",
+      type: "option",
+      value: HASH_DELIM_OPTIONS,
+    },
+  ];
 
-    run(input: string, args: any[]): number {
-        const samples = input.split(Utils.charRep(args[0]));
-        if (samples.length !== 2) throw new OperationError("Incorrect number of samples.");
-        return ctphjs.similarity(samples[0], samples[1]);
-    }
+  run(input: string, args: any[]): number {
+    const samples = input.split(Utils.charRep(args[0]));
+    if (samples.length !== 2)
+      throw new OperationError("Incorrect number of samples.");
+    return ctphjs.similarity(samples[0], samples[1]);
+  }
 }
 
 export default CompareCTPHHashes;

@@ -16,25 +16,25 @@ import { OperationError } from "../errors/OperationError";
 import * as pako from "pako";
 
 export class ZlibInflate extends Operation {
-    constructor() {
-        super();
-        this.name = "Zlib inflate";
-        this.module = "Compression";
-        this.description =
-            "Decompresses data compressed with the deflate algorithm (with zlib headers).";
-        this.inputType = "ArrayBuffer";
-        this.outputType = "ArrayBuffer";
-        this.args = [];
-    }
+  constructor() {
+    super();
+    this.name = "Zlib inflate";
+    this.module = "Compression";
+    this.description =
+      "Decompresses data compressed with the deflate algorithm (with zlib headers).";
+    this.inputType = "ArrayBuffer";
+    this.outputType = "ArrayBuffer";
+    this.args = [];
+  }
 
-    run(input: ArrayBuffer, _args: unknown[]): ArrayBuffer {
-        try {
-            const decompressed = pako.inflate(new Uint8Array(input));
-            return decompressed.buffer as ArrayBuffer;
-        } catch (err) {
-            throw new OperationError("Inflate error: " + String(err));
-        }
+  run(input: ArrayBuffer, _args: unknown[]): ArrayBuffer {
+    try {
+      const decompressed = pako.inflate(new Uint8Array(input));
+      return decompressed.buffer as ArrayBuffer;
+    } catch (err) {
+      throw new OperationError("Inflate error: " + String(err));
     }
+  }
 }
 
 export default ZlibInflate;

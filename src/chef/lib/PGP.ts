@@ -17,10 +17,10 @@ import promisify from "es6-promisify";
  * Progress callback
  */
 export const ASP = kbpgp.ASP({
-    "progress_hook": (info: { what: string }) => {
-        // Status updates disabled in VS Code extension context
-        void info;
-    }
+  progress_hook: (info: { what: string }) => {
+    // Status updates disabled in VS Code extension context
+    void info;
+  },
 });
 
 /**
@@ -30,14 +30,14 @@ export const ASP = kbpgp.ASP({
  * @returns {number}
  */
 export function getSubkeySize(keySize: number): number {
-    const map: Record<number, number> = {
-        1024: 1024,
-        2048: 1024,
-        4096: 2048,
-        256:  256,
-        384:  256,
-    };
-    return map[keySize];
+  const map: Record<number, number> = {
+    1024: 1024,
+    2048: 1024,
+    4096: 2048,
+    256: 256,
+    384: 256,
+  };
+  return map[keySize];
 }
 
 /**
@@ -47,27 +47,32 @@ export function getSubkeySize(keySize: number): number {
  * @param {string} [passphrase]
  * @returns {Promise<object>}
  */
-export async function importPrivateKey(privateKey: string, passphrase?: string): Promise<unknown> {
-    try {
-        const key = await promisify(kbpgp.KeyManager.import_from_armored_pgp)({
-            armored: privateKey,
-            opts: {
-                "no_check_keys": true
-            }
+export async function importPrivateKey(
+  privateKey: string,
+  passphrase?: string,
+): Promise<unknown> {
+  try {
+    const key = await promisify(kbpgp.KeyManager.import_from_armored_pgp)({
+      armored: privateKey,
+      opts: {
+        no_check_keys: true,
+      },
+    });
+    if ((key as any).is_pgp_locked()) {
+      if (passphrase) {
+        await promisify((key as any).unlock_pgp.bind(key))({
+          passphrase,
         });
-        if ((key as any).is_pgp_locked()) {
-            if (passphrase) {
-                await promisify((key as any).unlock_pgp.bind(key))({
-                    passphrase
-                });
-            } else {
-                throw new OperationError("Did not provide passphrase with locked private key.");
-            }
-        }
-        return key;
-    } catch (err) {
-        throw new OperationError(`Could not import private key: ${err}`);
+      } else {
+        throw new OperationError(
+          "Did not provide passphrase with locked private key.",
+        );
+      }
     }
+    return key;
+  } catch (err) {
+    throw new OperationError(`Could not import private key: ${err}`);
+  }
 }
 
 /**
@@ -77,15 +82,15 @@ export async function importPrivateKey(privateKey: string, passphrase?: string):
  * @returns {Promise<object>}
  */
 export async function importPublicKey(publicKey: string): Promise<unknown> {
-    try {
-        const key = await promisify(kbpgp.KeyManager.import_from_armored_pgp)({
-            armored: publicKey,
-            opts: {
-                "no_check_keys": true
-            }
-        });
-        return key;
-    } catch (err) {
-        throw new OperationError(`Could not import public key: ${err}`);
-    }
+  try {
+    const key = await promisify(kbpgp.KeyManager.import_from_armored_pgp)({
+      armored: publicKey,
+      opts: {
+        no_check_keys: true,
+      },
+    });
+    return key;
+  } catch (err) {
+    throw new OperationError(`Could not import public key: ${err}`);
+  }
 }

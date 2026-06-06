@@ -18,37 +18,39 @@ import { Operation } from "../Operation";
  * Hex to PEM operation
  */
 export class HexToPEM extends Operation {
+  /**
+   * HexToPEM constructor
+   */
+  constructor() {
+    super();
 
-    /**
-     * HexToPEM constructor
-     */
-    constructor() {
-        super();
+    this.name = "Hex to PEM";
+    this.module = "PublicKey";
+    this.description =
+      "Converts a hexadecimal DER (Distinguished Encoding Rules) string into PEM (Privacy Enhanced Mail) format.";
+    this.infoURL = "https://wikipedia.org/wiki/Privacy-Enhanced_Mail";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [
+      {
+        name: "Header string",
+        type: "string",
+        value: "CERTIFICATE",
+      },
+    ];
+  }
 
-        this.name = "Hex to PEM";
-        this.module = "PublicKey";
-        this.description = "Converts a hexadecimal DER (Distinguished Encoding Rules) string into PEM (Privacy Enhanced Mail) format.";
-        this.infoURL = "https://wikipedia.org/wiki/Privacy-Enhanced_Mail";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [
-            {
-                "name": "Header string",
-                "type": "string",
-                "value": "CERTIFICATE"
-            }
-        ];
-    }
-
-    /**
-     * @param {string} input
-     * @param {Object[]} args
-     * @returns {string}
-     */
-    run(input: any, args: any[]): any {
-        return r.KJUR.asn1.ASN1Util.getPEMStringFromHex(input.replace(/\s/g, ""), args[0]);
-    }
-
+  /**
+   * @param {string} input
+   * @param {Object[]} args
+   * @returns {string}
+   */
+  run(input: any, args: any[]): any {
+    return r.KJUR.asn1.ASN1Util.getPEMStringFromHex(
+      input.replace(/\s/g, ""),
+      args[0],
+    );
+  }
 }
 
 export default HexToPEM;

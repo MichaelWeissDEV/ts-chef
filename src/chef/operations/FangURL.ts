@@ -17,53 +17,52 @@ import { Operation } from "../Operation";
  * FangURL operation
  */
 export class FangURL extends Operation {
+  /**
+   * FangURL constructor
+   */
+  constructor() {
+    super();
 
-    /**
-     * FangURL constructor
-     */
-    constructor() {
-        super();
+    this.name = "Fang URL";
+    this.module = "Default";
+    this.description =
+      "Takes a 'Defanged' Universal Resource Locator (URL) and 'Fangs' it. Meaning, it removes the alterations (defanged) that render it useless so that it can be used again.";
+    this.infoURL =
+      "https://isc.sans.edu/forums/diary/Defang+all+the+things/22744/";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [
+      {
+        name: "Restore [.]",
+        type: "boolean",
+        value: true,
+      },
+      {
+        name: "Restore hxxp",
+        type: "boolean",
+        value: true,
+      },
+      {
+        name: "Restore ://",
+        type: "boolean",
+        value: true,
+      },
+    ];
+  }
 
-        this.name = "Fang URL";
-        this.module = "Default";
-        this.description = "Takes a 'Defanged' Universal Resource Locator (URL) and 'Fangs' it. Meaning, it removes the alterations (defanged) that render it useless so that it can be used again.";
-        this.infoURL = "https://isc.sans.edu/forums/diary/Defang+all+the+things/22744/";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [
-            {
-                name: "Restore [.]",
-                type: "boolean",
-                value: true
-            },
-            {
-                name: "Restore hxxp",
-                type: "boolean",
-                value: true
-            },
-            {
-                name: "Restore ://",
-                type: "boolean",
-                value: true
-            }
-        ];
-    }
+  /**
+   * @param {string} input
+   * @param {Object[]} args
+   * @returns {string}
+   */
+  run(input: any, args: any[]): any {
+    const [dots, http, slashes] = args;
 
-    /**
-     * @param {string} input
-     * @param {Object[]} args
-     * @returns {string}
-     */
-    run(input: any, args: any[]): any {
-        const [dots, http, slashes] = args;
+    input = fangURL(input, dots, http, slashes);
 
-        input = fangURL(input, dots, http, slashes);
-
-        return input;
-    }
-
+    return input;
+  }
 }
-
 
 /**
  * Defangs a given URL
@@ -74,12 +73,17 @@ export class FangURL extends Operation {
  * @param {boolean} slashes
  * @returns {string}
  */
-function fangURL(url: string, dots: boolean, http: boolean, slashes: boolean): string {
-    if (dots) url = url.replace(/\[\.\]/g, ".");
-    if (http) url = url.replace(/hxxp/g, "http");
-    if (slashes) url = url.replace(/\[:\/\/\]/g, "://");
+function fangURL(
+  url: string,
+  dots: boolean,
+  http: boolean,
+  slashes: boolean,
+): string {
+  if (dots) url = url.replace(/\[\.\]/g, ".");
+  if (http) url = url.replace(/hxxp/g, "http");
+  if (slashes) url = url.replace(/\[:\/\/\]/g, "://");
 
-    return url;
+  return url;
 }
 
 export default FangURL;

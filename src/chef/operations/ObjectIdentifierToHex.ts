@@ -18,31 +18,30 @@ import { Operation } from "../Operation";
  * Object Identifier to Hex operation
  */
 export class ObjectIdentifierToHex extends Operation {
+  /**
+   * ObjectIdentifierToHex constructor
+   */
+  constructor() {
+    super();
 
-    /**
-     * ObjectIdentifierToHex constructor
-     */
-    constructor() {
-        super();
+    this.name = "Object Identifier to Hex";
+    this.module = "PublicKey";
+    this.description =
+      "Converts an object identifier (OID) into a hexadecimal string.";
+    this.infoURL = "https://wikipedia.org/wiki/Object_identifier";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [];
+  }
 
-        this.name = "Object Identifier to Hex";
-        this.module = "PublicKey";
-        this.description = "Converts an object identifier (OID) into a hexadecimal string.";
-        this.infoURL = "https://wikipedia.org/wiki/Object_identifier";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [];
-    }
-
-    /**
-     * @param {string} input
-     * @param {Object[]} args
-     * @returns {string}
-     */
-    run(input: any, args: any[]): any {
-        return r.KJUR.asn1.ASN1Util.oidIntToHex(input);
-    }
-
+  /**
+   * @param {string} input
+   * @param {Object[]} args
+   * @returns {string}
+   */
+  run(input: any, args: any[]): any {
+    return r.KJUR.asn1.ASN1Util.oidIntToHex(input);
+  }
 }
 
 export default ObjectIdentifierToHex;

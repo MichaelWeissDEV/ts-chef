@@ -14,19 +14,19 @@
 import { Operation } from "../Operation";
 
 export class ToLowerCase extends Operation {
-    constructor() {
-        super();
-        this.name = "To lower case";
-        this.module = "Default";
-        this.description = "Converts the input string to lower case.";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [];
-    }
+  constructor() {
+    super();
+    this.name = "To lower case";
+    this.module = "Default";
+    this.description = "Converts the input string to lower case.";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [];
+  }
 
-    run(input: string, _args: unknown[]): string {
-        return input.toLowerCase();
-    }
+  run(input: string, _args: unknown[]): string {
+    return input.toLowerCase();
+  }
 }
 
 export default ToLowerCase;

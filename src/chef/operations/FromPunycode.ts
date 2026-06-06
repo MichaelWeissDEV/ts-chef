@@ -18,43 +18,42 @@ import punycode from "punycode.js";
  * From Punycode operation
  */
 export class FromPunycode extends Operation {
+  /**
+   * FromPunycode constructor
+   */
+  constructor() {
+    super();
 
-    /**
-     * FromPunycode constructor
-     */
-    constructor() {
-        super();
+    this.name = "From Punycode";
+    this.module = "Encodings";
+    this.description =
+      "Punycode is a way to represent Unicode with the limited character subset of ASCII supported by the Domain Name System.<br><br>e.g. <code>mnchen-3ya</code> decodes to <code>m\xfcnchen</code>";
+    this.infoURL = "https://wikipedia.org/wiki/Punycode";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [
+      {
+        name: "Internationalised domain name",
+        type: "boolean",
+        value: false,
+      },
+    ];
+  }
 
-        this.name = "From Punycode";
-        this.module = "Encodings";
-        this.description = "Punycode is a way to represent Unicode with the limited character subset of ASCII supported by the Domain Name System.<br><br>e.g. <code>mnchen-3ya</code> decodes to <code>m\xfcnchen</code>";
-        this.infoURL = "https://wikipedia.org/wiki/Punycode";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [
-            {
-                "name": "Internationalised domain name",
-                "type": "boolean",
-                "value": false
-            }
-        ];
+  /**
+   * @param {string} input
+   * @param {Object[]} args
+   * @returns {string}
+   */
+  run(input: any, args: any[]): any {
+    const idn = args[0];
+
+    if (idn) {
+      return punycode.toUnicode(input);
+    } else {
+      return punycode.decode(input);
     }
-
-    /**
-     * @param {string} input
-     * @param {Object[]} args
-     * @returns {string}
-     */
-    run(input: any, args: any[]): any {
-        const idn = args[0];
-
-        if (idn) {
-            return punycode.toUnicode(input);
-        } else {
-            return punycode.decode(input);
-        }
-    }
-
+  }
 }
 
 export default FromPunycode;

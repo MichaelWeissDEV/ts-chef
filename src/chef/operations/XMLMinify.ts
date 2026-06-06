@@ -14,24 +14,24 @@
 import { Operation } from "../Operation";
 
 export class XMLMinify extends Operation {
-    constructor() {
-        super();
-        this.name = "XML Minify";
-        this.module = "Default";
-        this.description =
-            "Compresses XML markup by removing unnecessary whitespace.";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [];
-    }
+  constructor() {
+    super();
+    this.name = "XML Minify";
+    this.module = "Default";
+    this.description =
+      "Compresses XML markup by removing unnecessary whitespace.";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [];
+  }
 
-    run(input: string, _args: unknown[]): string {
-        return input
-            .replace(/<!--[\s\S]*?-->/g, "")
-            .replace(/>\s+</g, "><")
-            .replace(/\s{2,}/g, " ")
-            .trim();
-    }
+  run(input: string, _args: unknown[]): string {
+    return input
+      .replace(/<!--[\s\S]*?-->/g, "")
+      .replace(/>\s+</g, "><")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+  }
 }
 
 export default XMLMinify;

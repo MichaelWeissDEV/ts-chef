@@ -24,68 +24,71 @@ const OEM_MODES = ["Tesseract only", "LSTM only", "Tesseract/LSTM Combined"];
  * Optical Character Recognition operation
  */
 export class OpticalCharacterRecognition extends Operation {
+  /**
+   * OpticalCharacterRecognition constructor
+   */
+  constructor() {
+    super();
 
-    /**
-     * OpticalCharacterRecognition constructor
-     */
-    constructor() {
-        super();
+    this.name = "Optical Character Recognition";
+    this.module = "OCR";
+    this.description =
+      "Optical character recognition or optical character reader (OCR) is the mechanical or electronic conversion of images of typed, handwritten or printed text into machine-encoded text.<br><br>Supported image formats: png, jpg, bmp, pbm.";
+    this.infoURL = "https://wikipedia.org/wiki/Optical_character_recognition";
+    this.inputType = "ArrayBuffer";
+    this.outputType = "string";
+    this.args = [
+      {
+        name: "Show confidence",
+        type: "boolean",
+        value: true,
+      },
+      {
+        name: "OCR Engine Mode",
+        type: "option",
+        value: OEM_MODES,
+        defaultIndex: 1,
+      },
+    ];
+  }
 
-        this.name = "Optical Character Recognition";
-        this.module = "OCR";
-        this.description = "Optical character recognition or optical character reader (OCR) is the mechanical or electronic conversion of images of typed, handwritten or printed text into machine-encoded text.<br><br>Supported image formats: png, jpg, bmp, pbm.";
-        this.infoURL = "https://wikipedia.org/wiki/Optical_character_recognition";
-        this.inputType = "ArrayBuffer";
-        this.outputType = "string";
-        this.args = [
-            {
-                name: "Show confidence",
-                type: "boolean",
-                value: true
-            },
-            {
-                name: "OCR Engine Mode",
-                type: "option",
-                value: OEM_MODES,
-                defaultIndex: 1
-            }
-        ];
+  /**
+   * @param {ArrayBuffer} input
+   * @param {Object[]} args
+   * @returns {string}
+   */
+  async run(input: any, args: any[]): Promise<any> {
+    const [showConfidence, oemChoice] = args;
+
+    const type = isImage(input);
+    if (!type) {
+      throw new OperationError(
+        "Unsupported file type (supported: jpg,png,pbm,bmp) or no file provided",
+      );
     }
 
-    /**
-     * @param {ArrayBuffer} input
-     * @param {Object[]} args
-     * @returns {string}
-     */
-    async run(input: any, args: any[]): Promise<any> {
-        const [showConfidence, oemChoice] = args;
+    const assetDir = `${(global as any).docURL || ""}/assets/`;
+    const oem = OEM_MODES.indexOf(oemChoice);
 
-        const type = isImage(input);
-        if (!type) {
-            throw new OperationError("Unsupported file type (supported: jpg,png,pbm,bmp) or no file provided");
-        }
+    try {
+      const image = `data:${type};base64,${toBase64(input)}`;
+      const worker = await createWorker("eng", oem, {
+        workerPath: `${assetDir}tesseract/worker.min.js`,
+        langPath: `${assetDir}tesseract/lang-data`,
+        corePath: `${assetDir}tesseract/tesseract-core.wasm.js`,
+        logger: () => {},
+      });
+      const result = await worker.recognize(image);
 
-        const assetDir = `${(global as any).docURL || ""}/assets/`;
-        const oem = OEM_MODES.indexOf(oemChoice);
-
-        try {
-            const image = `data:${type};base64,${toBase64(input)}`;
-            const worker = await createWorker("eng", oem, {
-                workerPath: `${assetDir}tesseract/worker.min.js`,
-                langPath: `${assetDir}tesseract/lang-data`,
-                corePath: `${assetDir}tesseract/tesseract-core.wasm.js`,
-                logger: () => {}            });
-            const result = await worker.recognize(image);
-
-            if (showConfidence) {
-                return `Confidence: ${result.data.confidence}%\n\n${result.data.text}`;
-            } else {
-                return result.data.text;
-            }
-        } catch (err) {
-            throw new OperationError(`Error performing OCR on image. (${err})`);
-        }
+      if (showConfidence) {
+        return `Confidence: ${result.data.confidence}%\n\n${result.data.text}`;
+      } else {
+        return result.data.text;
+      }
+    } catch (err) {
+      throw new OperationError(`Error performing OCR on image. (${err})`);
     }
+  }
 }
 
 export default OpticalCharacterRecognition;

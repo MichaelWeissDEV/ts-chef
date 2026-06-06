@@ -14,19 +14,19 @@
 import { Operation } from "../Operation";
 
 export class ToUpperCase extends Operation {
-    constructor() {
-        super();
-        this.name = "To upper case";
-        this.module = "Default";
-        this.description = "Converts the input string to upper case.";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [];
-    }
+  constructor() {
+    super();
+    this.name = "To upper case";
+    this.module = "Default";
+    this.description = "Converts the input string to upper case.";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [];
+  }
 
-    run(input: string, _args: unknown[]): string {
-        return input.toUpperCase();
-    }
+  run(input: string, _args: unknown[]): string {
+    return input.toUpperCase();
+  }
 }
 
 export default ToUpperCase;

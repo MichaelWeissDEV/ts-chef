@@ -15,13 +15,16 @@ import Utils from "../Utils";
 // @ts-ignore
 import CryptoApi from "crypto-api/src/crypto-api.mjs";
 
-
 /**
  * Generic hash function.
  */
-export function runHash(name: string, input: ArrayBuffer, options: any = {}): string {
-    const msg = Utils.arrayBufferToStr(input, false),
-        hasher = CryptoApi.getHasher(name, options);
-    hasher.update(msg);
-    return CryptoApi.encoder.toHex(hasher.finalize());
+export function runHash(
+  name: string,
+  input: ArrayBuffer,
+  options: any = {},
+): string {
+  const msg = Utils.arrayBufferToStr(input, false),
+    hasher = CryptoApi.getHasher(name, options);
+  hasher.update(msg);
+  return CryptoApi.encoder.toHex(hasher.finalize());
 }

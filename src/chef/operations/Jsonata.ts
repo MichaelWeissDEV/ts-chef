@@ -19,54 +19,55 @@ import OperationError from "../errors/OperationError";
  * Jsonata Query operation
  */
 export class JsonataQuery extends Operation {
-    /**
-     * JsonataQuery constructor
-     */
-    constructor() {
-        super();
+  /**
+   * JsonataQuery constructor
+   */
+  constructor() {
+    super();
 
-        this.name = "Jsonata Query";
-        this.module = "Code";
-        this.description =
-            "Query and transform JSON data with a jsonata query.";
-        this.infoURL = "https://docs.jsonata.org/overview.html";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [
-            {
-                name: "Query",
-                type: "text",
-                value: "string",
-            },
-        ];
+    this.name = "Jsonata Query";
+    this.module = "Code";
+    this.description = "Query and transform JSON data with a jsonata query.";
+    this.infoURL = "https://docs.jsonata.org/overview.html";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [
+      {
+        name: "Query",
+        type: "text",
+        value: "string",
+      },
+    ];
+  }
+
+  /**
+   * @param {string} input
+   * @param {Object[]} args
+   * @returns {string}
+   */
+  async run(input: any, args: any[]): Promise<any> {
+    const [query] = args;
+    let result, jsonObj;
+
+    try {
+      jsonObj = JSON.parse(input);
+    } catch (err) {
+      throw new OperationError(
+        `Invalid input JSON: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
 
-    /**
-     * @param {string} input
-     * @param {Object[]} args
-     * @returns {string}
-     */
-    async run(input: any, args: any[]): Promise<any> {
-        const [query] = args;
-        let result, jsonObj;
-
-        try {
-            jsonObj = JSON.parse(input);
-        } catch (err) {
-            throw new OperationError(`Invalid input JSON: ${err instanceof Error ? err.message : String(err)}`);
-        }
-
-        try {
-            const expression = jsonata(query);
-            result = await expression.evaluate(jsonObj);
-        } catch (err) {
-            throw new OperationError(
-                `Invalid Jsonata Expression: ${err instanceof Error ? err.message : String(err)}`
-            );
-        }
-
-        return JSON.stringify(result === undefined ? "" : result);
+    try {
+      const expression = jsonata(query);
+      result = await expression.evaluate(jsonObj);
+    } catch (err) {
+      throw new OperationError(
+        `Invalid Jsonata Expression: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
+
+    return JSON.stringify(result === undefined ? "" : result);
+  }
 }
 
 export default JsonataQuery;

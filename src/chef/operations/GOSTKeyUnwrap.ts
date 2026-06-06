@@ -15,143 +15,166 @@ import { Operation } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { toHexFast, fromHex } from "../lib/Hex";
-import { CryptoGost, GostEngine } from "@wavesenterprise/crypto-gost-js/index.js";
+import {
+  CryptoGost,
+  GostEngine,
+} from "@wavesenterprise/crypto-gost-js/index.js";
 
 /**
  * GOST Key Unwrap operation
  */
 export class GOSTKeyUnwrap extends Operation {
+  /**
+   * GOSTKeyUnwrap constructor
+   */
+  constructor() {
+    super();
 
-    /**
-     * GOSTKeyUnwrap constructor
-     */
-    constructor() {
-        super();
+    this.name = "GOST Key Unwrap";
+    this.module = "Ciphers";
+    this.description =
+      "A decryptor for keys wrapped using one of the GOST block ciphers.";
+    this.infoURL = "https://wikipedia.org/wiki/GOST_(block_cipher)";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [
+      {
+        name: "Key",
+        type: "toggleString",
+        value: "",
+        toggleValues: ["Hex", "UTF8", "Latin1", "Base64"],
+      },
+      {
+        name: "User Key Material",
+        type: "toggleString",
+        value: "",
+        toggleValues: ["Hex", "UTF8", "Latin1", "Base64"],
+      },
+      {
+        name: "Input type",
+        type: "option",
+        value: ["Hex", "Raw"],
+      },
+      {
+        name: "Output type",
+        type: "option",
+        value: ["Raw", "Hex"],
+      },
+      {
+        name: "Algorithm",
+        type: "argSelector",
+        value: [
+          {
+            name: "GOST 28147 (1989)",
+            on: [5],
+          },
+          {
+            name: "GOST R 34.12 (Magma, 2015)",
+            off: [5],
+          },
+          {
+            name: "GOST R 34.12 (Kuznyechik, 2015)",
+            off: [5],
+          },
+        ],
+      },
+      {
+        name: "sBox",
+        type: "option",
+        value: [
+          "E-TEST",
+          "E-A",
+          "E-B",
+          "E-C",
+          "E-D",
+          "E-SC",
+          "E-Z",
+          "D-TEST",
+          "D-A",
+          "D-SC",
+        ],
+      },
+      {
+        name: "Key wrapping",
+        type: "option",
+        value: ["NO", "CP", "SC"],
+      },
+    ];
+  }
 
-        this.name = "GOST Key Unwrap";
-        this.module = "Ciphers";
-        this.description = "A decryptor for keys wrapped using one of the GOST block ciphers.";
-        this.infoURL = "https://wikipedia.org/wiki/GOST_(block_cipher)";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [
-            {
-                name: "Key",
-                type: "toggleString",
-                value: "",
-                toggleValues: ["Hex", "UTF8", "Latin1", "Base64"]
-            },
-            {
-                name: "User Key Material",
-                type: "toggleString",
-                value: "",
-                toggleValues: ["Hex", "UTF8", "Latin1", "Base64"]
-            },
-            {
-                name: "Input type",
-                type: "option",
-                value: ["Hex", "Raw"]
-            },
-            {
-                name: "Output type",
-                type: "option",
-                value: ["Raw", "Hex"]
-            },
-            {
-                name: "Algorithm",
-                type: "argSelector",
-                value: [
-                    {
-                        name: "GOST 28147 (1989)",
-                        on: [5]
-                    },
-                    {
-                        name: "GOST R 34.12 (Magma, 2015)",
-                        off: [5]
-                    },
-                    {
-                        name: "GOST R 34.12 (Kuznyechik, 2015)",
-                        off: [5]
-                    }
-                ]
-            },
-            {
-                name: "sBox",
-                type: "option",
-                value: ["E-TEST", "E-A", "E-B", "E-C", "E-D", "E-SC", "E-Z", "D-TEST", "D-A", "D-SC"]
-            },
-            {
-                name: "Key wrapping",
-                type: "option",
-                value: ["NO", "CP", "SC"]
-            }
-        ];
+  /**
+   * @param {string} input
+   * @param {Object[]} args
+   * @returns {string}
+   */
+  async run(input: any, args: any[]): Promise<any> {
+    const [keyObj, ukmObj, inputType, outputType, version, sBox, keyWrapping] =
+      args;
+
+    const key = toHexFast(
+      Utils.convertToByteArray(keyObj.string, keyObj.option),
+    );
+    const ukm = toHexFast(
+      Utils.convertToByteArray(ukmObj.string, ukmObj.option),
+    );
+    input =
+      inputType === "Hex" ? input : toHexFast(Utils.strToArrayBuffer(input));
+
+    let blockLength, versionNum;
+    switch (version) {
+      case "GOST 28147 (1989)":
+        versionNum = 1989;
+        blockLength = 64;
+        break;
+      case "GOST R 34.12 (Magma, 2015)":
+        versionNum = 2015;
+        blockLength = 64;
+        break;
+      case "GOST R 34.12 (Kuznyechik, 2015)":
+        versionNum = 2015;
+        blockLength = 128;
+        break;
+      default:
+        throw new OperationError(`Unknown algorithm version: ${version}`);
     }
 
-    /**
-     * @param {string} input
-     * @param {Object[]} args
-     * @returns {string}
-     */
-    async run(input: any, args: any[]): Promise<any> {
-        const [keyObj, ukmObj, inputType, outputType, version, sBox, keyWrapping] = args;
+    const sBoxVal = versionNum === 1989 ? sBox : null;
 
-        const key = toHexFast(Utils.convertToByteArray(keyObj.string, keyObj.option));
-        const ukm = toHexFast(Utils.convertToByteArray(ukmObj.string, ukmObj.option));
-        input = inputType === "Hex" ? input : toHexFast(Utils.strToArrayBuffer(input));
+    const algorithm: {
+      version: number;
+      length: number;
+      mode: string;
+      sBox: unknown;
+      keyWrapping: unknown;
+      ukm?: unknown;
+    } = {
+      version: versionNum,
+      length: blockLength,
+      mode: "KW",
+      sBox: sBoxVal,
+      keyWrapping: keyWrapping,
+    };
 
-        let blockLength, versionNum;
-        switch (version) {
-            case "GOST 28147 (1989)":
-                versionNum = 1989;
-                blockLength = 64;
-                break;
-            case "GOST R 34.12 (Magma, 2015)":
-                versionNum = 2015;
-                blockLength = 64;
-                break;
-            case "GOST R 34.12 (Kuznyechik, 2015)":
-                versionNum = 2015;
-                blockLength = 128;
-                break;
-            default:
-                throw new OperationError(`Unknown algorithm version: ${version}`);
-        }
+    try {
+      const Hex = CryptoGost.coding.Hex;
+      algorithm.ukm = Hex.decode(ukm);
 
-        const sBoxVal = versionNum === 1989 ? sBox : null;
+      const cipher = GostEngine.getGostCipher(algorithm);
+      const out = Hex.encode(
+        cipher.unwrapKey(Hex.decode(key), Hex.decode(input)),
+      );
 
-        const algorithm: {
-            version: number;
-            length: number;
-            mode: string;
-            sBox: unknown;
-            keyWrapping: unknown;
-            ukm?: unknown;
-        } = {
-            version: versionNum,
-            length: blockLength,
-            mode: "KW",
-            sBox: sBoxVal,
-            keyWrapping: keyWrapping
-        };
-
-        try {
-            const Hex = CryptoGost.coding.Hex;
-            algorithm.ukm = Hex.decode(ukm);
-
-            const cipher = GostEngine.getGostCipher(algorithm);
-            const out = Hex.encode(cipher.unwrapKey(Hex.decode(key), Hex.decode(input)));
-
-            return outputType === "Hex" ? out : Utils.byteArrayToChars(fromHex(out));
-        } catch (err) {
-            const errMsg = err instanceof Error ? err.message : String(err);
-            if (errMsg.includes("Invalid typed array length")) {
-                throw new OperationError("Incorrect input length. Must be a multiple of the block size.");
-            }
-            throw new OperationError(errMsg);
-        }
+      return outputType === "Hex" ? out : Utils.byteArrayToChars(fromHex(out));
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      if (errMsg.includes("Invalid typed array length")) {
+        throw new OperationError(
+          "Incorrect input length. Must be a multiple of the block size.",
+        );
+      }
+      throw new OperationError(errMsg);
     }
-
+  }
 }
 
 export default GOSTKeyUnwrap;

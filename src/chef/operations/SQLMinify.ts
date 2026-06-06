@@ -14,23 +14,23 @@
 import { Operation } from "../Operation";
 
 export class SQLMinify extends Operation {
-    constructor() {
-        super();
-        this.name = "SQL Minify";
-        this.module = "Code";
-        this.description = "Compresses Structured Query Language (SQL) code.";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [];
-    }
+  constructor() {
+    super();
+    this.name = "SQL Minify";
+    this.module = "Code";
+    this.description = "Compresses Structured Query Language (SQL) code.";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [];
+  }
 
-    run(input: string, _args: unknown[]): string {
-        return input
-            .replace(/\/\*[\s\S]*?\*\//g, "")
-            .replace(/--[^\n]*/g, "")
-            .replace(/\s+/g, " ")
-            .trim();
-    }
+  run(input: string, _args: unknown[]): string {
+    return input
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/--[^\n]*/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
 }
 
 export default SQLMinify;

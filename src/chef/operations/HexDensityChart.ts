@@ -14,225 +14,238 @@
 import * as d3temp from "d3";
 import * as d3hexbintemp from "d3-hexbin";
 import * as nodomtemp from "nodom";
-import { getScatterValues, RECORD_DELIMITER_OPTIONS, COLOURS, FIELD_DELIMITER_OPTIONS } from "../lib/Charts";
+import {
+  getScatterValues,
+  RECORD_DELIMITER_OPTIONS,
+  COLOURS,
+  FIELD_DELIMITER_OPTIONS,
+} from "../lib/Charts";
 
 import { Operation, ArgConfig } from "../Operation";
 import Utils from "../Utils";
 
 const d3 = (d3temp as any).default ? (d3temp as any).default : d3temp;
-const d3hexbin = (d3hexbintemp as any).default ? (d3hexbintemp as any).default : d3hexbintemp;
-const nodom = (nodomtemp as any).default ? (nodomtemp as any).default : nodomtemp;
-
+const d3hexbin = (d3hexbintemp as any).default
+  ? (d3hexbintemp as any).default
+  : d3hexbintemp;
+const nodom = (nodomtemp as any).default
+  ? (nodomtemp as any).default
+  : nodomtemp;
 
 /**
  * Hex Density chart operation
  */
 export class HexDensityChart extends Operation {
+  /**
+   * HexDensityChart constructor
+   */
+  constructor() {
+    super();
 
-    /**
-     * HexDensityChart constructor
-     */
-    constructor() {
-        super();
+    this.name = "Hex Density chart";
+    this.module = "Charts";
+    this.description =
+      "Hex density charts are used in a similar way to scatter charts, however rather than rendering tens of thousands of points, it groups the points into a few hundred hexagons to show the distribution.";
+    this.inputType = "string";
+    this.outputType = "html";
+    this.args = [
+      {
+        name: "Record delimiter",
+        type: "option",
+        value: RECORD_DELIMITER_OPTIONS,
+      },
+      {
+        name: "Field delimiter",
+        type: "option",
+        value: FIELD_DELIMITER_OPTIONS,
+      },
+      {
+        name: "Pack radius",
+        type: "number",
+        value: 25,
+      },
+      {
+        name: "Draw radius",
+        type: "number",
+        value: 15,
+      },
+      {
+        name: "Use column headers as labels",
+        type: "boolean",
+        value: true,
+      },
+      {
+        name: "X label",
+        type: "string",
+        value: "",
+      },
+      {
+        name: "Y label",
+        type: "string",
+        value: "",
+      },
+      {
+        name: "Draw hexagon edges",
+        type: "boolean",
+        value: false,
+      },
+      {
+        name: "Min colour value",
+        type: "string",
+        value: COLOURS.min,
+      },
+      {
+        name: "Max colour value",
+        type: "string",
+        value: COLOURS.max,
+      },
+      {
+        name: "Draw empty hexagons within data boundaries",
+        type: "boolean",
+        value: false,
+      },
+    ];
+  }
 
-        this.name = "Hex Density chart";
-        this.module = "Charts";
-        this.description = "Hex density charts are used in a similar way to scatter charts, however rather than rendering tens of thousands of points, it groups the points into a few hundred hexagons to show the distribution.";
-        this.inputType = "string";
-        this.outputType = "html";
-        this.args = [
-            {
-                name: "Record delimiter",
-                type: "option",
-                value: RECORD_DELIMITER_OPTIONS,
-            },
-            {
-                name: "Field delimiter",
-                type: "option",
-                value: FIELD_DELIMITER_OPTIONS,
-            },
-            {
-                name: "Pack radius",
-                type: "number",
-                value: 25,
-            },
-            {
-                name: "Draw radius",
-                type: "number",
-                value: 15,
-            },
-            {
-                name: "Use column headers as labels",
-                type: "boolean",
-                value: true,
-            },
-            {
-                name: "X label",
-                type: "string",
-                value: "",
-            },
-            {
-                name: "Y label",
-                type: "string",
-                value: "",
-            },
-            {
-                name: "Draw hexagon edges",
-                type: "boolean",
-                value: false,
-            },
-            {
-                name: "Min colour value",
-                type: "string",
-                value: COLOURS.min,
-            },
-            {
-                name: "Max colour value",
-                type: "string",
-                value: COLOURS.max,
-            },
-            {
-                name: "Draw empty hexagons within data boundaries",
-                type: "boolean",
-                value: false,
-            }
-        ];
+  /**
+   * Hex Bin chart operation.
+   *
+   * @param {string} input
+   * @param {Object[]} args
+   * @returns {string}
+   */
+  run(input: string, args: any[]): string {
+    const recordDelimiter = Utils.charRep(args[0]),
+      fieldDelimiter = Utils.charRep(args[1]),
+      packRadius = args[2] as number,
+      drawRadius = args[3] as number,
+      columnHeadingsAreIncluded = args[4],
+      drawEdges = args[7],
+      minColour = args[8],
+      maxColour = args[9],
+      drawEmptyHexagons = args[10],
+      dimension = 500;
+
+    let xLabel = args[5],
+      yLabel = args[6];
+    const { headings, values } = getScatterValues(
+      input,
+      recordDelimiter,
+      fieldDelimiter,
+      columnHeadingsAreIncluded,
+    );
+
+    if (headings) {
+      xLabel = headings.x;
+      yLabel = headings.y;
     }
 
+    const document = new nodom.Document();
+    let svg: any = document.createElement("svg");
+    svg = d3
+      .select(svg)
+      .attr("width", "100%")
+      .attr("height", "100%")
+      .attr("viewBox", `0 0 ${dimension} ${dimension}`);
 
-    /**
-     * Hex Bin chart operation.
-     *
-     * @param {string} input
-     * @param {Object[]} args
-     * @returns {string}
-     */
-    run(input: string, args: any[]): string {
-        const recordDelimiter = Utils.charRep(args[0]),
-            fieldDelimiter = Utils.charRep(args[1]),
-            packRadius = args[2] as number,
-            drawRadius = args[3] as number,
-            columnHeadingsAreIncluded = args[4],
-            drawEdges = args[7],
-            minColour = args[8],
-            maxColour = args[9],
-            drawEmptyHexagons = args[10],
-            dimension = 500;
+    const margin = {
+        top: 10,
+        right: 0,
+        bottom: 40,
+        left: 30,
+      },
+      width = dimension - margin.left - margin.right,
+      height = dimension - margin.top - margin.bottom,
+      marginedSpace = svg
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        let xLabel = args[5],
-            yLabel = args[6];
-        const { headings, values } = getScatterValues(
-            input,
-            recordDelimiter,
-            fieldDelimiter,
-            columnHeadingsAreIncluded
-        );
+    const hexbin = d3hexbin
+      .hexbin()
+      .radius(packRadius)
+      .extent([
+        [0, 0],
+        [width, height],
+      ]);
 
-        if (headings) {
-            xLabel = headings.x;
-            yLabel = headings.y;
-        }
+    const hexPoints = hexbin(values),
+      maxCount = Math.max(...hexPoints.map((b: any) => b.length));
 
-        const document = new nodom.Document();
-        let svg: any = document.createElement("svg");
-        svg = d3.select(svg)
-            .attr("width", "100%")
-            .attr("height", "100%")
-            .attr("viewBox", `0 0 ${dimension} ${dimension}`);
+    const xExtent = d3.extent(hexPoints, (d: any) => d.x) as [number, number],
+      yExtent = d3.extent(hexPoints, (d: any) => d.y) as [number, number];
 
-        const margin = {
-                top: 10,
-                right: 0,
-                bottom: 40,
-                left: 30,
-            },
-            width = dimension - margin.left - margin.right,
-            height = dimension - margin.top - margin.bottom,
-            marginedSpace = svg.append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    if (xExtent[0] !== undefined) {
+      xExtent[0] -= 2 * packRadius;
+      xExtent[1] += 3 * packRadius;
+      yExtent[0] -= 2 * packRadius;
+      yExtent[1] += 2 * packRadius;
+    }
 
-        const hexbin = d3hexbin.hexbin()
-            .radius(packRadius)
-            .extent([[0, 0], [width, height]]);
+    const xAxis = d3.scaleLinear().domain(xExtent).range([0, width]);
+    const yAxis = d3.scaleLinear().domain(yExtent).range([height, 0]);
 
-        const hexPoints = hexbin(values),
-            maxCount = Math.max(...hexPoints.map((b: any) => b.length));
+    const colour = d3
+      .scaleSequential(d3.interpolateLab(minColour, maxColour))
+      .domain([0, maxCount]);
 
-        const xExtent = d3.extent(hexPoints, (d: any) => d.x) as [number, number],
-            yExtent = d3.extent(hexPoints, (d: any) => d.y) as [number, number];
+    marginedSpace
+      .append("clipPath")
+      .attr("id", "clip")
+      .append("rect")
+      .attr("width", width)
+      .attr("height", height);
 
-        if (xExtent[0] !== undefined) {
-            xExtent[0] -= 2 * packRadius;
-            xExtent[1] += 3 * packRadius;
-            yExtent[0] -= 2 * packRadius;
-            yExtent[1] += 2 * packRadius;
-        }
-
-        const xAxis = d3.scaleLinear()
-            .domain(xExtent)
-            .range([0, width]);
-        const yAxis = d3.scaleLinear()
-            .domain(yExtent)
-            .range([height, 0]);
-
-        const colour = d3.scaleSequential(d3.interpolateLab(minColour, maxColour))
-            .domain([0, maxCount]);
-
-        marginedSpace.append("clipPath")
-            .attr("id", "clip")
-            .append("rect")
-            .attr("width", width)
-            .attr("height", height);
-
-        if (drawEmptyHexagons) {
-            marginedSpace.append("g")
-                .attr("class", "empty-hexagon")
-                .selectAll("path")
-                .data(this.getEmptyHexagons(hexPoints, packRadius))
-                .enter()
-                .append("path")
-                .attr("d", (d: any) => {
-                    return `M${xAxis(d.x)},${yAxis(d.y)} ${hexbin.hexagon(drawRadius)}`;
-                })
-                .attr("fill", () => colour(0))
-                .attr("stroke", drawEdges ? "black" : "none")
-                .attr("stroke-width", drawEdges ? "0.5" : "none")
-                .append("title")
-                .text((d: any) => {
-                    const count = 0,
-                        perc = 0,
-                        tooltip = `Count: ${count}\n
+    if (drawEmptyHexagons) {
+      marginedSpace
+        .append("g")
+        .attr("class", "empty-hexagon")
+        .selectAll("path")
+        .data(this.getEmptyHexagons(hexPoints, packRadius))
+        .enter()
+        .append("path")
+        .attr("d", (d: any) => {
+          return `M${xAxis(d.x)},${yAxis(d.y)} ${hexbin.hexagon(drawRadius)}`;
+        })
+        .attr("fill", () => colour(0))
+        .attr("stroke", drawEdges ? "black" : "none")
+        .attr("stroke-width", drawEdges ? "0.5" : "none")
+        .append("title")
+        .text((d: any) => {
+          const count = 0,
+            perc = 0,
+            tooltip = `Count: ${count}\n
                                 Percentage: ${perc.toFixed(2)}%\n
                                 Center: ${d.x.toFixed(2)}, ${d.y.toFixed(2)}\n
                         `.replace(/\s{2,}/g, "\n");
-                    return tooltip;
-                });
-        }
+          return tooltip;
+        });
+    }
 
-        marginedSpace.append("g")
-            .attr("class", "hexagon")
-            .attr("clip-path", "url(#clip)")
-            .selectAll("path")
-            .data(hexPoints)
-            .enter()
-            .append("path")
-            .attr("d", (d: any) => {
-                return `M${xAxis(d.x)},${yAxis(d.y)} ${hexbin.hexagon(drawRadius)}`;
-            })
-            .attr("fill", (d: any) => colour(d.length))
-            .attr("stroke", drawEdges ? "black" : "none")
-            .attr("stroke-width", drawEdges ? "0.5" : "none")
-            .append("title")
-            .text((d: any) => {
-                const count = d.length,
-                    perc = 100.0 * d.length / values.length,
-                    CX = d.x,
-                    CY = d.y,
-                    xMin = Math.min(...d.map((p: any) => p[0])),
-                    xMax = Math.max(...d.map((p: any) => p[0])),
-                    yMin = Math.min(...d.map((p: any) => p[1])),
-                    yMax = Math.max(...d.map((p: any) => p[1])),
-                    tooltip = `Count: ${count}\n
+    marginedSpace
+      .append("g")
+      .attr("class", "hexagon")
+      .attr("clip-path", "url(#clip)")
+      .selectAll("path")
+      .data(hexPoints)
+      .enter()
+      .append("path")
+      .attr("d", (d: any) => {
+        return `M${xAxis(d.x)},${yAxis(d.y)} ${hexbin.hexagon(drawRadius)}`;
+      })
+      .attr("fill", (d: any) => colour(d.length))
+      .attr("stroke", drawEdges ? "black" : "none")
+      .attr("stroke-width", drawEdges ? "0.5" : "none")
+      .append("title")
+      .text((d: any) => {
+        const count = d.length,
+          perc = (100.0 * d.length) / values.length,
+          CX = d.x,
+          CY = d.y,
+          xMin = Math.min(...d.map((p: any) => p[0])),
+          xMax = Math.max(...d.map((p: any) => p[0])),
+          yMin = Math.min(...d.map((p: any) => p[1])),
+          yMax = Math.max(...d.map((p: any) => p[1])),
+          tooltip = `Count: ${count}\n
                                Percentage: ${perc.toFixed(2)}%\n
                                Center: ${CX.toFixed(2)}, ${CY.toFixed(2)}\n
                                Min X: ${xMin.toFixed(2)}\n
@@ -240,70 +253,83 @@ export class HexDensityChart extends Operation {
                                Min Y: ${yMin.toFixed(2)}\n
                                Max Y: ${yMax.toFixed(2)}
                     `.replace(/\s{2,}/g, "\n");
-                return tooltip;
-            });
+        return tooltip;
+      });
 
-        marginedSpace.append("g")
-            .attr("class", "axis axis--y")
-            .call(d3.axisLeft(yAxis).tickSizeOuter(-width));
+    marginedSpace
+      .append("g")
+      .attr("class", "axis axis--y")
+      .call(d3.axisLeft(yAxis).tickSizeOuter(-width));
 
-        svg.append("text")
-            .attr("transform", "rotate(-90)")
-            .attr("y", -margin.left)
-            .attr("x", -(height / 2))
-            .attr("dy", "1em")
-            .style("text-anchor", "middle")
-            .text(yLabel);
+    svg
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -margin.left)
+      .attr("x", -(height / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text(yLabel);
 
-        marginedSpace.append("g")
-            .attr("class", "axis axis--x")
-            .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(xAxis).tickSizeOuter(-height));
+    marginedSpace
+      .append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(xAxis).tickSizeOuter(-height));
 
-        svg.append("text")
-            .attr("x", width / 2)
-            .attr("y", dimension)
-            .style("text-anchor", "middle")
-            .text(xLabel);
+    svg
+      .append("text")
+      .attr("x", width / 2)
+      .attr("y", dimension)
+      .style("text-anchor", "middle")
+      .text(xLabel);
 
-        return (svg.node() as HTMLElement).outerHTML;
+    return (svg.node() as HTMLElement).outerHTML;
+  }
+
+  /**
+   * Hex Bin chart operation.
+   *
+   * @param {Object[]} centres
+   * @param {number} radius
+   * @returns {Object[]}
+   */
+  getEmptyHexagons(centres: any[], radius: number): any[] {
+    const emptyCentres: any[] = [],
+      boundingRect = [
+        d3.extent(centres, (d: any) => d.x),
+        d3.extent(centres, (d: any) => d.y),
+      ] as [[number, number], [number, number]],
+      hexagonCenterToEdge = Math.cos((2 * Math.PI) / 12) * radius,
+      hexagonEdgeLength = Math.sin((2 * Math.PI) / 12) * radius;
+    let indent = false;
+
+    if (boundingRect[0][0] === undefined || boundingRect[1][0] === undefined) {
+      return [];
     }
 
+    for (
+      let y = boundingRect[1][0];
+      y <= boundingRect[1][1] + radius;
+      y += hexagonEdgeLength + radius
+    ) {
+      for (
+        let x = boundingRect[0][0];
+        x <= boundingRect[0][1] + radius;
+        x += 2 * hexagonCenterToEdge
+      ) {
+        let cx = x;
+        const cy = y;
 
-    /**
-     * Hex Bin chart operation.
-     *
-     * @param {Object[]} centres
-     * @param {number} radius
-     * @returns {Object[]}
-     */
-    getEmptyHexagons(centres: any[], radius: number): any[] {
-        const emptyCentres: any[] = [],
-            boundingRect = [d3.extent(centres, (d: any) => d.x), d3.extent(centres, (d: any) => d.y)] as [[number, number], [number, number]],
-            hexagonCenterToEdge = Math.cos(2 * Math.PI / 12) * radius,
-            hexagonEdgeLength = Math.sin(2 * Math.PI / 12) * radius;
-        let indent = false;
+        if (indent && x >= boundingRect[0][1]) break;
+        if (indent) cx += hexagonCenterToEdge;
 
-        if (boundingRect[0][0] === undefined || boundingRect[1][0] === undefined) {
-            return [];
-        }
-
-        for (let y = boundingRect[1][0]; y <= boundingRect[1][1] + radius; y += hexagonEdgeLength + radius) {
-            for (let x = boundingRect[0][0]; x <= boundingRect[0][1] + radius; x += 2 * hexagonCenterToEdge) {
-                let cx = x;
-                const cy = y;
-
-                if (indent && x >= boundingRect[0][1]) break;
-                if (indent) cx += hexagonCenterToEdge;
-
-                emptyCentres.push({x: cx, y: cy});
-            }
-            indent = !indent;
-        }
-
-        return emptyCentres;
+        emptyCentres.push({ x: cx, y: cy });
+      }
+      indent = !indent;
     }
 
+    return emptyCentres;
+  }
 }
 
 export default HexDensityChart;

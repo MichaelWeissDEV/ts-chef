@@ -15,24 +15,24 @@ import { Operation } from "../Operation";
 import { OperationError } from "../errors/OperationError";
 
 export class JSONMinify extends Operation {
-    constructor() {
-        super();
-        this.name = "JSON Minify";
-        this.module = "Code";
-        this.description = "Compresses JavaScript Object Notation (JSON) code.";
-        this.inputType = "string";
-        this.outputType = "string";
-        this.args = [];
-    }
+  constructor() {
+    super();
+    this.name = "JSON Minify";
+    this.module = "Code";
+    this.description = "Compresses JavaScript Object Notation (JSON) code.";
+    this.inputType = "string";
+    this.outputType = "string";
+    this.args = [];
+  }
 
-    run(input: string, _args: unknown[]): string {
-        if (!input) return "";
-        try {
-            return JSON.stringify(JSON.parse(input));
-        } catch (err) {
-            throw new OperationError("Unable to parse JSON: " + err);
-        }
+  run(input: string, _args: unknown[]): string {
+    if (!input) return "";
+    try {
+      return JSON.stringify(JSON.parse(input));
+    } catch (err) {
+      throw new OperationError("Unable to parse JSON: " + err);
     }
+  }
 }
 
 export default JSONMinify;

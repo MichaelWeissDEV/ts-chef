@@ -19,29 +19,29 @@ import { Operation, ArgConfig } from "../Operation";
  * @category Default
  */
 export class Comment extends Operation {
-    name = "Comment";
-    module = "Default";
-    description =
-        "Provides a place to write comments within the flow of the recipe. This operation has no computational effect.";
-    inputType = "string";
-    outputType = "string";
-    flowControl = true;
-    args: ArgConfig[] = [
-        {
-            name: "Comment",
-            type: "text",
-            value: "",
-        },
-    ];
+  name = "Comment";
+  module = "Default";
+  description =
+    "Provides a place to write comments within the flow of the recipe. This operation has no computational effect.";
+  inputType = "string";
+  outputType = "string";
+  flowControl = true;
+  args: ArgConfig[] = [
+    {
+      name: "Comment",
+      type: "text",
+      value: "",
+    },
+  ];
 
-    /**
-     * @param {string} input
-     * @param {any[]} _args
-     * @returns {string}
-     */
-    run(input: string, _args: any[]): string {
-        return input;
-    }
+  /**
+   * @param {string} input
+   * @param {any[]} _args
+   * @returns {string}
+   */
+  run(input: string, _args: any[]): string {
+    return input;
+  }
 }
 
 export default Comment;

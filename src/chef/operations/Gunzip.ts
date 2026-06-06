@@ -20,39 +20,38 @@ const Zlib = gunzip.Zlib;
  * Gunzip operation
  */
 export class Gunzip extends Operation {
+  /**
+   * Gunzip constructor
+   */
+  constructor() {
+    super();
 
-    /**
-     * Gunzip constructor
-     */
-    constructor() {
-        super();
+    this.name = "Gunzip";
+    this.module = "Compression";
+    this.description =
+      "Decompresses data which has been compressed using the deflate algorithm with gzip headers.";
+    this.infoURL = "https://wikipedia.org/wiki/Gzip";
+    this.inputType = "ArrayBuffer";
+    this.outputType = "ArrayBuffer";
+    this.args = [];
+    this.checks = [
+      {
+        pattern: "^\\x1f\\x8b\\x08",
+        flags: "",
+        args: [],
+      },
+    ];
+  }
 
-        this.name = "Gunzip";
-        this.module = "Compression";
-        this.description = "Decompresses data which has been compressed using the deflate algorithm with gzip headers.";
-        this.infoURL = "https://wikipedia.org/wiki/Gzip";
-        this.inputType = "ArrayBuffer";
-        this.outputType = "ArrayBuffer";
-        this.args = [];
-        this.checks = [
-            {
-                pattern: "^\\x1f\\x8b\\x08",
-                flags: "",
-                args: []
-            }
-        ];
-    }
-
-    /**
-     * @param {ArrayBuffer} input
-     * @param {Object[]} args
-     * @returns {File}
-     */
-    run(input: any, args: any[]): any {
-        const gzipObj = new Zlib.Gunzip(new Uint8Array(input));
-        return new Uint8Array(gzipObj.decompress()).buffer;
-    }
-
+  /**
+   * @param {ArrayBuffer} input
+   * @param {Object[]} args
+   * @returns {File}
+   */
+  run(input: any, args: any[]): any {
+    const gzipObj = new Zlib.Gunzip(new Uint8Array(input));
+    return new Uint8Array(gzipObj.decompress()).buffer;
+  }
 }
 
 export default Gunzip;

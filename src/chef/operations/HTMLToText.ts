@@ -14,21 +14,21 @@
 import { Operation } from "../Operation";
 
 export class HTMLToText extends Operation {
-    constructor() {
-        super();
-        this.name = "HTML To Text";
-        this.module = "Default";
-        this.description =
-            "Converts an HTML output from an operation to a readable string instead of being rendered in the DOM.";
-        this.infoURL = "";
-        this.inputType = "html";
-        this.outputType = "string";
-        this.args = [];
-    }
+  constructor() {
+    super();
+    this.name = "HTML To Text";
+    this.module = "Default";
+    this.description =
+      "Converts an HTML output from an operation to a readable string instead of being rendered in the DOM.";
+    this.infoURL = "";
+    this.inputType = "html";
+    this.outputType = "string";
+    this.args = [];
+  }
 
-    run(input: string, _args: unknown[]): string {
-        return input;
-    }
+  run(input: string, _args: unknown[]): string {
+    return input;
+  }
 }
 
 export default HTMLToText;

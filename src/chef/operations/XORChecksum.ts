@@ -14,23 +14,23 @@
 import { Operation } from "../Operation";
 
 export class XORChecksum extends Operation {
-    constructor() {
-        super();
-        this.name = "XOR checksum";
-        this.module = "Default";
-        this.description =
-            "XORs all the bytes in the input and returns the result.";
-        this.inputType = "ArrayBuffer";
-        this.outputType = "string";
-        this.args = [];
-    }
+  constructor() {
+    super();
+    this.name = "XOR checksum";
+    this.module = "Default";
+    this.description =
+      "XORs all the bytes in the input and returns the result.";
+    this.inputType = "ArrayBuffer";
+    this.outputType = "string";
+    this.args = [];
+  }
 
-    run(input: ArrayBuffer, _args: unknown[]): string {
-        const bytes = new Uint8Array(input);
-        let checksum = 0;
-        for (const b of bytes) checksum ^= b;
-        return checksum.toString(16).padStart(2, "0");
-    }
+  run(input: ArrayBuffer, _args: unknown[]): string {
+    const bytes = new Uint8Array(input);
+    let checksum = 0;
+    for (const b of bytes) checksum ^= b;
+    return checksum.toString(16).padStart(2, "0");
+  }
 }
 
 export default XORChecksum;

@@ -12,11 +12,11 @@
  */
 
 export class DishError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "DishError";
-        Object.setPrototypeOf(this, DishError.prototype);
-    }
+  constructor(message: string) {
+    super(message);
+    this.name = "DishError";
+    Object.setPrototypeOf(this, DishError.prototype);
+  }
 }
 
 export default DishError;
