@@ -15,8 +15,7 @@ import { Operation } from "../Operation";
 import { Utils } from "../Utils";
 import { OperationError } from "../errors/OperationError";
 import { toBase64 } from "../lib/Base64";
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const blakejs = require("blakejs");
+import * as blakejs from "blakejs";
 
 interface ToggleStringArg {
   string: string;
@@ -97,7 +96,7 @@ export class BLAKE2b extends Operation {
         return toBase64(blakejs.blake2b(data, key, sizeBytes));
       case "Raw":
         return Utils.arrayBufferToStr(
-          blakejs.blake2b(data, key, sizeBytes).buffer,
+          blakejs.blake2b(data, key, sizeBytes).buffer as ArrayBuffer,
           false,
         );
       default:

@@ -12,7 +12,7 @@
  */
 
 import { Operation, ArgConfig } from "../Operation";
-const vkbeautify = require("vkbeautify");
+import * as vkbeautify from "vkbeautify";
 
 /**
  * CSS Minify operation

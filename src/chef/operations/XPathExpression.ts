@@ -13,6 +13,8 @@
 
 import { Operation } from "../Operation";
 import { OperationError } from "../errors/OperationError";
+import { DOMParser } from "@xmldom/xmldom";
+import * as xpath from "xpath";
 
 export class XPathExpression extends Operation {
   constructor() {
@@ -32,9 +34,6 @@ export class XPathExpression extends Operation {
 
   run(input: string, args: unknown[]): string {
     const [query, delimiter] = args;
-
-    const { DOMParser } = require("@xmldom/xmldom");
-    const xpath = require("xpath");
 
     let doc;
     try {

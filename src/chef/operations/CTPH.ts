@@ -12,6 +12,7 @@
  */
 
 import Operation from "../Operation";
+import * as ctphjs from "ctph.js";
 
 /**
  * CTPH operation
@@ -42,8 +43,7 @@ export class CTPH extends Operation {
    * @param {any[]} args - Operation arguments (none).
    * @returns {string} - The fuzzy hash.
    */
-  run(input: string, args: any[]): string {
-    const ctphjs = require("ctph.js");
+  run(input: string, _args: any[]): string {
     return ctphjs.digest(input);
   }
 }

@@ -11,8 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const scryptsy = require("scryptsy");
+import scryptsy from "scryptsy";
 import { Operation } from "../Operation";
 import { Utils } from "../Utils";
 import { OperationError } from "../errors/OperationError";

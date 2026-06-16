@@ -11,15 +11,11 @@
  * -----------------------------------------------------------------------------
  */
 
-// Lazy imports to avoid circular deps - these are called at runtime
-let _fromBase64:
-  | ((data: string, alph?: string, ret?: string) => string | number[])
-  | null = null;
-let _fromHex: ((data: string, delim?: string) => number[]) | null = null;
-let _fromDecimal: ((data: string, delim?: string) => number[]) | null = null;
-let _fromBinary: ((data: string) => number[]) | null = null;
-
 import { OperationError } from "./errors/OperationError";
+import { fromBase64 } from "./lib/Base64";
+import { fromHex as _fromHex } from "./lib/Hex";
+import { fromDecimal as _fromDecimal } from "./lib/Decimal";
+import { fromBinary as _fromBinary } from "./lib/Binary";
 
 export const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -436,6 +432,7 @@ export class Utils {
    * @returns Escaped string.
    */
   static escapeWhitespace(str: string): string {
+    // eslint-disable-next-line no-control-regex
     return str.replace(/[\x09-\x10]/g, (c) => {
       return String.fromCharCode(0xe000 + c.charCodeAt(0));
     });
@@ -503,7 +500,9 @@ export class Utils {
    * @returns The printable string.
    */
   static printable(str: string, preserveWs: boolean = false): string {
+    // eslint-disable-next-line no-control-regex
     const re = /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]/g;
+    // eslint-disable-next-line no-control-regex
     const wsRe = /[\x09-\x0d]/g;
     str = str.replace(re, ".");
     if (!preserveWs) str = str.replace(wsRe, ".");
@@ -556,20 +555,15 @@ export class Utils {
    * @returns The resulting byte array.
    */
   static convertToByteArray(str: string, type: string): number[] {
-    if (!_fromBase64) _fromBase64 = require("./lib/Base64").fromBase64;
-    if (!_fromHex) _fromHex = require("./lib/Hex").fromHex;
-    if (!_fromDecimal) _fromDecimal = require("./lib/Decimal").fromDecimal;
-    if (!_fromBinary) _fromBinary = require("./lib/Binary").fromBinary;
-
     switch (type.toLowerCase()) {
       case "binary":
-        return _fromBinary!(str);
+        return _fromBinary(str);
       case "hex":
-        return _fromHex!(str);
+        return _fromHex(str);
       case "decimal":
-        return _fromDecimal!(str);
+        return _fromDecimal(str);
       case "base64":
-        return _fromBase64!(str, undefined, "byteArray") as number[];
+        return fromBase64(str, undefined, "byteArray") as number[];
       case "utf8":
         return Utils.strToUtf8ByteArray(str);
       case "latin1":
@@ -586,21 +580,16 @@ export class Utils {
    * @returns The resulting byte string.
    */
   static convertToByteString(str: string, type: string): string {
-    if (!_fromBase64) _fromBase64 = require("./lib/Base64").fromBase64;
-    if (!_fromHex) _fromHex = require("./lib/Hex").fromHex;
-    if (!_fromDecimal) _fromDecimal = require("./lib/Decimal").fromDecimal;
-    if (!_fromBinary) _fromBinary = require("./lib/Binary").fromBinary;
-
     switch (type.toLowerCase()) {
       case "binary":
-        return Utils.byteArrayToChars(_fromBinary!(str));
+        return Utils.byteArrayToChars(_fromBinary(str));
       case "hex":
-        return Utils.byteArrayToChars(_fromHex!(str));
+        return Utils.byteArrayToChars(_fromHex(str));
       case "decimal":
-        return Utils.byteArrayToChars(_fromDecimal!(str));
+        return Utils.byteArrayToChars(_fromDecimal(str));
       case "base64":
         return Utils.byteArrayToChars(
-          _fromBase64!(str, undefined, "byteArray") as number[],
+          fromBase64(str, undefined, "byteArray") as number[],
         );
       case "utf8":
         return new TextEncoder()

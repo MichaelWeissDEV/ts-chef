@@ -13,7 +13,7 @@
 
 import Operation from "../Operation";
 import OperationError from "../errors/OperationError";
-const Bzip2 = require("libbzip2-wasm");
+import Bzip2 from "libbzip2-wasm";
 
 /**
  * Bzip2 is a compression library developed by Julian Seward (of GHC fame) that uses the Burrows-Wheeler algorithm.

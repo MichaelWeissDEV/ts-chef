@@ -11,9 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const ieee754 = require("ieee754");
-
+import * as ieee754 from "ieee754";
 import { Operation } from "../Operation";
 import { Utils } from "../Utils";
 import { DELIM_OPTIONS } from "../lib/Delim";
@@ -56,7 +54,7 @@ export class FromFloat extends Operation {
     const mLen = byteSize === 4 ? 23 : 52;
     const floats = input.split(delim);
 
-    const output = new Array(floats.length * byteSize);
+    const output = new Uint8Array(floats.length * byteSize);
     for (let i = 0; i < floats.length; i++) {
       ieee754.write(
         output,
@@ -67,7 +65,7 @@ export class FromFloat extends Operation {
         byteSize,
       );
     }
-    return output;
+    return Array.from(output);
   }
 }
 

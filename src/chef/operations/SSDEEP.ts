@@ -11,8 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const ssdeepjs = require("ssdeep.js");
+import * as ssdeepjs from "ssdeep.js";
 import { Operation } from "../Operation";
 
 export class SSDEEP extends Operation {

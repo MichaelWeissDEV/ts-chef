@@ -13,7 +13,7 @@
 
 import Operation from "../Operation";
 import OperationError from "../errors/OperationError";
-const Bzip2 = require("libbzip2-wasm");
+import Bzip2 from "libbzip2-wasm";
 
 /**
  * Decompress data using the Bzip2 algorithm.

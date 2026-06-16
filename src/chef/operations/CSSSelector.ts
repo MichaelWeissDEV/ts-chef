@@ -13,6 +13,7 @@
 
 import Operation from "../Operation";
 import OperationError from "../errors/OperationError";
+import { JSDOM } from "jsdom";
 
 /**
  * CSS selector operation
@@ -62,7 +63,6 @@ export class CSSSelector extends Operation {
       return "";
     }
 
-    const { JSDOM } = require("jsdom");
     const dom = new JSDOM(input);
     const document = dom.window.document;
 

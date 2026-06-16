@@ -15,8 +15,7 @@ import { OperationError } from "../errors/OperationError";
 import { fromHex } from "./Hex";
 import { Utils } from "../Utils";
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const r = require("jsrsasign");
+import * as r from "jsrsasign";
 
 function sm3Bytes(data: number[]): number[] {
   const ROL32 = (x: number, n: number) => ((x << n) >>> 0) | (x >>> (32 - n));
