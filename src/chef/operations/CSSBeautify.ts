@@ -12,7 +12,7 @@
  */
 
 import { Operation, ArgConfig } from "../Operation";
-import * as vkbeautify from "vkbeautify";
+import vkbeautify from "vkbeautify";
 
 /**
  * CSS Beautify operation
