@@ -69,7 +69,7 @@ export class ParseUNIXFilePermissions extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
+  run(input: string, _args: any[]): string {
     const perms: Perms = {
       d: false, // directory
       sl: false, // symbolic link
@@ -96,14 +96,13 @@ export class ParseUNIXFilePermissions extends Operation {
       g = 0,
       o = 0,
       output = "",
-      octal: string | null = null,
       textual: string | null = null;
 
     if (input.search(/\s*[0-7]{1,4}\s*/i) === 0) {
       // Input is octal
       const match = input.match(/\s*([0-7]{1,4})\s*/i);
       if (match) {
-        octal = match[1];
+        const octal = match[1];
 
         if (octal.length === 4) {
           d = parseInt(octal[0], 8);
@@ -264,7 +263,7 @@ export class ParseUNIXFilePermissions extends Operation {
  * @returns {string}
  */
 function permsToStr(perms: Perms): string {
-  let str = "",
+  let str: string,
     type = "-";
 
   if (perms.d) type = "d";

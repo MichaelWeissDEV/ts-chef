@@ -38,12 +38,12 @@ export class PlistViewer extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
+  run(input: string, _args: any[]): string {
     const plistStart = input.indexOf("<plist");
     if (plistStart === -1) return input;
 
     // Regexes are designed to transform the xml format into a more readable string format.
-    let formattedInput = input
+    const formattedInput = input
       .slice(plistStart)
       .replace(/<plist.+>/g, "plist => ")
       .replace(/<dict>/g, "{")
@@ -84,7 +84,7 @@ export class PlistViewer extends Operation {
     const printIt = (lines: string[], index: number) => {
       if (!lines.length) return;
 
-      let temp = "";
+      let temp: string;
       const origArr = arrCount;
       let currElem = lines[0];
 
@@ -126,7 +126,7 @@ export class PlistViewer extends Operation {
       if (arrCount > origArr) {
         printIt(lines.slice(1), 0);
       } else {
-        printIt(lines.slice(1), ++index);
+        printIt(lines.slice(1), index + 1);
       }
     };
 

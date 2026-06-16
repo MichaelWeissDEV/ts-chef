@@ -88,7 +88,7 @@ export class ParseX509Certificate extends Operation {
         default:
           undefinedInputFormat = true;
       }
-    } catch (e) {
+    } catch (_e) {
       throw new OperationError(
         "Certificate load error (non-certificate input?)",
       );
@@ -107,7 +107,7 @@ export class ParseX509Certificate extends Operation {
       sig = cert.getSignatureValueHex();
 
     let pkStr = "",
-      sigStr = "",
+      sigStr: string,
       extensions = "";
 
     // Public Key fields
@@ -182,7 +182,7 @@ export class ParseX509Certificate extends Operation {
     let breakoutSig = false;
     try {
       breakoutSig = r.ASN1HEX.dump(sig).indexOf("SEQUENCE") === 0;
-    } catch (err) {
+    } catch {
       // Error processing signature, output without further breakout
     }
 
@@ -201,7 +201,9 @@ export class ParseX509Certificate extends Operation {
         .getInfo()
         .split("X509v3 Extensions:\n")[1]
         .split("signature")[0];
-    } catch (err) {}
+    } catch {
+      // cert may not have extension info
+    }
 
     const issuerStr = formatDnObj(issuer, 2),
       nbDate = formatDate(cert.getNotBefore()),

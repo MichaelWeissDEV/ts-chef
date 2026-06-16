@@ -65,7 +65,9 @@ export class RenderMarkdown extends Operation {
           if (lang && hljs.getLanguage(lang) && enableHighlighting) {
             try {
               return hljs.highlight(str, { language: lang }).value;
-            } catch (__) {}
+            } catch {
+              // highlighting failed, use raw string
+            }
           }
 
           return "";
@@ -91,7 +93,6 @@ export class RenderMarkdown extends Operation {
         return self.renderToken(tokens, idx, options);
       };
 
-    // eslint-disable-next-line camelcase
     md.renderer.rules.link_open = function (tokens, idx, options, env, self) {
       const token = tokens[idx];
       const aIndex = token.attrIndex("target");

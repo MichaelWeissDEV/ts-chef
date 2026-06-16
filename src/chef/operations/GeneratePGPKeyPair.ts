@@ -113,28 +113,26 @@ export class GeneratePGPKeyPair extends Operation {
       asp: ASP,
     };
 
-    return new Promise(async (resolve, reject) => {
-      try {
-        const unsignedKey: any = await promisify(kbpgp.KeyManager.generate)(
-          keyGenerationOptions,
-        );
-        await promisify(unsignedKey.sign.bind(unsignedKey))({});
+    try {
+      const unsignedKey: any = await promisify(kbpgp.KeyManager.generate)(
+        keyGenerationOptions,
+      );
+      await promisify(unsignedKey.sign.bind(unsignedKey))({});
 
-        const signedKey = unsignedKey,
-          privateKeyExportOptions: any = {};
+      const signedKey = unsignedKey,
+        privateKeyExportOptions: any = {};
 
-        if (password) privateKeyExportOptions.passphrase = password;
-        const privateKey: any = await promisify(
-          signedKey.export_pgp_private.bind(signedKey),
-        )(privateKeyExportOptions);
-        const publicKey: any = await promisify(
-          signedKey.export_pgp_public.bind(signedKey),
-        )({});
-        resolve(privateKey + "\n" + publicKey.trim());
-      } catch (err) {
-        reject(`Error whilst generating key pair: ${err}`);
-      }
-    });
+      if (password) privateKeyExportOptions.passphrase = password;
+      const privateKey: any = await promisify(
+        signedKey.export_pgp_private.bind(signedKey),
+      )(privateKeyExportOptions);
+      const publicKey: any = await promisify(
+        signedKey.export_pgp_public.bind(signedKey),
+      )({});
+      return privateKey + "\n" + publicKey.trim();
+    } catch (err) {
+      throw new Error(`Error whilst generating key pair: ${err}`, { cause: err });
+    }
   }
 }
 

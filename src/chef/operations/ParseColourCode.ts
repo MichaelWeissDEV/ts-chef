@@ -38,7 +38,7 @@ export class ParseColourCode extends Operation {
    * @param {Object[]} args
    * @returns {html}
    */
-  run(input: string, args: any[]): string {
+  run(input: string, _args: any[]): string {
     let r = 0,
       g = 0,
       b = 0,
@@ -96,7 +96,7 @@ export class ParseColourCode extends Operation {
       h = Math.round(hsl_[0] * 360),
       s = Math.round(hsl_[1] * 100),
       l = Math.round(hsl_[2] * 100);
-    let k_val = 1 - Math.max(r / 255, g / 255, b / 255),
+    const k_val = 1 - Math.max(r / 255, g / 255, b / 255),
       c_val = (1 - r / 255 - k_val) / (1 - k_val),
       y_val = (1 - b / 255 - k_val) / (1 - k_val),
       m_val = (1 - g / 255 - k_val) / (1 - k_val);

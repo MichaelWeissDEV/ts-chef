@@ -43,68 +43,41 @@ export class SplitColourChannels extends Operation {
    * @param {Object[]} args
    * @returns {List<File>}
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: any, _args: any[]): Promise<any> {
     input = new Uint8Array(input);
     // Make sure that the input is an image
     if (!isImage(input)) throw new OperationError("Invalid file type.");
 
     const parsedImage = await Jimp.read(Buffer.from(input));
 
-    const red = new Promise(async (resolve, reject) => {
-      try {
-        const split = parsedImage
-          .clone()
-          .color([
-            { apply: "blue", params: [-255] },
-            { apply: "green", params: [-255] },
-          ])
-          .getBuffer(JimpMime.png);
-        resolve(
-          new File([new Uint8Array((await split).values())], "red.png", {
-            type: "image/png",
-          }),
-        );
-      } catch (err) {
-        reject(new OperationError(`Could not split red channel: ${err}`));
-      }
-    });
+    const red = parsedImage
+      .clone()
+      .color([
+        { apply: "blue", params: [-255] },
+        { apply: "green", params: [-255] },
+      ])
+      .getBuffer(JimpMime.png)
+      .then((split) => new File([new Uint8Array(split.values())], "red.png", { type: "image/png" }))
+      .catch((err: unknown) => { throw new OperationError(`Could not split red channel: ${err}`); });
 
-    const green = new Promise(async (resolve, reject) => {
-      try {
-        const split = parsedImage
-          .clone()
-          .color([
-            { apply: "red", params: [-255] },
-            { apply: "blue", params: [-255] },
-          ])
-          .getBuffer(JimpMime.png);
-        resolve(
-          new File([new Uint8Array((await split).values())], "green.png", {
-            type: "image/png",
-          }),
-        );
-      } catch (err) {
-        reject(new OperationError(`Could not split green channel: ${err}`));
-      }
-    });
+    const green = parsedImage
+      .clone()
+      .color([
+        { apply: "red", params: [-255] },
+        { apply: "blue", params: [-255] },
+      ])
+      .getBuffer(JimpMime.png)
+      .then((split) => new File([new Uint8Array(split.values())], "green.png", { type: "image/png" }))
+      .catch((err: unknown) => { throw new OperationError(`Could not split green channel: ${err}`); });
 
-    const blue = new Promise(async (resolve, reject) => {
-      try {
-        const split = parsedImage
-          .color([
-            { apply: "red", params: [-255] },
-            { apply: "green", params: [-255] },
-          ])
-          .getBuffer(JimpMime.png);
-        resolve(
-          new File([new Uint8Array((await split).values())], "blue.png", {
-            type: "image/png",
-          }),
-        );
-      } catch (err) {
-        reject(new OperationError(`Could not split blue channel: ${err}`));
-      }
-    });
+    const blue = parsedImage
+      .color([
+        { apply: "red", params: [-255] },
+        { apply: "green", params: [-255] },
+      ])
+      .getBuffer(JimpMime.png)
+      .then((split) => new File([new Uint8Array(split.values())], "blue.png", { type: "image/png" }))
+      .catch((err: unknown) => { throw new OperationError(`Could not split blue channel: ${err}`); });
 
     return await Promise.all([red, green, blue]);
   }

@@ -15,7 +15,7 @@ import { Operation } from "../Operation";
 import { Utils } from "../Utils";
 import { OperationError } from "../errors/OperationError";
 
-const EMAIL_REGEX = /\b([\w.%+\-]+)@([\w\-]+\.)+([A-Za-z]{2,})\b/;
+const EMAIL_REGEX = /\b([\w.%+-]+)@([\w-]+\.)+([A-Za-z]{2,})\b/;
 
 export class RegularExpression extends Operation {
   constructor() {
