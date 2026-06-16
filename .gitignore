@@ -16,13 +16,7 @@ node_modules/
 *.log
 .DS_Store
 
-# IDE files
-.vscode/*
-!.vscode/launch.json
-!.vscode/tasks.json
-!.vscode/extensions.json
-.history/
-.claude/
+
 
 # Documentation
 /docs/api/
