@@ -39,7 +39,7 @@ Use it to inspect encoded strings, build repeatable transformation pipelines, de
 
 ## Installation
 
-Install `ts-chef` from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=michaelweiss.ts-chef), or search for `ts-chef` in the VS Code Extensions view.
+Install `ts-chef` from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=MichaelWeiss.vscode-ts-chef), or search for `ts-chef` in the VS Code Extensions view.
 
 Requirements:
 
