@@ -148,6 +148,7 @@ export function decodeUtf16LE(b: Uint8Array, off: number, len: number): string {
   try {
     return new TextDecoder("utf-16le")
       .decode(b.slice(off, off + len))
+      // eslint-disable-next-line no-control-regex
       .replace(/\u0000/g, "")
       .trim();
   } catch {
@@ -220,6 +221,7 @@ export function safeUtf8(bytes: Uint8Array): string {
  */
 export function decodeLatin1Trim(bytes: Uint8Array): string {
   return decodeText(bytes, 0)
+    // eslint-disable-next-line no-control-regex
     .replace(/\u0000/g, "")
     .trim();
 }

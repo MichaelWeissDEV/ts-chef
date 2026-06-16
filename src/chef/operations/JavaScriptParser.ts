@@ -75,9 +75,7 @@ export class JavaScriptParser extends Operation {
         comment: parseComment,
         tolerant: parseTolerant,
       };
-    let result = {};
-
-    result = esprima.parseScript(input, options);
+    const result = esprima.parseScript(input, options);
     return JSON.stringify(result, null, 2);
   }
 }

@@ -65,7 +65,7 @@ export class JavaScriptBeautify extends Operation {
     const beautifyIndent = args[0] || "\\t",
       quotes = args[1].toLowerCase(),
       [, beautifySemicolons, beautifyComment] = args;
-    let result = "",
+    let result: string,
       AST;
 
     try {

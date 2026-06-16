@@ -39,7 +39,7 @@ export class MD5 extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     return runHash("md5", input);
   }
 }

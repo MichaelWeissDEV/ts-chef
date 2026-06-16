@@ -39,10 +39,10 @@ export class JSONtoYAML extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     try {
       return YAML.stringify(input);
-    } catch (err) {
+    } catch {
       throw new OperationError("Test");
     }
   }

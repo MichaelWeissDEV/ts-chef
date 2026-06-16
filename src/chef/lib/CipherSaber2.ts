@@ -19,8 +19,8 @@ export function encode(
 ): number[] {
   const ivp = new Uint8Array([...key, ...tempIVP]);
   const state = new Array(256).fill(0);
-  let j = 0,
-    i = 0;
+  let j = 0;
+  let i: number;
   const result: number[] = [];
 
   // Mixing states based off of IV.
@@ -37,7 +37,7 @@ export function encode(
 
   // XOR cipher with key.
   for (let x = 0; x < input.length; x++) {
-    i = ++i % 256;
+    i = (i + 1) % 256;
     j = (j + state[i]) % 256;
     [state[i], state[j]] = [state[j], state[i]];
     const n = (state[i] + state[j]) % 256;

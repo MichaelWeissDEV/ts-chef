@@ -112,7 +112,7 @@ export class FuzzyMatch extends Operation {
     let result = "",
       pos = 0,
       hlClass = "hl1";
-    matches.forEach(([matches, score, idxs]) => {
+    matches.forEach(([_matches, _score, idxs]) => {
       const matchRanges = calcMatchRanges(idxs);
 
       matchRanges.forEach(([start, length], i) => {

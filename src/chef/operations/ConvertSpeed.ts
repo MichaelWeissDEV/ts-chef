@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { Operation } from "../Operation";
 import BigNumber from "bignumber.js";
 
 /**

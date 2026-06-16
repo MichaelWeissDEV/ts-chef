@@ -33,7 +33,7 @@ function getDisplacement(offset: number) {
  * @returns {number[]}
  */
 export function decompress(compressed: number[]) {
-  const decompressed = Array();
+  const decompressed: number[] = [];
   let coffset = 0;
 
   while (coffset + 2 <= compressed.length) {

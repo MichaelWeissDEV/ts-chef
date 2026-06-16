@@ -66,12 +66,13 @@ export class ChangeIPFormat extends Operation {
       }
 
       switch (inFormat) {
-        case "Dotted Decimal":
+        case "Dotted Decimal": {
           const octets = lines[i].split(".");
           for (let j = 0; j < octets.length; j++) {
             baIp.push(parseInt(octets[j], 10));
           }
           break;
+        }
         case "Decimal":
           baIp = this.fromNumber(lines[i].toString(), 10);
           break;
@@ -86,32 +87,36 @@ export class ChangeIPFormat extends Operation {
       }
 
       switch (outFormat) {
-        case "Dotted Decimal":
+        case "Dotted Decimal": {
           let ddIp = "";
           for (let j = 0; j < baIp.length; j++) {
             ddIp += baIp[j] + ".";
           }
           output += ddIp.slice(0, -1) + "\n";
           break;
-        case "Decimal":
+        }
+        case "Decimal": {
           const decIp =
             ((baIp[0] << 24) | (baIp[1] << 16) | (baIp[2] << 8) | baIp[3]) >>>
             0;
           output += decIp.toString() + "\n";
           break;
-        case "Octal":
+        }
+        case "Octal": {
           const octIp =
             ((baIp[0] << 24) | (baIp[1] << 16) | (baIp[2] << 8) | baIp[3]) >>>
             0;
           output += "0" + octIp.toString(8) + "\n";
           break;
-        case "Hex":
+        }
+        case "Hex": {
           let hexIp = "";
           for (let j = 0; j < baIp.length; j++) {
             hexIp += Utils.hex(baIp[j]);
           }
           output += hexIp + "\n";
           break;
+        }
         default:
           throw new OperationError("Unsupported output IP format");
       }

@@ -401,7 +401,7 @@ export function decode(
         witnessVersion = null;
         bytes = fromWords(words);
       }
-    } catch (e) {
+    } catch {
       // SegWit decode failed, try generic decode
       witnessVersion = null;
       try {

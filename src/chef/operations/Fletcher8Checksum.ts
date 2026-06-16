@@ -39,7 +39,7 @@ export class Fletcher8Checksum extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     let a = 0,
       b = 0;
     input = new Uint8Array(input);

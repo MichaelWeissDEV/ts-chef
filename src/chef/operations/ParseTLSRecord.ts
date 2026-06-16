@@ -51,7 +51,7 @@ export class ParseTLSRecord extends Operation {
    * @param {any[]} args
    * @returns {any[]} Array of Object representations of TLS Records contained within input.
    */
-  run(input: ArrayBuffer, args: any[]): any[] {
+  run(input: ArrayBuffer, _args: any[]): any[] {
     const s = new Stream(new Uint8Array(input));
 
     const output: any[] = [];

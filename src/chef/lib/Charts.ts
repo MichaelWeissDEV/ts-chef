@@ -90,7 +90,7 @@ export function getScatterValues(
   fieldDelimiter: string,
   columnHeadingsAreIncluded: boolean,
 ): { headings?: { x: string; y: string }; values: number[][] } {
-  let { headings, values } = getValues(
+  const { headings, values } = getValues(
     input,
     recordDelimiter,
     fieldDelimiter,
@@ -134,7 +134,7 @@ export function getScatterValuesWithColour(
   fieldDelimiter: string,
   columnHeadingsAreIncluded: boolean,
 ): { headings?: { x: string; y: string }; values: (number | string)[][] } {
-  let { headings, values } = getValues(
+  const { headings, values } = getValues(
     input,
     recordDelimiter,
     fieldDelimiter,
@@ -177,7 +177,7 @@ export function getSeriesValues(
   input: string,
   recordDelimiter: string,
   fieldDelimiter: string,
-  columnHeadingsAreIncluded: boolean,
+  _columnHeadingsAreIncluded: boolean,
 ): {
   xValues: string[];
   series: { name: string; data: { [key: string]: number } }[];
@@ -190,7 +190,7 @@ export function getSeriesValues(
     3,
   );
 
-  let xValuesSet = new Set<string>();
+  const xValuesSet = new Set<string>();
   const series: { [serie: string]: { [xVal: string]: number } } = {};
 
   values.forEach((row) => {

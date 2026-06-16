@@ -2697,7 +2697,7 @@ export function extractJPEG(bytes: Uint8Array, offset: number): Uint8Array {
         `Invalid marker while parsing JPEG at pos ${stream.position}: ${marker}`,
       );
 
-    let segmentSize = 0;
+    let segmentSize: number;
     switch (marker[1]) {
       // No length
       case 0xd8: // Start of Image
@@ -3046,8 +3046,8 @@ export function extractPNG(bytes: Uint8Array, offset: number): Uint8Array {
   // Move past signature to first chunk
   stream.moveForwardsBy(8);
 
-  let chunkSize = 0,
-    chunkType = "";
+  let chunkSize: number;
+  let chunkType = "";
 
   while (chunkType !== "IEND") {
     chunkSize = stream.readInt(4, "be")!;
@@ -3740,7 +3740,7 @@ function parseHuffmanBlock(
 ): void {
   let code;
   let loops = 0;
-  // @ts-ignore
+  // @ts-expect-error -- readHuffmanCode accepts tuple argument
   while ((code = readHuffmanCode(stream, [litTab, 8]))) {
     // Simplified table passing
     if (code === 256) break;
@@ -3750,7 +3750,7 @@ function parseHuffmanBlock(
       );
     if (code < 256) continue;
     stream.readBits(lengthExtraTable[code - 257], "le");
-    // @ts-ignore
+    // @ts-expect-error -- readHuffmanCode accepts tuple argument
     code = readHuffmanCode(stream, [distTab, 5]);
     stream.readBits(distanceExtraTable[code], "le");
   }
@@ -3762,10 +3762,8 @@ function parseHuffmanBlock(
 function buildHuffmanTable(
   lengths: Uint8Array | number[],
 ): [Uint32Array, number, number] {
-  // @ts-ignore
-  const maxCodeLength = Math.max(...lengths);
-  // @ts-ignore
-  const minCodeLength = Math.min(...lengths.filter((l) => l > 0));
+  const maxCodeLength = Math.max(...(lengths as number[]));
+  const minCodeLength = Math.min(...(lengths as number[]).filter((l) => l > 0));
   const size = 1 << maxCodeLength;
   const table = new Uint32Array(size);
 

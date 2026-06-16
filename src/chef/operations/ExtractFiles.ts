@@ -28,7 +28,7 @@ export class ExtractFiles extends Operation {
     super();
 
     // Get the first extension for each signature that can be extracted
-    let supportedExts = Object.keys(FILE_SIGNATURES).map((cat) => {
+    const supportedExts = Object.keys(FILE_SIGNATURES).map((cat) => {
       return FILE_SIGNATURES[cat]
         .filter((sig) => sig.extractor)
         .map((sig) => sig.extension.toUpperCase());

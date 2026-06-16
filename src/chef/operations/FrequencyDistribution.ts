@@ -52,7 +52,7 @@ export class FrequencyDistribution extends Operation {
    * @param {Object[]} args
    * @returns {json}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     const data = new Uint8Array(input);
     if (!data.length) throw new OperationError("No data");
 

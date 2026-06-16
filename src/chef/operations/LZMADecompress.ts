@@ -41,7 +41,7 @@ export class LZMADecompress extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: any, _args: any[]): Promise<any> {
     return new Promise((resolve, reject) => {
       decompress(
         new Uint8Array(input),

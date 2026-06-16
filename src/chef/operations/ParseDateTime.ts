@@ -66,7 +66,7 @@ export class ParseDateTime extends Operation {
     try {
       date = moment.tz(input, inputFormat, inputTimezone);
       if (!date || date.format() === "Invalid date") throw Error;
-    } catch (err) {
+    } catch (_err) {
       return `Invalid format.\n\n${FORMAT_EXAMPLES}`;
     }
 

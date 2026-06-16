@@ -47,7 +47,7 @@ export class DefangIPAddresses extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
+  run(input: string, _args: any[]): string {
     input = input.replace(IPV4_REGEX, (x) => {
       return x.replace(/\./g, "[.]");
     });

@@ -11,7 +11,6 @@
  * -----------------------------------------------------------------------------
  */
 
-// @ts-ignore
 import zlibAndGzip from "zlibjs/bin/zlib_and_gzip.min.js";
 
 const Zlib = zlibAndGzip.Zlib;

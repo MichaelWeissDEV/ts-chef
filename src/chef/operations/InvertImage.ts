@@ -42,7 +42,7 @@ export class InvertImage extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: any, _args: any[]): Promise<any> {
     if (!isImage(input)) {
       throw new OperationError("Invalid input file format.");
     }

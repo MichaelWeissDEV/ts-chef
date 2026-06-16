@@ -73,7 +73,7 @@ export function ipv6CidrRange(
     total = new Array(128);
 
   const mask = genIpv6Mask(cidrRange);
-  let totalDiff = "";
+  let totalDiff: string;
 
   for (let i = 0; i < 8; i++) {
     ip1[i] = network[i] & mask[i];
@@ -167,7 +167,7 @@ export function ipv6HyphenatedRange(
     total = new Array(128).fill(0);
 
   let output = "",
-    t = "",
+    t: string,
     i;
 
   for (i = 0; i < 8; i++) {
@@ -367,8 +367,8 @@ export function strToIpv6(ipStr: string): number[] {
  * Converts an IPv6 address from numerical array format to string format.
  */
 export function ipv6ToStr(ipv6: number[], compact?: boolean): string {
-  let output = "",
-    i = 0;
+  let output = "";
+  let i: number;
 
   if (compact) {
     let start = -1,

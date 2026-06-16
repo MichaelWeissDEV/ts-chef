@@ -162,7 +162,7 @@ export class MicrosoftScriptDecoder extends Operation {
     this.args = [];
     this.checks = [
       {
-        pattern: "#@~\\\^.{6}==(.+).{6}==\\\^#~@",
+        pattern: "#@~\\^.{6}==(.+).{6}==\\^#~@",
         flags: "i",
         args: [],
       },

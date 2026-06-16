@@ -40,7 +40,7 @@ export class ParseObjectIDTimestamp extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     try {
       const objectId = new BSON.ObjectId(input);
       return objectId.getTimestamp().toISOString();

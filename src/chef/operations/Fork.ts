@@ -58,7 +58,7 @@ export class Fork extends Operation {
    * @param {Operation[]} state.opList - The list of operations in the recipe.
    * @returns {Object} The updated state of the recipe.
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: any, _args: any[]): Promise<any> {
     const state = input;
     const opList = state.opList,
       inputType = opList[state.progress].inputType,

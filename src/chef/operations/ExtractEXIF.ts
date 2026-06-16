@@ -45,7 +45,7 @@ export class ExtractEXIF extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     try {
       const parser = ExifParser.create(input);
       const result = parser.parse();

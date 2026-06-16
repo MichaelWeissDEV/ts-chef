@@ -84,7 +84,7 @@ export class ParseX509CRL extends Operation {
         default:
           undefinedInputFormat = true;
       }
-    } catch (e) {
+    } catch (_e) {
       throw new OperationError(
         "Certificate load error (non-certificate input?)",
       );

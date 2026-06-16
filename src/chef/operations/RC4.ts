@@ -108,7 +108,7 @@ export class RC4 extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlight(pos: any, args: any[]): any {
+  highlight(pos: any, _args: any[]): any {
     return pos;
   }
 
@@ -121,7 +121,7 @@ export class RC4 extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlightReverse(pos: any, args: any[]): any {
+  highlightReverse(pos: any, _args: any[]): any {
     return pos;
   }
 }

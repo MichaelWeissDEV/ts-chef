@@ -97,7 +97,7 @@ export class RenderImage extends Operation {
    * @param {byteArray} data
    * @returns {html}
    */
-  async present(data: any, args: any[]): Promise<any> {
+  async present(data: any, _args: any[]): Promise<any> {
     if (!data.length) return "";
 
     let dataURI = "data:";

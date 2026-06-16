@@ -72,7 +72,7 @@ export class CSVToJSON extends Operation {
     }
 
     switch (format) {
-      case "Array of dictionaries":
+      case "Array of dictionaries": {
         const header = json[0] as string[];
         return json.slice(1).map((row) => {
           const obj: Record<string, string> = {};
@@ -81,6 +81,7 @@ export class CSVToJSON extends Operation {
           });
           return obj;
         });
+      }
       case "Array of arrays":
       default:
         return json;

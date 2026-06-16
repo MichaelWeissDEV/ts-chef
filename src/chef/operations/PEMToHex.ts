@@ -48,7 +48,7 @@ export class PEMToHex extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     const output = [];
     let match;
     const regex = /-----BEGIN ([A-Z][A-Z ]+[A-Z])-----/g;

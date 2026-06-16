@@ -1339,7 +1339,7 @@ export class CRCChecksum extends Operation {
     const TOP_BIT = 1n << (width - 1n);
     const MASK = (1n << width) - 1n;
 
-    for (let byte of input) {
+    for (const byte of input) {
       let b = BigInt(byte);
       if (reflectIn) {
         b = this.reflectData(b, 8n);
@@ -1400,7 +1400,7 @@ export class CRCChecksum extends Operation {
     const MASK = (1n << width) - 1n;
     const TABLE = this.generateTable(width, poly, MASK, TOP_BIT);
 
-    for (let byte of input) {
+    for (const byte of input) {
       let b = BigInt(byte);
       if (reflectIn) {
         b = this.reflectData(b, 8n);
@@ -1469,7 +1469,7 @@ export class CRCChecksum extends Operation {
       const xorOut = BigInt("0x" + xorOutObject.string);
 
       return this.crc(width, input, poly, init, reflectIn, reflectOut, xorOut);
-    } catch (error) {
+    } catch {
       throw new OperationError("Invalid custom CRC arguments");
     }
   }

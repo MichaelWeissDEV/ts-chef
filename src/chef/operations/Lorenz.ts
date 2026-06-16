@@ -434,7 +434,7 @@ export class Lorenz extends Operation {
 
       const basicmotor = m37lug;
       let totalmotor: number;
-      let lim = 0;
+      let lim: number;
 
       p5[2] = p5[1];
       p5[1] = p5[0];

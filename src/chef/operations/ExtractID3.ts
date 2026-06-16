@@ -41,7 +41,7 @@ export class ExtractID3 extends Operation {
    * @param {any[]} args
    * @returns {any}
    */
-  run(inputBuffer: ArrayBuffer, args: any[]): any {
+  run(inputBuffer: ArrayBuffer, _args: any[]): any {
     let input = new Uint8Array(inputBuffer);
 
     /**

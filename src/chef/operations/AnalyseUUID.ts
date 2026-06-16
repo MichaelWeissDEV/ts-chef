@@ -58,7 +58,7 @@ export class AnalyseUUID extends Operation {
     try {
       uuidVersion = uuid.version(trimmedInput); // Re-using the uuid library to extract version
       uuidBytes = uuid.parse(trimmedInput) as Uint8Array; // Re-using the uuid library to parse bytes
-    } catch (error) {
+    } catch {
       throw new OperationError("Invalid UUID");
     }
 

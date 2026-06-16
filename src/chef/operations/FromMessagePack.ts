@@ -40,7 +40,7 @@ export class FromMessagePack extends Operation {
    * @param {Object[]} args
    * @returns {JSON}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     try {
       const buf = Buffer.from(new Uint8Array(input));
       return notepack.decode(buf);

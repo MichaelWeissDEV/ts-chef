@@ -13,7 +13,7 @@
 
 import { Operation } from "../Operation";
 import { Utils } from "../Utils";
-import { B32_ALPHA, B32HEX_ALPHA } from "./ToBase32";
+import { B32_ALPHA } from "./ToBase32";
 import OperationError from "../errors/OperationError";
 
 /**

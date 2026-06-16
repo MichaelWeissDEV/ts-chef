@@ -43,7 +43,7 @@ export class MIMEDecoding extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     const mimeEncodedText = Utils.byteArrayToUtf8(input);
     const encodedHeaders = mimeEncodedText.replace(/\r\n/g, "\n");
 

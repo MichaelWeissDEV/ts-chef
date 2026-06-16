@@ -99,7 +99,7 @@ export function deriveKey(password: string) {
  */
 function checkKey(key: string) {
   if (key.length !== letters.length) throw new OperationError("Wrong key size");
-  const counts: any = new Array();
+  const counts: any = {};
   for (let i = 0; i < letters.length; i++) counts[letters.charAt(i)] = 0;
   for (const elem of letters) {
     if (letters.indexOf(elem) === -1)

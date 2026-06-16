@@ -40,7 +40,7 @@ export class PubKeyFromPrivKey extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
+  run(input: string, _args: any[]): string {
     let output = "";
     let match: RegExpExecArray | null;
     const regex = /-----BEGIN ((RSA |EC |DSA )?PRIVATE KEY)-----/g;

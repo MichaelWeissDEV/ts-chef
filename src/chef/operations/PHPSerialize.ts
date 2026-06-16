@@ -40,7 +40,7 @@ export class PHPSerialize extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     /**
      * Determines if a number is an integer
      * @param {number} value

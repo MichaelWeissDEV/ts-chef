@@ -155,7 +155,7 @@ export function fromModhex(
 
   // The `.replace(/\s/g, "")` an interesting workaround: Hex "multiline" tests aren't actually
   // multiline. Tests for Modhex fixes that, thus exposing the issue.
-  let cleanedData = data.toLowerCase().replace(/\s/g, "");
+  const cleanedData = data.toLowerCase().replace(/\s/g, "");
 
   let dataParts: string[];
   if (delim !== "None") {

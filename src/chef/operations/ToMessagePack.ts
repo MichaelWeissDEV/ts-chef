@@ -40,7 +40,7 @@ export class ToMessagePack extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     try {
       const res = notepack.encode(input);
       // Safely convert from Node Buffer to ArrayBuffer using the correct view of the data

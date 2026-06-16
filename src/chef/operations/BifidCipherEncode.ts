@@ -50,7 +50,6 @@ export class BifidCipherEncode extends Operation {
    */
   run(input: string, args: any[]): string {
     const keywordStr = args[0].toUpperCase().replace(/J/g, "I"),
-      keyword = [...new Set(keywordStr.split(""))],
       alpha = "ABCDEFGHIKLMNOPQRSTUVWXYZ",
       xCo: number[] = [],
       yCo: number[] = [],

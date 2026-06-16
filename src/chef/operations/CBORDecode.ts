@@ -24,7 +24,7 @@ export class CBORDecode extends Operation {
   outputType = "JSON";
   args: ArgConfig[] = [];
 
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     return Cbor.decodeFirstSync(Buffer.from(input).toString("hex"));
   }
 }

@@ -220,7 +220,7 @@ export function toJA4S(bytes: Uint8Array): JA4SResult {
   const versionStr = tlsVersionMapper(version);
 
   /* Number of Extensions */
-  let extLen = tlsr.handshake.value.extensions.value.length;
+  const extLen = tlsr.handshake.value.extensions.value.length;
   const extLenStr = extLen > 99 ? "99" : extLen.toString().padStart(2, "0");
 
   /* ALPN Extension Chosen Value */

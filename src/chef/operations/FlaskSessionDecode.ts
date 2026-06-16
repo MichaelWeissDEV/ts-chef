@@ -71,7 +71,7 @@ export class FlaskSessionDecode extends Operation {
     let payloadJson;
     try {
       payloadJson = fromBase64(padded) as string;
-    } catch (e) {
+    } catch {
       throw new OperationError("Invalid Base64 payload");
     }
 

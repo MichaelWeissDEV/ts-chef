@@ -89,7 +89,7 @@ export class RotateImage extends Operation {
    * @param {ArrayBuffer} data
    * @returns {html}
    */
-  present(data: any, args: any[]): any {
+  present(data: any, _args: any[]): any {
     if (!data.byteLength) return "";
     const dataArray = new Uint8Array(data);
 

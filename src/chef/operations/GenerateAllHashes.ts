@@ -320,7 +320,7 @@ export class GenerateAllHashes extends Operation {
    * @returns {string}
    */
   executeAlgo(algo: Operation, inputType: string, params: any[] = []): string {
-    let digest = "";
+    let digest: string;
     switch (inputType) {
       case "arrayBuffer":
         digest = algo.run(this.inputArrayBuffer, params);

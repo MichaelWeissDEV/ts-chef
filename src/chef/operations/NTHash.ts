@@ -39,7 +39,7 @@ export class NTHash extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     // Convert to UTF-16LE
     const buf = new ArrayBuffer(input.length * 2);
     const bufView = new Uint16Array(buf);

@@ -39,7 +39,7 @@ export class HaversineDistance extends Operation {
    * @param {Object[]} args
    * @returns {number}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     const values = input.match(
       /^(-?\d+(\.\d+)?), ?(-?\d+(\.\d+)?), ?(-?\d+(\.\d+)?), ?(-?\d+(\.\d+)?)$/,
     );

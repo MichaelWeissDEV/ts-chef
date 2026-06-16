@@ -38,14 +38,14 @@ export class CitrixCTX1Decode extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: ArrayBuffer, args: any[]): string {
+  run(input: ArrayBuffer, _args: any[]): string {
     const inputBytes = new Uint8Array(input);
     if (inputBytes.length % 4 !== 0) {
       throw new OperationError("Incorrect hash length");
     }
     const revinput = new Uint8Array(inputBytes).reverse();
     const result: number[] = [];
-    let temp = 0;
+    let temp: number;
     for (let i = 0; i < revinput.length; i += 2) {
       if (i + 2 >= revinput.length) {
         temp = 0;

@@ -75,12 +75,12 @@ export class GroupIPAddresses extends Operation {
       ips = input.split(delim),
       ipv4Networks: { [key: number]: number[] } = {},
       ipv6Networks: { [key: string]: number[][] } = {};
-    let match: RegExpExecArray | null = null,
+    let match: RegExpExecArray | null,
       output = "",
-      ip4: number = 0,
-      ip6: number[] = [],
-      network4: number = 0,
-      networkStr = "",
+      ip4: number,
+      ip6: number[],
+      network4: number,
+      networkStr: string,
       i: number;
 
     if (cidr < 0 || cidr > 127) {
@@ -103,8 +103,6 @@ export class GroupIPAddresses extends Operation {
       } else if ((match = IPV6_REGEX.exec(ips[i]))) {
         ip6 = strToIpv6(match[1]) as number[];
         const networkArr: number[] = [];
-        networkStr = "";
-
         for (let j = 0; j < 8; j++) {
           networkArr.push(ip6[j] & ipv6Mask[j]);
         }

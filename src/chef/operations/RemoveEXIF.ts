@@ -43,7 +43,7 @@ export class RemoveEXIF extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     input = new Uint8Array(input);
     // Do nothing if input is empty
     if (input.length === 0) return input;

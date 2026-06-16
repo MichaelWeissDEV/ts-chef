@@ -45,7 +45,7 @@ export class DechunkHTTPResponse extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     const chunks = [];
     let chunkSizeEnd = input.indexOf("\n") + 1;
     const lineEndings = input.charAt(chunkSizeEnd - 2) === "\r" ? "\r\n" : "\n";

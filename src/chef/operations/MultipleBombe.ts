@@ -31,19 +31,6 @@ function rotorsFormat(rotors: any[], s: number, n: number): string {
   return res.join("\n");
 }
 
-/**
- * Combinatorics choose function
- * @param {number} n
- * @param {number} k
- * @returns {number}
- */
-function choose(n: number, k: number): number {
-  let res = 1;
-  for (let i = 1; i <= k; i++) {
-    res *= (n + 1 - i) / i;
-  }
-  return res;
-}
 
 /**
  * Bombe operation

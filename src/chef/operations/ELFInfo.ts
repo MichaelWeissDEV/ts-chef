@@ -42,7 +42,7 @@ export class ELFInfo extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: ArrayBuffer, args: any[]): string {
+  run(input: ArrayBuffer, _args: any[]): string {
     let phoff = 0;
     let phEntries = 0;
     let shoff = 0;
@@ -252,7 +252,7 @@ export class ELFInfo extends Operation {
       }
       ehResult.push("Type:".padEnd(align) + eType);
 
-      let ISA = "";
+      let ISA: string;
       switch (stream.readInt(2, endianness) ?? -1) {
         case 0x0000:
           ISA = "No specific instruction set";
@@ -752,7 +752,7 @@ export class ELFInfo extends Operation {
       const shResult: string[] = [];
 
       const nameOffset = stream.readInt(4, endianness) ?? 0;
-      let type = "";
+      let type: string;
       const shType = stream.readInt(4, endianness) ?? -1;
       switch (true) {
         case shType === 0x00000001:
@@ -965,7 +965,7 @@ export class ELFInfo extends Operation {
     result.push("=".repeat(align) + " Symbol Table " + "=".repeat(align));
 
     stream.moveTo(symtabOffset);
-    let elem = "";
+    let elem: string;
     for (let i = 0; i < symtabSize / symtabEntSize; i++)
       if ((elem = getSymbols(stream)) !== "")
         result.push("Symbol Name:".padEnd(align) + elem);

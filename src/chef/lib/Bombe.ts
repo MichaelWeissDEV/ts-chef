@@ -279,16 +279,16 @@ export class BombeMachine {
 
     const [mostConnected, edges] = this.makeMenu();
 
-    this.wires = new Array(26 * 26).fill(false);
-    this.scramblers = new Array();
+    this.wires = Array(26 * 26).fill(false);
+    this.scramblers = [];
     for (let i = 0; i < 26; i++) {
-      this.scramblers.push(new Array());
+      this.scramblers.push([]);
     }
     this.sharedScrambler = new SharedScrambler(
       this.baseRotors.slice(1),
       reflector,
     );
-    this.allScramblers = new Array();
+    this.allScramblers = [];
     let indicatorObj: Scrambler | undefined = undefined;
     for (const edge of edges as Edge[]) {
       const cRotor = this.baseRotors[0].copy();

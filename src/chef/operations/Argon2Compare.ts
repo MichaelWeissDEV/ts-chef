@@ -61,7 +61,7 @@ export class Argon2Compare extends Operation {
       } else {
         return "No match";
       }
-    } catch (err) {
+    } catch {
       return "No match";
     }
   }

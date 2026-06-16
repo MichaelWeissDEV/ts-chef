@@ -24,7 +24,7 @@ export class CBOREncode extends Operation {
   outputType = "ArrayBuffer";
   args: ArgConfig[] = [];
 
-  run(input: any, args: any[]): ArrayBuffer {
+  run(input: any, _args: any[]): ArrayBuffer {
     return new Uint8Array(Cbor.encodeCanonical(input)).buffer;
   }
 }

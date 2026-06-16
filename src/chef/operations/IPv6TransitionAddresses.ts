@@ -191,7 +191,7 @@ export class IPv6TransitionAddresses extends Operation {
      */
     const unTransition = (input: string): string => {
       let output = "";
-      let hextets = "";
+      let hextets: string;
 
       /**
        * 6to4

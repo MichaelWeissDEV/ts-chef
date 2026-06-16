@@ -148,7 +148,7 @@ class Protobuf {
       }
       Protobuf.updateMainMessageName();
     } catch (error) {
-      throw new Error("Schema " + error);
+      throw new Error("Schema " + error, { cause: error });
     }
   }
 
@@ -213,7 +213,7 @@ class Protobuf {
       }
     } catch (error) {
       if (message) {
-        throw new Error("Input " + error);
+        throw new Error("Input " + error, { cause: error });
       } else {
         return rawDecode;
       }
@@ -596,7 +596,7 @@ class Protobuf {
         ...this.fieldTypes[fieldNum],
         ...pbObject.fieldTypes,
       };
-    } catch (err) {
+    } catch {
       // Otherwise treat as bytes
       field = Utils.byteArrayToChars(Array.from(fieldBytes));
     }

@@ -40,7 +40,7 @@ export class Return extends Operation {
    * @param {Operation[]} state.opList - The list of operations in the recipe.
    * @returns {Object} The updated state of the recipe.
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     return input;
   }
 }

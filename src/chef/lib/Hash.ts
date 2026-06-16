@@ -12,7 +12,6 @@
  */
 
 import Utils from "../Utils";
-// @ts-ignore
 import CryptoApi from "crypto-api/src/crypto-api.mjs";
 
 /**

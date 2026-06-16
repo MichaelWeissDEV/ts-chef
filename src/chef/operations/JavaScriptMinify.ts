@@ -38,7 +38,7 @@ export class JavaScriptMinify extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: any, _args: any[]): Promise<any> {
     const result = await terser.minify(input);
     if (result.error) {
       throw new OperationError(`Error minifying JavaScript. (${result.error})`);

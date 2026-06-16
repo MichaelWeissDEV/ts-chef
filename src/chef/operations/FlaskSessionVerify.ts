@@ -115,7 +115,7 @@ export class FlaskSessionVerify extends Operation {
     let payloadJson: string;
     try {
       payloadJson = fromBase64(padded) as string;
-    } catch (e) {
+    } catch {
       throw new OperationError("Invalid Base64 payload");
     }
 

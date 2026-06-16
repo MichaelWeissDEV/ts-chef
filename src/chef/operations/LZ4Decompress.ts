@@ -39,7 +39,7 @@ export class LZ4Decompress extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     const inBuf = new Uint8Array(input);
     const decompressed = lz4.decompress(inBuf);
     return decompressed.buffer;

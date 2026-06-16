@@ -40,7 +40,7 @@ export class LMHash extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     return (ntlm as any).smbhash.lmhash(input);
   }
 }

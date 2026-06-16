@@ -90,7 +90,7 @@ export class DateTimeDelta extends Operation {
     try {
       date = moment.tz(input, inputFormat, inputTimezone);
       if (!date || date.format() === "Invalid date") throw Error();
-    } catch (err) {
+    } catch {
       return `Invalid format.\n\n${FORMAT_EXAMPLES}`;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

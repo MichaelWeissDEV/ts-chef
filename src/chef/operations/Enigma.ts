@@ -16,30 +16,6 @@ import { OperationError } from "../errors/OperationError";
 import { Utils, LETTERS } from "../Utils";
 
 /**
- * Enigma rotor configuration
- */
-interface RotorConfig {
-  name: string;
-  value: string;
-}
-
-/**
- * Reflector configuration
- */
-interface ReflectorConfig {
-  name: string;
-  value: string;
-}
-
-/**
- * Enigma plugboard configuration
- */
-interface PlugboardConfig {
-  name: string;
-  value: string;
-}
-
-/**
  * Rotor state
  */
 class Rotor {
@@ -147,10 +123,10 @@ class PairMapBase {
       if (a === b) {
         return;
       }
-      if (this.map.hasOwnProperty(a)) {
+      if (Object.prototype.hasOwnProperty.call(this.map,a)) {
         throw new OperationError(`${name} connects ${pair[0]} more than once`);
       }
-      if (this.map.hasOwnProperty(b)) {
+      if (Object.prototype.hasOwnProperty.call(this.map,b)) {
         throw new OperationError(`${name} connects ${pair[1]} more than once`);
       }
       this.map[a] = b;
@@ -159,7 +135,7 @@ class PairMapBase {
   }
 
   transform(c: number): number {
-    if (!this.map.hasOwnProperty(c)) {
+    if (!Object.prototype.hasOwnProperty.call(this.map,c)) {
       return c;
     }
     return this.map[c];

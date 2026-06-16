@@ -40,7 +40,7 @@ export class LZNT1Decompress extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  run(input: any, args: any[]): any {
+  run(input: any, _args: any[]): any {
     return decompress(input);
   }
 }

@@ -36,7 +36,7 @@ export class CitrixCTX1Encode extends Operation {
    * @param {any[]} args
    * @returns {number[]}
    */
-  run(input: string, args: any[]): number[] {
+  run(input: string, _args: any[]): number[] {
     const utf16pass = Buffer.from(input, "utf16le");
     const result: number[] = [];
     let temp = 0;

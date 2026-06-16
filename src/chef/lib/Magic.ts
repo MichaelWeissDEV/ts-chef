@@ -65,9 +65,9 @@ class Magic {
     depth: number,
     extLang: boolean,
     crib: string,
-    p0: never[],
-    p1: boolean,
-    cribRegex: RegExp | null,
+    _p0: never[],
+    _p1: boolean,
+    _cribRegex: RegExp | null,
   ): Promise<MagicResult[]> {
     void depth;
     void extLang;

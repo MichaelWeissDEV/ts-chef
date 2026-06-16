@@ -54,7 +54,7 @@ export class GenerateECDSAKeyPair extends Operation {
   async run(input: any, args: any[]): Promise<any> {
     const [curveName, outputFormat] = args;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       let internalCurveName;
       switch (curveName) {
         case "P-256":
