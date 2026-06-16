@@ -15,7 +15,7 @@ import {
 } from "./commands/runner";
 import { analyseValue } from "./providers/detector";
 import { initOutputChannel, log } from "./logger";
-import registry from "./generated/opsRegistry";
+import registry from "./opsRegistry";
 import type { Operation } from "./chef/Operation";
 
 function resultToString(result: unknown): string {

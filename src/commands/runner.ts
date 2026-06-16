@@ -1,4 +1,4 @@
-import registry, { findOp } from "../generated/opsRegistry";
+import registry, { findOp } from "../opsRegistry";
 import type { ArgConfig } from "../chef/Operation";
 import type { PipelineStep } from "../storage/store";
 

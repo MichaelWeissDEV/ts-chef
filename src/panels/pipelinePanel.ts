@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { PipelineStore, Pipeline, PipelineStep } from "../storage/store";
 import { parsePipeline, runPipeline } from "../commands/runner";
 import { log } from "../logger";
-import registry from "../generated/opsRegistry";
+import registry from "../opsRegistry";
 
 export class PipelinePanel {
   private static current: PipelinePanel | undefined;
