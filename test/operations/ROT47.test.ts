@@ -4,7 +4,8 @@ describe("ROT47", () => {
   const op = new ROT47();
 
   const str = (s: string) => s.split("").map((c) => c.charCodeAt(0));
-  const out = (arr: number[]) => arr.map((c) => String.fromCharCode(c)).join("");
+  const out = (arr: number[]) =>
+    arr.map((c) => String.fromCharCode(c)).join("");
 
   test("Rotating 'Hello' by 47", () => {
     expect(out(op.run(str("Hello"), [47]))).toBe("w6==@");

@@ -6,13 +6,13 @@ describe("Keccak", () => {
 
   test("Keccak-256 of empty string", () => {
     expect(op.run(strToAB(""), ["256"])).toBe(
-      "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
+      "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
     );
   });
 
   test("Keccak-256 of 'hello'", () => {
     expect(op.run(strToAB("hello"), ["256"])).toBe(
-      "1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8"
+      "1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8",
     );
   });
 

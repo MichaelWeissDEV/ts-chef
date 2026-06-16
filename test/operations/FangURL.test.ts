@@ -4,15 +4,21 @@ describe("FangURL", () => {
   const op = new FangURL();
 
   test("Restores hxxp to http", () => {
-    expect(op.run("hxxp://example[.]com", [true, true, true])).toContain("http://");
+    expect(op.run("hxxp://example[.]com", [true, true, true])).toContain(
+      "http://",
+    );
   });
 
   test("Restores [.] to .", () => {
-    expect(op.run("example[.]com", [true, true, true])).toContain("example.com");
+    expect(op.run("example[.]com", [true, true, true])).toContain(
+      "example.com",
+    );
   });
 
   test("Restores [//] to //", () => {
-    expect(op.run("http[://]example.com", [true, true, true])).toContain("http://");
+    expect(op.run("http[://]example.com", [true, true, true])).toContain(
+      "http://",
+    );
   });
 
   test("Plain text unchanged", () => {

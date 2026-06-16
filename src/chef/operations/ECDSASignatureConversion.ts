@@ -71,7 +71,9 @@ export class ECDSASignatureConversion extends Operation {
         if (typeof inputJson === "object") {
           inputFormat = "Raw JSON";
         }
-      } catch { /* ignore parse errors */ }
+      } catch {
+        /* ignore parse errors */
+      }
     }
 
     if (inputFormat === "Auto") {
@@ -90,7 +92,9 @@ export class ECDSASignatureConversion extends Operation {
       try {
         inputBase64 = fromBase64(input, "A-Za-z0-9-_", "byteArray", false);
         inputFormat = "JSON Web Signature";
-      } catch { /* ignore parse errors */ }
+      } catch {
+        /* ignore parse errors */
+      }
     }
 
     // convert input to ASN.1 hex

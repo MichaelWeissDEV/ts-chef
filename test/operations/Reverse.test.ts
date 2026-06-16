@@ -4,7 +4,8 @@ describe("Reverse", () => {
   const op = new Reverse();
 
   const str = (s: string) => s.split("").map((c) => c.charCodeAt(0));
-  const out = (arr: number[]) => arr.map((c) => String.fromCharCode(c)).join("");
+  const out = (arr: number[]) =>
+    arr.map((c) => String.fromCharCode(c)).join("");
 
   test("Reverses a simple byte array", () => {
     expect(out(op.run(str("hello"), ["Character"]))).toBe("olleh");

@@ -57,8 +57,15 @@ export class SplitColourChannels extends Operation {
         { apply: "green", params: [-255] },
       ])
       .getBuffer(JimpMime.png)
-      .then((split) => new File([new Uint8Array(split.values())], "red.png", { type: "image/png" }))
-      .catch((err: unknown) => { throw new OperationError(`Could not split red channel: ${err}`); });
+      .then(
+        (split) =>
+          new File([new Uint8Array(split.values())], "red.png", {
+            type: "image/png",
+          }),
+      )
+      .catch((err: unknown) => {
+        throw new OperationError(`Could not split red channel: ${err}`);
+      });
 
     const green = parsedImage
       .clone()
@@ -67,8 +74,15 @@ export class SplitColourChannels extends Operation {
         { apply: "blue", params: [-255] },
       ])
       .getBuffer(JimpMime.png)
-      .then((split) => new File([new Uint8Array(split.values())], "green.png", { type: "image/png" }))
-      .catch((err: unknown) => { throw new OperationError(`Could not split green channel: ${err}`); });
+      .then(
+        (split) =>
+          new File([new Uint8Array(split.values())], "green.png", {
+            type: "image/png",
+          }),
+      )
+      .catch((err: unknown) => {
+        throw new OperationError(`Could not split green channel: ${err}`);
+      });
 
     const blue = parsedImage
       .color([
@@ -76,8 +90,15 @@ export class SplitColourChannels extends Operation {
         { apply: "green", params: [-255] },
       ])
       .getBuffer(JimpMime.png)
-      .then((split) => new File([new Uint8Array(split.values())], "blue.png", { type: "image/png" }))
-      .catch((err: unknown) => { throw new OperationError(`Could not split blue channel: ${err}`); });
+      .then(
+        (split) =>
+          new File([new Uint8Array(split.values())], "blue.png", {
+            type: "image/png",
+          }),
+      )
+      .catch((err: unknown) => {
+        throw new OperationError(`Could not split blue channel: ${err}`);
+      });
 
     return await Promise.all([red, green, blue]);
   }

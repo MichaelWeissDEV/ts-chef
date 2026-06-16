@@ -3,7 +3,8 @@ import { FromCharcode } from "../../src/chef/operations/FromCharcode";
 describe("FromCharcode", () => {
   const op = new FromCharcode();
 
-  const out = (ab: ArrayBuffer) => Buffer.from(new Uint8Array(ab)).toString("utf8");
+  const out = (ab: ArrayBuffer) =>
+    Buffer.from(new Uint8Array(ab)).toString("utf8");
 
   test("Converts hex charcode 41 to 'A'", () => {
     expect(out(op.run("41", ["Space", 16]))).toBe("A");

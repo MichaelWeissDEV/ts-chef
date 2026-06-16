@@ -31,7 +31,6 @@ function rotorsFormat(rotors: any[], s: number, n: number): string {
   return res.join("\n");
 }
 
-
 /**
  * Bombe operation
  */

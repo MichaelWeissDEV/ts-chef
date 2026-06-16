@@ -4,7 +4,11 @@ describe("ExtractEmailAddresses", () => {
   const op = new ExtractEmailAddresses();
 
   test("Extracts a single email address", () => {
-    const result = op.run("Contact us at test@example.com for help.", [false, false, false]);
+    const result = op.run("Contact us at test@example.com for help.", [
+      false,
+      false,
+      false,
+    ]);
     expect(result).toContain("test@example.com");
   });
 

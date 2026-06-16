@@ -18,7 +18,9 @@ describe("ToBase64", () => {
   });
 
   test("Encodes 'hello world'", () => {
-    expect(op.run(str("hello world"), ["A-Za-z0-9+/="])).toBe("aGVsbG8gd29ybGQ=");
+    expect(op.run(str("hello world"), ["A-Za-z0-9+/="])).toBe(
+      "aGVsbG8gd29ybGQ=",
+    );
   });
 
   test("Encodes binary data", () => {

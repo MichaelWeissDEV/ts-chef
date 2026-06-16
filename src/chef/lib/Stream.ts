@@ -106,7 +106,9 @@ export class Stream {
       while (
         ++this.position < this.length &&
         this.bytes[this.position] !== val
-      ) { /* scan forward */ }
+      ) {
+        /* scan forward */
+      }
       return;
     }
 
@@ -124,7 +126,9 @@ export class Stream {
       while (
         this.position < this.length &&
         this.bytes[this.position++] !== initial
-      ) { /* scan forward */ }
+      ) {
+        /* scan forward */
+      }
       found = true;
       for (let x = length - 1; x >= 0; x--) {
         if (this.bytes[this.position - length + x] !== val[x]) {

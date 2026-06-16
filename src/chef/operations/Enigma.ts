@@ -123,10 +123,10 @@ class PairMapBase {
       if (a === b) {
         return;
       }
-      if (Object.prototype.hasOwnProperty.call(this.map,a)) {
+      if (Object.prototype.hasOwnProperty.call(this.map, a)) {
         throw new OperationError(`${name} connects ${pair[0]} more than once`);
       }
-      if (Object.prototype.hasOwnProperty.call(this.map,b)) {
+      if (Object.prototype.hasOwnProperty.call(this.map, b)) {
         throw new OperationError(`${name} connects ${pair[1]} more than once`);
       }
       this.map[a] = b;
@@ -135,7 +135,7 @@ class PairMapBase {
   }
 
   transform(c: number): number {
-    if (!Object.prototype.hasOwnProperty.call(this.map,c)) {
+    if (!Object.prototype.hasOwnProperty.call(this.map, c)) {
       return c;
     }
     return this.map[c];

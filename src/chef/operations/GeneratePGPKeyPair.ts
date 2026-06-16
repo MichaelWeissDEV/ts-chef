@@ -131,7 +131,9 @@ export class GeneratePGPKeyPair extends Operation {
       )({});
       return privateKey + "\n" + publicKey.trim();
     } catch (err) {
-      throw new Error(`Error whilst generating key pair: ${err}`, { cause: err });
+      throw new Error(`Error whilst generating key pair: ${err}`, {
+        cause: err,
+      });
     }
   }
 }

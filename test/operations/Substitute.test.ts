@@ -4,7 +4,13 @@ describe("Substitute", () => {
   const op = new Substitute();
 
   test("Substitutes a to b", () => {
-    expect(op.run("hello", ["abcdefghijklmnopqrstuvwxyz", "bcdefghijklmnopqrstuvwxyza", false])).toBe("ifmmp");
+    expect(
+      op.run("hello", [
+        "abcdefghijklmnopqrstuvwxyz",
+        "bcdefghijklmnopqrstuvwxyza",
+        false,
+      ]),
+    ).toBe("ifmmp");
   });
 
   test("Identity substitution leaves string unchanged", () => {
@@ -12,7 +18,13 @@ describe("Substitute", () => {
   });
 
   test("Case sensitive by default", () => {
-    expect(op.run("Hello", ["ABCDEFGHIJKLMNOPQRSTUVWXYZ", "BCDEFGHIJKLMNOPQRSTUVWXYZA", false])).toBe("Iello");
+    expect(
+      op.run("Hello", [
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "BCDEFGHIJKLMNOPQRSTUVWXYZA",
+        false,
+      ]),
+    ).toBe("Iello");
   });
 
   test("Empty input returns empty", () => {

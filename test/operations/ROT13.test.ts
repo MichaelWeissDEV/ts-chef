@@ -4,7 +4,8 @@ describe("ROT13", () => {
   const op = new ROT13();
 
   const str = (s: string) => s.split("").map((c) => c.charCodeAt(0));
-  const out = (arr: number[]) => arr.map((c) => String.fromCharCode(c)).join("");
+  const out = (arr: number[]) =>
+    arr.map((c) => String.fromCharCode(c)).join("");
 
   test("Standard ROT13 of 'Hello'", () => {
     expect(out(op.run(str("Hello"), [true, true, false, 13]))).toBe("Uryyb");
