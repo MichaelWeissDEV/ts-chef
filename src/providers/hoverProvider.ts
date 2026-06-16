@@ -27,7 +27,7 @@ export class HoverProvider implements vscode.HoverProvider {
 
     for (const result of highConf) {
       const conf = Math.round(result.confidence * 100);
-      let preview = "";
+      let preview: string;
       try {
         const out = runOp(result.opName, match.value, result.defaultArgs);
         let str: string;

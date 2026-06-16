@@ -49,9 +49,9 @@ export class OffsetChecker extends Operation {
     const sampleDelim = args[0],
       samples = input.split(sampleDelim),
       outputs = new Array(samples.length);
-    let i = 0,
-      s = 0,
-      match = false,
+    let i: number,
+      s: number,
+      match: boolean,
       inMatch = false,
       chr;
 

@@ -86,10 +86,10 @@ export class GenerateECDSAKeyPair extends Operation {
           break;
         case "JWK":
           pubKey = r.KEYUTIL.getJWKFromKey(keyPair.pubKeyObj);
-          pubKey.key_ops = ["verify"]; // eslint-disable-line camelcase
+          pubKey.key_ops = ["verify"];
           pubKey.kid = "PublicKey";
           privKey = r.KEYUTIL.getJWKFromKey(keyPair.prvKeyObj);
-          privKey.key_ops = ["sign"]; // eslint-disable-line camelcase
+          privKey.key_ops = ["sign"];
           privKey.kid = "PrivateKey";
           result = JSON.stringify({ keys: [privKey, pubKey] }, null, 4);
           break;

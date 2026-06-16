@@ -179,7 +179,7 @@ export class ScatterChart extends Operation {
       .append("circle")
       .attr("cx", (d: any[]) => xAxis(d[0]))
       .attr("cy", (d: any[]) => yAxis(d[1]))
-      .attr("r", (d: any[]) => radius)
+      .attr("r", (_d: any[]) => radius)
       .attr("fill", (d: any[]) => {
         return colourInInput ? d[2] : fillColour;
       })

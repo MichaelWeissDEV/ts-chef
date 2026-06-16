@@ -69,7 +69,7 @@ export class Strings extends Operation {
     const punctuation = "/\\-:.,_$%'\"()<>= !\\[\\]{}@";
     const printable = "\x20-\x7e";
 
-    let strings = "";
+    let strings: string;
     switch (matchType) {
       case "Alphanumeric + punctuation (A)":
         strings = `[${alphanumeric + punctuation}]`;

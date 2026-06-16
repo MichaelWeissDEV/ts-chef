@@ -54,7 +54,7 @@ export class XXTEADecrypt extends Operation {
     );
     try {
       return decrypt(new Uint8Array(input), key)!.buffer;
-    } catch (err) {
+    } catch {
       throw new OperationError("Unable to decrypt using this key");
     }
   }

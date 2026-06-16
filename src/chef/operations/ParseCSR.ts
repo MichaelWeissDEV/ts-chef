@@ -12,7 +12,7 @@
  */
 
 import * as r from "jsrsasign";
-import { Operation, ArgConfig } from "../Operation";
+import { Operation } from "../Operation";
 import { formatDnObj } from "../lib/PublicKey";
 import Utils from "../Utils";
 
@@ -55,7 +55,7 @@ export class ParseCSR extends Operation {
    * @param {any[]} args
    * @returns {string} Human-readable description of a Certificate Signing Request (CSR).
    */
-  run(input: string, args: any[]): string {
+  run(input: string, _args: any[]): string {
     if (!input.length) {
       return "No input";
     }
@@ -140,7 +140,7 @@ function formatRequestedExtensions(csrParam: any): string {
 
   if (Object.prototype.hasOwnProperty.call(csrParam, "extreq")) {
     for (const extension of csrParam.extreq) {
-      let parts: string[] = [];
+      let parts: string[];
       switch (extension.extname) {
         case "basicConstraints":
           parts = describeBasicConstraints(extension);

@@ -19,7 +19,7 @@ import {
   FIELD_DELIMITER_OPTIONS,
 } from "../lib/Charts";
 
-import { Operation, ArgConfig } from "../Operation";
+import { Operation } from "../Operation";
 import Utils from "../Utils";
 
 const d3 = (d3temp as any).default ? (d3temp as any).default : d3temp;

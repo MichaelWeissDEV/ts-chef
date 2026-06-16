@@ -38,7 +38,7 @@ export class XPathExpression extends Operation {
     let doc;
     try {
       doc = new DOMParser().parseFromString(input, "text/xml");
-    } catch (err: any) {
+    } catch {
       throw new OperationError("Invalid input XML.");
     }
 

@@ -12,7 +12,7 @@
  */
 
 import * as r from "jsrsasign";
-import { Operation, ArgConfig } from "../Operation";
+import { Operation } from "../Operation";
 import { fromBase64 } from "../lib/Base64";
 import { toHex } from "../lib/Hex";
 import { formatDnObj } from "../lib/PublicKey";

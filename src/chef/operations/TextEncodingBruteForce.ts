@@ -78,7 +78,7 @@ export class TextEncodingBruteForce extends Operation {
             ).buffer as ArrayBuffer,
           );
         }
-      } catch (err) {
+      } catch (_err) {
         output[charset] = "Could not decode.";
       }
     });

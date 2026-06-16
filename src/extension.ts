@@ -28,7 +28,6 @@ function resultToString(result: unknown): string {
 
 /** Replace $varName / {{varName}} references with stored variable values. */
 function resolveVars(text: string, varStore: VariableStore): string {
-  const vars = varStore.load();
   return text
     .replace(
       /\{\{([^}]+)\}\}/g,

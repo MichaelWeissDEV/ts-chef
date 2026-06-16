@@ -129,8 +129,6 @@ function parseStep(part: string): PipelineStep {
   const name = part.slice(0, parenIdx).trim();
   const argsStr = part.slice(parenIdx + 1, part.lastIndexOf(")")).trim();
   const op = resolveOp(name);
-  const defaultArgs = op.factory().args.map(resolveDefaultArg);
-
   // Parse key=value pairs, handling quoted strings
   const overrides: Record<string, string> = {};
   const kvRe = /([^,=]+)=("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|[^,]*)/g;

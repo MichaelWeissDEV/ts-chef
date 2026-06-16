@@ -44,7 +44,7 @@ export class GenerateUUID extends Operation {
 
   run(input: string, args: unknown[]): string {
     const [version, namespace] = args as [UUIDVersion, string];
-    const fn = uuidLib[version] as Function | undefined;
+    const fn = uuidLib[version] as ((...args: unknown[]) => string) | undefined;
     if (typeof fn !== "function")
       throw new OperationError("Invalid UUID version");
 
