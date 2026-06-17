@@ -1,7 +1,8 @@
 /**
- * Tests for the runner utilities (resolveDefaultArg + normaliseInput).
- * These functions are inlined here (same logic as src/commands/runner.ts)
- * to test them without pulling in the vscode bundle.
+ * Tests for the runner utilities (resolveDefaultArg + normaliseInput +
+ * operationNeedsInput). These functions are inlined here (same logic as
+ * src/commands/runner.ts) to test them without pulling in the ops registry,
+ * which transitively imports ESM-only deps jest can't parse.
  */
 
 import { strToAB, byteArrToStr } from "./helpers";
@@ -225,5 +226,38 @@ describe("resolveDefaultArg → operation integration", () => {
     const result = op.run("aGVsbG8=", args);
     expect(Array.isArray(result)).toBe(true);
     expect(byteArrToStr(result as number[])).toBe("hello");
+  });
+});
+
+// ── operationNeedsInput ───────────────────────────────────────────────────────
+// Inline copy of src/commands/runner.ts → operationNeedsInput.
+function operationNeedsInput(op: { args: ArgLike[] }): boolean {
+  return op.args.some(
+    (a) => a.type === "toggleString" && (a.value as string) === "",
+  );
+}
+
+describe("operationNeedsInput", () => {
+  test("true when a toggleString arg is still empty", () => {
+    expect(operationNeedsInput({ args: [{ type: "toggleString", value: "" }] })).toBe(
+      true,
+    );
+  });
+
+  test("false when the toggleString arg has a value", () => {
+    expect(
+      operationNeedsInput({ args: [{ type: "toggleString", value: "secret" }] }),
+    ).toBe(false);
+  });
+
+  test("false when there are no toggleString args", () => {
+    expect(
+      operationNeedsInput({
+        args: [
+          { type: "string", value: "" },
+          { type: "number", value: 0 },
+        ],
+      }),
+    ).toBe(false);
   });
 });

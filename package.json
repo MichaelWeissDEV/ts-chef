@@ -159,6 +159,17 @@
           "type": "boolean",
           "default": false,
           "description": "Automatically scan the document when it is saved"
+        },
+        "tschef.pipelineResultAction": {
+          "type": "string",
+          "enum": ["popup", "replace", "copy"],
+          "enumDescriptions": [
+            "Show an information message with Replace/Copy buttons",
+            "Replace the selection (or whole document) with the result",
+            "Copy the result to the clipboard"
+          ],
+          "default": "popup",
+          "description": "How to present the result of a pipeline or operation"
         }
       }
     }

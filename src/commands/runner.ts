@@ -1,6 +1,17 @@
 import registry, { findOp } from "../opsRegistry";
-import type { ArgConfig } from "../chef/Operation";
+import type { ArgConfig, Operation } from "../chef/Operation";
 import type { PipelineStep } from "../storage/store";
+
+/**
+ * Whether an operation needs free-text input to be useful — i.e. it has a
+ * `toggleString` argument whose value is still empty (e.g. a key/secret the
+ * user must supply). Lets callers prompt for input instead of running blindly.
+ */
+export function operationNeedsInput(op: Operation): boolean {
+  return op.args.some(
+    (a) => a.type === "toggleString" && (a.value as string) === "",
+  );
+}
 
 /**
  * Extracts the actual default value from an ArgConfig so it matches
