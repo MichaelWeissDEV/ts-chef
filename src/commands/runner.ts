@@ -1,6 +1,10 @@
 import registry, { findOp } from "../opsRegistry";
-import type { ArgConfig, Operation } from "../chef/Operation";
+import type { Operation } from "../chef/Operation";
 import type { PipelineStep } from "../storage/store";
+import { resolveDefaultArg } from "./argDefaults";
+
+// Re-exported for callers that already import it from the runner.
+export { resolveDefaultArg };
 
 /**
  * Whether an operation needs free-text input to be useful — i.e. it has a
@@ -11,40 +15,6 @@ export function operationNeedsInput(op: Operation): boolean {
   return op.args.some(
     (a) => a.type === "toggleString" && (a.value as string) === "",
   );
-}
-
-/**
- * Extracts the actual default value from an ArgConfig so it matches
- * what the operation's run() method expects for each arg type.
- */
-export function resolveDefaultArg(arg: ArgConfig): unknown {
-  switch (arg.type) {
-    case "editableOption":
-    case "editableOptionShort": {
-      const opts = arg.value as Array<{ name: string; value: unknown }>;
-      if (!Array.isArray(opts)) return arg.value;
-      const idx = typeof arg.defaultIndex === "number" ? arg.defaultIndex : 0;
-      return opts[idx]?.value ?? opts[0]?.value ?? "";
-    }
-    case "option": {
-      const opts = arg.value as unknown[];
-      return Array.isArray(opts) ? (opts[0] ?? "") : arg.value;
-    }
-    case "argSelector": {
-      // run() receives the selected option name string (e.g. "CBC")
-      const opts = arg.value as Array<{ name: string }>;
-      return Array.isArray(opts) ? (opts[0]?.name ?? "") : arg.value;
-    }
-    case "toggleString": {
-      // run() receives { string: value, option: encoding }
-      return {
-        string: typeof arg.value === "string" ? arg.value : "",
-        option: arg.toggleValues?.[0] ?? "Hex",
-      };
-    }
-    default:
-      return arg.value;
-  }
 }
 
 /**

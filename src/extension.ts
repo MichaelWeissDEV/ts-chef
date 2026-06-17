@@ -23,6 +23,14 @@ import {
 } from "./commands/pipelineResult";
 import { InlineResultController } from "./commands/inlineResult";
 import { WebviewResultController } from "./commands/webviewResult";
+import {
+  OperationsViewProvider,
+  type OpInfo,
+} from "./providers/operationsViewProvider";
+import {
+  RecipeViewProvider,
+  type RecipeStep,
+} from "./providers/recipeViewProvider";
 import { pickScope } from "./commands/scopePicker";
 
 /** The configured default scope for a given preset kind. */
@@ -36,7 +44,7 @@ function defaultScope(
 import { analyseValue } from "./providers/detector";
 import { initOutputChannel, log } from "./logger";
 import registry from "./opsRegistry";
-import type { Operation } from "./chef/Operation";
+import type { ArgConfig, Operation } from "./chef/Operation";
 
 function resultToString(result: unknown): string {
   if (Array.isArray(result))
@@ -137,10 +145,105 @@ export function activate(context: vscode.ExtensionContext): void {
     panel: (editor, result) => webviewResult.show(editor, result),
   };
 
+  // Lazily instantiate operations only when their arg defs are first needed,
+  // so the ~479 ops aren't all constructed at startup.
+  const argDefsCache = new Map<string, ArgConfig[]>();
+  const argDefsFor = (opName: string): ArgConfig[] | undefined => {
+    const cached = argDefsCache.get(opName);
+    if (cached) return cached;
+    const entry = registry.find((e) => e.opName === opName);
+    if (!entry) return undefined;
+    const defs = entry.factory().args;
+    argDefsCache.set(opName, defs);
+    return defs;
+  };
+  const displayNameFor = (opName: string): string =>
+    registry.find((e) => e.opName === opName)?.displayName ?? opName;
+
+  // ---- Operations + Recipe sidebars (WebviewViews) ----
+  const recipeView = new RecipeViewProvider({
+    argDefsFor,
+    displayNameFor,
+    apply: (steps) => applyRecipeToSelection(steps),
+    save: (name, steps) => saveRecipeAsPipeline(name, steps),
+  });
+  const operationsView = new OperationsViewProvider({
+    listOps: (): OpInfo[] =>
+      registry.map((e) => ({
+        opName: e.opName,
+        displayName: e.displayName,
+        module: e.module || "Other",
+      })),
+    apply: (opName) =>
+      vscode.commands.executeCommand("tschef.applyOperation", opName),
+    addToRecipe: (opName) => recipeView.addOperation(opName),
+  });
+
+  /** Resolve the editor's input text (selection, else whole document). */
+  function selectionInput(editor: vscode.TextEditor): string {
+    const raw =
+      editor.document.getText(editor.selection) || editor.document.getText();
+    return resolveVars(raw, varStore);
+  }
+
+  async function applyRecipeToSelection(steps: RecipeStep[]): Promise<void> {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showWarningMessage("ts-chef: No active editor.");
+      return;
+    }
+    if (!steps.length) {
+      vscode.window.showWarningMessage("ts-chef: The recipe is empty.");
+      return;
+    }
+    try {
+      const result = runPipeline(selectionInput(editor), steps);
+      log(`Recipe applied: ${steps.length} step(s)`);
+      await presentPipelineResult(editor, result, "Recipe", resultRenderers);
+    } catch (e) {
+      log(`Recipe error: ${e}`);
+      vscode.window.showErrorMessage(`ts-chef recipe error: ${e}`);
+    }
+  }
+
+  async function saveRecipeAsPipeline(
+    name: string,
+    steps: RecipeStep[],
+  ): Promise<void> {
+    if (!name) {
+      vscode.window.showWarningMessage("ts-chef: Name the recipe before saving.");
+      return;
+    }
+    if (!steps.length) {
+      vscode.window.showWarningMessage("ts-chef: The recipe is empty.");
+      return;
+    }
+    const scope = await pickScope(
+      defaultScope("defaultPipelineScope"),
+      `Save recipe "${name}"`,
+    );
+    if (!scope) return;
+    const raw = steps.map((s) => displayNameFor(s.opName)).join(" | ");
+    pipeStore.upsert(scope, { name, raw, steps });
+    pipeTree.refresh();
+    log(`Recipe "${name}" saved as pipeline (${steps.length} step(s), ${scope})`);
+    vscode.window.showInformationMessage(
+      `ts-chef: Recipe "${name}" saved (${scope}).`,
+    );
+  }
+
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider("tschef.patternsView", patternsTree),
     vscode.window.registerTreeDataProvider("tschef.variablesView", varTree),
     vscode.window.registerTreeDataProvider("tschef.pipelinesView", pipeTree),
+    vscode.window.registerWebviewViewProvider(
+      OperationsViewProvider.viewType,
+      operationsView,
+    ),
+    vscode.window.registerWebviewViewProvider(
+      RecipeViewProvider.viewType,
+      recipeView,
+    ),
     vscode.languages.registerHoverProvider(
       { scheme: "*" },
       new HoverProvider(scanState),
@@ -543,6 +646,56 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand("tschef.refreshPipelines", () =>
       pipeTree.refresh(),
+    ),
+  );
+
+  // Apply a single operation (with its default args) to the selection — the
+  // click action of the Operations sidebar.
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "tschef.applyOperation",
+      async (opName: string) => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+          vscode.window.showWarningMessage("ts-chef: No active editor.");
+          return;
+        }
+        const argDefs = argDefsFor(opName);
+        if (!argDefs) return;
+        try {
+          const result = resultToString(
+            runOp(opName, selectionInput(editor), argDefs.map(resolveDefaultArg)),
+          );
+          log(`applyOperation: "${opName}" applied`);
+          await presentPipelineResult(
+            editor,
+            result,
+            displayNameFor(opName),
+            resultRenderers,
+          );
+        } catch (e) {
+          log(`applyOperation error: ${e}`);
+          vscode.window.showErrorMessage(`ts-chef: ${e}`);
+        }
+      },
+    ),
+  );
+
+  // Load a saved pipeline into the working recipe and reveal the recipe pane.
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "tschef.loadRecipe",
+      async (arg: string | { pipeline?: { name: string } }) => {
+        const name =
+          typeof arg === "string" ? arg : (arg?.pipeline?.name ?? "");
+        const pipeline = name ? pipeStore.findByName(name) : undefined;
+        if (!pipeline) return;
+        recipeView.loadRecipe(
+          pipeline.steps.map((s) => ({ opName: s.opName, args: s.args })),
+          pipeline.name,
+        );
+        await vscode.commands.executeCommand("tschef.recipeView.focus");
+      },
     ),
   );
 

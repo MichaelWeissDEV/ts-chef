@@ -76,6 +76,11 @@
         "command": "tschef.addVariable",
         "title": "tschef: Add Variable",
         "icon": "$(add)"
+      },
+      {
+        "command": "tschef.loadRecipe",
+        "title": "tschef: Load into Recipe",
+        "icon": "$(list-flat)"
       }
     ],
     "viewsContainers": {
@@ -89,6 +94,18 @@
     },
     "views": {
       "tschef-sidebar": [
+        {
+          "id": "tschef.operationsView",
+          "type": "webview",
+          "name": "Operations",
+          "contextualTitle": "tschef Operations"
+        },
+        {
+          "id": "tschef.recipeView",
+          "type": "webview",
+          "name": "Recipe",
+          "contextualTitle": "tschef Recipe"
+        },
         {
           "id": "tschef.patternsView",
           "name": "Found Patterns",
@@ -139,6 +156,13 @@
           "command": "tschef.runSavedPipelinePicker",
           "when": "view == tschef.pipelinesView",
           "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "tschef.loadRecipe",
+          "when": "view == tschef.pipelinesView && viewItem =~ /^pipeline-/",
+          "group": "inline"
         }
       ]
     },
