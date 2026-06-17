@@ -13,7 +13,54 @@
 
 import forge from "node-forge";
 
-const boxes = {
+/**
+ * Blowfish box structure containing S-boxes and P-array
+ */
+interface BlowfishBoxes {
+  p: number[];
+  s0: number[];
+  s1: number[];
+  s2: number[];
+  s3: number[];
+}
+
+/**
+ * Constructor for one of node-forge's cipher mode implementations
+ * (`forge.cipher.modes.*`). These are not surfaced by `@types/node-forge`.
+ */
+type ForgeCipherModeConstructor = new (options: unknown) => unknown;
+
+/**
+ * The subset of a node-forge `BlockCipher` instance used by the Blowfish
+ * operations.
+ */
+interface ForgeBlockCipher {
+  start(options?: { iv?: unknown }): void;
+  update(input: forge.util.ByteStringBuffer): void;
+  finish(pad?: () => boolean): boolean;
+  output: forge.util.ByteStringBuffer;
+}
+
+/**
+ * Constructor for node-forge's internal `BlockCipher`, which `@types/node-forge`
+ * does not expose on `forge.cipher`.
+ */
+type ForgeBlockCipherConstructor = new (options: unknown) => ForgeBlockCipher;
+
+/**
+ * The parts of `forge.cipher` the Blowfish implementation relies on but which
+ * are missing from `@types/node-forge`. Casting once through this interface
+ * keeps the rest of the file free of `any`.
+ */
+interface ForgeCipherInternals {
+  modes: Record<string, ForgeCipherModeConstructor>;
+  BlockCipher: ForgeBlockCipherConstructor;
+}
+
+/** node-forge cipher internals, typed for the features used below. */
+const cipherInternals = forge.cipher as unknown as ForgeCipherInternals;
+
+const boxes: BlowfishBoxes = {
   p: [
     0x243f6a88, 0x85a308d3, 0x13198a2e, 0x03707344, 0xa4093822, 0x299f31d0,
     0x082efa98, 0xec4e6c89, 0x452821e6, 0x38d01377, 0xbe5466cf, 0x34e90c6c,
@@ -208,7 +255,7 @@ function xor(x: number, y: number): number {
   );
 }
 
-function f(v: number, box: any): number {
+function f(v: number, box: BlowfishBoxes): number {
   const d = box.s3[v & 0xff];
   v >>= 8;
   const c = box.s2[v & 0xff];
@@ -231,7 +278,7 @@ function f(v: number, box: any): number {
   );
 }
 
-function eb(o: { left: number; right: number }, box: any) {
+function eb(o: { left: number; right: number }, box: BlowfishBoxes) {
   let l = o.left;
   let r = o.right;
   l = xor(l, box.p[0]);
@@ -255,7 +302,7 @@ function eb(o: { left: number; right: number }, box: any) {
   o.left = xor(r, box.p[17]);
 }
 
-function db(o: { left: number; right: number }, box: any) {
+function db(o: { left: number; right: number }, box: BlowfishBoxes) {
   let l = o.left;
   let r = o.right;
   l = xor(l, box.p[17]);
@@ -279,14 +326,22 @@ function db(o: { left: number; right: number }, box: any) {
   o.left = xor(r, box.p[0]);
 }
 
-function encryptBlock(inblock: number[], outblock: number[], box: any) {
+function encryptBlock(
+  inblock: number[],
+  outblock: number[],
+  box: BlowfishBoxes,
+) {
   const o = { left: inblock[0], right: inblock[1] };
   eb(o, box);
   outblock[0] = o.left;
   outblock[1] = o.right;
 }
 
-function decryptBlock(inblock: number[], outblock: number[], box: any) {
+function decryptBlock(
+  inblock: number[],
+  outblock: number[],
+  box: BlowfishBoxes,
+) {
   const o = { left: inblock[0], right: inblock[1] };
   db(o, box);
   outblock[0] = o.left;
@@ -299,8 +354,8 @@ function decryptBlock(inblock: number[], outblock: number[], box: any) {
  * Provides block cipher operations and key schedule initialization.
  */
 export class BlowfishAlgorithm {
-  box: any;
-  mode: any;
+  box: BlowfishBoxes;
+  mode: unknown;
 
   /**
    * Creates a new Blowfish instance with the given key and mode.
@@ -325,22 +380,22 @@ export class BlowfishAlgorithm {
 
     switch (modeName.toLowerCase()) {
       case "ecb":
-        this.mode = new ((forge.cipher as any).modes.ecb as any)(modeOption);
+        this.mode = new cipherInternals.modes.ecb(modeOption);
         break;
       case "cbc":
-        this.mode = new ((forge.cipher as any).modes.cbc as any)(modeOption);
+        this.mode = new cipherInternals.modes.cbc(modeOption);
         break;
       case "cfb":
-        this.mode = new ((forge.cipher as any).modes.cfb as any)(modeOption);
+        this.mode = new cipherInternals.modes.cfb(modeOption);
         break;
       case "ofb":
-        this.mode = new ((forge.cipher as any).modes.ofb as any)(modeOption);
+        this.mode = new cipherInternals.modes.ofb(modeOption);
         break;
       case "ctr":
-        this.mode = new ((forge.cipher as any).modes.ctr as any)(modeOption);
+        this.mode = new cipherInternals.modes.ctr(modeOption);
         break;
       default:
-        this.mode = new ((forge.cipher as any).modes.ecb as any)(modeOption);
+        this.mode = new cipherInternals.modes.ecb(modeOption);
         break;
     }
   }
@@ -385,7 +440,7 @@ export class BlowfishAlgorithm {
       box.p[i++] = res.right;
     }
     for (let i = 0; i < 4; i++) {
-      const s = (box as any)["s" + i];
+      const s = (box as BlowfishBoxes)["s" + i] as number[];
       for (let j = 0, l = s.length; j < l; ) {
         eb(res, box);
         s[j++] = res.left;
@@ -408,7 +463,7 @@ export const Blowfish = {
    * @returns A forge BlockCipher instance.
    */
   createCipher: function (key: string | number[], modeName: string) {
-    return new (forge.cipher as any).BlockCipher({
+    return new cipherInternals.BlockCipher({
       algorithm: new BlowfishAlgorithm(key, modeName),
       key: key,
       decrypt: false,
@@ -422,7 +477,7 @@ export const Blowfish = {
    * @returns A forge BlockCipher instance.
    */
   createDecipher: function (key: string | number[], modeName: string) {
-    return new (forge.cipher as any).BlockCipher({
+    return new cipherInternals.BlockCipher({
       algorithm: new BlowfishAlgorithm(key, modeName),
       key: key,
       decrypt: true,
