@@ -10,7 +10,7 @@ function symArgs(
   mode = "CBC",
   inputType = "Raw",
   outputType = "Hex",
-): any[] {
+): Array<string | { string: string; option: string }> {
   return [
     { string: keyHex, option: "Hex" },
     { string: ivHex, option: "Hex" },

@@ -17,7 +17,7 @@ function aesEncArgs(
   mode = "CBC",
   inputType = "Raw",
   outputType = "Hex",
-): any[] {
+): Array<string | { string: string; option: string }> {
   return [
     { string: keyHex, option: "Hex" },
     { string: ivHex, option: "Hex" },
@@ -33,7 +33,7 @@ function aesDecArgs(
   mode = "CBC",
   inputType = "Hex",
   outputType = "Raw",
-): any[] {
+): Array<string | { string: string; option: string }> {
   return [
     { string: keyHex, option: "Hex" },
     { string: ivHex, option: "Hex" },
@@ -52,7 +52,7 @@ function symArgs(
   mode = "CBC",
   inputType = "Raw",
   outputType = "Hex",
-): any[] {
+): Array<string | { string: string; option: string }> {
   return [
     { string: keyHex, option: "Hex" },
     { string: ivHex, option: "Hex" },
@@ -61,7 +61,7 @@ function symArgs(
     outputType,
   ];
 }
-function symDecArgs(keyHex: string, ivHex: string, mode = "CBC"): any[] {
+function symDecArgs(keyHex: string, ivHex: string, mode = "CBC"): Array<string | { string: string; option: string }> {
   return symArgs(keyHex, ivHex, mode, "Hex", "Raw");
 }
 
@@ -147,21 +147,25 @@ describe("DES Encrypt / Decrypt", () => {
 
   test("DES CBC round-trip", () => {
     const enc = new DESEncrypt().run(PLAINTEXT, symArgs(KEY, IV, "CBC"));
-    const dec = new DESDecrypt().run(enc as any, symDecArgs(KEY, IV, "CBC"));
-    if ((dec as any) instanceof ArrayBuffer) {
-      expect(abToStr(dec as any).trim()).toBe(PLAINTEXT);
+    const dec = new DESDecrypt().run(enc, symDecArgs(KEY, IV, "CBC")) as
+      | string
+      | ArrayBuffer;
+    if (dec instanceof ArrayBuffer) {
+      expect(abToStr(dec).trim()).toBe(PLAINTEXT);
     } else {
-      expect((dec as string).trim()).toBe(PLAINTEXT);
+      expect(dec.trim()).toBe(PLAINTEXT);
     }
   });
 
   test("DES ECB round-trip", () => {
     const enc = new DESEncrypt().run(PLAINTEXT, symArgs(KEY, IV, "ECB"));
-    const dec = new DESDecrypt().run(enc as any, symDecArgs(KEY, IV, "ECB"));
-    if ((dec as any) instanceof ArrayBuffer) {
-      expect(abToStr(dec as any).trim()).toBe(PLAINTEXT);
+    const dec = new DESDecrypt().run(enc, symDecArgs(KEY, IV, "ECB")) as
+      | string
+      | ArrayBuffer;
+    if (dec instanceof ArrayBuffer) {
+      expect(abToStr(dec).trim()).toBe(PLAINTEXT);
     } else {
-      expect((dec as string).trim()).toBe(PLAINTEXT);
+      expect(dec.trim()).toBe(PLAINTEXT);
     }
   });
 
@@ -180,7 +184,7 @@ describe("Triple DES Encrypt / Decrypt", () => {
   test("3DES CBC round-trip", () => {
     const enc = new TripleDESEncrypt().run(PLAINTEXT, symArgs(KEY, IV, "CBC"));
     const dec = new TripleDESDecrypt().run(
-      enc as any,
+      enc,
       symDecArgs(KEY, IV, "CBC"),
     );
     expect(abToStr(dec as ArrayBuffer).trim()).toBe(PLAINTEXT);
@@ -189,7 +193,7 @@ describe("Triple DES Encrypt / Decrypt", () => {
   test("3DES ECB round-trip", () => {
     const enc = new TripleDESEncrypt().run(PLAINTEXT, symArgs(KEY, IV, "ECB"));
     const dec = new TripleDESDecrypt().run(
-      enc as any,
+      enc,
       symDecArgs(KEY, IV, "ECB"),
     );
     expect(abToStr(dec as ArrayBuffer).trim()).toBe(PLAINTEXT);
@@ -203,27 +207,25 @@ describe("Blowfish Encrypt / Decrypt", () => {
 
   test("Blowfish CBC round-trip", () => {
     const enc = new BlowfishEncrypt().run(PLAINTEXT, symArgs(KEY, IV, "CBC"));
-    const dec = new BlowfishDecrypt().run(
-      enc as any,
-      symDecArgs(KEY, IV, "CBC"),
-    );
-    if ((dec as any) instanceof ArrayBuffer) {
-      expect(abToStr(dec as any).trim()).toBe(PLAINTEXT);
+    const dec = new BlowfishDecrypt().run(enc, symDecArgs(KEY, IV, "CBC")) as
+      | string
+      | ArrayBuffer;
+    if (dec instanceof ArrayBuffer) {
+      expect(abToStr(dec).trim()).toBe(PLAINTEXT);
     } else {
-      expect((dec as string).trim()).toBe(PLAINTEXT);
+      expect(dec.trim()).toBe(PLAINTEXT);
     }
   });
 
   test("Blowfish ECB round-trip", () => {
     const enc = new BlowfishEncrypt().run(PLAINTEXT, symArgs(KEY, IV, "ECB"));
-    const dec = new BlowfishDecrypt().run(
-      enc as any,
-      symDecArgs(KEY, IV, "ECB"),
-    );
-    if ((dec as any) instanceof ArrayBuffer) {
-      expect(abToStr(dec as any).trim()).toBe(PLAINTEXT);
+    const dec = new BlowfishDecrypt().run(enc, symDecArgs(KEY, IV, "ECB")) as
+      | string
+      | ArrayBuffer;
+    if (dec instanceof ArrayBuffer) {
+      expect(abToStr(dec).trim()).toBe(PLAINTEXT);
     } else {
-      expect((dec as string).trim()).toBe(PLAINTEXT);
+      expect(dec.trim()).toBe(PLAINTEXT);
     }
   });
 
