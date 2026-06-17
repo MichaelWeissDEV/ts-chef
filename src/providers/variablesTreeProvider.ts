@@ -1,15 +1,17 @@
 import * as vscode from "vscode";
-import { VariableStore, Variable } from "../storage/store";
+import { VariableStore, ScopedVariable } from "../storage/store";
 
 class VariableNode extends vscode.TreeItem {
-  constructor(public readonly variable: Variable) {
+  constructor(public readonly variable: ScopedVariable) {
     super(variable.name, vscode.TreeItemCollapsibleState.None);
-    this.description =
+    const value =
       variable.value.length > 40
         ? variable.value.slice(0, 40) + "…"
         : variable.value;
-    this.tooltip = `${variable.name}: ${variable.value}${variable.description ? "\n" + variable.description : ""}`;
-    this.contextValue = "variable";
+    this.description = `${value}  [${variable.scope}]`;
+    this.tooltip = `${variable.name}: ${variable.value}${variable.description ? "\n" + variable.description : ""}\n(${variable.scope})`;
+    // Scope-qualified for future scope-targeted context menus.
+    this.contextValue = `variable-${variable.scope}`;
     this.iconPath = new vscode.ThemeIcon("key");
   }
 }
@@ -29,6 +31,6 @@ export class VariablesTreeProvider implements vscode.TreeDataProvider<VariableNo
   }
 
   getChildren(): VariableNode[] {
-    return this.store.load().map((v) => new VariableNode(v));
+    return this.store.loadAll().map((v) => new VariableNode(v));
   }
 }

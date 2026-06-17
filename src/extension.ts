@@ -5,7 +5,11 @@ import { HoverProvider } from "./providers/hoverProvider";
 import { PatternsTreeProvider } from "./providers/patternsTreeProvider";
 import { VariablesTreeProvider } from "./providers/variablesTreeProvider";
 import { PipelinesTreeProvider } from "./providers/pipelinesTreeProvider";
-import { VariableStore, PipelineStore } from "./storage/store";
+import {
+  VariableStore,
+  PipelineStore,
+  type StorageScope,
+} from "./storage/store";
 import { PipelinePanel } from "./panels/pipelinePanel";
 import {
   runOp,
@@ -14,6 +18,16 @@ import {
   resolveDefaultArg,
 } from "./commands/runner";
 import { presentPipelineResult } from "./commands/pipelineResult";
+import { pickScope } from "./commands/scopePicker";
+
+/** The configured default scope for a given preset kind. */
+function defaultScope(
+  key: "defaultVariableScope" | "defaultPipelineScope",
+): StorageScope {
+  return vscode.workspace
+    .getConfiguration("tschef")
+    .get<StorageScope>(key, "global");
+}
 import { analyseValue } from "./providers/detector";
 import { initOutputChannel, log } from "./logger";
 import registry from "./opsRegistry";
@@ -99,8 +113,9 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const scanState = new ScanState();
   const decorations = new DecorationProvider(scanState);
-  const varStore = new VariableStore();
-  const pipeStore = new PipelineStore();
+  const globalDir = context.globalStorageUri.fsPath;
+  const varStore = new VariableStore(globalDir);
+  const pipeStore = new PipelineStore(globalDir);
 
   const patternsTree = new PatternsTreeProvider(scanState);
   const varTree = new VariablesTreeProvider(varStore);
@@ -280,26 +295,33 @@ export function activate(context: vscode.ExtensionContext): void {
         prompt: "Description (optional)",
         placeHolder: "e.g. AES-256 key for project X",
       });
-      varStore.set(name, value, desc ?? undefined);
+      const scope = await pickScope(
+        defaultScope("defaultVariableScope"),
+        `Save variable "${name}"`,
+      );
+      if (!scope) return;
+      varStore.set(scope, name, value, desc ?? undefined);
       varTree.refresh();
-      log(`Variable "${name}" set`);
+      log(`Variable "${name}" set (${scope})`);
       vscode.window.showInformationMessage(
-        `ts-chef: Variable "${name}" saved.`,
+        `ts-chef: Variable "${name}" saved (${scope}).`,
       );
     }),
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("tschef.showVariables", async () => {
-      const vars = varStore.load();
+      const vars = varStore.loadAll();
       if (!vars.length) {
         vscode.window.showInformationMessage("ts-chef: No variables defined.");
         return;
       }
       const items = vars.map((v) => ({
         label: v.name,
-        description: v.value,
+        description: `${v.value}  [${v.scope}]`,
         detail: v.description,
+        name: v.name,
+        scope: v.scope,
       }));
       const action = await vscode.window.showQuickPick(
         [
@@ -319,25 +341,25 @@ export function activate(context: vscode.ExtensionContext): void {
           { label: "$(trash) Delete" },
           { label: "$(copy) Copy value" },
         ],
-        { placeHolder: `Variable: ${action.label}` },
+        { placeHolder: `Variable: ${action.name} (${action.scope})` },
       );
       if (!choice) return;
       if (choice.label.includes("Delete")) {
-        varStore.delete(action.label);
+        varStore.delete(action.scope, action.name);
         varTree.refresh();
       }
       if (choice.label.includes("Edit")) {
         const newVal = await vscode.window.showInputBox({
-          value: varStore.get(action.label),
+          value: varStore.get(action.name),
           prompt: "New value",
         });
         if (newVal !== undefined) {
-          varStore.set(action.label, newVal);
+          varStore.set(action.scope, action.name, newVal);
           varTree.refresh();
         }
       }
       if (choice.label.includes("Copy")) {
-        const v = varStore.get(action.label);
+        const v = varStore.get(action.name);
         if (v) vscode.env.clipboard.writeText(v);
       }
     }),
@@ -382,7 +404,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(
       "tschef.runSavedPipeline",
       async (name: string) => {
-        const pipeline = pipeStore.load().find((p) => p.name === name);
+        const pipeline = pipeStore.findByName(name);
         if (!pipeline) return;
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -414,7 +436,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(
       "tschef.runSavedPipelinePicker",
       async () => {
-        const pipelines = pipeStore.load();
+        const pipelines = pipeStore.loadAll();
         if (!pipelines.length) {
           vscode.window.showInformationMessage(
             "ts-chef: No saved pipelines. Save one in the Pipeline Editor first.",
@@ -424,7 +446,7 @@ export function activate(context: vscode.ExtensionContext): void {
         const picked = await vscode.window.showQuickPick(
           pipelines.map((p) => ({
             label: p.name,
-            description: p.description,
+            description: `${p.description ?? ""}  [${p.scope}]`,
             detail: p.raw,
             name: p.name,
           })),
