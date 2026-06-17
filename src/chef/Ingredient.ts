@@ -15,6 +15,7 @@ import { Utils } from "./Utils";
 import { fromHex } from "./lib/Hex";
 import { OperationError } from "./errors/OperationError";
 import { ArgConfig } from "./Operation";
+import { PipelineData } from "./types";
 
 /**
  * An Ingredient represents a single argument value for an operation.
@@ -29,7 +30,7 @@ export class Ingredient {
   type: string = "";
 
   /** Internal storage for the argument value. */
-  private _value: any = null;
+  private _value: PipelineData | null = null;
 
   /** Whether the argument is disabled. */
   disabled: boolean = false;
@@ -62,7 +63,7 @@ export class Ingredient {
   step: number = 1;
 
   /** The initial default value of the argument. */
-  defaultValue: any;
+  defaultValue: PipelineData | null = null;
 
   /**
    * Ingredient constructor.
@@ -108,7 +109,7 @@ export class Ingredient {
   /**
    * Returns the value of the Ingredient as it should be stored in a recipe configuration.
    */
-  get config(): any {
+  get config(): PipelineData | null {
     return this._value;
   }
 
@@ -118,14 +119,14 @@ export class Ingredient {
    *
    * @param value - The new value.
    */
-  set value(value: any) {
+  set value(value: PipelineData | null) {
     this._value = Ingredient.prepare(value, this.type);
   }
 
   /**
    * Gets the current value of the Ingredient.
    */
-  get value(): any {
+  get value(): PipelineData | null {
     return this._value;
   }
 
@@ -140,7 +141,7 @@ export class Ingredient {
    * @returns The prepared and validated value.
    * @throws {OperationError} If the value is invalid for the specified type.
    */
-  static prepare(data: any, type: string): any {
+  static prepare(data: PipelineData | null, type: string): PipelineData | null {
     let number: number;
 
     switch (type) {
@@ -158,9 +159,9 @@ export class Ingredient {
         }
       case "number":
         if (data === null) return data;
-        number = parseFloat(data);
+        number = typeof data === "number" ? data : parseFloat(String(data));
         if (isNaN(number)) {
-          const sample = Utils.truncate(data.toString(), 10);
+          const sample = Utils.truncate(String(data), 10);
           throw new OperationError(
             "Invalid ingredient value. Not a number: " + sample,
           );
