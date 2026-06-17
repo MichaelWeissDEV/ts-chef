@@ -6,6 +6,8 @@
  * @author Michael Weiss
  */
 
+import { PipelineData } from "./types";
+
 /**
  * Configuration for an operation argument.
  *
@@ -17,7 +19,7 @@ export interface ArgConfig {
   /** The type of the argument (e.g., 'string', 'number', 'option', 'boolean'). */
   type: string;
   /** The default or current value of the argument. */
-  value: unknown;
+  value: PipelineData | null;
   /** Optional values for 'option' or 'editableOption' type arguments. */
   toggleValues?: string[];
   /** A hint or tooltip describing the purpose of the argument. */
@@ -59,8 +61,7 @@ export type HighlightResult = HighlightPos | false;
  * Type alias for any input data processed by an operation.
  * Operations can handle strings, number arrays (byte arrays), ArrayBuffers, etc.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AnyInput = any;
+export type AnyInput = PipelineData;
 
 /**
  * Abstract base class for all operations in ts-chef.
@@ -133,8 +134,7 @@ export abstract class Operation {
    * @returns The processed data.
    * @throws {OperationError} If processing fails.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  abstract run(input: AnyInput, args: any[]): AnyInput;
+  abstract run(input: AnyInput, args: unknown[]): AnyInput;
 
   /**
    * Formats the output data for presentation in the UI.
@@ -146,8 +146,7 @@ export abstract class Operation {
    * @param _args - The arguments used during execution.
    * @returns The formatted presentation data.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  present(data: AnyInput, _args: any[]): AnyInput {
+  present(data: AnyInput, _args: unknown[]): AnyInput {
     return data;
   }
 
@@ -160,8 +159,7 @@ export abstract class Operation {
    * @param _args - The arguments used.
    * @returns The corresponding highlight positions in the output, or `false`.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  highlight(_pos: HighlightPos, _args: any[]): HighlightResult {
+  highlight(_pos: HighlightPos, _args: unknown[]): HighlightResult {
     return false;
   }
 
@@ -172,8 +170,7 @@ export abstract class Operation {
    * @param _args - The arguments used.
    * @returns The corresponding highlight positions in the input, or `false`.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  highlightReverse(_pos: HighlightPos, _args: any[]): HighlightResult {
+  highlightReverse(_pos: HighlightPos, _args: unknown[]): HighlightResult {
     return false;
   }
 }
