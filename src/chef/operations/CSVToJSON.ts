@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import Operation from "../Operation";
+import Operation, { AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { Utils } from "../Utils";
 
@@ -61,14 +61,14 @@ export class CSVToJSON extends Operation {
    * @param {string} args[2] - Format ("Array of dictionaries" or "Array of arrays").
    * @returns {unknown} - The converted JSON.
    */
-  run(input: string, args: any[]): unknown {
+  run(input: string, args: string[]): AnyInput {
     const [cellDelims, rowDelims, format] = args;
 
     let json: string[][];
     try {
       json = Utils.parseCSV(input, cellDelims.split(""), rowDelims.split(""));
-    } catch (err: any) {
-      throw new OperationError("Unable to parse CSV: " + err);
+    } catch (err) {
+      throw new OperationError("Unable to parse CSV: " + String(err));
     }
 
     switch (format) {
