@@ -17,7 +17,12 @@ import {
   runPipeline,
   resolveDefaultArg,
 } from "./commands/runner";
-import { presentPipelineResult } from "./commands/pipelineResult";
+import {
+  presentPipelineResult,
+  type ResultRenderer,
+} from "./commands/pipelineResult";
+import { InlineResultController } from "./commands/inlineResult";
+import { WebviewResultController } from "./commands/webviewResult";
 import { pickScope } from "./commands/scopePicker";
 
 /** The configured default scope for a given preset kind. */
@@ -120,6 +125,17 @@ export function activate(context: vscode.ExtensionContext): void {
   const patternsTree = new PatternsTreeProvider(scanState);
   const varTree = new VariablesTreeProvider(varStore);
   const pipeTree = new PipelinesTreeProvider(pipeStore);
+
+  // Custom result presenters for the `inline` / `panel` modes, injected into
+  // presentPipelineResult via the renderer map below.
+  const inlineResult = new InlineResultController();
+  const webviewResult = new WebviewResultController();
+  inlineResult.register(context);
+  webviewResult.register(context);
+  const resultRenderers: Partial<Record<"inline" | "panel", ResultRenderer>> = {
+    inline: (editor, result) => inlineResult.show(editor, result),
+    panel: (editor, result) => webviewResult.show(editor, result),
+  };
 
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider("tschef.patternsView", patternsTree),
@@ -385,7 +401,7 @@ export function activate(context: vscode.ExtensionContext): void {
         log(
           `Pipeline ran: "${raw}", input ${text.length} chars → ${result.length} chars`,
         );
-        await presentPipelineResult(editor, result, "Result");
+        await presentPipelineResult(editor, result, "Result", resultRenderers);
       } catch (e) {
         log(`Pipeline error: ${e}`);
         vscode.window.showErrorMessage(`ts-chef pipeline error: ${e}`);
@@ -420,7 +436,12 @@ export function activate(context: vscode.ExtensionContext): void {
           log(
             `Ran saved pipeline "${name}": ${pipeline.steps.length} step(s), ${text.length} → ${result.length} chars`,
           );
-          await presentPipelineResult(editor, result, `Pipeline "${name}"`);
+          await presentPipelineResult(
+            editor,
+            result,
+            `Pipeline "${name}"`,
+            resultRenderers,
+          );
         } catch (e) {
           log(`Saved pipeline "${name}" error: ${e}`);
           vscode.window.showErrorMessage(
@@ -505,7 +526,7 @@ export function activate(context: vscode.ExtensionContext): void {
         log(
           `Deep analysis applied "${picked.opName}": ${text.length} → ${str.length} chars`,
         );
-        await presentPipelineResult(editor, str, "Result");
+        await presentPipelineResult(editor, str, "Result", resultRenderers);
       } catch (e) {
         log(`Deep analysis error: ${e}`);
         vscode.window.showErrorMessage(`ts-chef deep analysis error: ${e}`);

@@ -162,11 +162,13 @@
         },
         "tschef.pipelineResultAction": {
           "type": "string",
-          "enum": ["popup", "replace", "copy"],
+          "enum": ["popup", "replace", "copy", "inline", "panel"],
           "enumDescriptions": [
             "Show an information message with Replace/Copy buttons",
             "Replace the selection (or whole document) with the result",
-            "Copy the result to the clipboard"
+            "Copy the result to the clipboard",
+            "Pin the result inline as a CodeLens row with Replace/Copy/Close",
+            "Show the result in a reusable webview panel beside the editor"
           ],
           "default": "popup",
           "description": "How to present the result of a pipeline or operation"

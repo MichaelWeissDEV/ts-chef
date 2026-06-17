@@ -22,7 +22,56 @@ export class Selection {
   get isEmpty(): boolean {
     return JSON.stringify(this.anchor) === JSON.stringify(this.active);
   }
+  // Real Selections extend Range; the controllers read `.start`/`.end`.
+  get start(): Position {
+    return this.orderedFirst() ? (this.anchor as Position) : (this.active as Position);
+  }
+  get end(): Position {
+    return this.orderedFirst() ? (this.active as Position) : (this.anchor as Position);
+  }
+  private orderedFirst(): boolean {
+    const a = this.anchor as Position;
+    const b = this.active as Position;
+    return a.line < b.line || (a.line === b.line && a.character <= b.character);
+  }
 }
+
+export class Range {
+  readonly start: Position;
+  readonly end: Position;
+  constructor(
+    startLine: number,
+    startChar: number,
+    endLine: number,
+    endChar: number,
+  ) {
+    this.start = new Position(startLine, startChar);
+    this.end = new Position(endLine, endChar);
+  }
+}
+
+export class CodeLens {
+  constructor(
+    public readonly range: unknown,
+    public readonly command?: unknown,
+  ) {}
+}
+
+export class EventEmitter<T> {
+  private listeners: ((e: T) => void)[] = [];
+  readonly event = (listener: (e: T) => void): { dispose(): void } => {
+    this.listeners.push(listener);
+    return { dispose: () => undefined };
+  };
+  fire(data: T): void {
+    for (const l of this.listeners) l(data);
+  }
+  dispose(): void {
+    this.listeners = [];
+  }
+}
+
+export const ViewColumn = { Beside: 2 } as const;
 
 // ── test-controlled state ─────────────────────────────────────────────────────
 let configValues: Record<string, unknown> = {};
@@ -30,6 +79,8 @@ let infoMessageResponse: string | undefined = undefined;
 let workspaceFolder: string | undefined = undefined;
 let quickPickResponse: ((items: readonly unknown[]) => unknown) | undefined;
 let lastQuickPickItems: readonly unknown[] = [];
+let registeredCommands: Record<string, (...args: unknown[]) => unknown> = {};
+let lastWebviewPanel: FakeWebviewPanel | undefined;
 
 export const clipboardWrite = jest.fn<void, [string]>();
 export const statusBarMessage = jest.fn<void, [string, number?]>();
@@ -59,12 +110,63 @@ export const workspace = {
   },
 };
 
+/** A controllable stand-in for `vscode.WebviewPanel`. */
+export type FakeWebviewPanel = {
+  webview: {
+    html: string;
+    onDidReceiveMessage: (cb: (msg: unknown) => void) => void;
+  };
+  onDidDispose: (cb: () => void) => void;
+  reveal: jest.Mock;
+  dispose: () => void;
+  disposed: boolean;
+  /** Simulate the webview posting a message back to the extension. */
+  __fireMessage: (msg: unknown) => void;
+};
+
 export const window = {
   showInformationMessage,
   showWarningMessage,
   showQuickPick,
   setStatusBarMessage: (msg: string, timeout?: number) =>
     statusBarMessage(msg, timeout),
+  createWebviewPanel: (..._args: unknown[]): FakeWebviewPanel => {
+    let messageHandler: ((msg: unknown) => void) | undefined;
+    let disposeHandler: (() => void) | undefined;
+    const panel: FakeWebviewPanel = {
+      webview: {
+        html: "",
+        onDidReceiveMessage: (cb) => {
+          messageHandler = cb;
+        },
+      },
+      onDidDispose: (cb) => {
+        disposeHandler = cb;
+      },
+      reveal: jest.fn(),
+      disposed: false,
+      dispose: () => {
+        panel.disposed = true;
+        disposeHandler?.();
+      },
+      __fireMessage: (msg) => messageHandler?.(msg),
+    };
+    lastWebviewPanel = panel;
+    return panel;
+  },
+};
+
+export const languages = {
+  registerCodeLensProvider: (..._args: unknown[]) => ({
+    dispose: () => undefined,
+  }),
+};
+
+export const commands = {
+  registerCommand: (id: string, cb: (...args: unknown[]) => unknown) => {
+    registeredCommands[id] = cb;
+    return { dispose: () => undefined };
+  },
 };
 
 export const env = {
@@ -78,6 +180,8 @@ export function __reset(): void {
   workspaceFolder = undefined;
   quickPickResponse = undefined;
   lastQuickPickItems = [];
+  registeredCommands = {};
+  lastWebviewPanel = undefined;
   clipboardWrite.mockClear();
   statusBarMessage.mockClear();
   showInformationMessage.mockClear();
@@ -110,4 +214,16 @@ export function __setQuickPickResponse(
 /** The items most recently passed to `showQuickPick`. */
 export function __getLastQuickPickItems(): readonly unknown[] {
   return lastQuickPickItems;
+}
+
+/** Invoke a command registered via `commands.registerCommand`. */
+export function __invokeCommand(id: string, ...args: unknown[]): unknown {
+  const cb = registeredCommands[id];
+  if (!cb) throw new Error(`No command registered for "${id}"`);
+  return cb(...args);
+}
+
+/** The most recently created webview panel, or undefined if none. */
+export function __getWebviewPanel(): FakeWebviewPanel | undefined {
+  return lastWebviewPanel;
 }
