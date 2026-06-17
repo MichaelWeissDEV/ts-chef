@@ -14,7 +14,10 @@ import { FromBase64 } from "../src/chef/operations/FromBase64";
 // ── Inline copies of runner utilities under test ──────────────────────────────
 
 // Only the fields resolveDefaultArg reads; real ArgConfig[] also satisfies this.
-type ArgLike = Pick<ArgConfig, "type" | "value" | "toggleValues" | "defaultIndex">;
+type ArgLike = Pick<
+  ArgConfig,
+  "type" | "value" | "toggleValues" | "defaultIndex"
+>;
 
 function resolveDefaultArg(arg: ArgLike): unknown {
   switch (arg.type) {
@@ -239,14 +242,16 @@ function operationNeedsInput(op: { args: ArgLike[] }): boolean {
 
 describe("operationNeedsInput", () => {
   test("true when a toggleString arg is still empty", () => {
-    expect(operationNeedsInput({ args: [{ type: "toggleString", value: "" }] })).toBe(
-      true,
-    );
+    expect(
+      operationNeedsInput({ args: [{ type: "toggleString", value: "" }] }),
+    ).toBe(true);
   });
 
   test("false when the toggleString arg has a value", () => {
     expect(
-      operationNeedsInput({ args: [{ type: "toggleString", value: "secret" }] }),
+      operationNeedsInput({
+        args: [{ type: "toggleString", value: "secret" }],
+      }),
     ).toBe(false);
   });
 

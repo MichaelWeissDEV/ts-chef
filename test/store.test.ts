@@ -2,7 +2,11 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import { VariableStore, PipelineStore, Pipeline } from "../src/storage/store";
-import { __reset, __setWorkspaceFolder, showWarningMessage } from "./vscode-mock";
+import {
+  __reset,
+  __setWorkspaceFolder,
+  showWarningMessage,
+} from "./vscode-mock";
 
 let globalDir: string;
 let wsDir: string;
@@ -27,9 +31,7 @@ describe("VariableStore", () => {
     __setWorkspaceFolder(wsDir);
     const store = new VariableStore(globalDir);
     store.set("workspace", "k", "v");
-    expect(store.load("workspace")).toEqual([
-      { name: "k", value: "v" },
-    ]);
+    expect(store.load("workspace")).toEqual([{ name: "k", value: "v" }]);
     expect(store.load("global")).toEqual([]);
   });
 

@@ -106,7 +106,10 @@ export class WebviewResultController {
       }
     } else if (msg.type === "copy") {
       vscode.env.clipboard.writeText(state.result);
-      vscode.window.setStatusBarMessage("ts-chef: Pipeline result copied", 3000);
+      vscode.window.setStatusBarMessage(
+        "ts-chef: Pipeline result copied",
+        3000,
+      );
     } else if (msg.type === "close") {
       this.panel?.dispose();
     }

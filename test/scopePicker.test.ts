@@ -28,8 +28,8 @@ describe("pickScope", () => {
   });
 
   test("returns the picked scope", async () => {
-    __setQuickPickResponse(
-      (items) => (items as ScopeItem[]).find((i) => i.scope === "workspace"),
+    __setQuickPickResponse((items) =>
+      (items as ScopeItem[]).find((i) => i.scope === "workspace"),
     );
     expect(await pickScope("global", "Save x")).toBe("workspace");
   });

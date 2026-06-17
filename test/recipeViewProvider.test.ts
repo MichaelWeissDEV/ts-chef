@@ -43,7 +43,11 @@ function makeDeps(over: Partial<RecipeViewDeps> = {}): RecipeViewDeps {
   return {
     argDefsFor: (opName) => ARG_DEFS[opName],
     displayNameFor: (opName) =>
-      opName === "ToHex" ? "To Hex" : opName === "ToBase64" ? "To Base64" : opName,
+      opName === "ToHex"
+        ? "To Hex"
+        : opName === "ToBase64"
+          ? "To Base64"
+          : opName,
     apply: jest.fn(),
     save: jest.fn(),
     ...over,

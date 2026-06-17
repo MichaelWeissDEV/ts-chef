@@ -31,7 +31,9 @@ function makeEditor(
       positionAt: (offset: number) => new Position(0, offset),
     },
     selection,
-    edit: async (cb: (eb: { replace: (r: unknown, t: string) => void }) => void) => {
+    edit: async (
+      cb: (eb: { replace: (r: unknown, t: string) => void }) => void,
+    ) => {
       cb({ replace: (range, t) => replaceCalls.push({ range, text: t }) });
       return true;
     },
@@ -72,9 +74,7 @@ describe("presentPipelineResult", () => {
       emptySelection: true,
     });
     await presentPipelineResult(editor, "NEW", "Result");
-    expect(replaceCalls).toEqual([
-      expect.objectContaining({ text: "NEW" }),
-    ]);
+    expect(replaceCalls).toEqual([expect.objectContaining({ text: "NEW" })]);
     expect(showInformationMessage).not.toHaveBeenCalled();
     expect(clipboardWrite).not.toHaveBeenCalled();
   });

@@ -211,7 +211,9 @@ export function activate(context: vscode.ExtensionContext): void {
     steps: RecipeStep[],
   ): Promise<void> {
     if (!name) {
-      vscode.window.showWarningMessage("ts-chef: Name the recipe before saving.");
+      vscode.window.showWarningMessage(
+        "ts-chef: Name the recipe before saving.",
+      );
       return;
     }
     if (!steps.length) {
@@ -226,7 +228,9 @@ export function activate(context: vscode.ExtensionContext): void {
     const raw = steps.map((s) => displayNameFor(s.opName)).join(" | ");
     pipeStore.upsert(scope, { name, raw, steps });
     pipeTree.refresh();
-    log(`Recipe "${name}" saved as pipeline (${steps.length} step(s), ${scope})`);
+    log(
+      `Recipe "${name}" saved as pipeline (${steps.length} step(s), ${scope})`,
+    );
     vscode.window.showInformationMessage(
       `ts-chef: Recipe "${name}" saved (${scope}).`,
     );
@@ -664,7 +668,11 @@ export function activate(context: vscode.ExtensionContext): void {
         if (!argDefs) return;
         try {
           const result = resultToString(
-            runOp(opName, selectionInput(editor), argDefs.map(resolveDefaultArg)),
+            runOp(
+              opName,
+              selectionInput(editor),
+              argDefs.map(resolveDefaultArg),
+            ),
           );
           log(`applyOperation: "${opName}" applied`);
           await presentPipelineResult(

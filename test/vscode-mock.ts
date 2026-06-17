@@ -24,10 +24,14 @@ export class Selection {
   }
   // Real Selections extend Range; the controllers read `.start`/`.end`.
   get start(): Position {
-    return this.orderedFirst() ? (this.anchor as Position) : (this.active as Position);
+    return this.orderedFirst()
+      ? (this.anchor as Position)
+      : (this.active as Position);
   }
   get end(): Position {
-    return this.orderedFirst() ? (this.active as Position) : (this.anchor as Position);
+    return this.orderedFirst()
+      ? (this.active as Position)
+      : (this.anchor as Position);
   }
   private orderedFirst(): boolean {
     const a = this.anchor as Position;
@@ -104,9 +108,7 @@ export const workspace = {
       key in configValues ? (configValues[key] as T) : fallback,
   }),
   get workspaceFolders() {
-    return workspaceFolder
-      ? [{ uri: { fsPath: workspaceFolder } }]
-      : undefined;
+    return workspaceFolder ? [{ uri: { fsPath: workspaceFolder } }] : undefined;
   },
 };
 

@@ -15,7 +15,8 @@ export async function pickScope(
   defaultScope: StorageScope,
   title: string,
 ): Promise<StorageScope | undefined> {
-  const other: StorageScope = defaultScope === "global" ? "workspace" : "global";
+  const other: StorageScope =
+    defaultScope === "global" ? "workspace" : "global";
   const items = [defaultScope, other].map((scope) => ({
     label:
       scope === defaultScope ? `${LABELS[scope]} (default)` : LABELS[scope],

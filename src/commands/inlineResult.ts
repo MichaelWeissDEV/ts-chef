@@ -69,7 +69,10 @@ export class InlineResultController implements vscode.CodeLensProvider {
         item.result.replace(/\s+/g, " ").slice(0, MAX_PREVIEW) +
         (item.result.length > MAX_PREVIEW ? "…" : "");
       lenses.push(
-        new vscode.CodeLens(range, { title: `$(output) ${preview}`, command: "" }),
+        new vscode.CodeLens(range, {
+          title: `$(output) ${preview}`,
+          command: "",
+        }),
         new vscode.CodeLens(range, {
           title: "$(replace) Replace",
           command: "tschef.applyInlineResult",
@@ -116,7 +119,10 @@ export class InlineResultController implements vscode.CodeLensProvider {
 
     if (action === "copy") {
       vscode.env.clipboard.writeText(item.result);
-      vscode.window.setStatusBarMessage("ts-chef: Pipeline result copied", 3000);
+      vscode.window.setStatusBarMessage(
+        "ts-chef: Pipeline result copied",
+        3000,
+      );
       return; // keep the row open
     }
 

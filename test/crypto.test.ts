@@ -61,7 +61,11 @@ function symArgs(
     outputType,
   ];
 }
-function symDecArgs(keyHex: string, ivHex: string, mode = "CBC"): Array<string | { string: string; option: string }> {
+function symDecArgs(
+  keyHex: string,
+  ivHex: string,
+  mode = "CBC",
+): Array<string | { string: string; option: string }> {
   return symArgs(keyHex, ivHex, mode, "Hex", "Raw");
 }
 
@@ -183,19 +187,13 @@ describe("Triple DES Encrypt / Decrypt", () => {
 
   test("3DES CBC round-trip", () => {
     const enc = new TripleDESEncrypt().run(PLAINTEXT, symArgs(KEY, IV, "CBC"));
-    const dec = new TripleDESDecrypt().run(
-      enc,
-      symDecArgs(KEY, IV, "CBC"),
-    );
+    const dec = new TripleDESDecrypt().run(enc, symDecArgs(KEY, IV, "CBC"));
     expect(abToStr(dec as ArrayBuffer).trim()).toBe(PLAINTEXT);
   });
 
   test("3DES ECB round-trip", () => {
     const enc = new TripleDESEncrypt().run(PLAINTEXT, symArgs(KEY, IV, "ECB"));
-    const dec = new TripleDESDecrypt().run(
-      enc,
-      symDecArgs(KEY, IV, "ECB"),
-    );
+    const dec = new TripleDESDecrypt().run(enc, symDecArgs(KEY, IV, "ECB"));
     expect(abToStr(dec as ArrayBuffer).trim()).toBe(PLAINTEXT);
   });
 });

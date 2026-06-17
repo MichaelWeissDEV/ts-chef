@@ -74,7 +74,9 @@ describe("InlineResultController", () => {
   test("lenses for one document are not shown in another", () => {
     const ctl = new InlineResultController();
     ctl.show(makeEditor("file:///a.txt").editor, "X");
-    expect(ctl.provideCodeLenses(makeDocument("file:///b.txt"))).toHaveLength(0);
+    expect(ctl.provideCodeLenses(makeDocument("file:///b.txt"))).toHaveLength(
+      0,
+    );
   });
 
   test("long results are truncated with an ellipsis in the preview", () => {
@@ -92,7 +94,9 @@ describe("InlineResultController", () => {
 
     await __invokeCommand("tschef.applyInlineResult", "replace", 0);
     expect(replaceCalls).toEqual([expect.objectContaining({ text: "NEW" })]);
-    expect(ctl.provideCodeLenses(makeDocument("file:///a.txt"))).toHaveLength(0);
+    expect(ctl.provideCodeLenses(makeDocument("file:///a.txt"))).toHaveLength(
+      0,
+    );
   });
 
   test("replace on a closed editor warns and keeps the row", async () => {
@@ -106,7 +110,9 @@ describe("InlineResultController", () => {
     await __invokeCommand("tschef.applyInlineResult", "replace", 0);
     expect(replaceCalls).toHaveLength(0);
     expect(showWarningMessage).toHaveBeenCalled();
-    expect(ctl.provideCodeLenses(makeDocument("file:///a.txt"))).toHaveLength(4);
+    expect(ctl.provideCodeLenses(makeDocument("file:///a.txt"))).toHaveLength(
+      4,
+    );
   });
 
   test("copy action writes the clipboard and keeps the row open", async () => {
@@ -117,7 +123,9 @@ describe("InlineResultController", () => {
     await __invokeCommand("tschef.applyInlineResult", "copy", 0);
     expect(clipboardWrite).toHaveBeenCalledWith("COPYME");
     expect(statusBarMessage).toHaveBeenCalled();
-    expect(ctl.provideCodeLenses(makeDocument("file:///a.txt"))).toHaveLength(4);
+    expect(ctl.provideCodeLenses(makeDocument("file:///a.txt"))).toHaveLength(
+      4,
+    );
   });
 
   test("close action removes the row without touching clipboard or editor", async () => {
@@ -126,7 +134,9 @@ describe("InlineResultController", () => {
     ctl.show(makeEditor("file:///a.txt").editor, "BYE");
 
     await __invokeCommand("tschef.applyInlineResult", "close", 0);
-    expect(ctl.provideCodeLenses(makeDocument("file:///a.txt"))).toHaveLength(0);
+    expect(ctl.provideCodeLenses(makeDocument("file:///a.txt"))).toHaveLength(
+      0,
+    );
     expect(clipboardWrite).not.toHaveBeenCalled();
   });
 
@@ -135,7 +145,9 @@ describe("InlineResultController", () => {
     ctl.register(makeContext());
     ctl.show(makeEditor("file:///a.txt").editor, "first");
     ctl.show(makeEditor("file:///a.txt").editor, "second");
-    expect(ctl.provideCodeLenses(makeDocument("file:///a.txt"))).toHaveLength(8);
+    expect(ctl.provideCodeLenses(makeDocument("file:///a.txt"))).toHaveLength(
+      8,
+    );
   });
 
   test("a failing edit warns rather than throwing", async () => {
@@ -145,7 +157,9 @@ describe("InlineResultController", () => {
 
     await __invokeCommand("tschef.applyInlineResult", "replace", 0);
     expect(showWarningMessage).toHaveBeenCalled();
-    expect(ctl.provideCodeLenses(makeDocument("file:///a.txt"))).toHaveLength(4);
+    expect(ctl.provideCodeLenses(makeDocument("file:///a.txt"))).toHaveLength(
+      4,
+    );
   });
 
   test("applying an unknown id is a no-op", async () => {

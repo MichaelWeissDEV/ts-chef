@@ -60,12 +60,14 @@ export class VariableStore {
 
   /** Merged view of both scopes; workspace items first (drives precedence). */
   loadAll(): ScopedVariable[] {
-    const ws = this.load("workspace").map(
-      (v) => ({ ...v, scope: "workspace" as const }),
-    );
-    const gl = this.load("global").map(
-      (v) => ({ ...v, scope: "global" as const }),
-    );
+    const ws = this.load("workspace").map((v) => ({
+      ...v,
+      scope: "workspace" as const,
+    }));
+    const gl = this.load("global").map((v) => ({
+      ...v,
+      scope: "global" as const,
+    }));
     return [...ws, ...gl];
   }
 
@@ -140,12 +142,14 @@ export class PipelineStore {
 
   /** Merged view of both scopes; workspace items first (drives precedence). */
   loadAll(): ScopedPipeline[] {
-    const ws = this.load("workspace").map(
-      (p) => ({ ...p, scope: "workspace" as const }),
-    );
-    const gl = this.load("global").map(
-      (p) => ({ ...p, scope: "global" as const }),
-    );
+    const ws = this.load("workspace").map((p) => ({
+      ...p,
+      scope: "workspace" as const,
+    }));
+    const gl = this.load("global").map((p) => ({
+      ...p,
+      scope: "global" as const,
+    }));
     return [...ws, ...gl];
   }
 
