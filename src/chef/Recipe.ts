@@ -1,5 +1,6 @@
 import Dish from "./Dish";
-import { Operation } from "./Operation";
+import { Operation, AnyInput } from "./Operation";
+import { PipelineData, normalizeInput, InputType } from "./types";
 
 /**
  * Represents a single operation entry in a recipe's internal list.
@@ -10,7 +11,7 @@ interface OpListItem {
   /** The module/category name. */
   module?: string;
   /** The argument values configured for this instance of the operation. */
-  ingValues: unknown[];
+  ingValues: (PipelineData | null)[];
   /** Whether execution should pause before this operation (breakpoint). */
   breakpoint?: boolean;
   /** Whether this operation is disabled and should be skipped. */
@@ -57,7 +58,7 @@ class Recipe {
   constructor(
     recipeConfig?: Array<{
       op: string;
-      args: unknown[];
+      args: (PipelineData | null)[];
       breakpoint?: boolean;
       disabled?: boolean;
     }>,
@@ -116,14 +117,24 @@ class Recipe {
           };
           const result = await item.op.run(
             currentState,
-            item.ingValues as string[],
+            item.ingValues as unknown[],
           );
           if (result && typeof result === "object" && "progress" in result) {
-            i = (result as RecipeState).progress;
+            i = (result as unknown as RecipeState).progress;
           }
         } else {
-          const input = await dish.get(item.inputType ?? "string");
-          const output = await item.op.run(input, item.ingValues as string[]);
+          // Type-safe input normalization
+          const rawInput = await dish.get(item.inputType ?? "string");
+          const input = item.inputType
+            ? normalizeInput(
+                rawInput as PipelineData,
+                item.inputType as InputType,
+              )
+            : rawInput;
+          const output = await item.op.run(
+            input as AnyInput,
+            item.ingValues as unknown[],
+          );
           dish.set(output, dish.type);
         }
         progress = i;
