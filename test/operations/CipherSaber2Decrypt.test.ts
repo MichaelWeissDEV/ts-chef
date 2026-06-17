@@ -1,5 +1,5 @@
 import { CipherSaber2Decrypt } from "../../src/chef/operations/CipherSaber2Decrypt";
-import { Utils } from "../../src/chef/Utils";
+import { CipherSaber2Encrypt } from "../../src/chef/operations/CipherSaber2Encrypt";
 
 describe("CipherSaber2Decrypt", () => {
   let decrypt: CipherSaber2Decrypt;
@@ -13,8 +13,7 @@ describe("CipherSaber2Decrypt", () => {
     const rounds = 20;
 
     // Use Encrypt to create a valid ciphertext for testing Decrypt
-    const encrypt =
-      new (require("../../src/chef/operations/CipherSaber2Encrypt").CipherSaber2Encrypt)();
+    const encrypt = new CipherSaber2Encrypt();
     const input = new Uint8Array(Buffer.from("This is a test message")).buffer;
     const encrypted = encrypt.run(input, [key, rounds]);
 
