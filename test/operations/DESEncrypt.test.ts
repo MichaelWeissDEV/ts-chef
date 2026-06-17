@@ -1,5 +1,4 @@
 import { DESEncrypt } from "../../src/chef/operations/DESEncrypt";
-import { DESDecrypt } from "../../src/chef/operations/DESDecrypt";
 
 const PLAINTEXT = "hello world";
 const KEY = "0123456789abcdef"; // 8 bytes
@@ -19,10 +18,6 @@ function symArgs(
     inputType,
     outputType,
   ];
-}
-
-function symDecArgs(keyHex: string, ivHex: string, mode = "CBC"): any[] {
-  return symArgs(keyHex, ivHex, mode, "Hex", "Raw");
 }
 
 describe("DESEncrypt", () => {

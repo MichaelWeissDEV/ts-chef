@@ -18,7 +18,6 @@ describe("CartesianProduct", () => {
 
   test("Custom delimiters", () => {
     const input = "1;2|A;B";
-    const expected = "(1:A);(1:B);(2:A);(2:B)";
     // Note: CartesianProduct uses itemDelimiter in result as well
     // Wait, looking at the code:
     // .map((set) => `(${set.join(",")})`)

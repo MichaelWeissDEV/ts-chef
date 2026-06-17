@@ -1,5 +1,4 @@
 import { CSVToJSON } from "../../src/chef/operations/CSVToJSON";
-import { OperationError } from "../../src/chef/errors/OperationError";
 
 describe("CSVToJSON", () => {
   const op = new CSVToJSON();
