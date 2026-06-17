@@ -44,7 +44,7 @@ export class GenerateAllHashes extends Operation {
     name: string;
     algo: Operation;
     inputType: string;
-    params?: any[];
+    params?: unknown[];
   }[];
 
   inputArrayBuffer: ArrayBuffer = new ArrayBuffer(0);
@@ -294,7 +294,10 @@ export class GenerateAllHashes extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: ArrayBuffer, args: any[]): string {
+  run(
+    input: ArrayBuffer,
+    args: [length: string, includeNames: boolean],
+  ): string {
     const [length, includeNames] = args;
     this.inputArrayBuffer = input;
     this.inputStr = Utils.arrayBufferToStr(input, false);
@@ -319,17 +322,21 @@ export class GenerateAllHashes extends Operation {
    * @param {any[]} [params=[]]
    * @returns {string}
    */
-  executeAlgo(algo: Operation, inputType: string, params: any[] = []): string {
+  executeAlgo(
+    algo: Operation,
+    inputType: string,
+    params: unknown[] = [],
+  ): string {
     let digest: string;
     switch (inputType) {
       case "arrayBuffer":
-        digest = algo.run(this.inputArrayBuffer, params);
+        digest = String(algo.run(this.inputArrayBuffer, params));
         break;
       case "str":
-        digest = algo.run(this.inputStr, params);
+        digest = String(algo.run(this.inputStr, params));
         break;
       case "byteArray":
-        digest = algo.run(this.inputByteArray, params);
+        digest = String(algo.run(this.inputByteArray, params));
         break;
       default:
         throw new OperationError("Unknown hash input type: " + inputType);
