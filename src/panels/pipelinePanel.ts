@@ -1,6 +1,12 @@
 import * as vscode from "vscode";
-import { PipelineStore, Pipeline, PipelineStep } from "../storage/store";
+import {
+  PipelineStore,
+  Pipeline,
+  PipelineStep,
+  type StorageScope,
+} from "../storage/store";
 import { parsePipeline, runPipeline } from "../commands/runner";
+import { pickScope } from "../commands/scopePicker";
 import { log } from "../logger";
 import registry from "../opsRegistry";
 
@@ -40,7 +46,10 @@ export class PipelinePanel {
     panel.webview.onDidReceiveMessage((msg) => this.handleMessage(msg));
   }
 
-  private handleMessage(msg: { type: string; [k: string]: unknown }): void {
+  private async handleMessage(msg: {
+    type: string;
+    [k: string]: unknown;
+  }): Promise<void> {
     switch (msg.type) {
       case "run": {
         const input = msg.input as string;
@@ -77,16 +86,24 @@ export class PipelinePanel {
             : parsePipeline(msg.raw as string);
           const raw =
             (msg.raw as string) || steps.map((s) => s.opName).join(" | ");
-          this.store.upsert({
+          const defaultPipelineScope = vscode.workspace
+            .getConfiguration("tschef")
+            .get<StorageScope>("defaultPipelineScope", "global");
+          const scope = await pickScope(
+            defaultPipelineScope,
+            `Save pipeline "${name}"`,
+          );
+          if (!scope) return;
+          this.store.upsert(scope, {
             name,
             raw,
             steps,
             description: msg.description as string | undefined,
           });
           vscode.commands.executeCommand("tschef.refreshPipelines");
-          log(`Pipeline "${name}" saved (${steps.length} step(s))`);
+          log(`Pipeline "${name}" saved (${steps.length} step(s), ${scope})`);
           vscode.window.showInformationMessage(
-            `ts-chef: Pipeline "${name}" saved.`,
+            `ts-chef: Pipeline "${name}" saved (${scope}).`,
           );
         } catch (e) {
           vscode.window.showErrorMessage(`ts-chef parse error: ${e}`);

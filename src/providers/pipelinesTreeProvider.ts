@@ -1,12 +1,14 @@
 import * as vscode from "vscode";
-import { PipelineStore, Pipeline } from "../storage/store";
+import { PipelineStore, ScopedPipeline } from "../storage/store";
 
 class PipelineNode extends vscode.TreeItem {
-  constructor(public readonly pipeline: Pipeline) {
+  constructor(public readonly pipeline: ScopedPipeline) {
     super(pipeline.name, vscode.TreeItemCollapsibleState.None);
-    this.description = pipeline.description ?? pipeline.raw.slice(0, 50);
-    this.tooltip = pipeline.raw;
-    this.contextValue = "pipeline";
+    const summary = pipeline.description ?? pipeline.raw.slice(0, 50);
+    this.description = `${summary}  [${pipeline.scope}]`;
+    this.tooltip = `${pipeline.raw}\n(${pipeline.scope})`;
+    // Scope-qualified for future scope-targeted context menus.
+    this.contextValue = `pipeline-${pipeline.scope}`;
     this.iconPath = new vscode.ThemeIcon("symbol-event");
     this.command = {
       command: "tschef.runSavedPipeline",
@@ -29,6 +31,6 @@ export class PipelinesTreeProvider implements vscode.TreeDataProvider<PipelineNo
     return e;
   }
   getChildren(): PipelineNode[] {
-    return this.store.load().map((p) => new PipelineNode(p));
+    return this.store.loadAll().map((p) => new PipelineNode(p));
   }
 }

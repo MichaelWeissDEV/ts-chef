@@ -170,6 +170,26 @@
           ],
           "default": "popup",
           "description": "How to present the result of a pipeline or operation"
+        },
+        "tschef.defaultPipelineScope": {
+          "type": "string",
+          "enum": ["global", "workspace"],
+          "enumDescriptions": [
+            "Save to global storage, available in all workspaces",
+            "Save to the current workspace's .vscode/ts-chef folder"
+          ],
+          "default": "global",
+          "description": "Default scope pre-selected when saving a pipeline"
+        },
+        "tschef.defaultVariableScope": {
+          "type": "string",
+          "enum": ["global", "workspace"],
+          "enumDescriptions": [
+            "Save to global storage, available in all workspaces",
+            "Save to the current workspace's .vscode/ts-chef folder"
+          ],
+          "default": "global",
+          "description": "Default scope pre-selected when saving a variable"
         }
       }
     }

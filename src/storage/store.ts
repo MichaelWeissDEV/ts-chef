@@ -2,7 +2,14 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 
-function getStoreDir(): string | undefined {
+/**
+ * Where a preset lives:
+ * - `workspace` — `<ws>/.vscode/ts-chef/` (or `<ws>/.ts-chef/`), per-project.
+ * - `global`    — `context.globalStorageUri`, shared across all workspaces.
+ */
+export type StorageScope = "workspace" | "global";
+
+function workspaceStoreDir(): string | undefined {
   const ws = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
   if (!ws) return undefined;
   const vscodePath = path.join(ws, ".vscode");
@@ -34,42 +41,69 @@ export interface Variable {
   description?: string;
 }
 
+export interface ScopedVariable extends Variable {
+  scope: StorageScope;
+}
+
 export class VariableStore {
-  private get file(): string | undefined {
-    const dir = getStoreDir();
-    return dir ? path.join(dir, "variables.json") : undefined;
+  constructor(private readonly globalDir: string) {}
+
+  private dir(scope: StorageScope): string | undefined {
+    return scope === "global" ? this.globalDir : workspaceStoreDir();
   }
 
-  load(): Variable[] {
-    const f = this.file;
-    if (!f) return [];
-    return readJSON<Variable[]>(f, []);
+  load(scope: StorageScope): Variable[] {
+    const dir = this.dir(scope);
+    if (!dir) return [];
+    return readJSON<Variable[]>(path.join(dir, "variables.json"), []);
   }
 
-  save(vars: Variable[]): void {
-    const dir = getStoreDir();
+  /** Merged view of both scopes; workspace items first (drives precedence). */
+  loadAll(): ScopedVariable[] {
+    const ws = this.load("workspace").map(
+      (v) => ({ ...v, scope: "workspace" as const }),
+    );
+    const gl = this.load("global").map(
+      (v) => ({ ...v, scope: "global" as const }),
+    );
+    return [...ws, ...gl];
+  }
+
+  save(scope: StorageScope, vars: Variable[]): void {
+    const dir = this.dir(scope);
     if (!dir) {
       vscode.window.showWarningMessage(
-        "ts-chef: open a workspace folder to save variables.",
+        "ts-chef: open a workspace folder to save workspace variables.",
       );
       return;
     }
     ensureDir(dir);
-    writeJSON(this.file!, vars);
+    writeJSON(path.join(dir, "variables.json"), vars);
   }
 
+  /** Resolve a value by name, workspace overriding global. */
   get(name: string): string | undefined {
-    return this.load().find((v) => v.name === name)?.value;
+    const ws = this.load("workspace").find((v) => v.name === name);
+    if (ws) return ws.value;
+    return this.load("global").find((v) => v.name === name)?.value;
   }
 
-  set(name: string, value: string, description?: string): void {
-    const vars = this.load().filter((v) => v.name !== name);
+  set(
+    scope: StorageScope,
+    name: string,
+    value: string,
+    description?: string,
+  ): void {
+    const vars = this.load(scope).filter((v) => v.name !== name);
     vars.push({ name, value, description });
-    this.save(vars);
+    this.save(scope, vars);
   }
 
-  delete(name: string): void {
-    this.save(this.load().filter((v) => v.name !== name));
+  delete(scope: StorageScope, name: string): void {
+    this.save(
+      scope,
+      this.load(scope).filter((v) => v.name !== name),
+    );
   }
 }
 
@@ -87,37 +121,61 @@ export interface Pipeline {
   raw: string; // original pipe syntax
 }
 
+export interface ScopedPipeline extends Pipeline {
+  scope: StorageScope;
+}
+
 export class PipelineStore {
-  private get file(): string | undefined {
-    const dir = getStoreDir();
-    return dir ? path.join(dir, "pipelines.json") : undefined;
+  constructor(private readonly globalDir: string) {}
+
+  private dir(scope: StorageScope): string | undefined {
+    return scope === "global" ? this.globalDir : workspaceStoreDir();
   }
 
-  load(): Pipeline[] {
-    const f = this.file;
-    if (!f) return [];
-    return readJSON<Pipeline[]>(f, []);
+  load(scope: StorageScope): Pipeline[] {
+    const dir = this.dir(scope);
+    if (!dir) return [];
+    return readJSON<Pipeline[]>(path.join(dir, "pipelines.json"), []);
   }
 
-  save(pipelines: Pipeline[]): void {
-    const dir = getStoreDir();
+  /** Merged view of both scopes; workspace items first (drives precedence). */
+  loadAll(): ScopedPipeline[] {
+    const ws = this.load("workspace").map(
+      (p) => ({ ...p, scope: "workspace" as const }),
+    );
+    const gl = this.load("global").map(
+      (p) => ({ ...p, scope: "global" as const }),
+    );
+    return [...ws, ...gl];
+  }
+
+  /** Find a pipeline by name across both scopes, workspace overriding global. */
+  findByName(name: string): ScopedPipeline | undefined {
+    return this.loadAll().find((p) => p.name === name);
+  }
+
+  save(scope: StorageScope, pipelines: Pipeline[]): void {
+    const dir = this.dir(scope);
     if (!dir) {
       vscode.window.showWarningMessage(
-        "ts-chef: open a workspace folder to save pipelines.",
+        "ts-chef: open a workspace folder to save workspace pipelines.",
       );
       return;
     }
     ensureDir(dir);
-    writeJSON(this.file!, pipelines);
+    writeJSON(path.join(dir, "pipelines.json"), pipelines);
   }
 
-  upsert(pipeline: Pipeline): void {
-    const list = this.load().filter((p) => p.name !== pipeline.name);
+  upsert(scope: StorageScope, pipeline: Pipeline): void {
+    const list = this.load(scope).filter((p) => p.name !== pipeline.name);
     list.push(pipeline);
-    this.save(list);
+    this.save(scope, list);
   }
 
-  delete(name: string): void {
-    this.save(this.load().filter((p) => p.name !== name));
+  delete(scope: StorageScope, name: string): void {
+    this.save(
+      scope,
+      this.load(scope).filter((p) => p.name !== name),
+    );
   }
 }
