@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import jwt from "jsonwebtoken";
 import { OperationError } from "../errors/OperationError";
 
@@ -35,11 +35,11 @@ export class JWTDecode extends Operation {
     ];
   }
 
-  run(input: string, _args: unknown[]): unknown {
+  run(input: string, _args: unknown[]): AnyInput {
     try {
       const decoded = jwt.decode(input, { complete: true });
       if (!decoded) throw new Error("Invalid JWT");
-      return (decoded as { payload: unknown }).payload;
+      return (decoded as { payload: AnyInput }).payload;
     } catch (err) {
       throw new OperationError(String(err));
     }
