@@ -2,6 +2,7 @@
  * Round-trip tests for Base32/45/58/62/85/92.
  */
 import { strToAB, byteArrToStr } from "./helpers";
+import type { Operation } from "../src/chef/Operation";
 import { ToBase32 } from "../src/chef/operations/ToBase32";
 import { FromBase32 } from "../src/chef/operations/FromBase32";
 import { ToBase45 } from "../src/chef/operations/ToBase45";
@@ -18,10 +19,10 @@ import { FromBase92 } from "../src/chef/operations/FromBase92";
 const SAMPLES = ["hello", "hello world", "a", "abc", "0123456789"];
 
 function abEncodeDecode(
-  ToOp: any,
-  FromOp: any,
-  toArgs: any[],
-  fromArgs: any[],
+  ToOp: new () => Operation,
+  FromOp: new () => Operation,
+  toArgs: unknown[],
+  fromArgs: unknown[],
   sample: string,
 ) {
   const enc = new ToOp().run(strToAB(sample), toArgs);
@@ -32,10 +33,10 @@ function abEncodeDecode(
 }
 
 function byteEncodeDecode(
-  ToOp: any,
-  FromOp: any,
-  toArgs: any[],
-  fromArgs: any[],
+  ToOp: new () => Operation,
+  FromOp: new () => Operation,
+  toArgs: unknown[],
+  fromArgs: unknown[],
   sample: string,
 ) {
   const ab = strToAB(sample);

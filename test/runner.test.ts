@@ -5,27 +5,31 @@
  */
 
 import { strToAB, byteArrToStr } from "./helpers";
+import type { ArgConfig } from "../src/chef/Operation";
 import { AESEncrypt } from "../src/chef/operations/AESEncrypt";
 import { ToBase32 } from "../src/chef/operations/ToBase32";
 import { FromBase64 } from "../src/chef/operations/FromBase64";
 
 // ── Inline copies of runner utilities under test ──────────────────────────────
 
-function resolveDefaultArg(arg: any) {
+// Only the fields resolveDefaultArg reads; real ArgConfig[] also satisfies this.
+type ArgLike = Pick<ArgConfig, "type" | "value" | "toggleValues" | "defaultIndex">;
+
+function resolveDefaultArg(arg: ArgLike): unknown {
   switch (arg.type) {
     case "editableOption":
     case "editableOptionShort": {
-      const opts = arg.value;
+      const opts = arg.value as Array<{ name: string; value: unknown }>;
       if (!Array.isArray(opts)) return arg.value;
       const idx = typeof arg.defaultIndex === "number" ? arg.defaultIndex : 0;
       return opts[idx]?.value ?? opts[0]?.value ?? "";
     }
     case "option": {
-      const opts = arg.value;
+      const opts = arg.value as unknown[];
       return Array.isArray(opts) ? (opts[0] ?? "") : arg.value;
     }
     case "argSelector": {
-      const opts = arg.value;
+      const opts = arg.value as Array<{ name: string }>;
       return Array.isArray(opts) ? (opts[0]?.name ?? "") : arg.value;
     }
     case "toggleString":
@@ -38,10 +42,10 @@ function resolveDefaultArg(arg: any) {
   }
 }
 
-function normaliseInput(input: any, inputType: string) {
+function normaliseInput(input: unknown, inputType: string): unknown {
   let buf: Buffer;
   if (typeof input === "string") buf = Buffer.from(input, "utf-8");
-  else if (Array.isArray(input)) buf = Buffer.from(input);
+  else if (Array.isArray(input)) buf = Buffer.from(input as number[]);
   else if (input instanceof ArrayBuffer)
     buf = Buffer.from(new Uint8Array(input));
   else if (Buffer.isBuffer(input)) buf = input;

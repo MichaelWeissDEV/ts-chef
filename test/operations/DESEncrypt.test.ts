@@ -11,7 +11,7 @@ function symArgs(
   mode = "CBC",
   inputType = "Raw",
   outputType = "Hex",
-): any[] {
+): Array<string | { string: string; option: string }> {
   return [
     { string: keyHex, option: "Hex" },
     { string: ivHex, option: "Hex" },
@@ -21,7 +21,7 @@ function symArgs(
   ];
 }
 
-function symDecArgs(keyHex: string, ivHex: string, mode = "CBC"): any[] {
+function symDecArgs(keyHex: string, ivHex: string, mode = "CBC"): Array<string | { string: string; option: string }> {
   return symArgs(keyHex, ivHex, mode, "Hex", "Raw");
 }
 
