@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { Utils } from "../Utils";
 
@@ -41,7 +41,7 @@ export class ExtractID3 extends Operation {
    * @param {any[]} args
    * @returns {any}
    */
-  run(inputBuffer: ArrayBuffer, _args: any[]): any {
+  run(inputBuffer: ArrayBuffer, _args: unknown[]): AnyInput {
     let input = new Uint8Array(inputBuffer);
 
     /**
@@ -159,7 +159,7 @@ export class ExtractID3 extends Operation {
    * @param {any} data
    * @returns {string}
    */
-  present(data: any): string {
+  present(data: AnyInput): string {
     if (!data || !Object.prototype.hasOwnProperty.call(data, "Tags"))
       return JSON.stringify(data, null, 4);
 
