@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import cptable from "codepage";
 import { CHR_ENC_CODE_PAGES } from "../lib/ChrEnc";
 
@@ -54,8 +54,9 @@ export class DecodeText extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const format = CHR_ENC_CODE_PAGES[args[0]];
+  run(input: ArrayBuffer, args: unknown[]): AnyInput {
+    const [arg0] = args as [string];
+    const format = CHR_ENC_CODE_PAGES[arg0];
     return cptable.utils.decode(format, new Uint8Array(input));
   }
 }
