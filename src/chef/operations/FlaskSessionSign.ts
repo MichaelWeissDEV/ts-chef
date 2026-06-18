@@ -60,7 +60,11 @@ export class FlaskSessionSign extends Operation {
    * @returns {string}
    */
   run(input: AnyInput, args: unknown[]): AnyInput {
-    const [arg0, arg1, arg2] = args as [{ string: string; option: string }, { string: string; option: string }, string];
+    const [arg0, arg1, arg2] = args as [
+      { string: string; option: string },
+      { string: string; option: string },
+      string,
+    ];
     if (!arg0.string) {
       throw new OperationError("Secret key required");
     }
