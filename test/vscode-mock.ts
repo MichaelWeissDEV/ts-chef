@@ -1,4 +1,13 @@
 /**
+ * @fileoverview vscode-mock module for ts-chef extension
+ * @package core
+ * @license Apache-2.0
+ * @author Michael Weiss
+ * @copyright 2024-2026 Michael Weiss
+ * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
+ */
+
+/**
  * Minimal `vscode` API mock for unit-testing modules that import `vscode`.
  * Wired in via jest `moduleNameMapper` (see jest.config.js). Only the surface
  * actually used by the code under test is implemented; extend as needed.
