@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { fromHex } from "../lib/Hex";
 import { toBase64 } from "../lib/Base64";
@@ -58,8 +58,8 @@ export class ECDSASign extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [keyPem, mdAlgo, outputFormat] = args;
+  run(input: string, args: unknown[]): AnyInput {
+    const [keyPem, mdAlgo, outputFormat] = args as [string, string, string];
 
     if (keyPem.replace("-----BEGIN EC PRIVATE KEY-----", "").length === 0) {
       throw new OperationError("Please enter a private key.");
