@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import OperationError from "../errors/OperationError";
 import { ENCODING_SCHEME, ENCODING_LOOKUP, FORMAT } from "../lib/BCD";
@@ -70,11 +70,12 @@ export class FromBCD extends Operation {
    * @param {Object[]} args
    * @returns {BigNumber}
    */
-  run(input: any, args: any[]): any {
-    const encoding = ENCODING_LOOKUP[args[0]],
-      packed = args[1],
-      signed = args[2],
-      inputFormat = args[3],
+  run(input: string, args: unknown[]): AnyInput {
+    const [arg0, arg1, arg2, arg3] = args as [string, boolean, boolean, string];
+    const encoding = ENCODING_LOOKUP[arg0],
+      packed = arg1,
+      signed = arg2,
+      inputFormat = arg3,
       nibbles = [];
 
     let output = "",
