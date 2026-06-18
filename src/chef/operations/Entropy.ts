@@ -478,7 +478,12 @@ export class Entropy extends Operation {
         return this.calculateByteFrequency(inputBytes);
       case "Curve":
       case "Image":
-        return (this.calculateScanningEntropy(inputBytes) as { entropyData: number[]; binWidth: number }).entropyData;
+        return (
+          this.calculateScanningEntropy(inputBytes) as {
+            entropyData: number[];
+            binWidth: number;
+          }
+        ).entropyData;
       case "Shannon scale":
       default:
         return this.calculateShannonEntropy(inputBytes);
