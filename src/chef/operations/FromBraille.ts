@@ -11,7 +11,12 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation, AnyInput, HighlightPos, HighlightResult } from "../Operation";
+import {
+  Operation,
+  AnyInput,
+  HighlightPos,
+  HighlightResult,
+} from "../Operation";
 import { BRAILLE_LOOKUP } from "../lib/Braille";
 
 /**
