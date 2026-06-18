@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 
 /**
  * Escape Unicode Characters operation
@@ -58,9 +58,9 @@ export class EscapeUnicodeCharacters extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const regexWhitelist = /[ -~]/i,
-      [prefix, encodeAll, padding, uppercaseHex] = args;
+  run(input: string, args: unknown[]): AnyInput {
+    const [prefix, encodeAll, padding, uppercaseHex] = args as [string, boolean, number, boolean];
+    const regexWhitelist = /[ -~]/i;
 
     let output = "",
       character: string;
