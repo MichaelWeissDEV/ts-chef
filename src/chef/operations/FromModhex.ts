@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { FROM_MODHEX_DELIM_OPTIONS, fromModhex } from "../lib/Modhex";
 
 /**
@@ -81,8 +81,9 @@ export class FromModhex extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  run(input: any, args: any[]): any {
-    const delim = args[0] || "Auto";
+  run(input: string, args: unknown[]): AnyInput {
+    const [arg0] = args as [string];
+    const delim = arg0 || "Auto";
     return fromModhex(input, delim, 2);
   }
 }
