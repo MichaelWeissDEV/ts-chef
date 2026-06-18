@@ -46,8 +46,8 @@ export class ConvertArea extends Operation {
    *
    * @see {@link https://wikipedia.org/wiki/Orders_of_magnitude_(area)}
    */
-  run(input: string, args: any[]): string {
-    const [inputUnits, outputUnits] = args;
+  run(input: string, args: unknown[]): string {
+    const [inputUnits, outputUnits] = args as [string, string];
     const bnInput = new BigNumber(input);
 
     const result = bnInput

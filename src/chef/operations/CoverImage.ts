@@ -86,7 +86,7 @@ export class CoverImage extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
     const [width, height, hAlign, vAlign, alg] = args;
 
     const resizeMap: Record<string, ResizeStrategy> = {
@@ -120,14 +120,14 @@ export class CoverImage extends Operation {
       image.cover({
         w: width,
         h: height,
-        align: (alignMap[hAlign] as any) | (alignMap[vAlign] as any),
+        align: alignMap[hAlign] | alignMap[vAlign],
         mode: resizeMap[alg],
       });
       let imageBuffer;
       if (image.mime === "image/gif") {
-        imageBuffer = await image.getBuffer(JimpMime.png as any);
+        imageBuffer = await image.getBuffer(JimpMime.png);
       } else {
-        imageBuffer = await image.getBuffer(image.mime as any);
+        imageBuffer = await image.getBuffer(image.mime);
       }
       return imageBuffer.buffer;
     } catch (err) {

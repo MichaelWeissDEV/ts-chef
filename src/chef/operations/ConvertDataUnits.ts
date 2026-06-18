@@ -12,6 +12,7 @@
  */
 
 import { Operation } from "../Operation";
+import BigNumber from "bignumber.js";
 
 /**
  * Convert data units operation
@@ -48,8 +49,8 @@ export class ConvertDataUnits extends Operation {
    * @param {Object[]} args
    * @returns {BigNumber}
    */
-  run(input: any, args: any[]): any {
-    const [inputUnits, outputUnits] = args;
+  run(input: BigNumber, args: unknown[]): BigNumber {
+    const [inputUnits, outputUnits] = args as [string, string];
 
     input = input.times(DATA_FACTOR[inputUnits]);
     return input.div(DATA_FACTOR[outputUnits]);

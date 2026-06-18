@@ -250,20 +250,20 @@ export class CRCChecksum extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: ArrayBuffer, args: any[]): string {
+  run(input: ArrayBuffer, args: unknown[]): string {
     const algorithm = args[0];
     const inputBytes = new Uint8Array(input);
 
     switch (algorithm) {
       case "Custom":
         return this.custom(
-          args[1],
+          args[1] as { string: string },
           inputBytes,
-          args[2],
-          args[3],
-          args[4],
-          args[5],
-          args[6],
+          args[2] as { string: string },
+          args[3] as { string: string },
+          args[4] as string,
+          args[5] as string,
+          args[6] as { string: string },
         );
       case "CRC-3/GSM":
         return this.crc(3n, inputBytes, 0x3n, 0x0n, false, false, 0x7n);
@@ -1452,13 +1452,13 @@ export class CRCChecksum extends Operation {
   }
 
   private custom(
-    widthObject: any,
+    widthObject: { string: string },
     input: Uint8Array,
-    polyObject: any,
-    initObject: any,
-    reflectInObject: any,
-    reflectOutObject: any,
-    xorOutObject: any,
+    polyObject: { string: string },
+    initObject: { string: string },
+    reflectInObject: string,
+    reflectOutObject: string,
+    xorOutObject: { string: string },
   ): string {
     try {
       const width = BigInt(widthObject.string);

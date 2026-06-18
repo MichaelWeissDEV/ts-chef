@@ -53,8 +53,8 @@ export class ConvertSpeed extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
-    const [inputUnits, outputUnits] = args;
+  run(input: string, args: unknown[]): string {
+    const [inputUnits, outputUnits] = args as [string, string];
     const bnInput = new BigNumber(input);
 
     const result = bnInput

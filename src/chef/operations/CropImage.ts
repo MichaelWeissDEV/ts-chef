@@ -97,7 +97,7 @@ export class CropImage extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
     const [
       xPos,
       yPos,
@@ -138,9 +138,9 @@ export class CropImage extends Operation {
 
       let imageBuffer;
       if (image.mime === "image/gif") {
-        imageBuffer = await image.getBuffer(JimpMime.png as any);
+        imageBuffer = await image.getBuffer(JimpMime.png);
       } else {
-        imageBuffer = await image.getBuffer(image.mime as any);
+        imageBuffer = await image.getBuffer(image.mime);
       }
       return imageBuffer.buffer;
     } catch (err) {

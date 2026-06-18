@@ -39,7 +39,7 @@ export class Comment extends Operation {
    * @param {any[]} _args
    * @returns {string}
    */
-  run(input: string, _args: any[]): string {
+  run(input: string, _args: unknown[]): string {
     return input;
   }
 }

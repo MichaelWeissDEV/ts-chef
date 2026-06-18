@@ -50,7 +50,7 @@ export class ChangeIPFormat extends Operation {
    * @param {string} args[1] - The output format (Dotted Decimal, Decimal, Octal, Hex).
    * @returns {string} - The converted IP address(es).
    */
-  run(input: string, args: any[]): string {
+  run(input: string, args: unknown[]): string {
     const inFormat = args[0];
     const outFormat = args[1];
     const lines = input.split("\n");

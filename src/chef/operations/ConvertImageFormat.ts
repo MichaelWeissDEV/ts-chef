@@ -68,7 +68,7 @@ export class ConvertImageFormat extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
     const [format, jpegQuality, pngFilterType, pngDeflateLevel] = args;
     const formatMap: Record<string, string> = {
       JPEG: JimpMime.jpeg,

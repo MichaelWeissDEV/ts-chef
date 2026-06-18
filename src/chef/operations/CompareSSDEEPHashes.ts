@@ -33,8 +33,8 @@ export class CompareSSDEEPHashes extends Operation {
     },
   ];
 
-  run(input: string, args: any[]): number {
-    const samples = input.split(Utils.charRep(args[0]));
+  run(input: string, args: unknown[]): number {
+    const samples = input.split(Utils.charRep(args[0] as string));
     if (samples.length !== 2)
       throw new OperationError("Incorrect number of samples.");
     return ssdeepjs.similarity(samples[0], samples[1]);

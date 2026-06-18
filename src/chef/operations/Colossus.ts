@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { Operation, ArgConfig, AnyInput } from "../Operation";
 import { OperationError } from "../errors/OperationError";
 import { ColossusComputer } from "../lib/Colossus";
 import { SWITCHES, VALID_ITA2, ROTOR_SIZES } from "../lib/Lorenz";
@@ -24,6 +24,11 @@ import { SWITCHES, VALID_ITA2, ROTOR_SIZES } from "../lib/Lorenz";
  * @see https://virtualcolossus.co.uk
  * @see https://github.com/gchq/CyberChef/wiki/Colossus
  */
+interface ColossusOutput {
+  printout: string;
+  counters: Array<number | string>;
+}
+
 export class Colossus extends Operation {
   name = "Colossus";
   module = "Bletchley";
@@ -412,7 +417,7 @@ export class Colossus extends Operation {
    * @param {any[]} args
    * @returns {any}
    */
-  run(input: string, args: any[]): any {
+  run(input: string, args: unknown[]): AnyInput {
     input = input.toUpperCase();
     for (const character of input) {
       if (VALID_ITA2.indexOf(character) === -1) {
@@ -423,14 +428,14 @@ export class Colossus extends Operation {
       }
     }
 
-    const pattern = args[1];
+    const pattern = args[1] as string;
     const qbusin = {
-      Z: args[2],
-      Chi: args[3],
-      Psi: args[4],
+      Z: args[2] as string,
+      Chi: args[3] as string,
+      Psi: args[4] as string,
     };
 
-    const limitation = args[5];
+    const limitation = args[5] as string;
     const lm = [false, false, false];
     if (limitation.includes("Χ2")) lm[0] = true;
     if (limitation.includes("Ψ1")) lm[1] = true;
@@ -441,8 +446,8 @@ export class Colossus extends Operation {
       P5: lm[2],
     };
 
-    const KRackOpt = args[6];
-    const setProgram = args[7];
+    const KRackOpt = args[6] as string;
+    const setProgram = args[7] as string;
 
     if (KRackOpt === "Select Program" && setProgram !== "") {
       args = this.selectProgram(setProgram, args);
@@ -451,7 +456,7 @@ export class Colossus extends Operation {
     const re = new RegExp("^$|^[.x]$");
     for (let qr = 0; qr < 3; qr++) {
       for (let a = 0; a < 5; a++) {
-        if (!re.test(args[qr * 7 + a + 9]))
+        if (!re.test(args[qr * 7 + a + 9] as string))
           throw new OperationError(
             "Switch R" +
               (qr + 1) +
@@ -462,11 +467,11 @@ export class Colossus extends Operation {
       }
     }
 
-    if (!re.test(args[37]))
+    if (!re.test(args[37] as string))
       throw new OperationError(
         "Switch Add-Equals can only be set to blank, . or x",
       );
-    if (!re.test(args[40]))
+    if (!re.test(args[40] as string))
       throw new OperationError(
         "Switch Total Motor can only be set to blank, . or x",
       );
@@ -501,13 +506,13 @@ export class Colossus extends Operation {
       totalMotor: args[40],
     };
 
-    const settotal = parseInt(args[42], 10);
+    const settotal = parseInt(args[42] as string, 10);
     if (settotal < 0 || settotal > 9999)
       throw new OperationError("Set Total must be between 0000 and 9999");
 
     const control = {
-      fast: args[43],
-      slow: args[44],
+      fast: args[43] as string,
+      slow: args[44] as string,
     };
 
     const rotorNames = [
@@ -528,7 +533,7 @@ export class Colossus extends Operation {
 
     for (let i = 0; i < rotorNames.length; i++) {
       const name = rotorNames[i];
-      const start = args[rotorStartIndices[i]];
+      const start = args[rotorStartIndices[i]] as number;
       if (start < 1 || start > ROTOR_SIZES[name]) {
         throw new OperationError(
           `${name} start must be between 1 and ${ROTOR_SIZES[name]}`,
@@ -564,7 +569,7 @@ export class Colossus extends Operation {
     return colossus.run();
   }
 
-  selectProgram(progname: string, args: any[]): any[] {
+  selectProgram(progname: string, args: unknown[]): unknown[] {
     if (progname === "Letter Count") {
       args[9] = "";
       args[10] = "";
@@ -641,7 +646,7 @@ export class Colossus extends Operation {
     return args;
   }
 
-  present(output: any): string {
+  present(output: ColossusOutput): string {
     let html = "Colossus Printer\n\n";
     html += output.printout + "\n\n";
     html += "Colossus Counters\n\n";

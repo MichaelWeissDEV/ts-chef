@@ -91,7 +91,7 @@ export class ContainImage extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
     const [width, height, hAlign, vAlign, alg, opaqueBg] = args;
 
     const resizeMap: Record<string, ResizeStrategy> = {
@@ -126,7 +126,7 @@ export class ContainImage extends Operation {
       image.contain({
         w: width,
         h: height,
-        align: (alignMap[hAlign] as any) | (alignMap[vAlign] as any),
+        align: alignMap[hAlign] | alignMap[vAlign],
         mode: resizeMap[alg],
       });
 

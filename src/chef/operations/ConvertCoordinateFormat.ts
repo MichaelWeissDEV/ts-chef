@@ -63,10 +63,10 @@ export class ConvertCoordinateFormat extends Operation {
     },
   ];
 
-  run(input: string, args: any[]): string {
+  run(input: string, args: unknown[]): string {
     if (input.replace(/[\s+]/g, "") !== "") {
       const [inFormat, inDelim, outFormat, outDelim, incDirection, precision] =
-        args;
+        args as [string, string, string, string, string, number];
       const result = convertCoordinates(
         input,
         inFormat,

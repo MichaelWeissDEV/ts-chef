@@ -23,6 +23,11 @@ import * as forge from "node-forge";
  * @category Crypto
  * @see https://wikipedia.org/wiki/CMAC
  */
+interface ToggleStringArg {
+  string: string;
+  option: string;
+}
+
 export class CMAC extends Operation {
   name = "CMAC";
   module = "Crypto";
@@ -52,9 +57,9 @@ export class CMAC extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: ArrayBuffer, args: any[]): string {
-    const key = Utils.convertToByteString(args[0].string, args[0].option);
-    const algo = args[1];
+  run(input: ArrayBuffer, args: unknown[]): string {
+    const [keyArg, algo] = args as [ToggleStringArg, string];
+    const key = Utils.convertToByteString(keyArg.string, keyArg.option);
 
     const info = (() => {
       switch (algo) {
@@ -118,7 +123,7 @@ export class CMAC extends Operation {
         forge.util.createBuffer(info.key, "raw"),
       );
       cipher.start({ iv: "" });
-      cipher.update(forge.util.createBuffer(a as any));
+      cipher.update(forge.util.createBuffer(new Uint8Array(a)));
       cipher.finish();
       const cipherText = cipher.output.getBytes();
       for (let i = 0; i < a.length; i++) {

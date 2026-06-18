@@ -92,6 +92,11 @@ function chacha(
  *
  * @category Ciphers
  */
+interface ToggleStringArg {
+  string: string;
+  option: string;
+}
+
 export class ChaCha extends Operation {
   name = "ChaCha";
   module = "Ciphers";
@@ -153,12 +158,12 @@ export class ChaCha extends Operation {
    * @param {string} args[5] - The output format (Raw, Hex).
    * @returns {string} - The resulting string.
    */
-  run(input: string, args: any[]): string {
-    const key = Utils.convertToByteArray(args[0].string, args[0].option);
-    const nonceType = args[1].option;
-    const rounds = parseInt(args[3], 10);
-    const inputType = args[4];
-    const outputType = args[5];
+  run(input: string, args: unknown[]): string {
+    const [keyArg, nonceArg, counterArg, roundsArg, inputType, outputType] =
+      args as [ToggleStringArg, ToggleStringArg, number, string, string, string];
+    const key = Utils.convertToByteArray(keyArg.string, keyArg.option);
+    const nonceType = nonceArg.option;
+    const rounds = parseInt(roundsArg, 10);
 
     if (key.length !== 16 && key.length !== 32) {
       throw new OperationError(`Invalid key length: ${key.length} bytes.
@@ -168,10 +173,10 @@ ChaCha uses a key of 16 or 32 bytes (128 or 256 bits).`);
 
     let counter: number[], nonce: number[], counterLength: number;
     if (nonceType === "Integer") {
-      nonce = Utils.intToByteArray(parseInt(args[1].string, 10), 12, "little");
+      nonce = Utils.intToByteArray(parseInt(nonceArg.string, 10), 12, "little");
       counterLength = 4;
     } else {
-      nonce = Utils.convertToByteArray(args[1].string, args[1].option);
+      nonce = Utils.convertToByteArray(nonceArg.string, nonceArg.option);
       if (!(nonce.length === 12 || nonce.length === 8)) {
         throw new OperationError(`Invalid nonce length: ${nonce.length} bytes.
 
@@ -179,7 +184,7 @@ ChaCha uses a nonce of 8 or 12 bytes (64 or 96 bits).`);
       }
       counterLength = 16 - nonce.length;
     }
-    counter = Utils.intToByteArray(args[2], counterLength, "little");
+    counter = Utils.intToByteArray(counterArg, counterLength, "little");
 
     const output: number[] = [];
     const inputBytes = Utils.convertToByteArray(input, inputType);

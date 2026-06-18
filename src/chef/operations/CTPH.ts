@@ -43,7 +43,7 @@ export class CTPH extends Operation {
    * @param {any[]} args - Operation arguments (none).
    * @returns {string} - The fuzzy hash.
    */
-  run(input: string, _args: any[]): string {
+  run(input: string, _args: unknown[]): string {
     return ctphjs.digest(input);
   }
 }

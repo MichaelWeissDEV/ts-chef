@@ -40,7 +40,7 @@ export class CSSBeautify extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
+  run(input: string, args: unknown[]): string {
     const indentStr = args[0];
     return vkbeautify.css(input, indentStr);
   }

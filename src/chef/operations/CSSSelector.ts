@@ -56,8 +56,8 @@ export class CSSSelector extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
-    const [query, delimiter] = args;
+  run(input: string, args: unknown[]): string {
+    const [query, delimiter] = args as [string, string];
 
     if (!query.length || !input.length) {
       return "";
@@ -69,13 +69,14 @@ export class CSSSelector extends Operation {
     let result;
     try {
       result = document.querySelectorAll(query);
-    } catch (err: any) {
+    } catch (err) {
       throw new OperationError(
-        "Invalid CSS Selector. Details:\n" + err.message,
+        "Invalid CSS Selector. Details:\n" +
+          (err instanceof Error ? err.message : String(err)),
       );
     }
 
-    const nodeToString = function (node: any): string {
+    const nodeToString = function (node: { outerHTML?: string; toString(): string }): string {
       return node.outerHTML || node.toString();
     };
 

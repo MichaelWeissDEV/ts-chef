@@ -22,6 +22,11 @@ import * as crypto from "crypto";
  * @category Crypto
  * @see https://wikipedia.org/wiki/CipherSaber
  */
+interface ToggleStringArg {
+  string: string;
+  option: string;
+}
+
 export class CipherSaber2Encrypt extends Operation {
   name = "CipherSaber2 Encrypt";
   module = "Crypto";
@@ -51,10 +56,10 @@ export class CipherSaber2Encrypt extends Operation {
    * @param {any[]} args
    * @returns {ArrayBuffer}
    */
-  run(input: ArrayBuffer, args: any[]): ArrayBuffer {
+  run(input: ArrayBuffer, args: unknown[]): ArrayBuffer {
     const inputBytes = new Uint8Array(input);
-    const key = Utils.convertToByteArray(args[0].string, args[0].option);
-    const rounds = args[1];
+    const [keyArg, rounds] = args as [ToggleStringArg, number];
+    const key = Utils.convertToByteArray(keyArg.string, keyArg.option);
 
     const tempIVP = crypto.randomBytes(10);
     const result = Array.from(tempIVP);
