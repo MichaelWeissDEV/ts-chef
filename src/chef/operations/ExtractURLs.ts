@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { search, URL_REGEX } from "../lib/Extract";
 import { caseInsensitiveSort } from "../lib/Sort";
 
@@ -55,8 +55,8 @@ export class ExtractURLs extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [displayTotal, sort, unique] = args;
+  run(input: string, args: unknown[]): AnyInput {
+    const [displayTotal, sort, unique] = args as [boolean, boolean, boolean];
     const results = search(
       input,
       URL_REGEX,
