@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { scanForFileTypes, extractFile } from "../lib/FileType";
@@ -78,7 +78,7 @@ export class ExtractFiles extends Operation {
    * @param {Object[]} args
    * @returns {List<File>}
    */
-  run(input: any, args: any[]): any {
+  run(input: ArrayBuffer, args: unknown[]): AnyInput {
     const bytes = new Uint8Array(input),
       categories: string[] = [],
       minSize = args.pop(),
@@ -129,7 +129,7 @@ export class ExtractFiles extends Operation {
    * @param {File[]} files
    * @returns {html}
    */
-  async present(files: any[]) {
+  async present(files: unknown[]) {
     return await (Utils as any).displayFilesAsHTML(files);
   }
 }
