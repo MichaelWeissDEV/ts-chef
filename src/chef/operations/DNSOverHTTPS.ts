@@ -100,7 +100,12 @@ export class DNSOverHTTPS extends Operation {
    * @returns {Promise<any>}
    */
   async run(input: string, args: unknown[]): Promise<AnyInput> {
-    const [resolver, requestType, justAnswer, DNSSEC] = args as [string, string, boolean, boolean];
+    const [resolver, requestType, justAnswer, DNSSEC] = args as [
+      string,
+      string,
+      boolean,
+      boolean,
+    ];
     let url: URL;
     try {
       url = new URL(resolver);
