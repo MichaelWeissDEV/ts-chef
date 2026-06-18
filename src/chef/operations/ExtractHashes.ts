@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { search } from "../lib/Extract";
 
 /**
@@ -56,11 +56,10 @@ export class ExtractHashes extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: string, args: unknown[]): AnyInput {
+    const [hashLength, searchAllHashes, showDisplayTotal] = args as [number, boolean, boolean];
     const results = [];
     let hashCount = 0;
-
-    const [hashLength, searchAllHashes, showDisplayTotal] = args;
 
     // Convert character length to bit length
     let hashBitLengths = [(hashLength / 2) * 8];
