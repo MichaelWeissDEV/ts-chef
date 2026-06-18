@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 
 /**
  * From Case Insensitive Regex operation
@@ -38,7 +38,7 @@ export class FromCaseInsensitiveRegex extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: string, _args: unknown[]): AnyInput {
     return input.replace(/\[[a-z]{2}\]/gi, (m: string) =>
       m[1].toUpperCase() === m[2].toUpperCase() ? m[1] : m,
     );
