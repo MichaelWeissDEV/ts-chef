@@ -52,7 +52,7 @@ export class BcryptCompare extends Operation {
    * @param {string} args[0] - The bcrypt hash to compare against.
    * @returns {Promise<string>} A message indicating whether the password matches the hash.
    */
-  async run(input: string, args: any[]): Promise<string> {
+  async run(input: string, args: unknown[]): Promise<string> {
     const hash = args[0];
     const match = await bcrypt.compare(input, hash);
     return match ? "Match: " + input : "No match";
