@@ -93,7 +93,16 @@ export class FuzzyMatch extends Operation {
    * @returns {html}
    */
   run(input: string, args: unknown[]): AnyInput {
-    const [arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7] = args as [unknown, number, number, number, number, number, number, number];
+    const [arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7] = args as [
+      unknown,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+    ];
     const searchStr = arg0;
     const weights = {
       sequentialBonus: arg1,
