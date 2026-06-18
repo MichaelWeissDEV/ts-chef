@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import * as JsDiff from "diff";
 import OperationError from "../errors/OperationError";
@@ -73,7 +73,7 @@ export class Diff extends Operation {
    * @param {Object[]} args
    * @returns {html}
    */
-  run(input: any, args: any[]): any {
+  run(input: string, args: unknown[]): AnyInput {
     const [
         sampleDelim,
         diffBy,
@@ -81,7 +81,7 @@ export class Diff extends Operation {
         showRemoved,
         showSubtraction,
         ignoreWhitespace,
-      ] = args,
+      ] = args as [string, string, boolean, boolean, boolean, boolean],
       samples = input.split(sampleDelim);
     let output = "",
       diff;
