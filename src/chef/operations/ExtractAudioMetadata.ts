@@ -198,10 +198,8 @@ export class ExtractAudioMetadata extends Operation {
     listSection(d.tags?.raw?.riff?.chunks, "RIFF Chunks", (c: any) =>
       row(c.id, `${c.size} bytes @ offset ${c.offset}`),
     );
-    listSection(
-      d.tags?.raw?.flac?.blocks,
-      "FLAC Metadata Blocks",
-      (b: any) => row(b.type, `${b.length} bytes`),
+    listSection(d.tags?.raw?.flac?.blocks, "FLAC Metadata Blocks", (b: any) =>
+      row(b.type, `${b.length} bytes`),
     );
 
     if (d.tags?.raw?.mp4?.top_level_atoms?.length) {
