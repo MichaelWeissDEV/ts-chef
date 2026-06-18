@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 
 /**
  * Format MAC addresses operation
@@ -70,7 +70,7 @@ export class FormatMACAddresses extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: string, args: unknown[]): AnyInput {
     if (!input) return "";
 
     const [outputCase, noDelim, dashDelim, colonDelim, ciscoStyle, ipv6IntID] =
