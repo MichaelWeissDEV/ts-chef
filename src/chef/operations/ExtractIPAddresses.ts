@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { search } from "../lib/Extract";
 import { ipSort } from "../lib/Sort";
 
@@ -70,9 +70,9 @@ export class ExtractIPAddresses extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: string, args: unknown[]): AnyInput {
     const [includeIpv4, includeIpv6, removeLocal, displayTotal, sort, unique] =
-        args,
+        args as [boolean, boolean, boolean, boolean, boolean, boolean],
       // IPv4 decimal groups can have values 0 to 255. To construct a regex the following sub-regex is reused:
       ipv4DecimalByte = "(?:25[0-5]|2[0-4]\\d|1?[0-9]\\d|\\d)",
       ipv4OctalByte = "(?:0[1-3]?[0-7]{1,2})",
