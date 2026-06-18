@@ -55,9 +55,10 @@ export class DecodeNetBIOSName extends Operation {
    * @param {any[]} args
    * @returns {number[]}
    */
-  run(input: number[], args: any[]): number[] {
+  run(input: number[], args: unknown[]): number[] {
+    const [arg0] = args as [number];
     const output = [],
-      offset = args[0];
+      offset = arg0;
 
     if (input.length <= 32 && input.length % 2 === 0) {
       for (let i = 0; i < input.length; i += 2) {
