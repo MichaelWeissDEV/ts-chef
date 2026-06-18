@@ -77,7 +77,15 @@ export class DateTimeDelta extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): string {
-    const [arg0, arg1, arg2, daysDelta, hoursDelta, minutesDelta, secondsDelta] = args as [unknown, string, string, number, number, number, number];
+    const [
+      arg0,
+      arg1,
+      arg2,
+      daysDelta,
+      hoursDelta,
+      minutesDelta,
+      secondsDelta,
+    ] = args as [unknown, string, string, number, number, number, number];
     const inputTimezone = "UTC";
     const inputFormat = arg1;
     const operationType = arg2;
