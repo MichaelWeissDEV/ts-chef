@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { isImage } from "../lib/FileType";
@@ -55,12 +55,12 @@ export class ViewBitPlane extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  async run(input: any, args: any[]): Promise<any> {
-    if (!isImage(input))
+  async run(input: AnyInput, args: unknown[]): Promise<AnyInput> {
+    if (!isImage(input as ArrayBuffer))
       throw new OperationError("Please enter a valid image file.");
 
-    const [colour, bit] = args,
-      parsedImage = await Jimp.read(input),
+    const [colour, bit] = args as [string, number],
+      parsedImage = await Jimp.read(input as ArrayBuffer),
       width = parsedImage.bitmap.width,
       height = parsedImage.bitmap.height,
       colourIndex = COLOUR_OPTIONS.indexOf(colour),

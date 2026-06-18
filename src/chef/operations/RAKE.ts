@@ -60,14 +60,15 @@ export class RAKE extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
+  run(input: string, args: unknown[]): string {
+    const [wordDelimStr, sentDelimStr, stopWordsStr] = args as [string, string, string];
     // Get delimiter regexs
-    const wordDelim = new RegExp(args[0], "g");
-    const sentDelim = new RegExp(args[1], "g");
+    const wordDelim = new RegExp(wordDelimStr, "g");
+    const sentDelim = new RegExp(sentDelimStr, "g");
 
     // Deduplicate the stop words and add the empty string
     const stopWords = Utils.unique(
-      args[2].toLowerCase().replace(/ /g, "").split(","),
+      stopWordsStr.toLowerCase().replace(/ /g, "").split(","),
     );
     stopWords.push("");
 

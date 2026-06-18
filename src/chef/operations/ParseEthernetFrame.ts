@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { fromHex, toHex } from "../lib/Hex";
@@ -55,26 +55,26 @@ export class ParseEthernetFrame extends Operation {
    * @param {Object[]} args
    * @returns {html}
    */
-  run(input: any, args: any[]): any {
-    const format = args[0];
-    const outputFormat = args[1];
+  run(input: string, args: unknown[]): AnyInput {
+    const [format, outputFormat] = args as [string, string];
 
+    let bytes: number[];
     if (format === "Hex") {
-      input = fromHex(input);
+      bytes = fromHex(input);
     } else if (format === "Raw") {
-      input = new Uint8Array(Utils.strToArrayBuffer(input));
+      bytes = Array.from(new Uint8Array(Utils.strToArrayBuffer(input)));
     } else {
       throw new OperationError("Invalid input format selected.");
     }
 
-    const destinationMac = input.slice(0, 6);
-    const sourceMac = input.slice(6, 12);
+    const destinationMac = bytes.slice(0, 6);
+    const sourceMac = bytes.slice(6, 12);
 
     let offset = 12;
     const vlans = [];
 
-    while (offset < input.length) {
-      const ethType = Utils.byteArrayToChars(input.slice(offset, offset + 2));
+    while (offset < bytes.length) {
+      const ethType = Utils.byteArrayToChars(bytes.slice(offset, offset + 2));
       offset += 2;
 
       if (ethType === "\x81\x00" || ethType === "\x88\xA8") {
@@ -83,7 +83,7 @@ export class ParseEthernetFrame extends Operation {
         //  ^^^ PRIO  - Ignored
         //     ^ DEI  - Ignored
         //        ^^^^ ^^^^ ^^^^ VLAN ID
-        const vlanTag = input.slice(offset, offset + 2);
+        const vlanTag = bytes.slice(offset, offset + 2);
         vlans.push(((vlanTag[0] & 0b00001111) << 8) | vlanTag[1]);
 
         offset += 2;
@@ -92,7 +92,7 @@ export class ParseEthernetFrame extends Operation {
       }
     }
 
-    const packetData = input.slice(offset);
+    const packetData = bytes.slice(offset);
 
     if (outputFormat === "Packet data") {
       return Utils.byteArrayToChars(packetData);

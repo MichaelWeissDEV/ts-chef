@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { toHexFast } from "../lib/Hex";
 import { objToTable } from "../lib/Protocol";
 import Stream from "../lib/Stream";
@@ -51,7 +51,7 @@ export class ParseTLSRecord extends Operation {
    * @param {any[]} args
    * @returns {any[]} Array of Object representations of TLS Records contained within input.
    */
-  run(input: ArrayBuffer, _args: any[]): any[] {
+  run(input: ArrayBuffer, _args: unknown[]): AnyInput {
     const s = new Stream(new Uint8Array(input));
 
     const output: any[] = [];
@@ -115,8 +115,8 @@ export class ParseTLSRecord extends Operation {
    * @param {any[]} data - Array of Object representations of the TLS Records.
    * @returns {string} HTML representation of TLS Records contained within data.
    */
-  present(data: any[]): string {
-    return data.map((r) => objToTable(r)).join("\n\n");
+  present(data: AnyInput, _args: unknown[]): AnyInput {
+    return (data as any[]).map((r) => objToTable(r)).join("\n\n");
   }
 }
 

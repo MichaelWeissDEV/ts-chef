@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import { scanForFileTypes } from "../lib/FileType";
 import { FILE_SIGNATURES } from "../lib/FileSignatures";
@@ -47,14 +47,14 @@ export class ScanForEmbeddedFiles extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: AnyInput, args: unknown[]): AnyInput {
     let output =
         "Scanning data for 'magic bytes' which may indicate embedded files. The following results may be false positives and should not be treated as reliable. Any sufficiently long file is likely to contain these magic bytes coincidentally.\n",
       numFound = 0;
     const categories: string[] = [],
-      data = new Uint8Array(input);
+      data = new Uint8Array(input as ArrayBuffer);
 
-    args.forEach((cat, i) => {
+    (args as boolean[]).forEach((cat, i) => {
       if (cat) categories.push(Object.keys(FILE_SIGNATURES)[i]);
     });
 

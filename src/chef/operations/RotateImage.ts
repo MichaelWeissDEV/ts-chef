@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { toBase64 } from "../lib/Base64";
@@ -48,8 +48,8 @@ export class RotateImage extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  async run(input: any, args: any[]): Promise<any> {
-    const [degrees] = args;
+  async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
+    const [degrees] = args as [number];
 
     if (!isImage(input)) {
       throw new OperationError("Invalid file type.");
@@ -89,9 +89,10 @@ export class RotateImage extends Operation {
    * @param {ArrayBuffer} data
    * @returns {html}
    */
-  present(data: any, _args: any[]): any {
-    if (!data.byteLength) return "";
-    const dataArray = new Uint8Array(data);
+  present(data: AnyInput, _args: unknown[]): AnyInput {
+    const buf = data as ArrayBuffer;
+    if (!buf.byteLength) return "";
+    const dataArray = new Uint8Array(buf);
 
     const type = isImage(dataArray);
     if (!type) {

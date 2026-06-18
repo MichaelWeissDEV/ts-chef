@@ -13,7 +13,7 @@
 
 import { fromBase64 } from "../lib/Base64";
 import { toHexFast } from "../lib/Hex";
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 /**
@@ -48,7 +48,7 @@ export class PEMToHex extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: string, _args: unknown[]): string {
     const output = [];
     let match;
     const regex = /-----BEGIN ([A-Z][A-Z ]+[A-Z])-----/g;

@@ -56,8 +56,8 @@ export class RenderMarkdown extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
-    const [convertLinks, enableHighlighting, openLinksBlank] = args,
+  run(input: string, args: unknown[]): string {
+    const [convertLinks, enableHighlighting, openLinksBlank] = args as [boolean, boolean, boolean],
       md = new MarkdownIt({
         linkify: convertLinks,
         html: false, // Explicitly disable HTML rendering

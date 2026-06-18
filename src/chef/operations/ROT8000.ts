@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, HighlightPos, HighlightResult } from "../Operation";
 
 /**
  * ROT8000 operation.
@@ -37,7 +37,7 @@ export class ROT8000 extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  run(input: any, _args: any[]): any {
+  run(input: string, _args: unknown[]): string {
     // Inspired from https://github.com/rottytooth/rot8000/blob/main/rot8000.js
     // these come from the valid-code-point-transitions.json file generated from the c# proj
     // this is done bc: 1) don't trust JS's understanging of surrogate pairs and 2) consistency with original rot8000
@@ -110,7 +110,7 @@ export class ROT8000 extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlight(pos: any, _args: any[]): any {
+  highlight(pos: HighlightPos, _args: unknown[]): HighlightResult {
     return pos;
   }
 
@@ -123,7 +123,7 @@ export class ROT8000 extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlightReverse(pos: any, _args: any[]): any {
+  highlightReverse(pos: HighlightPos, _args: unknown[]): HighlightResult {
     return pos;
   }
 }

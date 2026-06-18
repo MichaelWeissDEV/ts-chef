@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import OperationError from "../errors/OperationError";
 import { fromHex, toHex } from "../lib/Hex";
@@ -55,40 +55,40 @@ export class ParseIPv4Header extends Operation {
    * @param {Object[]} args
    * @returns {html}
    */
-  run(input: any, args: any[]): any {
-    const format = args[0];
-    const outputFormat = args[1];
+  run(input: string, args: unknown[]): AnyInput {
+    const [format, outputFormat] = args as [string, string];
 
     let output;
 
+    let bytes: number[];
     if (format === "Hex") {
-      input = fromHex(input);
+      bytes = fromHex(input);
     } else if (format === "Raw") {
-      input = new Uint8Array(Utils.strToArrayBuffer(input));
+      bytes = Array.from(new Uint8Array(Utils.strToArrayBuffer(input)));
     } else {
       throw new OperationError("Unrecognised input format.");
     }
 
-    const ihlNum: number = input[0] & 0x0f;
+    const ihlNum: number = bytes[0] & 0x0f;
     let ihl: number | string = ihlNum;
-    const dscp = (input[1] >>> 2) & 0x3f,
-      ecn = input[1] & 0x03,
-      length = (input[2] << 8) | input[3],
-      identification = (input[4] << 8) | input[5],
-      flags = (input[6] >>> 5) & 0x07,
-      fragOffset = ((input[6] & 0x1f) << 8) | input[7],
-      ttl = input[8],
-      protocol = input[9],
-      checksum = (input[10] << 8) | input[11],
+    const dscp = (bytes[1] >>> 2) & 0x3f,
+      ecn = bytes[1] & 0x03,
+      length = (bytes[2] << 8) | bytes[3],
+      identification = (bytes[4] << 8) | bytes[5],
+      flags = (bytes[6] >>> 5) & 0x07,
+      fragOffset = ((bytes[6] & 0x1f) << 8) | bytes[7],
+      ttl = bytes[8],
+      protocol = bytes[9],
+      checksum = (bytes[10] << 8) | bytes[11],
       srcIP =
-        (input[12] << 24) | (input[13] << 16) | (input[14] << 8) | input[15],
+        (bytes[12] << 24) | (bytes[13] << 16) | (bytes[14] << 8) | bytes[15],
       dstIP =
-        (input[16] << 24) | (input[17] << 16) | (input[18] << 8) | input[19],
-      checksumHeader = input
+        (bytes[16] << 24) | (bytes[17] << 16) | (bytes[18] << 8) | bytes[19],
+      checksumHeader = bytes
         .slice(0, 10)
         .concat([0, 0])
-        .concat(input.slice(12, 20));
-    let version: number | string = (input[0] >>> 4) & 0x0f,
+        .concat(bytes.slice(12, 20));
+    let version: number | string = (bytes[0] >>> 4) & 0x0f,
       options: number[] = [];
 
     // Version
@@ -103,7 +103,7 @@ export class ParseIPv4Header extends Operation {
     } else if (ihlNum > 5) {
       // sort out options...
       const optionsLen = ihlNum * 4 - 20;
-      options = input.slice(20, optionsLen + 20);
+      options = bytes.slice(20, optionsLen + 20);
     }
 
     // Protocol
@@ -123,7 +123,7 @@ export class ParseIPv4Header extends Operation {
         givenChecksum + " (incorrect, should be " + correctChecksum + ")";
     }
 
-    const data = input.slice(ihlNum * 4);
+    const data = bytes.slice(ihlNum * 4);
 
     if (outputFormat === "Table") {
       output = `<table class='table table-hover table-sm table-bordered table-nonfluid'><tr><th>Field</th><th>Value</th></tr>

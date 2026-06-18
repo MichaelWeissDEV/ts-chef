@@ -12,7 +12,7 @@
  */
 
 import jsonata from "jsonata";
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 /**
@@ -45,8 +45,8 @@ export class JsonataQuery extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  async run(input: any, args: any[]): Promise<any> {
-    const [query] = args;
+  async run(input: string, args: unknown[]): Promise<AnyInput> {
+    const [query] = args as [string];
     let result, jsonObj;
 
     try {

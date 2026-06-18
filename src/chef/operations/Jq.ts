@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import jq from "jq-web";
 
@@ -51,8 +51,8 @@ export class Jq extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [query, raw] = args;
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const [query, raw] = args as [string, boolean];
     let result;
 
     try {

@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import Operation from "../Operation";
+import Operation, { AnyInput } from "../Operation";
 import { keccak224, keccak256, keccak384, keccak512 } from "js-sha3";
 import OperationError from "../errors/OperationError";
 
@@ -46,8 +46,9 @@ export class Keccak extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const size = parseInt(args[0], 10);
+  run(input: ArrayBuffer, args: unknown[]): AnyInput {
+    const [sizeStr] = args as [string];
+    const size = parseInt(sizeStr, 10);
     let algo;
 
     switch (size) {

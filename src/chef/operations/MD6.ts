@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import Operation from "../Operation";
+import Operation, { AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import NodeMD6 from "node-md6";
 
@@ -56,8 +56,8 @@ export class MD6 extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [size, levels, key] = args;
+  run(input: string, args: unknown[]): string {
+    const [size, levels, key] = args as [number, number, string];
 
     if (size < 0 || size > 512)
       throw new OperationError("Size must be between 0 and 512");

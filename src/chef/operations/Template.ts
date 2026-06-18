@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Handlebars from "handlebars";
 
@@ -46,8 +46,8 @@ export class Template extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [templateStr] = args;
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const [templateStr] = args as [string];
     try {
       const template = Handlebars.compile(templateStr);
       return template(input);

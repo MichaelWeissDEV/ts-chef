@@ -54,11 +54,11 @@ export class HASSHServerFingerprint extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [inputFormat, outputFormat] = args;
+  run(input: string, args: unknown[]): string {
+    const [inputFormat, outputFormat] = args as [string, string];
 
-    input = Utils.convertToByteArray(input, inputFormat);
-    const s = new Stream(new Uint8Array(input));
+    const inputBytes = Utils.convertToByteArray(input, inputFormat);
+    const s = new Stream(new Uint8Array(inputBytes));
 
     // Length
     const length = s.readInt(4);

@@ -230,39 +230,40 @@ export class Lorenz extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
-    const model = args[0],
-      pattern = args[1],
-      kt = args[2],
-      mode = args[3],
-      intype = args[4],
-      outtype = args[5],
-      format = args[6],
-      lugs1 = args[19],
-      lugs2 = args[20],
-      lugs3 = args[21],
-      lugs4 = args[22],
-      lugs5 = args[23],
-      lugm37 = args[24],
-      lugm61 = args[25],
-      lugx1 = args[26],
-      lugx2 = args[27],
-      lugx3 = args[28],
-      lugx4 = args[29],
-      lugx5 = args[30];
+  run(input: string, args: unknown[]): string {
+    const typedArgs = args as [string, string, boolean, string, string, string, string, number, number, number, number, number, number, number, number, number, number, number, number, string, string, string, string, string, string, string, string, string, string, string, string];
+    const model = typedArgs[0],
+      pattern = typedArgs[1],
+      kt = typedArgs[2],
+      mode = typedArgs[3],
+      intype = typedArgs[4],
+      outtype = typedArgs[5],
+      format = typedArgs[6],
+      lugs1 = typedArgs[19],
+      lugs2 = typedArgs[20],
+      lugs3 = typedArgs[21],
+      lugs4 = typedArgs[22],
+      lugs5 = typedArgs[23],
+      lugm37 = typedArgs[24],
+      lugm61 = typedArgs[25],
+      lugx1 = typedArgs[26],
+      lugx2 = typedArgs[27],
+      lugx3 = typedArgs[28],
+      lugx4 = typedArgs[29],
+      lugx5 = typedArgs[30];
 
-    let s1 = args[7],
-      s2 = args[8],
-      s3 = args[9],
-      s4 = args[10],
-      s5 = args[11],
-      m37 = args[12],
-      m61 = args[13],
-      x1 = args[14],
-      x2 = args[15],
-      x3 = args[16],
-      x4 = args[17],
-      x5 = args[18];
+    let s1 = typedArgs[7],
+      s2 = typedArgs[8],
+      s3 = typedArgs[9],
+      s4 = typedArgs[10],
+      s5 = typedArgs[11],
+      m37 = typedArgs[12],
+      m61 = typedArgs[13],
+      x1 = typedArgs[14],
+      x2 = typedArgs[15],
+      x3 = typedArgs[16],
+      x4 = typedArgs[17],
+      x5 = typedArgs[18];
 
     this.reverseTable();
 

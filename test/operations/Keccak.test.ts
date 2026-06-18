@@ -17,11 +17,11 @@ describe("Keccak", () => {
   });
 
   test("Keccak-256 produces 64 hex chars", () => {
-    expect(op.run(strToAB("test"), ["256"]).length).toBe(64);
+    expect((op.run(strToAB("test"), ["256"]) as string).length).toBe(64);
   });
 
   test("Keccak-512 produces 128 hex chars", () => {
-    expect(op.run(strToAB("test"), ["512"]).length).toBe(128);
+    expect((op.run(strToAB("test"), ["512"]) as string).length).toBe(128);
   });
 
   test("Different inputs produce different hashes", () => {

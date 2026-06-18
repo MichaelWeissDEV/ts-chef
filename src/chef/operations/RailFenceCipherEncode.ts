@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 /**
@@ -50,8 +50,8 @@ export class RailFenceCipherEncode extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [key, offset] = args;
+  run(input: string, args: unknown[]): string {
+    const [key, offset] = args as [number, number];
 
     const plaintext = input;
     if (key < 2) {

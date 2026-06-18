@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import Operation from "../Operation";
+import Operation, { AnyInput } from "../Operation";
 import { decompress } from "../lib/LZNT1";
 
 /**
@@ -40,8 +40,8 @@ export class LZNT1Decompress extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  run(input: any, _args: any[]): any {
-    return decompress(input);
+  run(input: AnyInput, _args: unknown[]): AnyInput {
+    return decompress(input as number[]);
   }
 }
 

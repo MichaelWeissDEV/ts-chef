@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import jsYaml from "js-yaml";
 /**
@@ -38,9 +38,9 @@ export class YAMLToJSON extends Operation {
    * @param {Object[]} args
    * @returns {JSON}
    */
-  run(input: any, _args: any[]): any {
+  run(input: AnyInput, _args: unknown[]): AnyInput {
     try {
-      return jsYaml.load(input);
+      return jsYaml.load(input as string);
     } catch (err) {
       throw new OperationError("Unable to parse YAML: " + err);
     }

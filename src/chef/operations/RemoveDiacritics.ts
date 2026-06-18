@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 
 /**
  * Remove Diacritics operation
@@ -38,7 +38,7 @@ export class RemoveDiacritics extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: string, _args: unknown[]): string {
     // reference: https://stackoverflow.com/questions/990904/remove-accents-diacritics-in-a-string-in-javascript/37511463
     return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }

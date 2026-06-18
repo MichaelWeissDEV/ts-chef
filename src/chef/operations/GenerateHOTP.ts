@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import * as OTPAuth from "otpauth";
 
 /**
@@ -54,16 +54,17 @@ export class GenerateHOTP extends Operation {
   /**
    *
    */
-  run(input: any, args: any[]): any {
-    const secretStr = new TextDecoder("utf-8").decode(input).trim();
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const [label, digits, counter] = args as [string, number, number];
+    const secretStr = new TextDecoder("utf-8").decode(input as ArrayBuffer).trim();
     const secret = secretStr ? secretStr.toUpperCase().replace(/\s+/g, "") : "";
 
     const hotp = new OTPAuth.HOTP({
       issuer: "",
-      label: args[0],
+      label: label,
       algorithm: "SHA1",
-      digits: args[1],
-      counter: args[2],
+      digits: digits,
+      counter: counter,
       secret: OTPAuth.Secret.fromBase32(secret),
     });
 

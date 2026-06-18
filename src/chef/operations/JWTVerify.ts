@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import Operation from "../Operation";
+import Operation, { AnyInput } from "../Operation";
 import jwt from "jsonwebtoken";
 import OperationError from "../errors/OperationError";
 import { JWT_ALGORITHMS } from "../lib/JWT";
@@ -47,8 +47,8 @@ export class JWTVerify extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [key] = args;
+  run(input: string, args: unknown[]): AnyInput {
+    const [key] = args as [string];
     const algos = [...JWT_ALGORITHMS];
     algos[algos.indexOf("None")] = "none";
 

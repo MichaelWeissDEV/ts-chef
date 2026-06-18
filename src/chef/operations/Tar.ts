@@ -45,7 +45,8 @@ export class Tar extends Operation {
    * @param {any[]} args
    * @returns {File}
    */
-  run(input: ArrayBuffer, args: any[]): File {
+  run(input: ArrayBuffer, args: unknown[]): File {
+    const [filename] = args as [string];
     const inputBytes = new Uint8Array(input);
 
     class Tarball {
@@ -86,7 +87,7 @@ export class Tar extends Operation {
     const lastModTime = currentUnixTimestamp.toString(8).padStart(11, "0");
 
     const file: Record<string, number[] | string> = {
-      fileName: Utils.padBytesRight(Utils.strToByteArray(args[0]), 100),
+      fileName: Utils.padBytesRight(Utils.strToByteArray(filename), 100),
       fileMode: Utils.padBytesRight(Utils.strToByteArray("0000664"), 8),
       ownerUID: Utils.padBytesRight(Utils.strToByteArray("0"), 8),
       ownerGID: Utils.padBytesRight(Utils.strToByteArray("0"), 8),
@@ -144,7 +145,7 @@ export class Tar extends Operation {
     tarball.writeBytes(inputBytes);
     tarball.writeEndBlocks();
 
-    return new File([new Uint8Array(tarball.bytes)], args[0]);
+    return new File([new Uint8Array(tarball.bytes)], filename);
   }
 }
 

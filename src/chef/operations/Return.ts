@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 
 /**
  * Return operation
@@ -40,7 +40,7 @@ export class Return extends Operation {
    * @param {Operation[]} state.opList - The list of operations in the recipe.
    * @returns {Object} The updated state of the recipe.
    */
-  run(input: any, _args: any[]): any {
+  run(input: AnyInput, _args: unknown[]): AnyInput {
     return input;
   }
 }

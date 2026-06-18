@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, HighlightPos, HighlightResult } from "../Operation";
 import { calculateParityBit, decodeParityBit } from "../lib/ParityBit";
 
 /**
@@ -60,7 +60,7 @@ export class ParityBit extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: string, args: unknown[]): string {
     if (input.length === 0) {
       return input;
     }
@@ -73,8 +73,9 @@ export class ParityBit extends Operation {
       args[2] === "Encode"
         ? calculateParityBit(input, args)
         : decodeParityBit(input, args);
-    if (args[3].length > 0) {
-      const byteStrings = input.split(args[3]);
+    const delimiter = args[3] as string;
+    if (delimiter.length > 0) {
+      const byteStrings = input.split(delimiter);
       for (
         let byteStringsArrayIndex = 0;
         byteStringsArrayIndex < byteStrings.length;
@@ -85,7 +86,7 @@ export class ParityBit extends Operation {
           args,
         );
       }
-      return byteStrings.join(args[3]);
+      return byteStrings.join(delimiter);
     }
     return method(input, args);
   }
@@ -99,8 +100,8 @@ export class ParityBit extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlight(pos: any, args: any[]): any {
-    if (args[3].length === 0) {
+  highlight(pos: HighlightPos, args: unknown[]): HighlightResult {
+    if ((args[3] as string).length === 0) {
       if (args[1] === "Prepend") {
         pos[0].start += 1;
         pos[0].end += 1;
@@ -119,8 +120,8 @@ export class ParityBit extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlightReverse(pos: any, args: any[]): any {
-    if (args[3].length === 0) {
+  highlightReverse(pos: HighlightPos, args: unknown[]): HighlightResult {
+    if ((args[3] as string).length === 0) {
       if (args[1] === "Prepend") {
         if (pos[0].start > 0) {
           pos[0].start -= 1;

@@ -51,8 +51,8 @@ export class JPathExpression extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [query, delimiter] = args;
+  run(input: string, args: unknown[]): string {
+    const [query, delimiter] = args as [string, string];
     let results, jsonObj;
 
     try {

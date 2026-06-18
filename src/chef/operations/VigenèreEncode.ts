@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput, HighlightPos, HighlightResult } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 /**
@@ -45,9 +45,11 @@ class VigenèreEncode extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const [keyRaw] = args as [string];
     const alphabet = "abcdefghijklmnopqrstuvwxyz",
-      key = args[0].toLowerCase();
+      key = keyRaw.toLowerCase();
+    const inputStr = input as string;
     let output = "",
       fail = 0,
       keyIndex,
@@ -58,25 +60,25 @@ class VigenèreEncode extends Operation {
     if (!/^[a-zA-Z]+$/.test(key))
       throw new OperationError("The key must consist only of letters");
 
-    for (let i = 0; i < input.length; i++) {
-      if (alphabet.indexOf(input[i]) >= 0) {
+    for (let i = 0; i < inputStr.length; i++) {
+      if (alphabet.indexOf(inputStr[i]) >= 0) {
         // Get the corresponding character of key for the current letter, accounting
         // for chars not in alphabet
         chr = key[(i - fail) % key.length];
         // Get the location in the vigenere square of the key char
         keyIndex = alphabet.indexOf(chr);
         // Get the location in the vigenere square of the message char
-        msgIndex = alphabet.indexOf(input[i]);
+        msgIndex = alphabet.indexOf(inputStr[i]);
         // Get the encoded letter by finding the sum of indexes modulo 26 and finding
         // the letter corresponding to that
         output += alphabet[(keyIndex + msgIndex) % 26];
-      } else if (alphabet.indexOf(input[i].toLowerCase()) >= 0) {
+      } else if (alphabet.indexOf(inputStr[i].toLowerCase()) >= 0) {
         chr = key[(i - fail) % key.length].toLowerCase();
         keyIndex = alphabet.indexOf(chr);
-        msgIndex = alphabet.indexOf(input[i].toLowerCase());
+        msgIndex = alphabet.indexOf(inputStr[i].toLowerCase());
         output += alphabet[(keyIndex + msgIndex) % 26].toUpperCase();
       } else {
-        output += input[i];
+        output += inputStr[i];
         fail++;
       }
     }
@@ -93,7 +95,7 @@ class VigenèreEncode extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlight(pos: any, _args: any[]): any {
+  highlight(pos: HighlightPos, _args: unknown[]): HighlightResult {
     return pos;
   }
 
@@ -106,7 +108,7 @@ class VigenèreEncode extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlightReverse(pos: any, _args: any[]): any {
+  highlightReverse(pos: HighlightPos, _args: unknown[]): HighlightResult {
     return pos;
   }
 }

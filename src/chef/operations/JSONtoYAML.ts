@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import YAML from "yaml";
 
@@ -39,7 +39,7 @@ export class JSONtoYAML extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: AnyInput, _args: unknown[]): AnyInput {
     try {
       return YAML.stringify(input);
     } catch {

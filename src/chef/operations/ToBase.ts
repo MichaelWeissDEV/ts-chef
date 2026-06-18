@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 /**
@@ -44,11 +44,11 @@ export class ToBase extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const [radix] = args as [number];
     if (!input) {
       throw new OperationError("Error: Input must be a number");
     }
-    const radix = args[0];
     if (radix < 2 || radix > 36) {
       throw new OperationError(
         "Error: Radix argument must be between 2 and 36",

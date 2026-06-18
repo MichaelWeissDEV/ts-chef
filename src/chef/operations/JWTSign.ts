@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import Operation from "../Operation";
+import Operation, { AnyInput } from "../Operation";
 import jwt from "jsonwebtoken";
 import OperationError from "../errors/OperationError";
 import { JWT_ALGORITHMS } from "../lib/JWT";
@@ -57,8 +57,8 @@ export class JWTSign extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [key, algorithm, header] = args;
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const [key, algorithm, header] = args as [string, string, string];
 
     try {
       return jwt.sign(input, key, {

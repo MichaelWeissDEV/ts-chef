@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput, HighlightPos, HighlightResult } from "../Operation";
 import OperationError from "../errors/OperationError";
 /**
  * Vigenère Decode operation
@@ -44,9 +44,11 @@ class VigenèreDecode extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const [keyRaw] = args as [string];
     const alphabet = "abcdefghijklmnopqrstuvwxyz",
-      key = args[0].toLowerCase();
+      key = keyRaw.toLowerCase();
+    const inputStr = input as string;
     let output = "",
       fail = 0,
       keyIndex,
@@ -57,22 +59,22 @@ class VigenèreDecode extends Operation {
     if (!/^[a-zA-Z]+$/.test(key))
       throw new OperationError("The key must consist only of letters");
 
-    for (let i = 0; i < input.length; i++) {
-      if (alphabet.indexOf(input[i]) >= 0) {
+    for (let i = 0; i < inputStr.length; i++) {
+      if (alphabet.indexOf(inputStr[i]) >= 0) {
         chr = key[(i - fail) % key.length];
         keyIndex = alphabet.indexOf(chr);
-        msgIndex = alphabet.indexOf(input[i]);
+        msgIndex = alphabet.indexOf(inputStr[i]);
         // Subtract indexes from each other, add 26 just in case the value is negative,
         // modulo to remove if necessary
         output += alphabet[(msgIndex - keyIndex + alphabet.length) % 26];
-      } else if (alphabet.indexOf(input[i].toLowerCase()) >= 0) {
+      } else if (alphabet.indexOf(inputStr[i].toLowerCase()) >= 0) {
         chr = key[(i - fail) % key.length].toLowerCase();
         keyIndex = alphabet.indexOf(chr);
-        msgIndex = alphabet.indexOf(input[i].toLowerCase());
+        msgIndex = alphabet.indexOf(inputStr[i].toLowerCase());
         output +=
           alphabet[(msgIndex + alphabet.length - keyIndex) % 26].toUpperCase();
       } else {
-        output += input[i];
+        output += inputStr[i];
         fail++;
       }
     }
@@ -89,7 +91,7 @@ class VigenèreDecode extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlight(pos: any, _args: any[]): any {
+  highlight(pos: HighlightPos, _args: unknown[]): HighlightResult {
     return pos;
   }
 
@@ -102,7 +104,7 @@ class VigenèreDecode extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlightReverse(pos: any, _args: any[]): any {
+  highlightReverse(pos: HighlightPos, _args: unknown[]): HighlightResult {
     return pos;
   }
 }

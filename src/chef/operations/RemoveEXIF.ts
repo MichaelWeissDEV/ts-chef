@@ -12,7 +12,7 @@
  */
 
 import { removeEXIF } from "../vendor/remove-exif";
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 /**
@@ -43,16 +43,16 @@ export class RemoveEXIF extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  run(input: any, _args: any[]): any {
-    input = new Uint8Array(input);
+  run(input: ArrayBuffer, _args: unknown[]): AnyInput {
+    const inputBytes = new Uint8Array(input);
     // Do nothing if input is empty
-    if (input.length === 0) return input;
+    if (inputBytes.length === 0) return inputBytes;
 
     try {
-      return removeEXIF(input);
+      return removeEXIF(inputBytes);
     } catch (err) {
       // Simply return input if no EXIF data is found
-      if (err === "Exif not found.") return input;
+      if (err === "Exif not found.") return inputBytes;
       throw new OperationError(`Could not remove EXIF data from image: ${err}`);
     }
   }

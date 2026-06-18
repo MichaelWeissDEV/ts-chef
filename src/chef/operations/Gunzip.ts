@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import gunzip from "zlibjs/bin/gunzip.min.js";
 
 const Zlib = gunzip.Zlib;
@@ -48,7 +48,7 @@ export class Gunzip extends Operation {
    * @param {Object[]} args
    * @returns {File}
    */
-  run(input: any, _args: any[]): any {
+  run(input: ArrayBuffer, _args: unknown[]): AnyInput {
     const gzipObj = new Zlib.Gunzip(new Uint8Array(input));
     return new Uint8Array(gzipObj.decompress()).buffer;
   }

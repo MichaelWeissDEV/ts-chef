@@ -107,15 +107,10 @@ export class HeatmapChart extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
-    const recordDelimiter = Utils.charRep(args[0]),
-      fieldDelimiter = Utils.charRep(args[1]),
-      vBins = args[2] as number,
-      hBins = args[3] as number,
-      columnHeadingsAreIncluded = args[4],
-      drawEdges = args[7],
-      minColour = args[8],
-      maxColour = args[9],
+  run(input: string, args: unknown[]): string {
+    const [recordDelimArg, fieldDelimArg, vBins, hBins, columnHeadingsAreIncluded, xLabelArg, yLabelArg, drawEdges, minColour, maxColour] = args as [string, string, number, number, boolean, string, string, boolean, string, string];
+    const recordDelimiter = Utils.charRep(recordDelimArg),
+      fieldDelimiter = Utils.charRep(fieldDelimArg),
       dimension = 500;
     if (vBins <= 0)
       throw new OperationError(
@@ -126,8 +121,8 @@ export class HeatmapChart extends Operation {
         "Number of horizontal bins must be greater than 0",
       );
 
-    let xLabel = args[5],
-      yLabel = args[6];
+    let xLabel = xLabelArg,
+      yLabel = yLabelArg;
     const { headings, values } = getScatterValues(
       input,
       recordDelimiter,

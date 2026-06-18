@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import OperationError from "../errors/OperationError";
 
@@ -45,9 +45,9 @@ export class OffsetChecker extends Operation {
    * @param {Object[]} args
    * @returns {html}
    */
-  run(input: any, args: any[]): any {
-    const sampleDelim = args[0],
-      samples = input.split(sampleDelim),
+  run(input: string, args: unknown[]): string {
+    const [sampleDelim] = args as [string];
+    const samples = input.split(sampleDelim),
       outputs = new Array(samples.length);
     let i: number,
       s: number,

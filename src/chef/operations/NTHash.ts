@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { runHash } from "../lib/Hash";
 
 /**
@@ -39,7 +39,7 @@ export class NTHash extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: string, _args: unknown[]): string {
     // Convert to UTF-16LE
     const buf = new ArrayBuffer(input.length * 2);
     const bufView = new Uint16Array(buf);

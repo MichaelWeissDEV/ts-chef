@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import Operation from "../Operation";
+import Operation, { AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 import { compress } from "@blu3r4y/lzma";
@@ -49,8 +49,9 @@ export class LZMACompress extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  async run(input: any, args: any[]): Promise<any> {
-    const mode = Number(args[0]);
+  async run(input: ArrayBuffer, args: unknown[]): Promise<AnyInput> {
+    const [modeArg] = args as [string];
+    const mode = Number(modeArg);
     return new Promise((resolve, reject) => {
       compress(
         new Uint8Array(input),

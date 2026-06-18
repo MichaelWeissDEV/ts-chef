@@ -54,9 +54,8 @@ export class JA3Fingerprint extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
-    const inputFormat = args[0] as string;
-    const outputFormat = args[1] as string;
+  run(input: string, args: unknown[]): string {
+    const [inputFormat, outputFormat] = args as [string, string];
 
     const inputBytes = Utils.convertToByteArray(input, inputFormat);
     const s = new Stream(new Uint8Array(inputBytes));

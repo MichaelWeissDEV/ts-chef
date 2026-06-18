@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Stream from "../lib/Stream";
 import { toHexFast, fromHex } from "../lib/Hex";
 import { toBinary } from "../lib/Binary";
@@ -51,8 +51,8 @@ export class ParseTCP extends Operation {
    * @param {any[]} args
    * @returns {any}
    */
-  run(input: string, args: any[]): any {
-    const format = args[0];
+  run(input: string, args: unknown[]): AnyInput {
+    const [format] = args as [string];
     let inputBuffer: ArrayBuffer;
 
     if (format === "Hex") {
@@ -168,7 +168,7 @@ export class ParseTCP extends Operation {
    * @param {any} data
    * @returns {string}
    */
-  present(data: any): string {
+  present(data: AnyInput, _args: unknown[]): AnyInput {
     return objToTable(data);
   }
 }

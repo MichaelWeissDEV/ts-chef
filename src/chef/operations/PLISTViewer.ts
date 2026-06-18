@@ -38,7 +38,7 @@ export class PlistViewer extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, _args: any[]): string {
+  run(input: string, _args: unknown[]): string {
     const plistStart = input.indexOf("<plist");
     if (plistStart === -1) return input;
 

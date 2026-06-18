@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { LETTERS } from "../lib/Enigma";
 import {
   NUMBERS,
@@ -268,33 +268,34 @@ export class Sigaba extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const sigabaSwitch = args[40];
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const a = args as (string | boolean)[];
+    const sigabaSwitch = a[40] as string;
     const cipherRotors = [];
     const controlRotors = [];
     const indexRotors = [];
     for (let i = 0; i < 5; i++) {
-      const rotorWiring = args[i * 3];
+      const rotorWiring = a[i * 3] as string;
       cipherRotors.push(
-        new CRRotor(rotorWiring, args[i * 3 + 2], args[i * 3 + 1]),
+        new CRRotor(rotorWiring, a[i * 3 + 2] as string, a[i * 3 + 1] as boolean),
       );
     }
     for (let i = 5; i < 10; i++) {
-      const rotorWiring = args[i * 3];
+      const rotorWiring = a[i * 3] as string;
       controlRotors.push(
-        new CRRotor(rotorWiring, args[i * 3 + 2], args[i * 3 + 1]),
+        new CRRotor(rotorWiring, a[i * 3 + 2] as string, a[i * 3 + 1] as boolean),
       );
     }
     for (let i = 15; i < 20; i++) {
-      const rotorWiring = args[i * 2];
-      indexRotors.push(new IRotor(rotorWiring, args[i * 2 + 1]));
+      const rotorWiring = a[i * 2] as string;
+      indexRotors.push(new IRotor(rotorWiring, a[i * 2 + 1] as string));
     }
     const sigaba = new SigabaMachine(cipherRotors, controlRotors, indexRotors);
     let result;
     if (sigabaSwitch === "Encrypt") {
-      result = sigaba.encrypt(input);
+      result = sigaba.encrypt(input as string);
     } else if (sigabaSwitch === "Decrypt") {
-      result = sigaba.decrypt(input);
+      result = sigaba.decrypt(input as string);
     }
     return result;
   }

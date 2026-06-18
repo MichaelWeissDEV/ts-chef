@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Adler32Checksum from "./Adler32Checksum";
 import CRCChecksum from "./CRCChecksum";
 import Fletcher8Checksum from "./Fletcher8Checksum";
@@ -285,8 +285,8 @@ export class GenerateAllChecksums extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [length, includeNames] = args;
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const [length, includeNames] = args as [string, boolean];
     let output = "";
     this.checksums.forEach((checksum) => {
       const checksumLength = checksum.name.match(
@@ -294,7 +294,7 @@ export class GenerateAllChecksums extends Operation {
       )?.[1];
       if (length === "All" || length === checksumLength) {
         const value = checksum.algo.run(
-          new Uint8Array(input),
+          new Uint8Array(input as ArrayBuffer),
           checksum.params || [],
         );
         output += includeNames

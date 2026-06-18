@@ -57,13 +57,14 @@ export class LS47Encrypt extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    this.paddingSize = parseInt(args[1], 10);
+  run(input: string, args: unknown[]): string {
+    const [password, paddingSizeArg, signature] = args as [string, number, string];
+    this.paddingSize = paddingSizeArg;
 
     LS47.initTiles();
 
-    const key = LS47.deriveKey(args[0]);
-    return LS47.encryptPad(key, input, args[2], this.paddingSize);
+    const key = LS47.deriveKey(password);
+    return LS47.encryptPad(key, input, signature, paddingSizeArg);
   }
 }
 

@@ -42,7 +42,7 @@ export class NormaliseImage extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  async run(input: any, _args: any[]): Promise<any> {
+  async run(input: ArrayBuffer, _args: unknown[]): Promise<ArrayBuffer> {
     if (!isImage(input)) {
       throw new OperationError("Invalid file type.");
     }

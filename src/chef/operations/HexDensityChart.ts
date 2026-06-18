@@ -114,20 +114,14 @@ export class HexDensityChart extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
-    const recordDelimiter = Utils.charRep(args[0]),
-      fieldDelimiter = Utils.charRep(args[1]),
-      packRadius = args[2] as number,
-      drawRadius = args[3] as number,
-      columnHeadingsAreIncluded = args[4],
-      drawEdges = args[7],
-      minColour = args[8],
-      maxColour = args[9],
-      drawEmptyHexagons = args[10],
+  run(input: string, args: unknown[]): string {
+    const [recordDelimArg, fieldDelimArg, packRadius, drawRadius, columnHeadingsAreIncluded, xLabelArg, yLabelArg, drawEdges, minColour, maxColour, drawEmptyHexagons] = args as [string, string, number, number, boolean, string, string, boolean, string, string, boolean];
+    const recordDelimiter = Utils.charRep(recordDelimArg),
+      fieldDelimiter = Utils.charRep(fieldDelimArg),
       dimension = 500;
 
-    let xLabel = args[5],
-      yLabel = args[6];
+    let xLabel = xLabelArg,
+      yLabel = yLabelArg;
     const { headings, values } = getScatterValues(
       input,
       recordDelimiter,

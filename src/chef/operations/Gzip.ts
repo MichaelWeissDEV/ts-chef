@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { COMPRESSION_TYPE, ZLIB_COMPRESSION_TYPE_LOOKUP } from "../lib/Zlib";
 import gzip from "zlibjs/bin/gzip.min.js";
 
@@ -64,30 +64,29 @@ export class Gzip extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  run(input: any, args: any[]): any {
-    const filename = args[1],
-      comment = args[2],
-      options: {
+  run(input: ArrayBuffer, args: unknown[]): AnyInput {
+    const [_compressionType, filename, comment, fhcrc] = args as [string, string, string, boolean];
+    const options: {
         deflateOptions: { compressionType: number };
         flags: { fhcrc: boolean; fname?: boolean; comment?: boolean };
         filename?: string;
         comment?: string;
       } = {
         deflateOptions: {
-          compressionType: ZLIB_COMPRESSION_TYPE_LOOKUP[args[0] as string],
+          compressionType: ZLIB_COMPRESSION_TYPE_LOOKUP[_compressionType],
         },
         flags: {
-          fhcrc: args[3] as boolean,
+          fhcrc: fhcrc,
         },
       };
 
-    if ((filename as string).length) {
+    if (filename.length) {
       options.flags.fname = true;
-      options.filename = filename as string;
+      options.filename = filename;
     }
-    if ((comment as string).length) {
+    if (comment.length) {
       options.flags.comment = true;
-      options.comment = comment as string;
+      options.comment = comment;
     }
     const gzipObj = new Zlib.Gzip(new Uint8Array(input), options);
     const compressed = new Uint8Array(gzipObj.compress());

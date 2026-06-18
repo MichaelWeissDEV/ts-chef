@@ -12,7 +12,7 @@
  */
 
 import r from "jsrsasign";
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 /**
@@ -40,7 +40,7 @@ export class PubKeyFromCert extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: string, _args: unknown[]): string {
     let output = "";
     let match;
     const regex = /-----BEGIN CERTIFICATE-----/g;

@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import UAParser from "ua-parser-js";
 
 /**
@@ -46,7 +46,7 @@ export class ParseUserAgent extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: string, _args: unknown[]): string {
     const ua = new UAParser(input).getResult();
     return `Browser
     Name: ${ua.browser.name || "unknown"}

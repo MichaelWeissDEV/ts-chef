@@ -59,13 +59,13 @@ export class ParseX509Certificate extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
+  run(input: string, args: unknown[]): string {
     if (!input.length) {
       return "No input";
     }
 
     const cert = new (r as any).X509(),
-      inputFormat = args[0];
+      [inputFormat] = args as [string];
 
     let undefinedInputFormat = false;
     try {

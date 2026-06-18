@@ -92,7 +92,7 @@ export class ContainImage extends Operation {
    * @returns {byteArray}
    */
   async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
-    const [width, height, hAlign, vAlign, alg, opaqueBg] = args;
+    const [width, height, hAlign, vAlign, alg, opaqueBg] = args as [number, number, string, string, string, boolean];
 
     const resizeMap: Record<string, ResizeStrategy> = {
       "Nearest Neighbour": ResizeStrategy.NEAREST_NEIGHBOR,

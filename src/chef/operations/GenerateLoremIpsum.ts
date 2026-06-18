@@ -55,8 +55,8 @@ export class GenerateLoremIpsum extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [length, lengthType] = args;
+  run(input: string, args: unknown[]): string {
+    const [length, lengthType] = args as [number, string];
     if (length < 1) {
       throw new OperationError("Length must be greater than 0");
     }

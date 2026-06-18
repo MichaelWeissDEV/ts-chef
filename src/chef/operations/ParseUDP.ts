@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Stream from "../lib/Stream";
 import { toHexFast, fromHex } from "../lib/Hex";
 import { objToTable } from "../lib/Protocol";
@@ -49,18 +49,19 @@ export class ParseUDP extends Operation {
    * @param {Object[]} args
    * @returns {Object}
    */
-  run(input: any, args: any[]): any {
-    const format = args[0];
+  run(input: string, args: unknown[]): AnyInput {
+    const [format] = args as [string];
 
+    let rawBytes: number[] | ArrayBuffer;
     if (format === "Hex") {
-      input = fromHex(input);
+      rawBytes = fromHex(input);
     } else if (format === "Raw") {
-      input = Utils.strToArrayBuffer(input);
+      rawBytes = Utils.strToArrayBuffer(input);
     } else {
       throw new OperationError("Unrecognised input format.");
     }
 
-    const s = new Stream(new Uint8Array(input));
+    const s = new Stream(new Uint8Array(rawBytes));
     if (s.length < 8) {
       throw new OperationError("Need 8 bytes for a UDP Header");
     }
@@ -86,7 +87,7 @@ export class ParseUDP extends Operation {
    * @param {Object} data
    * @returns {html}
    */
-  present(data: any) {
+  present(data: AnyInput, _args: unknown[]): AnyInput {
     return objToTable(data);
   }
 }

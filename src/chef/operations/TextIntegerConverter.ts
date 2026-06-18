@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 /* ---------- helper functions ---------- */
@@ -95,9 +95,9 @@ export class TextIntegerConverter extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const outputFormat = args[0];
-    const trimmed = input.trim();
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const [outputFormat] = args as [string];
+    const trimmed = (input as string).trim();
 
     let bigIntValue;
 

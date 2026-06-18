@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { COMPRESSION_TYPE } from "../lib/Zlib";
 import rawdeflate from "zlibjs/bin/rawdeflate.min.js";
 
@@ -55,12 +55,10 @@ export class RawDeflate extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  run(input: any, args: any[]): any {
+  run(input: ArrayBuffer, args: unknown[]): ArrayBuffer {
+    const [compressionType] = args as [keyof typeof RAW_COMPRESSION_TYPE_LOOKUP];
     const deflate = new Zlib.RawDeflate(new Uint8Array(input), {
-      compressionType:
-        RAW_COMPRESSION_TYPE_LOOKUP[
-          args[0] as keyof typeof RAW_COMPRESSION_TYPE_LOOKUP
-        ],
+      compressionType: RAW_COMPRESSION_TYPE_LOOKUP[compressionType],
     });
     return new Uint8Array(deflate.compress()).buffer;
   }

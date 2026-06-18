@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import moment from "moment-timezone";
 import { DATETIME_FORMATS, FORMAT_EXAMPLES } from "../lib/DateTime";
 
@@ -57,9 +57,8 @@ export class ParseDateTime extends Operation {
    * @param {Object[]} args
    * @returns {html}
    */
-  run(input: any, args: any[]): any {
-    const inputFormat = args[1],
-      inputTimezone = args[2];
+  run(input: string, args: unknown[]): string {
+    const [, inputFormat, inputTimezone] = args as [unknown, string, string];
     let date,
       output = "";
 

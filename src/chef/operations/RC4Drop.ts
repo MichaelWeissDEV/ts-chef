@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, HighlightPos, HighlightResult } from "../Operation";
 import { format } from "../lib/Ciphers";
 import CryptoJS from "crypto-js";
 
@@ -87,13 +87,13 @@ export class RC4Drop extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const message = format[args[1]].parse(input),
-      passphrase = format[args[0].option].parse(args[0].string),
-      drop = args[3],
-      encrypted = CryptoJS.RC4Drop.encrypt(message, passphrase, { drop: drop });
+  run(input: string, args: unknown[]): string {
+    const [arg0, inputFmt, outputFmt, drop] = args as [{ string: string; option: string }, string, string, number];
+    const message = format[inputFmt].parse(input),
+      passphrase = format[arg0.option].parse(arg0.string),
+      encrypted = CryptoJS.RC4Drop.encrypt(message, passphrase, { drop });
 
-    return encrypted.ciphertext.toString(format[args[2]]);
+    return encrypted.ciphertext.toString(format[outputFmt]);
   }
 
   /**
@@ -105,7 +105,7 @@ export class RC4Drop extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlight(pos: any, _args: any[]): any {
+  highlight(pos: HighlightPos, _args: unknown[]): HighlightResult {
     return pos;
   }
 
@@ -118,7 +118,7 @@ export class RC4Drop extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlightReverse(pos: any, _args: any[]): any {
+  highlightReverse(pos: HighlightPos, _args: unknown[]): HighlightResult {
     return pos;
   }
 }

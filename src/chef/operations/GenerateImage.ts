@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { isImage } from "../lib/FileType";
@@ -59,9 +59,9 @@ export class GenerateImage extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  async run(input: any, args: any[]): Promise<any> {
-    const [mode, scale, width] = args;
-    input = new Uint8Array(input);
+  async run(input: ArrayBuffer, args: unknown[]): Promise<AnyInput> {
+    const [mode, scale, width] = args as [string, number, number];
+    const inputBytes = new Uint8Array(input);
 
     if (scale <= 0) {
       throw new OperationError("Pixel Scale Factor needs to be > 0");
@@ -81,19 +81,19 @@ export class GenerateImage extends Operation {
 
     const bytesPerPixel = bytePerPixelMap[mode as keyof typeof bytePerPixelMap];
 
-    if (bytesPerPixel > 0 && input.length % bytesPerPixel !== 0) {
+    if (bytesPerPixel > 0 && inputBytes.length % bytesPerPixel !== 0) {
       throw new OperationError(
         `Number of bytes is not a divisor of ${bytesPerPixel}`,
       );
     }
 
-    const height = Math.ceil(input.length / bytesPerPixel / width);
+    const height = Math.ceil(inputBytes.length / bytesPerPixel / width);
     const image = new Jimp({ width, height });
 
     if (mode === "Bits") {
       let index = 0;
-      for (let j = 0; j < input.length; j++) {
-        const curByte = Utils.bin(input[j]);
+      for (let j = 0; j < inputBytes.length; j++) {
+        const curByte = Utils.bin(inputBytes[j]);
         for (let k = 0; k < 8; k++, index++) {
           const x = index % width;
           const y = Math.floor(index / width);
@@ -105,7 +105,7 @@ export class GenerateImage extends Operation {
       }
     } else {
       let i = 0;
-      while (i < input.length) {
+      while (i < inputBytes.length) {
         const index = i / bytesPerPixel;
         const x = index % width;
         const y = Math.floor(index / width);
@@ -117,25 +117,25 @@ export class GenerateImage extends Operation {
 
         switch (mode) {
           case "Greyscale":
-            red = green = blue = input[i++];
+            red = green = blue = inputBytes[i++];
             break;
 
           case "RG":
-            red = input[i++];
-            green = input[i++];
+            red = inputBytes[i++];
+            green = inputBytes[i++];
             break;
 
           case "RGB":
-            red = input[i++];
-            green = input[i++];
-            blue = input[i++];
+            red = inputBytes[i++];
+            green = inputBytes[i++];
+            blue = inputBytes[i++];
             break;
 
           case "RGBA":
-            red = input[i++];
-            green = input[i++];
-            blue = input[i++];
-            alpha = input[i++];
+            red = inputBytes[i++];
+            green = inputBytes[i++];
+            blue = inputBytes[i++];
+            alpha = inputBytes[i++];
             break;
 
           default:

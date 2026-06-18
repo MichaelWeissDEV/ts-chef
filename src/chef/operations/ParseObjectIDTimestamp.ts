@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import * as BSON from "bson";
 
@@ -40,7 +40,7 @@ export class ParseObjectIDTimestamp extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: string, _args: unknown[]): string {
     try {
       const objectId = new BSON.ObjectId(input);
       return objectId.getTimestamp().toISOString();

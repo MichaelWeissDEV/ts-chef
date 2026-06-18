@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import OperationError from "../errors/OperationError";
 import { strToIpv6, ipv6ToStr, ipv4ToStr, IPV6_REGEX } from "../lib/IP";
@@ -42,7 +42,7 @@ export class ParseIPv6Address extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: string, _args: unknown[]): string {
     let match,
       output = "";
 

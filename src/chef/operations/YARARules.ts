@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Yara from "libyara-wasm";
 
@@ -77,7 +77,7 @@ export class YARARules extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: AnyInput, args: unknown[]): Promise<AnyInput> {
     const [
       rules,
       showStrings,
@@ -86,13 +86,13 @@ export class YARARules extends Operation {
       showCounts,
       showRuleWarns,
       showConsole,
-    ] = args;
+    ] = args as [string, boolean, boolean, boolean, boolean, boolean, boolean];
     return new Promise((resolve, reject) => {
       Yara().then(
         (yara: { run: (arg0: Uint8Array<any>, arg1: any) => any }) => {
           let matchString = "";
 
-          const inpArr = new Uint8Array(input); // Turns out embind knows that JS uint8array <==> C++ std::string
+          const inpArr = new Uint8Array(input as ArrayBuffer); // Turns out embind knows that JS uint8array <==> C++ std::string
 
           const resp = yara.run(inpArr, rules);
 

@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { BombeMachine } from "../lib/Bombe";
 import { ROTORS, ROTORS_FOURTH, REFLECTORS, Reflector } from "../lib/Enigma";
@@ -157,13 +157,9 @@ export class MultipleBombe extends Operation {
    * @param {Object[]} args
    * @returns {Object}
    */
-  run(input: string, args: any[]): any {
-    const mainRotorsStr = args[1];
-    const fourthRotorsStr = args[2];
-    const reflectorsStr = args[3];
-    let crib = args[4];
-    const offset = args[5];
-    const check = args[6];
+  run(input: string, args: unknown[]): AnyInput {
+    const [, mainRotorsStr, fourthRotorsStr, reflectorsStr, cribArg, offset, check] = args as [unknown, string, string, string, string, number, boolean];
+    let crib = cribArg;
     const rotors: string[] = [];
     const fourthRotors: string[] = [];
     const reflectors: Reflector[] = [];
@@ -257,7 +253,8 @@ export class MultipleBombe extends Operation {
    * @param {any[]} output.bombeRuns
    * @returns {string}
    */
-  present(output: any): string {
+  present(data: AnyInput, _args: unknown[]): AnyInput {
+    const output = data as { nLoops: number; bombeRuns: { rotors: string[]; reflector: string; result: [string, string, string][] }[] };
     let html = `Bombe run on menu with ${output.nLoops} loop${output.nLoops === 1 ? "" : "s"} (2+ desirable). Note: Rotors and rotor positions are listed left to right, ignore stepping and the ring setting, and positions start at the beginning of the crib. Some plugboard settings are determined. A decryption preview starting at the beginning of the crib and ignoring stepping is also provided.\n`;
 
     for (const run of output.bombeRuns) {

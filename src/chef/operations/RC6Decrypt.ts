@@ -90,10 +90,10 @@ export class RC6Decrypt extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const key = Utils.convertToByteArray(args[0].string, args[0].option),
-      iv = Utils.convertToByteArray(args[1].string, args[1].option),
-      [, mode, inputType, outputType, padding, wordSize, rounds] = args;
+  run(input: string, args: unknown[]): string {
+    const [arg0, arg1, mode, inputType, outputType, padding, wordSize, rounds] = args as [{ string: string; option: string }, { string: string; option: string }, string, string, string, string, number, number];
+    const key = Utils.convertToByteArray(arg0.string, arg0.option),
+      iv = Utils.convertToByteArray(arg1.string, arg1.option);
 
     // Validate word size
     if (
@@ -123,9 +123,9 @@ Rounds must be an integer between 1 and 255. Standard for w=${wordSize} is ${def
     // Default IV to null bytes if empty (like AES)
     const actualIv = iv.length === 0 ? new Array(blockSize).fill(0) : iv;
 
-    input = Utils.convertToByteArray(input, inputType);
+    const bytes = Utils.convertToByteArray(input, inputType);
     const output = decryptRC6(
-      input,
+      bytes,
       key,
       actualIv,
       mode,

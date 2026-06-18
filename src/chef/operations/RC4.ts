@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, HighlightPos, HighlightResult } from "../Operation";
 import CryptoJS from "crypto-js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -91,12 +91,13 @@ export class RC4 extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const message = format[args[1]].parse(input),
-      passphrase = format[args[0].option].parse(args[0].string),
+  run(input: string, args: unknown[]): string {
+    const [arg0, inputFmt, outputFmt] = args as [{ string: string; option: string }, string, string];
+    const message = format[inputFmt].parse(input),
+      passphrase = format[arg0.option].parse(arg0.string),
       encrypted = CryptoJS.RC4.encrypt(message, passphrase);
 
-    return encrypted.ciphertext.toString(format[args[2]]);
+    return encrypted.ciphertext.toString(format[outputFmt]);
   }
 
   /**
@@ -108,7 +109,7 @@ export class RC4 extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlight(pos: any, _args: any[]): any {
+  highlight(pos: HighlightPos, _args: unknown[]): HighlightResult {
     return pos;
   }
 
@@ -121,7 +122,7 @@ export class RC4 extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlightReverse(pos: any, _args: any[]): any {
+  highlightReverse(pos: HighlightPos, _args: unknown[]): HighlightResult {
     return pos;
   }
 }

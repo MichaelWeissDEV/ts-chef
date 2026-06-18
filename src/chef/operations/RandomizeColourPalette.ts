@@ -51,11 +51,12 @@ export class RandomizeColourPalette extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
     if (!isImage(input))
       throw new OperationError("Please enter a valid image file.");
 
-    const seed = args[0] || Math.random().toString().substr(2),
+    const [seedArg] = args as [string];
+    const seed = seedArg || Math.random().toString().substr(2),
       parsedImage = await Jimp.read(input),
       width = parsedImage.bitmap.width,
       height = parsedImage.bitmap.height;

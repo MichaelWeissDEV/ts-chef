@@ -68,9 +68,9 @@ export class PGPDecryptAndVerify extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: string, args: unknown[]): Promise<string> {
     const signedMessage = input,
-      [publicKey, privateKey, passphrase] = args,
+      [publicKey, privateKey, passphrase] = args as [string, string, string],
       keyring = new kbpgp.keyring.KeyRing();
     let unboxedLiterals;
 

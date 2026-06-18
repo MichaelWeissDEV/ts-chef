@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { cryptNotice } from "../lib/Crypt";
 import r from "jsrsasign";
 
@@ -51,8 +51,8 @@ export class GenerateECDSAKeyPair extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  async run(input: any, args: any[]): Promise<any> {
-    const [curveName, outputFormat] = args;
+  async run(input: string, args: unknown[]): Promise<AnyInput> {
+    const [curveName, outputFormat] = args as [string, string];
 
     return new Promise((resolve, _reject) => {
       let internalCurveName;

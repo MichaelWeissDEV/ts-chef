@@ -79,13 +79,12 @@ export class SeriesChart extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
-    const recordDelimiter = Utils.charRep(args[0]),
-      fieldDelimiter = Utils.charRep(args[1]),
-      xLabel = args[2] as string,
-      pipRadius = args[3] as number,
+  run(input: string, args: unknown[]): string {
+    const [recordDelimiterRaw, fieldDelimiterRaw, xLabel, pipRadius, seriesColoursRaw] = args as [string, string, string, number, string];
+    const recordDelimiter = Utils.charRep(recordDelimiterRaw),
+      fieldDelimiter = Utils.charRep(fieldDelimiterRaw),
       // Escape HTML from all colours to prevent reflected XSS. See https://github.com/gchq/CyberChef/issues/1265
-      seriesColours = (args[4] as string).split(",").map((colour) => {
+      seriesColours = seriesColoursRaw.split(",").map((colour) => {
         return Utils.escapeHtml(colour);
       }),
       svgWidth = 500,

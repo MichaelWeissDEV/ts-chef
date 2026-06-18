@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import Operation from "../Operation";
+import Operation, { AnyInput } from "../Operation";
 import { runHash } from "../lib/Hash";
 
 /**
@@ -39,7 +39,7 @@ export class MD5 extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: ArrayBuffer, _args: unknown[]): AnyInput {
     return runHash("md5", input);
   }
 }

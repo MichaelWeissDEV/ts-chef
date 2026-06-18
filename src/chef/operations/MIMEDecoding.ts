@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { fromHex } from "../lib/Hex";
@@ -43,8 +43,8 @@ export class MIMEDecoding extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
-    const mimeEncodedText = Utils.byteArrayToUtf8(input);
+  run(input: AnyInput, _args: unknown[]): AnyInput {
+    const mimeEncodedText = Utils.byteArrayToUtf8(input as number[]);
     const encodedHeaders = mimeEncodedText.replace(/\r\n/g, "\n");
 
     const decodedHeader = this.decodeHeaders(encodedHeaders);

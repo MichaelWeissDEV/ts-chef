@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput, HighlightPos, HighlightResult } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { LETTERS, Reflector } from "../lib/Enigma";
 import {
@@ -192,21 +192,22 @@ export class Typex extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const reflectorstr = args[20];
-    const plugboardstr = args[21];
-    const typexKeyboard = args[22];
-    const removeOther = args[23];
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const a = args as (string | boolean)[];
+    const reflectorstr = a[20] as string;
+    const plugboardstr = a[21] as string;
+    const typexKeyboard = a[22] as string;
+    const removeOther = a[23] as boolean;
     const rotors = [];
     for (let i = 0; i < 5; i++) {
-      const [rotorwiring, rotorsteps] = this.parseRotorStr(args[i * 4], i + 1);
+      const [rotorwiring, rotorsteps] = this.parseRotorStr(a[i * 4] as string, i + 1);
       rotors.push(
         new Rotor(
           rotorwiring,
           rotorsteps,
-          args[i * 4 + 1],
-          args[i * 4 + 2],
-          args[i * 4 + 3],
+          a[i * 4 + 1] as boolean,
+          a[i * 4 + 2] as string,
+          a[i * 4 + 3] as string,
         ),
       );
     }
@@ -218,15 +219,16 @@ export class Typex extends Operation {
       plugboardstrMod = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     }
     const plugboard = new Plugboard(plugboardstrMod);
+    let inputStr = input as string;
     if (removeOther) {
       if (typexKeyboard === "Encrypt") {
-        input = input.replace(/[^A-Za-z0-9 /%£()',.-]/g, "");
+        inputStr = inputStr.replace(/[^A-Za-z0-9 /%£()',.-]/g, "");
       } else {
-        input = input.replace(/[^A-Za-z]/g, "");
+        inputStr = inputStr.replace(/[^A-Za-z]/g, "");
       }
     }
     const typex = new TypexMachine(rotors, reflector, plugboard, typexKeyboard);
-    let result = typex.crypt(input);
+    let result = typex.crypt(inputStr);
     if (removeOther && typexKeyboard !== "Decrypt") {
       // Five character cipher groups is traditional
       result = result.replace(/([A-Z]{5})(?!$)/g, "$1 ");
@@ -244,10 +246,12 @@ export class Typex extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlight(pos: any, args: any[]): any {
-    if (args[18] === false) {
+  highlight(pos: HighlightPos, args: unknown[]): HighlightResult {
+    const a = args as unknown[];
+    if (a[18] === false) {
       return pos;
     }
+    return false;
   }
 
   /**
@@ -259,10 +263,12 @@ export class Typex extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlightReverse(pos: any, args: any[]): any {
-    if (args[18] === false) {
+  highlightReverse(pos: HighlightPos, args: unknown[]): HighlightResult {
+    const a = args as unknown[];
+    if (a[18] === false) {
       return pos;
     }
+    return false;
   }
 }
 

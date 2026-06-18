@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { toBase64 } from "../lib/Base64";
@@ -78,12 +78,10 @@ export class ResizeImage extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  async run(input: any, args: any[]): Promise<any> {
-    let width = args[0],
-      height = args[1];
-    const unit = args[2],
-      aspect = args[3],
-      resizeAlg = args[4] as keyof typeof resizeMap;
+  async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
+    const [widthArg, heightArg, unit, aspect, resizeAlg] = args as [number, number, string, boolean, string];
+    let width = widthArg,
+      height = heightArg;
 
     const resizeMap = {
       "Nearest Neighbour": ResizeStrategy.NEAREST_NEIGHBOR,
@@ -148,9 +146,10 @@ export class ResizeImage extends Operation {
    * @param {ArrayBuffer} data
    * @returns {html}
    */
-  present(data: any, _args: any[]): any {
-    if (!data.byteLength) return "";
-    const dataArray = new Uint8Array(data);
+  present(data: AnyInput, _args: unknown[]): AnyInput {
+    const buf = data as ArrayBuffer;
+    if (!buf.byteLength) return "";
+    const dataArray = new Uint8Array(buf);
 
     const type = isImage(dataArray);
     if (!type) {

@@ -69,12 +69,10 @@ export class Rabbit extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
-    const key = Utils.convertToByteArray(args[0].string, args[0].option);
-    const iv = Utils.convertToByteArray(args[1].string, args[1].option);
-    const endianness = args[2] as string;
-    const inputType = args[3] as string;
-    const outputType = args[4] as string;
+  run(input: string, args: unknown[]): string {
+    const [arg0, arg1, endianness, inputType, outputType] = args as [{ string: string; option: string }, { string: string; option: string }, string, string, string];
+    const key = Utils.convertToByteArray(arg0.string, arg0.option);
+    const iv = Utils.convertToByteArray(arg1.string, arg1.option);
 
     const littleEndian = endianness === "Little";
 

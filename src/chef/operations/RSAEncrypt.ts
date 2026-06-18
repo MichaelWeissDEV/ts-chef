@@ -69,8 +69,8 @@ export class RSAEncrypt extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [pemKey, scheme, md] = args;
+  run(input: string, args: unknown[]): string {
+    const [pemKey, scheme, md] = args as [string, string, string];
 
     if (pemKey.replace("-----BEGIN RSA PUBLIC KEY-----", "").length === 0) {
       throw new OperationError("Please enter a public key.");
@@ -81,7 +81,7 @@ export class RSAEncrypt extends Operation {
       // https://github.com/digitalbazaar/forge/issues/465#issuecomment-271097600
       const plaintextBytes = forge.util.encodeUtf8(input);
       // Encrypt message
-      const eMsg = pubKey.encrypt(plaintextBytes, scheme, {
+      const eMsg = pubKey.encrypt(plaintextBytes, scheme as forge.pki.rsa.EncryptionScheme, {
         md: MD_ALGORITHMS[md as keyof typeof MD_ALGORITHMS].create(),
       });
       return eMsg;

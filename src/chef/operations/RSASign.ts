@@ -56,8 +56,8 @@ export class RSASign extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [key, password, mdAlgo] = args;
+  run(input: string, args: unknown[]): string {
+    const [key, password, mdAlgo] = args as [string, string, string];
     if (key.replace("-----BEGIN RSA PRIVATE KEY-----", "").length === 0) {
       throw new OperationError("Please enter a private key.");
     }

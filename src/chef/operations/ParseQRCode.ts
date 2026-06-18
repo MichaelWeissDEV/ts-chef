@@ -55,8 +55,8 @@ export class ParseQRCode extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  async run(input: any, args: any[]): Promise<any> {
-    const [normalise] = args;
+  async run(input: ArrayBuffer, args: unknown[]): Promise<string> {
+    const [normalise] = args as [boolean];
 
     if (!isImage(input)) {
       throw new OperationError("Invalid file type.");

@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 
 /**
@@ -39,15 +39,15 @@ export class TCPIPChecksum extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
-    input = new Uint8Array(input);
+  run(input: AnyInput, _args: unknown[]): AnyInput {
+    const inputBytes = new Uint8Array(input as ArrayBuffer);
     let csum = 0;
 
-    for (let i = 0; i < input.length; i++) {
+    for (let i = 0; i < inputBytes.length; i++) {
       if (i % 2 === 0) {
-        csum += input[i] << 8;
+        csum += inputBytes[i] << 8;
       } else {
-        csum += input[i];
+        csum += inputBytes[i];
       }
     }
 

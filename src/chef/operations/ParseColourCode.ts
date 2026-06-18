@@ -38,7 +38,7 @@ export class ParseColourCode extends Operation {
    * @param {Object[]} args
    * @returns {html}
    */
-  run(input: string, _args: any[]): string {
+  run(input: string, _args: unknown[]): string {
     let r = 0,
       g = 0,
       b = 0,

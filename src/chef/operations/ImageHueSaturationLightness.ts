@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { toBase64 } from "../lib/Base64";
@@ -65,8 +65,8 @@ export class ImageHueSaturationLightness extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  async run(input: any, args: any[]): Promise<any> {
-    const [hue, saturation, lightness] = args;
+  async run(input: ArrayBuffer, args: unknown[]): Promise<AnyInput> {
+    const [hue, saturation, lightness] = args as [number, number, number];
 
     if (!isImage(input)) {
       throw new OperationError("Invalid file type.");

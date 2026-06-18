@@ -70,9 +70,9 @@ export class PGPEncryptAndSign extends Operation {
    *
    * @throws {OperationError} if failure to sign message
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: string, args: unknown[]): Promise<string> {
     const message = input,
-      [privateKey, passphrase, publicKey] = args;
+      [privateKey, passphrase, publicKey] = args as [string, string, string];
     let signedMessage;
 
     if (!privateKey)

@@ -58,10 +58,10 @@ export class JA4Fingerprint extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [inputFormat, outputFormat] = args;
-    input = Utils.convertToByteArray(input, inputFormat);
-    const ja4 = toJA4(new Uint8Array(input));
+  run(input: string, args: unknown[]): string {
+    const [inputFormat, outputFormat] = args as [string, string];
+    const inputBytes = Utils.convertToByteArray(input, inputFormat);
+    const ja4 = toJA4(new Uint8Array(inputBytes));
 
     // Output
     switch (outputFormat) {

@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput, HighlightPos, HighlightResult } from "../Operation";
 import { rot, rotr, rotrCarry } from "../lib/Rotate";
 
 /**
@@ -50,11 +50,12 @@ export class RotateRight extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  run(input: any, args: any[]): any {
-    if (args[1]) {
-      return rotrCarry(input, args[0]);
+  run(input: number[], args: unknown[]): AnyInput {
+    const [amount, carry] = args as [number, boolean];
+    if (carry) {
+      return rotrCarry(input, amount);
     } else {
-      return rot(input, args[0], rotr);
+      return rot(input, amount, rotr);
     }
   }
 
@@ -67,7 +68,7 @@ export class RotateRight extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlight(pos: any, _args: any[]): any {
+  highlight(pos: HighlightPos, _args: unknown[]): HighlightResult {
     return pos;
   }
 
@@ -80,7 +81,7 @@ export class RotateRight extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlightReverse(pos: any, _args: any[]): any {
+  highlightReverse(pos: HighlightPos, _args: unknown[]): HighlightResult {
     return pos;
   }
 }

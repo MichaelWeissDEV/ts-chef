@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Protobuf from "../lib/Protobuf";
 
@@ -58,10 +58,10 @@ export class ProtobufDecode extends Operation {
    * @param {Object[]} args
    * @returns {JSON}
    */
-  run(input: any, args: any[]): any {
-    input = new Uint8Array(input);
+  run(input: ArrayBuffer, args: unknown[]): AnyInput {
+    const inputBytes = new Uint8Array(input);
     try {
-      return Protobuf.decode(input, args);
+      return Protobuf.decode(inputBytes, args);
     } catch (err) {
       throw new OperationError(
         err instanceof Error ? err.message : String(err),

@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import forge from "node-forge";
 import BigNumber from "bignumber.js";
@@ -52,8 +52,8 @@ export class PseudoRandomNumberGenerator extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [numBytes, outputAs] = args;
+  run(input: string, args: unknown[]): string {
+    const [numBytes, outputAs] = args as [number, string];
 
     let bytes;
 

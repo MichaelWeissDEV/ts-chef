@@ -45,10 +45,11 @@ export class HexToPEM extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: string, args: unknown[]): string {
+    const [headerString] = args as [string];
     return r.KJUR.asn1.ASN1Util.getPEMStringFromHex(
       input.replace(/\s/g, ""),
-      args[0],
+      headerString,
     );
   }
 }

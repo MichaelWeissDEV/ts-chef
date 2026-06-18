@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 /**
@@ -87,8 +87,8 @@ export class HTTPRequest extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [method, url, headersText, mode, showResponseMetadata] = args;
+  run(input: string, args: unknown[]): AnyInput {
+    const [method, url, headersText, mode, showResponseMetadata] = args as [string, string, string, string, boolean];
 
     if (url.length === 0) return "";
 

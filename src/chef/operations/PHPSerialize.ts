@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 /**
@@ -40,7 +40,7 @@ export class PHPSerialize extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: AnyInput, _args: unknown[]): AnyInput {
     /**
      * Determines if a number is an integer
      * @param {number} value

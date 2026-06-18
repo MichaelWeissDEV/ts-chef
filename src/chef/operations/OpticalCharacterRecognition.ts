@@ -57,8 +57,8 @@ export class OpticalCharacterRecognition extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  async run(input: any, args: any[]): Promise<any> {
-    const [showConfidence, oemChoice] = args;
+  async run(input: ArrayBuffer, args: unknown[]): Promise<string> {
+    const [showConfidence, oemChoice] = args as [boolean, string];
 
     const type = isImage(input);
     if (!type) {

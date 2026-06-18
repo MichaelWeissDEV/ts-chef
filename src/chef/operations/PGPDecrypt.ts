@@ -63,9 +63,9 @@ export class PGPDecrypt extends Operation {
    *
    * @throws {OperationError} if invalid private key
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: string, args: unknown[]): Promise<string> {
     const encryptedMessage = input,
-      [privateKey, passphrase] = args,
+      [privateKey, passphrase] = args as [string, string],
       keyring = new kbpgp.keyring.KeyRing();
     let plaintextMessage: any;
 

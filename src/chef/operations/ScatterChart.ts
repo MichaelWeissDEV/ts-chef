@@ -96,17 +96,15 @@ export class ScatterChart extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
-    const recordDelimiter = Utils.charRep(args[0]),
-      fieldDelimiter = Utils.charRep(args[1]),
-      columnHeadingsAreIncluded = args[2],
-      fillColour = Utils.escapeHtml(args[5]),
-      radius = args[6],
-      colourInInput = args[7],
+  run(input: string, args: unknown[]): string {
+    const [recordDelimiterRaw, fieldDelimiterRaw, columnHeadingsAreIncluded, xLabelRaw, yLabelRaw, fillColourRaw, radius, colourInInput] = args as [string, string, boolean, string, string, string, number, boolean];
+    const recordDelimiter = Utils.charRep(recordDelimiterRaw),
+      fieldDelimiter = Utils.charRep(fieldDelimiterRaw),
+      fillColour = Utils.escapeHtml(fillColourRaw),
       dimension = 500;
 
-    let xLabel = args[3],
-      yLabel = args[4];
+    let xLabel = xLabelRaw,
+      yLabel = yLabelRaw;
 
     const dataFunction = colourInInput
       ? getScatterValuesWithColour

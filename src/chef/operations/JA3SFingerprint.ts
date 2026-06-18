@@ -54,11 +54,11 @@ export class JA3SFingerprint extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [inputFormat, outputFormat] = args;
+  run(input: string, args: unknown[]): string {
+    const [inputFormat, outputFormat] = args as [string, string];
 
-    input = Utils.convertToByteArray(input, inputFormat);
-    const s = new Stream(new Uint8Array(input));
+    const inputBytes = Utils.convertToByteArray(input, inputFormat);
+    const s = new Stream(new Uint8Array(inputBytes));
 
     const handshake = s.readInt(1);
     if (handshake !== 0x16) throw new OperationError("Not handshake data.");

@@ -12,7 +12,7 @@
  */
 
 import OperationError from "../errors/OperationError";
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import * as terser from "terser";
 
 /**
@@ -38,7 +38,7 @@ export class JavaScriptMinify extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  async run(input: any, _args: any[]): Promise<any> {
+  async run(input: string, _args: unknown[]): Promise<AnyInput> {
     const result = await terser.minify(input);
     if (result.error) {
       throw new OperationError(`Error minifying JavaScript. (${result.error})`);

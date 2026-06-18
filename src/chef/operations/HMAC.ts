@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import CryptoApi from "crypto-api/src/crypto-api";
 
@@ -73,9 +73,10 @@ export class HMAC extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const key = Utils.convertToByteString(args[0].string || "", args[0].option),
-      hashFunc = args[1].toLowerCase(),
+  run(input: ArrayBuffer, args: unknown[]): AnyInput {
+    const [keyObj, hashFuncArg] = args as [{ string: string; option: string }, string];
+    const key = Utils.convertToByteString(keyObj.string || "", keyObj.option),
+      hashFunc = hashFuncArg.toLowerCase(),
       msg = Utils.arrayBufferToStr(input, false),
       hasher = CryptoApi.getHasher(hashFunc);
 

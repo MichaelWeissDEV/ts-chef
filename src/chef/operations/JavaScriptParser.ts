@@ -65,9 +65,9 @@ export class JavaScriptParser extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: string, args: unknown[]): string {
     const [parseLoc, parseRange, parseTokens, parseComment, parseTolerant] =
-        args,
+        args as [boolean, boolean, boolean, boolean, boolean],
       options = {
         loc: parseLoc,
         range: parseRange,

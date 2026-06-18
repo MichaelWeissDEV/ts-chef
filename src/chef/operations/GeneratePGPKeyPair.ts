@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import kbpgp from "kbpgp";
 import { getSubkeySize, ASP } from "../lib/PGP";
 import { cryptNotice } from "../lib/Crypt";
@@ -69,15 +69,12 @@ export class GeneratePGPKeyPair extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  async run(input: any, args: any[]): Promise<any> {
-    let [keyType, keySize] = args[0].split("-");
-    const password = args[1],
-      name = args[2],
-      email = args[3];
+  async run(input: string, args: unknown[]): Promise<AnyInput> {
+    const [, password, name, email] = args as [string, string, string, string];
+    const parts = (args[0] as string).split("-");
+    let keyType = parts[0].toLowerCase();
+    const keySize = parseInt(parts[1], 10);
     let userIdentifier = "";
-
-    keyType = keyType.toLowerCase();
-    keySize = parseInt(keySize, 10);
 
     if (name) userIdentifier += name;
     if (email) userIdentifier += ` <${email}>`;

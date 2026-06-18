@@ -1,5 +1,5 @@
 import registry, { findOp } from "../opsRegistry";
-import type { Operation } from "../chef/Operation";
+import type { Operation, AnyInput } from "../chef/Operation";
 import type { PipelineStep } from "../storage/store";
 import { resolveDefaultArg } from "./argDefaults";
 
@@ -22,7 +22,7 @@ export function operationNeedsInput(op: Operation): boolean {
  * Needed because ToBase32/45/58/62/85/92 declare inputType="ArrayBuffer"
  * but callers may pass a plain string.
  */
-function normaliseInput(input: unknown, inputType: string): unknown {
+function normaliseInput(input: unknown, inputType: string): AnyInput {
   let buf: Buffer;
   if (typeof input === "string") {
     buf = Buffer.from(input, "utf-8");
@@ -57,9 +57,9 @@ function normaliseInput(input: unknown, inputType: string): unknown {
 
 export function runOp(
   opName: string,
-  input: unknown,
+  input: AnyInput,
   args: unknown[],
-): unknown {
+): AnyInput {
   const entry = registry.find(
     (e) =>
       e.opName === opName ||
@@ -68,12 +68,11 @@ export function runOp(
   if (!entry) throw new Error(`Unknown operation: ${opName}`);
   const op = entry.factory();
   const normalised = normaliseInput(input, op.inputType);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return op.run(normalised as any, args as any[]);
+  return op.run(normalised as AnyInput, args);
 }
 
-export function runPipeline(input: string, steps: PipelineStep[]): string {
-  let current: unknown = input;
+export function runPipeline(input: AnyInput, steps: PipelineStep[]): string {
+  let current: AnyInput = input;
   for (const step of steps) {
     current = runOp(step.opName, current, step.args);
   }

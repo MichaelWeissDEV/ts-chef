@@ -50,8 +50,8 @@ export class GenerateDeBruijnSequence extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [k, n] = args;
+  run(input: string, args: unknown[]): string {
+    const [k, n] = args as [number, number];
 
     if (k < 2 || k > 9) {
       throw new OperationError(

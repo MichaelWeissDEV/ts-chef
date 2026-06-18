@@ -13,7 +13,7 @@
 
 import { fromBase64, toBase64 } from "../lib/Base64";
 import { fromHex } from "../lib/Hex";
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { isType, detectFileType } from "../lib/FileType";
@@ -50,33 +50,32 @@ export class PlayMedia extends Operation {
    * @param {Object[]} args
    * @returns {byteArray} The multimedia data as bytes.
    */
-  run(input: any, args: any[]): any {
-    const [inputFormat] = args;
+  run(input: string, args: unknown[]): AnyInput {
+    const [inputFormat] = args as [string];
 
     if (!input.length) return [];
 
     // Convert input to raw bytes
+    let bytes: number[];
     switch (inputFormat) {
       case "Hex":
-        input = fromHex(input);
+        bytes = fromHex(input);
         break;
       case "Base64":
-        // Don't trust the Base64 entered by the user.
-        // Unwrap it first, then re-encode later.
-        input = fromBase64(input, undefined, "byteArray");
+        bytes = fromBase64(input, undefined, "byteArray") as number[];
         break;
       case "Raw":
       default:
-        input = Utils.strToByteArray(input);
+        bytes = Utils.strToByteArray(input);
         break;
     }
 
     // Determine file type
-    if (!isType(/^(audio|video)/, input)) {
+    if (!isType(/^(audio|video)/, new Uint8Array(bytes))) {
       throw new OperationError("Invalid or unrecognised file type");
     }
 
-    return input;
+    return bytes;
   }
 
   /**
@@ -86,15 +85,16 @@ export class PlayMedia extends Operation {
    * @param {byteArray} data Data containing an audio or video file.
    * @returns {string} Markup to display a media player.
    */
-  async present(data: any) {
-    if (!data.length) return "";
+  async present(data: AnyInput, _args: unknown[]): Promise<AnyInput> {
+    const dataBytes = data as number[];
+    if (!dataBytes.length) return "";
 
-    const types = detectFileType(data);
+    const types = detectFileType(new Uint8Array(dataBytes));
     const matches = /^audio|video/.exec(types[0].mime);
     if (!matches) {
       throw new OperationError("Invalid file type");
     }
-    const dataURI = `data:${types[0].mime};base64,${toBase64(data)}`;
+    const dataURI = `data:${types[0].mime};base64,${toBase64(dataBytes)}`;
     const element = matches[0];
 
     let html = `<${element} src='${dataURI}' type='${types[0].mime}' controls>`;

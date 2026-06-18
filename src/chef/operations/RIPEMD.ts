@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { runHash } from "../lib/Hash";
 
 /**
@@ -45,8 +45,8 @@ export class RIPEMD extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const size = args[0];
+  run(input: ArrayBuffer, args: unknown[]): AnyInput {
+    const [size] = args as [string];
     return runHash("ripemd" + size, input);
   }
 }

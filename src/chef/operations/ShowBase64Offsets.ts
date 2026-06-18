@@ -57,10 +57,8 @@ export class ShowBase64Offsets extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: number[], args: any[]): string {
-    const alphabet: string = args[0],
-      showVariable: boolean = args[1],
-      format: string = args[2];
+  run(input: number[], args: unknown[]): string {
+    const [alphabet, showVariable, format] = args as [string, boolean, string];
 
     if (format === "Base64") {
       input = fromBase64(

@@ -57,9 +57,9 @@ export class PGPEncrypt extends Operation {
    *
    * @throws {OperationError} if failed private key import or failed encryption
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: string, args: unknown[]): Promise<string> {
     const plaintextMessage = input,
-      plainPubKey = args[0];
+      [plainPubKey] = args as [string];
     let encryptedMessage;
 
     if (!plainPubKey)

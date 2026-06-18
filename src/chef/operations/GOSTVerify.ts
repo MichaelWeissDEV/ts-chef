@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { toHexFast } from "../lib/Hex";
@@ -103,8 +103,8 @@ export class GOSTVerify extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  async run(input: any, args: any[]): Promise<any> {
-    const [keyObj, ivObj, macObj, inputType, version, sBox] = args;
+  async run(input: string, args: unknown[]): Promise<AnyInput> {
+    const [keyObj, ivObj, macObj, inputType, version, sBox] = args as [{ string: string; option: string }, { string: string; option: string }, { string: string; option: string }, string, string, string];
 
     const key = toHexFast(
       Utils.convertToByteArray(keyObj.string, keyObj.option),

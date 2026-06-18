@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 
 /**
@@ -75,7 +75,7 @@ export class ROT13BruteForce extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: number[], args: unknown[]): string {
     const [
       rotateLower,
       rotateUpper,
@@ -84,7 +84,7 @@ export class ROT13BruteForce extends Operation {
       sampleOffset,
       printAmount,
       crib,
-    ] = args;
+    ] = args as [boolean, boolean, boolean, number, number, boolean, string];
     const sample = input.slice(sampleOffset, sampleOffset + sampleLength);
     const cribLower = crib.toLowerCase();
     const lowerStart = "a".charCodeAt(0),

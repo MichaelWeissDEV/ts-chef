@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { runHash } from "../lib/Hash";
 
 /**
@@ -47,8 +47,9 @@ export class HAS160 extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    return runHash("has160", input, { rounds: args[0] });
+  run(input: ArrayBuffer, args: unknown[]): AnyInput {
+    const [rounds] = args as [number];
+    return runHash("has160", input, { rounds });
   }
 }
 

@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { toBase64 } from "../lib/Base64";
@@ -48,8 +48,8 @@ export class ImageFilter extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  async run(input: any, args: any[]): Promise<any> {
-    const [filterType] = args;
+  async run(input: ArrayBuffer, args: unknown[]): Promise<AnyInput> {
+    const [filterType] = args as [string];
     if (!isImage(input)) {
       throw new OperationError("Invalid file type.");
     }

@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { INFLATE_BUFFER_TYPE } from "../lib/Zlib";
 import rawinflate from "zlibjs/bin/rawinflate.min.js";
 
@@ -81,16 +81,14 @@ export class RawInflate extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  run(input: any, args: any[]): any {
+  run(input: ArrayBuffer, args: unknown[]): ArrayBuffer {
+    const [startIndex, bufferSize, bufferTypeKey, resize, verify] = args as [number, number, keyof typeof RAW_BUFFER_TYPE_LOOKUP, boolean, boolean];
     const inflate = new Zlib.RawInflate(new Uint8Array(input), {
-        index: args[0],
-        bufferSize: args[1],
-        bufferType:
-          RAW_BUFFER_TYPE_LOOKUP[
-            args[2] as keyof typeof RAW_BUFFER_TYPE_LOOKUP
-          ],
-        resize: args[3],
-        verify: args[4],
+        index: startIndex,
+        bufferSize,
+        bufferType: RAW_BUFFER_TYPE_LOOKUP[bufferTypeKey],
+        resize,
+        verify,
       }),
       result = new Uint8Array(inflate.decompress());
 

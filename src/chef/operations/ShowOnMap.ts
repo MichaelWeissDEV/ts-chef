@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { FORMATS, convertCoordinates } from "../lib/ConvertCoordinates";
 import OperationError from "../errors/OperationError";
 
@@ -65,14 +65,13 @@ export class ShowOnMap extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    if (input.replace(/\s+/g, "") !== "") {
-      const inFormat = args[1],
-        inDelim = args[2];
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const [, inFormat, inDelim] = args as [number, string, string];
+    if ((input as string).replace(/\s+/g, "") !== "") {
       let latLong;
       try {
         latLong = convertCoordinates(
-          input,
+          input as string,
           inFormat,
           inDelim,
           "Decimal Degrees",
@@ -95,11 +94,12 @@ export class ShowOnMap extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  async present(data: any, args: any[]) {
-    if (data.replace(/\s+/g, "") === "") {
-      data = "0, 0";
+  async present(data: AnyInput, args: unknown[]): Promise<AnyInput> {
+    const [zoomLevel] = args as [number];
+    let dataStr = data as string;
+    if (dataStr.replace(/\s+/g, "") === "") {
+      dataStr = "0, 0";
     }
-    const zoomLevel = args[0];
     const tileUrl = "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
       tileAttribution =
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -119,13 +119,13 @@ export class ShowOnMap extends Operation {
 var mapscript = document.createElement('script');
 document.body.appendChild(mapscript);
 mapscript.onload = function() {
-    var presentMap = L.map('presentedMap').setView([${data}], ${zoomLevel});
+    var presentMap = L.map('presentedMap').setView([${dataStr}], ${zoomLevel});
     L.tileLayer('${tileUrl}', {
         attribution: '${tileAttribution}'
     }).addTo(presentMap);
 
-    L.marker([${data}]).addTo(presentMap)
-        .bindPopup('${data}')
+    L.marker([${dataStr}]).addTo(presentMap)
+        .bindPopup('${dataStr}')
         .openPopup();
 };
 mapscript.src = "${leafletUrl}";

@@ -66,10 +66,9 @@ export class GroupIPAddresses extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
-    const delim = Utils.charRep(args[0]),
-      cidr: number = args[1],
-      onlySubnets: boolean = args[2],
+  run(input: string, args: unknown[]): string {
+    const [_delimArg, cidr, onlySubnets] = args as [string, number, boolean];
+    const delim = Utils.charRep(_delimArg),
       ipv4Mask = cidr < 32 ? ~(0xffffffff >>> cidr) : 0xffffffff,
       ipv6Mask = genIpv6Mask(cidr),
       ips = input.split(delim),

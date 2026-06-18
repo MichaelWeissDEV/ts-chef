@@ -69,7 +69,7 @@ export class ParseUNIXFilePermissions extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: string, _args: any[]): string {
+  run(input: string, _args: unknown[]): string {
     const perms: Perms = {
       d: false, // directory
       sl: false, // symbolic link

@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import * as OTPAuth from "otpauth";
 
 /**
@@ -58,20 +58,21 @@ export class GenerateTOTP extends Operation {
   /**
    *
    */
-  run(input: any, args: any[]): any {
-    const secretStr = new TextDecoder("utf-8").decode(input).trim();
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const [label, digits, epochOffset, period] = args as [string, number, number, number];
+    const secretStr = new TextDecoder("utf-8").decode(input as ArrayBuffer).trim();
     const secret = secretStr ? secretStr.toUpperCase().replace(/\s+/g, "") : "";
 
     const totp = new OTPAuth.TOTP({
       issuer: "",
-      label: args[0],
+      label: label,
       algorithm: "SHA1",
-      digits: args[1],
-      period: args[3],
+      digits: digits,
+      period: period,
       secret: OTPAuth.Secret.fromBase32(secret),
     });
 
-    (totp as any).epoch = args[2] * 1000;
+    (totp as any).epoch = epochOffset * 1000;
 
     const uri = totp.toString();
     const code = totp.generate();

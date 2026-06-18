@@ -12,7 +12,7 @@
  */
 
 import r from "jsrsasign";
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 
 /**
  * Parse ASN.1 hex string operation
@@ -50,8 +50,8 @@ export class ParseASN1HexString extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [index, truncateLen] = args;
+  run(input: string, args: unknown[]): string {
+    const [index, truncateLen] = args as [number, number];
     return r.ASN1HEX.dump(
       input.replace(/\s/g, "").toLowerCase(),
       {

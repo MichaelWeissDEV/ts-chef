@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import {
   ipv4CidrRange,
@@ -63,8 +63,8 @@ export class ParseIPRange extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [includeNetworkInfo, enumerateAddresses, allowLargeList] = args;
+  run(input: string, args: unknown[]): string {
+    const [includeNetworkInfo, enumerateAddresses, allowLargeList] = args as [boolean, boolean, boolean];
 
     // Check what type of input we are looking at
     const ipv4CidrRegex = /^\s*((?:\d{1,3}\.){3}\d{1,3})\/(\d\d?)\s*$/,

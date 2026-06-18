@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import Operation from "../Operation";
+import Operation, { AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { decompress } from "@blu3r4y/lzma";
 import Utils from "../Utils";
@@ -41,7 +41,7 @@ export class LZMADecompress extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  async run(input: any, _args: any[]): Promise<any> {
+  async run(input: ArrayBuffer, _args: unknown[]): Promise<AnyInput> {
     return new Promise((resolve, reject) => {
       decompress(
         new Uint8Array(input),

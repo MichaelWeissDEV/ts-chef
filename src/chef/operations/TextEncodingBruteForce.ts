@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import cptable from "codepage";
 import { CHR_ENC_CODE_PAGES } from "../lib/ChrEnc";
@@ -56,24 +56,24 @@ export class TextEncodingBruteForce extends Operation {
    * @param {Object[]} args
    * @returns {json}
    */
-  run(input: any, args: any[]): any {
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const [mode] = args as [string];
     const output: Record<string, string> = {},
-      charsets = Object.keys(CHR_ENC_CODE_PAGES),
-      mode = args[0];
+      charsets = Object.keys(CHR_ENC_CODE_PAGES);
 
     charsets.forEach((charset) => {
       try {
         if (mode === "Decode") {
           output[charset] = cptable.utils.decode(
             CHR_ENC_CODE_PAGES[charset],
-            input,
+            input as string,
           );
         } else {
           output[charset] = Utils.arrayBufferToStr(
             (
               cptable.utils.encode(
                 CHR_ENC_CODE_PAGES[charset],
-                input,
+                input as string,
               ) as unknown as Uint8Array
             ).buffer as ArrayBuffer,
           );

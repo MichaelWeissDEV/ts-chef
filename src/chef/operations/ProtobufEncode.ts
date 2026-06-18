@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Protobuf from "../lib/Protobuf";
 
@@ -49,9 +49,9 @@ export class ProtobufEncode extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  run(input: any, args: any[]): any {
+  run(input: AnyInput, args: unknown[]): AnyInput {
     try {
-      return Protobuf.encode(input, args);
+      return Protobuf.encode(input as Record<string, unknown>, args);
     } catch (error) {
       throw new OperationError(
         error instanceof Error ? error.message : String(error),

@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import OperationError from "../errors/OperationError";
 import { decrypt } from "../lib/XXTEA";
@@ -48,12 +48,13 @@ export class XXTEADecrypt extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const [arg0] = args as [{ string: string; option: string }];
     const key = new Uint8Array(
-      Utils.convertToByteArray(args[0].string, args[0].option),
+      Utils.convertToByteArray(arg0.string, arg0.option),
     );
     try {
-      return decrypt(new Uint8Array(input), key)!.buffer;
+      return decrypt(new Uint8Array(input as ArrayBuffer), key)!.buffer;
     } catch {
       throw new OperationError("Unable to decrypt using this key");
     }

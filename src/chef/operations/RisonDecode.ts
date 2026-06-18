@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import rison from "rison";
 
@@ -46,8 +46,8 @@ export class RisonDecode extends Operation {
    * @param {Object[]} args
    * @returns {Object}
    */
-  run(input: any, args: any[]): any {
-    const [decodeOption] = args;
+  run(input: string, args: unknown[]): AnyInput {
+    const [decodeOption] = args as [string];
     switch (decodeOption) {
       case "Decode":
         return rison.decode(input);

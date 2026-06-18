@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import forge from "node-forge";
 import { cryptNotice } from "../lib/Crypt";
 
@@ -50,8 +50,8 @@ export class GenerateRSAKeyPair extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  async run(input: any, args: any[]): Promise<any> {
-    const [keyLength, outputFormat] = args;
+  async run(input: string, args: unknown[]): Promise<AnyInput> {
+    const [keyLength, outputFormat] = args as [string, string];
 
     return new Promise((resolve, reject) => {
       forge.pki.rsa.generateKeyPair(

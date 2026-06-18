@@ -57,12 +57,12 @@ export class ParseX509CRL extends Operation {
    * @param {any[]} args
    * @returns {string} Human-readable description of a Certificate Revocation List (CRL).
    */
-  run(input: string, args: any[]): string {
+  run(input: string, args: unknown[]): string {
     if (!input.length) {
       return "No input";
     }
 
-    const inputFormat = args[0];
+    const [inputFormat] = args as [string];
 
     let undefinedInputFormat = false;
     try {

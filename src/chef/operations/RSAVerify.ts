@@ -63,8 +63,8 @@ export class RSAVerify extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [pemKey, message, format, mdAlgo] = args;
+  run(input: string, args: unknown[]): string {
+    const [pemKey, message, format, mdAlgo] = args as [string, string, string, string];
     if (pemKey.replace("-----BEGIN RSA PUBLIC KEY-----", "").length === 0) {
       throw new OperationError("Please enter a public key.");
     }

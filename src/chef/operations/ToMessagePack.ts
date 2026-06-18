@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import notepack from "notepack.io";
 
@@ -40,7 +40,7 @@ export class ToMessagePack extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  run(input: any, _args: any[]): any {
+  run(input: AnyInput, _args: unknown[]): AnyInput {
     try {
       const res = notepack.encode(input);
       // Safely convert from Node Buffer to ArrayBuffer using the correct view of the data

@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import Operation from "../Operation";
+import Operation, { AnyInput } from "../Operation";
 import lz4 from "lz4js";
 
 /**
@@ -39,7 +39,7 @@ export class LZ4Decompress extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  run(input: any, _args: any[]): any {
+  run(input: ArrayBuffer, _args: unknown[]): AnyInput {
     const inBuf = new Uint8Array(input);
     const decompressed = lz4.decompress(inBuf);
     return decompressed.buffer;

@@ -108,7 +108,7 @@ export class CropImage extends Operation {
       autoFrames,
       autoSymmetric,
       autoBorder,
-    ] = args;
+    ] = args as [number, number, number, number, boolean, number, boolean, boolean, number];
     if (!isImage(input)) {
       throw new OperationError("Invalid file type.");
     }

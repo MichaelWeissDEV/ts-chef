@@ -55,7 +55,7 @@ export class ParseCSR extends Operation {
    * @param {any[]} args
    * @returns {string} Human-readable description of a Certificate Signing Request (CSR).
    */
-  run(input: string, _args: any[]): string {
+  run(input: string, _args: unknown[]): string {
     if (!input.length) {
       return "No input";
     }

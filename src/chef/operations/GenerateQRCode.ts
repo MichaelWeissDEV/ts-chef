@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { generateQrCode } from "../lib/QRCode";
 import { toBase64 } from "../lib/Base64";
@@ -68,8 +68,8 @@ export class GenerateQRCode extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  run(input: any, args: any[]): any {
-    const [format, size, margin, errorCorrection] = args;
+  run(input: string, args: unknown[]): AnyInput {
+    const [format, size, margin, errorCorrection] = args as [string, number, number, string];
 
     return generateQrCode(input, format, size, margin, errorCorrection);
   }

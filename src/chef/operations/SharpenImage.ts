@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { toBase64 } from "../lib/Base64";
@@ -63,16 +63,16 @@ export class SharpenImage extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  async run(input: any, args: any[]): Promise<any> {
-    const [radius, amount, threshold] = args;
+  async run(input: AnyInput, args: unknown[]): Promise<AnyInput> {
+    const [radius, amount, threshold] = args as [number, number, number];
 
-    if (!isImage(input)) {
+    if (!isImage(input as ArrayBuffer)) {
       throw new OperationError("Invalid file type.");
     }
 
     let image;
     try {
-      image = await Jimp.read(input);
+      image = await Jimp.read(input as ArrayBuffer);
     } catch (err) {
       throw new OperationError(`Error loading image. (${err})`);
     }
@@ -166,9 +166,9 @@ export class SharpenImage extends Operation {
    * @param {ArrayBuffer} data
    * @returns {html}
    */
-  present(data: any) {
-    if (!data.byteLength) return "";
-    const dataArray = new Uint8Array(data);
+  present(data: AnyInput, _args: unknown[]): AnyInput {
+    if (!(data as ArrayBuffer).byteLength) return "";
+    const dataArray = new Uint8Array(data as ArrayBuffer);
 
     const type = isImage(dataArray);
     if (!type) {

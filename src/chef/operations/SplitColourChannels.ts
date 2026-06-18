@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { isImage } from "../lib/FileType";
@@ -43,12 +43,12 @@ export class SplitColourChannels extends Operation {
    * @param {Object[]} args
    * @returns {List<File>}
    */
-  async run(input: any, _args: any[]): Promise<any> {
-    input = new Uint8Array(input);
+  async run(input: AnyInput, _args: unknown[]): Promise<AnyInput> {
+    const inputBytes = new Uint8Array(input as ArrayBuffer);
     // Make sure that the input is an image
-    if (!isImage(input)) throw new OperationError("Invalid file type.");
+    if (!isImage(inputBytes)) throw new OperationError("Invalid file type.");
 
-    const parsedImage = await Jimp.read(Buffer.from(input));
+    const parsedImage = await Jimp.read(Buffer.from(inputBytes));
 
     const red = parsedImage
       .clone()

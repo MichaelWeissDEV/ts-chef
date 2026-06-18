@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import GostDigest from "../vendor/gost/gostDigest";
 import { toHexFast } from "../lib/Hex";
@@ -79,8 +79,8 @@ export class GOSTHash extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [version, length, sBox] = args;
+  run(input: ArrayBuffer, args: unknown[]): AnyInput {
+    const [version, length, sBox] = args as [string, string, string];
 
     const versionNum = version === "GOST 28147 (1994)" ? 1994 : 2012;
     const algorithm: {
@@ -104,7 +104,7 @@ export class GOSTHash extends Operation {
     try {
       const gostDigest = new GostDigest(algorithm);
 
-      return toHexFast(gostDigest.digest(input));
+      return toHexFast(gostDigest.digest(new Uint8Array(input)));
     } catch (err) {
       throw new OperationError(
         err instanceof Error ? err.message : String(err),

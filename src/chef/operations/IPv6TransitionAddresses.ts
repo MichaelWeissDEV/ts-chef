@@ -49,7 +49,8 @@ export class IPv6TransitionAddresses extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
+  run(input: string, args: unknown[]): string {
+    const [ignoreRanges, removeHeaders] = args as [boolean, boolean];
     const XOR: Record<string, string> = {
       "0": "2",
       "1": "3",
@@ -93,7 +94,7 @@ export class IPv6TransitionAddresses extends Operation {
       /**
        * 6to4
        */
-      if (!args[1]) {
+      if (!removeHeaders) {
         output += "6to4: ";
       }
       output +=
@@ -107,7 +108,7 @@ export class IPv6TransitionAddresses extends Operation {
       /**
        * Mapped
        */
-      if (!args[1]) {
+      if (!removeHeaders) {
         output += "IPv4 Mapped: ";
       }
       output +=
@@ -125,7 +126,7 @@ export class IPv6TransitionAddresses extends Operation {
       /**
        * Translated
        */
-      if (!args[1]) {
+      if (!removeHeaders) {
         output += "IPv4 Translated: ";
       }
       output +=
@@ -143,7 +144,7 @@ export class IPv6TransitionAddresses extends Operation {
       /**
        * Nat64
        */
-      if (!args[1]) {
+      if (!removeHeaders) {
         output += "Nat 64: ";
       }
       output +=
@@ -167,7 +168,7 @@ export class IPv6TransitionAddresses extends Operation {
     const macTransition = (input: string): string => {
       let output = "";
       const MACPARTS = input.split(":");
-      if (!args[1]) {
+      if (!removeHeaders) {
         output += "EUI-64 Interface ID: ";
       }
       const MAC =
@@ -197,7 +198,7 @@ export class IPv6TransitionAddresses extends Operation {
        * 6to4
        */
       if (input.startsWith("2002:")) {
-        if (!args[1]) {
+        if (!removeHeaders) {
           output += "IPv4: ";
         }
         output +=
@@ -224,7 +225,7 @@ export class IPv6TransitionAddresses extends Operation {
         const match2 = /:([0-9a-z]{1,4})$/.exec(input);
         if (match1 && match2) {
           hextets = match1[1].padStart(4, "0") + match2[1].padStart(4, "0");
-          if (!args[1]) {
+          if (!removeHeaders) {
             output += "IPv4: ";
           }
           output +=
@@ -241,7 +242,7 @@ export class IPv6TransitionAddresses extends Operation {
         /**
          * EUI-64
          */
-        if (!args[1]) {
+        if (!removeHeaders) {
           output += "Mac Address: ";
         }
         const MAC = (
@@ -277,7 +278,7 @@ export class IPv6TransitionAddresses extends Operation {
 
     for (let i = 0; i < inputs.length; i++) {
       // if ignore ranges is checked and input is a range, skip
-      if ((args[0] && !inputs[i].includes("/")) || !args[0]) {
+      if ((ignoreRanges && !inputs[i].includes("/")) || !ignoreRanges) {
         if (/^[0-9]{1,3}(?:\.[0-9]{1,3}){3}$/.test(inputs[i])) {
           output += ipTransition(inputs[i], false);
         } else if (/\/24$/.test(inputs[i])) {

@@ -55,8 +55,8 @@ export class ParseSSHHostKey extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [inputFormat] = args,
+  run(input: string, args: unknown[]): string {
+    const [inputFormat] = args as [string],
       inputKey = this.convertKeyToBinary(input.trim(), inputFormat),
       fields = this.parseKey(inputKey),
       keyType = Utils.byteArrayToChars(fromHex(fields[0]));

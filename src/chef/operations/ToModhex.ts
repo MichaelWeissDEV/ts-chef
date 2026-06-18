@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { TO_MODHEX_DELIM_OPTIONS, toModhex } from "../lib/Modhex";
 import Utils from "../Utils";
 
@@ -51,11 +51,11 @@ export class ToModhex extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const delim = Utils.charRep(args[0]);
-    const lineSize = args[1];
+  run(input: AnyInput, args: unknown[]): AnyInput {
+    const [delimRaw, lineSize] = args as [string, number];
+    const delim = Utils.charRep(delimRaw);
 
-    return toModhex(new Uint8Array(input), delim, 2, "", lineSize);
+    return toModhex(new Uint8Array(input as ArrayBuffer), delim, 2, "", lineSize);
   }
 }
 

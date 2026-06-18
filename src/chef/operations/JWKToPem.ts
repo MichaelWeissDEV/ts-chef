@@ -12,7 +12,7 @@
  */
 
 import r from "jsrsasign";
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 /**
@@ -47,7 +47,7 @@ export class PEMToJWK extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: string, _args: unknown[]): AnyInput {
     const inputJson = JSON.parse(input);
 
     let keys = [];
