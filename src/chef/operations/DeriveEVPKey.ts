@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import CryptoJS from "crypto-js";
 
@@ -68,15 +68,16 @@ export class DeriveEVPKey extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: string, args: unknown[]): AnyInput {
+    const [arg0, arg1, arg2, arg3, arg4] = args as [{ string: string; option: string }, number, number, string, { string: string; option: string }];
     const passphrase = CryptoJS.enc.Latin1.parse(
-        Utils.convertToByteString(args[0].string, args[0].option),
+        Utils.convertToByteString(arg0.string, arg0.option),
       ),
-      keySize = args[1] / 32,
-      iterations = args[2],
-      hasher = args[3],
+      keySize = arg1 / 32,
+      iterations = arg2,
+      hasher = arg3,
       salt = CryptoJS.enc.Latin1.parse(
-        Utils.convertToByteString(args[4].string, args[4].option),
+        Utils.convertToByteString(arg4.string, arg4.option),
       ),
       key = CryptoJS.EvpKDF(passphrase as any, salt as any, {
         // lgtm [js/insufficient-password-hash]
