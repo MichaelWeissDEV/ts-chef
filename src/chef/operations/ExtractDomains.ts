@@ -61,7 +61,12 @@ export class ExtractDomains extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): AnyInput {
-    const [displayTotal, sort, unique, dmarc] = args as [boolean, boolean, boolean, boolean];
+    const [displayTotal, sort, unique, dmarc] = args as [
+      boolean,
+      boolean,
+      boolean,
+      boolean,
+    ];
 
     const results = search(
       input,
