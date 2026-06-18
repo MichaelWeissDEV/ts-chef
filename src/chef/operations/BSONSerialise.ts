@@ -45,7 +45,7 @@ export class BSONSerialise extends Operation {
    * @param {any[]} _args
    * @returns {ArrayBuffer}
    */
-  run(input: string, _args: any[]): ArrayBuffer {
+  run(input: string, _args: unknown[]): ArrayBuffer {
     if (!input) return new ArrayBuffer(0);
 
     try {
@@ -55,7 +55,7 @@ export class BSONSerialise extends Operation {
         buffer.byteOffset,
         buffer.byteOffset + buffer.byteLength,
       ) as ArrayBuffer;
-    } catch (err: any) {
+    } catch (err) {
       throw new OperationError(err.toString());
     }
   }
