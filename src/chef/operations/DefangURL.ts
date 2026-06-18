@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { URL_REGEX, DOMAIN_REGEX } from "../lib/Extract";
 
 /**
@@ -61,8 +61,8 @@ export class DefangURL extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [dots, http, slashes, process] = args;
+  run(input: string, args: unknown[]): AnyInput {
+    const [dots, http, slashes, process] = args as [boolean, boolean, boolean, string];
 
     switch (process) {
       case "Valid domains and full URLs":
