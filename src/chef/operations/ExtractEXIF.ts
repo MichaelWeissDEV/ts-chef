@@ -12,7 +12,7 @@
  */
 
 import ExifParser from "exif-parser";
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 /**
@@ -45,7 +45,7 @@ export class ExtractEXIF extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: ArrayBuffer, _args: unknown[]): AnyInput {
     try {
       const parser = ExifParser.create(input);
       const result = parser.parse();
