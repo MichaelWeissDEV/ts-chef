@@ -96,7 +96,13 @@ export class DESEncrypt extends Operation {
    * @throws {OperationError} if invalid key/IV length
    */
   run(input: string, args: unknown[]): string {
-    const [arg0, arg1, arg2, arg3, arg4] = args as [{ string: string; option: string }, { string: string; option: string }, string, string, string];
+    const [arg0, arg1, arg2, arg3, arg4] = args as [
+      { string: string; option: string },
+      { string: string; option: string },
+      string,
+      string,
+      string,
+    ];
     const key = Utils.convertToByteString(arg0.string, arg0.option),
       iv = Utils.convertToByteString(arg1.string, arg1.option),
       mode = arg2.substring(0, 3),
