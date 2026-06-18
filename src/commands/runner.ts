@@ -1,3 +1,12 @@
+/**
+ * @fileoverview runner command handler for ts-chef operations
+ * @package commands
+ * @license Apache-2.0
+ * @author Michael Weiss
+ * @copyright 2024-2026 Michael Weiss
+ * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
+ */
+
 import registry, { findOp } from "../opsRegistry";
 import type { Operation, AnyInput } from "../chef/Operation";
 import type { PipelineStep } from "../storage/store";
