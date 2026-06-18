@@ -1,4 +1,13 @@
-import { AnyInput } from "./Operation";
+/**
+ * @fileoverview Core Pipeline class for ts-chef processing pipeline
+ * @package chef
+ * @license Apache-2.0
+ * @author Michael Weiss
+ * @copyright 2024-2026 Michael Weiss
+ * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
+ */
+
+import type { AnyInput } from "./Operation";
 import { runOp, parsePipeline } from "../commands/runner";
 import type { PipelineStep } from "../storage/store";
 

@@ -64,6 +64,19 @@ export type HighlightResult = HighlightPos | false;
 export type AnyInput = PipelineData;
 
 /**
+ * Input data type for operations.
+ * Operations can handle strings, number arrays (byte arrays), ArrayBuffers, etc.
+ * This type represents the union of all possible data types that can flow through the pipeline.
+ */
+export type OperationInput = PipelineData;
+
+/**
+ * Output data type for operations.
+ * Same as input type - operations can output any PipelineData type.
+ */
+export type OperationOutput = PipelineData;
+
+/**
  * Abstract base class for all operations in ts-chef.
  *
  * Each operation defines its metadata (name, description, arguments)

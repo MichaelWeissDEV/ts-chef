@@ -1,3 +1,12 @@
+/**
+ * @fileoverview Type definitions for vendor-types.d
+ * @package chef
+ * @license Apache-2.0
+ * @author Michael Weiss
+ * @copyright 2024-2026 Michael Weiss
+ * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
+ */
+
 // Ambient module declarations for npm packages without @types
 
 declare module "jsqr" {

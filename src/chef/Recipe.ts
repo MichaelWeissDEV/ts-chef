@@ -1,3 +1,12 @@
+/**
+ * @fileoverview Core Recipe class for ts-chef processing pipeline
+ * @package chef
+ * @license Apache-2.0
+ * @author Michael Weiss
+ * @copyright 2024-2026 Michael Weiss
+ * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
+ */
+
 import Dish from "./Dish";
 import { Operation, AnyInput } from "./Operation";
 import { PipelineData, normalizeInput, InputType } from "./types";
