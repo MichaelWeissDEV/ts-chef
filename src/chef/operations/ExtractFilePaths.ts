@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { search } from "../lib/Extract";
 import { caseInsensitiveSort } from "../lib/Sort";
 
@@ -65,8 +65,8 @@ export class ExtractFilePaths extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [includeWinPath, includeUnixPath, displayTotal, sort, unique] = args,
+  run(input: string, args: unknown[]): AnyInput {
+    const [includeWinPath, includeUnixPath, displayTotal, sort, unique] = args as [boolean, boolean, boolean, boolean, boolean],
       winDrive = "[A-Z]:\\\\",
       winName = "[A-Z\\d][A-Z\\d\\- '_\\(\\)~]{0,61}",
       winExt = "[A-Z\\d]{1,6}",
