@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { search, DOMAIN_REGEX, DMARC_DOMAIN_REGEX } from "../lib/Extract";
 import { caseInsensitiveSort } from "../lib/Sort";
 
@@ -60,8 +60,8 @@ export class ExtractDomains extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [displayTotal, sort, unique, dmarc] = args;
+  run(input: string, args: unknown[]): AnyInput {
+    const [displayTotal, sort, unique, dmarc] = args as [boolean, boolean, boolean, boolean];
 
     const results = search(
       input,
