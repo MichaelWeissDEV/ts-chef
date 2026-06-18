@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { OperationError } from "../errors/OperationError";
 
 /**
@@ -99,8 +99,8 @@ export class DNSOverHTTPS extends Operation {
    * @param {any[]} args
    * @returns {Promise<any>}
    */
-  async run(input: string, args: any[]): Promise<any> {
-    const [resolver, requestType, justAnswer, DNSSEC] = args;
+  async run(input: string, args: unknown[]): Promise<AnyInput> {
+    const [resolver, requestType, justAnswer, DNSSEC] = args as [string, string, boolean, boolean];
     let url: URL;
     try {
       url = new URL(resolver);
