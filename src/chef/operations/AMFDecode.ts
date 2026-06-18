@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import Operation from "../Operation";
+import Operation, { AnyInput } from "../Operation";
 import "reflect-metadata"; // Required as a shim for the amf library
 import { AMF0, AMF3 } from "@astronautlabs/amf";
 
@@ -54,7 +54,7 @@ export class AMFDecode extends Operation {
    * @param {string} args[0] - The AMF format version (AMF0 or AMF3).
    * @returns {any} The decoded object.
    */
-  run(input: ArrayBuffer, args: any[]): any {
+  run(input: ArrayBuffer, args: unknown[]): AnyInput {
     const format = args[0];
     const handler = format === "AMF0" ? AMF0 : AMF3;
     const encoded = new Uint8Array(input);
@@ -63,15 +63,20 @@ export class AMFDecode extends Operation {
     return this.unwrap(result);
   }
 
-  private unwrap(obj: any): any {
+  private unwrap(obj: AnyInput): AnyInput {
     if (!obj || typeof obj !== "object") return obj;
-    if (typeof obj.value !== "undefined") return obj.value;
-    if (typeof obj.$value !== "undefined") return obj.$value;
+    const o = obj as {
+      value?: AnyInput;
+      $value?: AnyInput;
+      stringOrReference?: { $value?: AnyInput };
+    };
+    if (typeof o.value !== "undefined") return o.value;
+    if (typeof o.$value !== "undefined") return o.$value;
     if (
-      obj.stringOrReference &&
-      typeof obj.stringOrReference.$value !== "undefined"
+      o.stringOrReference &&
+      typeof o.stringOrReference.$value !== "undefined"
     )
-      return obj.stringOrReference.$value;
+      return o.stringOrReference.$value;
     return obj;
   }
 }
