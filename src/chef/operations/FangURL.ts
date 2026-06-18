@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 
 /**
  * FangURL operation
@@ -55,8 +55,8 @@ export class FangURL extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [dots, http, slashes] = args;
+  run(input: string, args: unknown[]): AnyInput {
+    const [dots, http, slashes] = args as [boolean, boolean, boolean];
 
     input = fangURL(input, dots, http, slashes);
 
