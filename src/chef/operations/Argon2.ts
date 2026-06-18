@@ -22,6 +22,11 @@ import * as argon2 from "argon2";
  * @category Crypto
  * @see https://wikipedia.org/wiki/Argon2
  */
+interface ToggleStringArg {
+  string: string;
+  option: string;
+}
+
 export class Argon2 extends Operation {
   /**
    * Argon2 constructor
@@ -85,26 +90,23 @@ export class Argon2 extends Operation {
    * @returns {Promise<string>} The generated hash.
    * @throws {OperationError} If hashing fails.
    */
-  async run(input: string, args: any[]): Promise<string> {
-    const argon2Types: Record<string, number> = {
+  async run(input: string, args: unknown[]): Promise<string> {
+    const argon2Types: Record<string, 0 | 1 | 2> = {
       Argon2i: argon2.argon2i,
       Argon2d: argon2.argon2d,
       Argon2id: argon2.argon2id,
     };
 
+    const [saltArg, time, mem, parallelism, hashLen, typeName, outFormat] =
+      args as [ToggleStringArg, number, number, number, number, string, string];
     const salt = Buffer.from(
-        Utils.convertToByteString(args[0].string || "", args[0].option),
+        Utils.convertToByteString(saltArg.string || "", saltArg.option),
         "latin1",
       ),
-      time = args[1],
-      mem = args[2],
-      parallelism = args[3],
-      hashLen = args[4],
-      type = argon2Types[args[5]],
-      outFormat = args[6];
+      type = argon2Types[typeName];
 
     try {
-      const options: any = {
+      const options = {
         salt: salt,
         timeCost: time,
         memoryCost: mem,
@@ -125,8 +127,10 @@ export class Argon2 extends Operation {
         }
         return buffer.toString("latin1");
       }
-    } catch (err: any) {
-      throw new OperationError(`Error: ${err.message}`);
+    } catch (err) {
+      throw new OperationError(
+        `Error: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 }
