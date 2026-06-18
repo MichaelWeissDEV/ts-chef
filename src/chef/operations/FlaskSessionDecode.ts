@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { fromBase64 } from "../lib/Base64";
 
@@ -45,7 +45,7 @@ export class FlaskSessionDecode extends Operation {
    * @param {Object[]} args
    * @returns {Object[]}
    */
-  run(input: any, args: any[]): any {
+  run(input: string, args: unknown[]): AnyInput {
     input = input.trim();
     const parts = input.split(".");
     if (parts.length !== 3) {
