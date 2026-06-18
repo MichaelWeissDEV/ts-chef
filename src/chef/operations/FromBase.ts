@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import BigNumber from "bignumber.js";
 import OperationError from "../errors/OperationError";
 
@@ -46,8 +46,9 @@ export class FromBase extends Operation {
    * @param {Object[]} args
    * @returns {BigNumber}
    */
-  run(input: any, args: any[]): any {
-    const radix = args[0];
+  run(input: string, args: unknown[]): AnyInput {
+    const [arg0] = args as [number];
+    const radix = arg0;
     if (radix < 2 || radix > 36) {
       throw new OperationError(
         "Error: Radix argument must be between 2 and 36",
