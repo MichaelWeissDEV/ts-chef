@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { fromBinary } from "../lib/Binary";
@@ -75,13 +75,13 @@ export class ExtractLSB extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: ArrayBuffer, args: unknown[]): Promise<AnyInput> {
+    const [colourPat1, colourPat2, colourPat3, colourPat4, pixelOrder, bit] = args as [string, string, string, string, string, number];
     if (!isImage(input))
       throw new OperationError("Please enter a valid image file.");
 
-    const bit = 7 - args.pop(),
-      pixelOrder = args.pop(),
-      colours = args
+    const bitIndex = 7 - bit,
+      colours = [colourPat1, colourPat2, colourPat3, colourPat4]
         .filter((option) => option !== "")
         .map((option) => COLOUR_OPTIONS.indexOf(option)),
       parsedImage = await Jimp.read(input),
@@ -99,7 +99,7 @@ export class ExtractLSB extends Operation {
     if (pixelOrder === "Row") {
       for (i = 0; i < rgba.length; i += 4) {
         for (const colour of colours) {
-          combinedBinary += Utils.bin(rgba[i + colour])[bit];
+          combinedBinary += Utils.bin(rgba[i + colour])[bitIndex];
         }
       }
     } else {
@@ -110,7 +110,7 @@ export class ExtractLSB extends Operation {
           rowWidth = row * pixelWidth;
           for (const colour of colours) {
             i = rowWidth + (col + colour * 4);
-            combinedBinary += Utils.bin(rgba[i])[bit];
+            combinedBinary += Utils.bin(rgba[i])[bitIndex];
           }
         }
       }
