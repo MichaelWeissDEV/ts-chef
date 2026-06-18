@@ -106,7 +106,9 @@ export class Magic extends Operation {
 
     // Filter down to results which matched the crib
     if (cribRegex) {
-      options = (options as MagicOption[]).filter((option) => option.matchesCrib);
+      options = (options as MagicOption[]).filter(
+        (option) => option.matchesCrib,
+      );
     }
 
     // Record the current state for use when presenting
@@ -124,7 +126,9 @@ export class Magic extends Operation {
    */
   present(input: AnyInput, _args: unknown[]): string {
     const options = input as MagicOption[];
-    const currentRecipeConfig = this.state.opList.map((op: { config?: unknown }) => op.config);
+    const currentRecipeConfig = this.state.opList.map(
+      (op: { config?: unknown }) => op.config,
+    );
 
     let output = `<table
                 class='table table-hover table-sm table-bordered'
@@ -169,16 +173,19 @@ export class Magic extends Operation {
 
       if (option.languageScores[0].probability > 0) {
         let likelyLangs = option.languageScores.filter(
-          (l: { lang: string; score: number; probability?: number }) => (l as { probability?: number }).probability ?? 0 > 0,
+          (l: { lang: string; score: number; probability?: number }) =>
+            (l as { probability?: number }).probability ?? 0 > 0,
         );
         if (likelyLangs.length < 1) likelyLangs = [option.languageScores[0]];
         language =
           "<span data-toggle='tooltip' data-container='body' title='Based on a statistical comparison of the frequency of bytes in various languages. Ordered by likelihood.'>" +
           "Possible languages:\n    " +
           likelyLangs
-            .map((lang: { lang: string; score: number; probability?: number }) => {
-              return MagicLib.codeToLanguage(lang.lang);
-            })
+            .map(
+              (lang: { lang: string; score: number; probability?: number }) => {
+                return MagicLib.codeToLanguage(lang.lang);
+              },
+            )
             .join("\n    ") +
           "</span>\n";
       }
