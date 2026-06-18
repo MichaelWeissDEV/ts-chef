@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import cs from "@alexaltea/capstone-js/dist/capstone.min.js";
 
@@ -71,7 +71,7 @@ export class DisassembleARM extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: string, args: unknown[]): Promise<AnyInput> {
     const [
       architecture,
       mode,
