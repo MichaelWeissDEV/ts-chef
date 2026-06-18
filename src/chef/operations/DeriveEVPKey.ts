@@ -69,7 +69,13 @@ export class DeriveEVPKey extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): AnyInput {
-    const [arg0, arg1, arg2, arg3, arg4] = args as [{ string: string; option: string }, number, number, string, { string: string; option: string }];
+    const [arg0, arg1, arg2, arg3, arg4] = args as [
+      { string: string; option: string },
+      number,
+      number,
+      string,
+      { string: string; option: string },
+    ];
     const passphrase = CryptoJS.enc.Latin1.parse(
         Utils.convertToByteString(arg0.string, arg0.option),
       ),
