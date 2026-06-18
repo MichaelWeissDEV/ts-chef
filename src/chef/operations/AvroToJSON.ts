@@ -51,7 +51,7 @@ export class AvroToJSON extends Operation {
    * @returns {Promise<string>} The resulting JSON string.
    * @throws {OperationError} If parsing fails or input is empty.
    */
-  async run(input: ArrayBuffer, args: any[]): Promise<string> {
+  async run(input: ArrayBuffer, args: unknown[]): Promise<string> {
     if (input.byteLength <= 0) {
       throw new OperationError("Please provide an input.");
     }
@@ -59,12 +59,12 @@ export class AvroToJSON extends Operation {
     const forceJSON = args[0];
 
     return new Promise((resolve, reject) => {
-      const result: any[] = [];
+      const result: unknown[] = [];
       const inpArray = new Uint8Array(input);
-      const decoder = new (avro.streams as any).BlockDecoder();
+      const decoder = new avro.streams.BlockDecoder();
 
       decoder
-        .on("data", function (obj: any) {
+        .on("data", function (obj: unknown) {
           result.push(obj);
         })
         .on("error", function () {
@@ -78,7 +78,7 @@ export class AvroToJSON extends Operation {
                 : JSON.stringify(result, null, 4),
             );
           } else {
-            const data = result.reduce(
+            const data = result.reduce<string>(
               (res, current) => res + JSON.stringify(current) + "\n",
               "",
             );
