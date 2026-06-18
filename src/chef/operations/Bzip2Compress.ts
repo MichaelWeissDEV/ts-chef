@@ -21,6 +21,14 @@ import Bzip2 from "libbzip2-wasm";
  * @category Compression
  * @see https://wikipedia.org/wiki/Bzip2
  */
+interface Bzip2Compressor {
+  compressBZ2(
+    data: Uint8Array,
+    blockSize: number,
+    workFactor: number,
+  ): { error: number; error_msg: string; output: Uint8Array };
+}
+
 export class Bzip2Compress extends Operation {
   /**
    * Bzip2Compress constructor
@@ -56,16 +64,16 @@ export class Bzip2Compress extends Operation {
    * @param {any[]} args
    * @returns {Promise<ArrayBuffer>}
    */
-  async run(input: ArrayBuffer, args: any[]): Promise<ArrayBuffer> {
-    const [blockSize, workFactor] = args;
+  async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
+    const [blockSize, workFactor] = args as [number, number];
     if (input.byteLength <= 0) {
       throw new OperationError("Please provide an input.");
     }
 
-    const bzip2 = await new Promise<any>((resolve) => {
+    const bzip2 = await new Promise<Bzip2Compressor>((resolve) => {
       const m = Bzip2();
-      if (m.then) {
-        m.then((instance: any) => {
+      if ("then" in m) {
+        m.then((instance) => {
           resolve({ compressBZ2: instance.compressBZ2.bind(instance) });
         });
       } else {
