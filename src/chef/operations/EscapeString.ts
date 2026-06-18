@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import jsesc from "jsesc";
 
 /**
@@ -72,15 +72,12 @@ export class EscapeString extends Operation {
    * World`, [])
    * > "Hello\nWorld"
    */
-  run(input: any, args: any[]): any {
-    const level = args[0],
-      quotes = args[1],
-      jsonCompat = args[2],
-      es6Compat = args[3],
-      lowercaseHex = !args[4];
+  run(input: string, args: unknown[]): AnyInput {
+    const [level, quotes, jsonCompat, es6Compat, uppercaseHex] = args as [string, string, boolean, boolean, boolean];
+    const lowercaseHex = !uppercaseHex;
 
     return jsesc(input, {
-      quotes: quotes.toLowerCase(),
+      quotes: quotes.toLowerCase() as "single" | "double" | "backtick",
       es6: es6Compat,
       escapeEverything: level === "Everything",
       json: jsonCompat,
