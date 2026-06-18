@@ -76,14 +76,11 @@ export class DateTimeDelta extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
+  run(input: string, args: unknown[]): string {
+    const [arg0, arg1, arg2, daysDelta, hoursDelta, minutesDelta, secondsDelta] = args as [unknown, string, string, number, number, number, number];
     const inputTimezone = "UTC";
-    const inputFormat = args[1];
-    const operationType = args[2];
-    const daysDelta = args[3];
-    const hoursDelta = args[4];
-    const minutesDelta = args[5];
-    const secondsDelta = args[6];
+    const inputFormat = arg1;
+    const operationType = arg2;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let date: any;
 
