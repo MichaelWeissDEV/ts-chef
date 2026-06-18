@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import cptable from "codepage";
 import { CHR_ENC_CODE_PAGES } from "../lib/ChrEnc";
 
@@ -54,8 +54,9 @@ export class EncodeText extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  run(input: any, args: any[]): any {
-    const format = CHR_ENC_CODE_PAGES[args[0]];
+  run(input: string, args: unknown[]): AnyInput {
+    const [arg0] = args as [string];
+    const format = CHR_ENC_CODE_PAGES[arg0];
     const encoded = cptable.utils.encode(format, input);
     return new Uint8Array(encoded as number[]).buffer;
   }
