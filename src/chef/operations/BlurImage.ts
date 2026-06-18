@@ -55,7 +55,7 @@ export class BlurImage extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
     const [blurAmount, blurType] = args;
 
     if (!isImage(input)) {
@@ -82,7 +82,7 @@ export class BlurImage extends Operation {
       if (image.mime === "image/gif") {
         imageBuffer = await image.getBuffer(JimpMime.png);
       } else {
-        imageBuffer = await image.getBuffer(image.mime as any);
+        imageBuffer = await image.getBuffer(image.mime);
       }
       return imageBuffer.buffer;
     } catch (err) {
