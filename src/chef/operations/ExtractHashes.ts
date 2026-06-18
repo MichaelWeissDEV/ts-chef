@@ -57,7 +57,11 @@ export class ExtractHashes extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): AnyInput {
-    const [hashLength, searchAllHashes, showDisplayTotal] = args as [number, boolean, boolean];
+    const [hashLength, searchAllHashes, showDisplayTotal] = args as [
+      number,
+      boolean,
+      boolean,
+    ];
     const results = [];
     let hashCount = 0;
 
