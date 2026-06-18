@@ -42,7 +42,7 @@ export class ELFInfo extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: ArrayBuffer, _args: any[]): string {
+  run(input: ArrayBuffer, _args: unknown[]): string {
     let phoff = 0;
     let phEntries = 0;
     let shoff = 0;
