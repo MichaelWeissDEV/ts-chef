@@ -66,7 +66,8 @@ export class ExtractFilePaths extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): AnyInput {
-    const [includeWinPath, includeUnixPath, displayTotal, sort, unique] = args as [boolean, boolean, boolean, boolean, boolean],
+    const [includeWinPath, includeUnixPath, displayTotal, sort, unique] =
+        args as [boolean, boolean, boolean, boolean, boolean],
       winDrive = "[A-Z]:\\\\",
       winName = "[A-Z\\d][A-Z\\d\\- '_\\(\\)~]{0,61}",
       winExt = "[A-Z\\d]{1,6}",
