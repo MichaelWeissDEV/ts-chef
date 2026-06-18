@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import punycode from "punycode.js";
 
 /**
@@ -45,7 +45,7 @@ export class FromPunycode extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: string, args: unknown[]): AnyInput {
     const idn = args[0];
 
     if (idn) {
