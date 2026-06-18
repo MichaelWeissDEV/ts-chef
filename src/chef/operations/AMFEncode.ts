@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import Operation from "../Operation";
+import Operation, { AnyInput } from "../Operation";
 import "reflect-metadata"; // Required as a shim for the amf library
 import { AMF0, AMF3 } from "@astronautlabs/amf";
 
@@ -54,7 +54,7 @@ export class AMFEncode extends Operation {
    *
    * @see {@link AMFDecode}
    */
-  run(input: any, args: any[]): ArrayBuffer {
+  run(input: AnyInput, args: unknown[]): ArrayBuffer {
     const format = args[0];
     const handler = format === "AMF0" ? AMF0 : AMF3;
     const output = handler.Value.any(input).serialize();
