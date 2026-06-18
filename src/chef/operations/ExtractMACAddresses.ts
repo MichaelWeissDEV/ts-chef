@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { search } from "../lib/Extract";
 import { hexadecimalSort } from "../lib/Sort";
 
@@ -55,8 +55,8 @@ export class ExtractMACAddresses extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const [displayTotal, sort, unique] = args,
+  run(input: string, args: unknown[]): AnyInput {
+    const [displayTotal, sort, unique] = args as [boolean, boolean, boolean],
       regex = /[A-F\d]{2}(?:[:-][A-F\d]{2}){5}/gi,
       results = search(
         input,
