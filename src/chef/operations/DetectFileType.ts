@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { detectFileType } from "../lib/FileType";
 import { FILE_SIGNATURES } from "../lib/FileSignatures";
 
@@ -60,7 +60,7 @@ export class DetectFileType extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: ArrayBuffer, args: unknown[]): AnyInput {
     const data = new Uint8Array(input),
       categories: string[] = [];
 
