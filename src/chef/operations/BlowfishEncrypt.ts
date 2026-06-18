@@ -20,6 +20,11 @@ import { Blowfish } from "../lib/Blowfish";
 /**
  * Blowfish Encrypt operation
  */
+interface ToggleStringArg {
+  string: string;
+  option: string;
+}
+
 export class BlowfishEncrypt extends Operation {
   /**
    * BlowfishEncrypt constructor
@@ -70,12 +75,16 @@ export class BlowfishEncrypt extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
-    const key = Utils.convertToByteString(args[0].string, args[0].option),
-      iv = Utils.convertToByteString(args[1].string, args[1].option),
-      mode = args[2],
-      inputType = args[3],
-      outputType = args[4];
+  run(input: string, args: unknown[]): string {
+    const [keyArg, ivArg, mode, inputType, outputType] = args as [
+      ToggleStringArg,
+      ToggleStringArg,
+      string,
+      string,
+      string,
+    ];
+    const key = Utils.convertToByteString(keyArg.string, keyArg.option),
+      iv = Utils.convertToByteString(ivArg.string, ivArg.option);
 
     if (key.length < 4 || key.length > 56) {
       throw new OperationError(`Invalid key length: ${key.length} bytes
