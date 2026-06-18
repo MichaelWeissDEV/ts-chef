@@ -25,6 +25,17 @@ import OperationError from "../errors/OperationError";
  * @see AESKeyWrap
  * @see AESKeyUnwrap
  */
+interface ToggleStringArg {
+  string: string;
+  option: string;
+}
+
+// forge cipher Mode plus the optional pad/unpad hooks used for NoPadding modes.
+interface ForgeMutableMode extends forge.cipher.Mode {
+  pad?: () => boolean;
+  unpad?: () => boolean;
+}
+
 export class AESEncrypt extends Operation {
   /**
    * AESEncrypt constructor
@@ -128,14 +139,20 @@ export class AESEncrypt extends Operation {
    *
    * @throws {OperationError} if invalid key length or padding issues.
    */
-  run(input: string, args: any[]): string {
-    const key = Utils.convertToByteString(args[0].string, args[0].option),
-      iv = Utils.convertToByteString(args[1].string, args[1].option),
-      mode = args[2].split("/")[0],
-      noPadding = args[2].endsWith("NoPadding"),
-      inputType = args[3],
-      outputType = args[4],
-      aad = Utils.convertToByteString(args[5].string, args[5].option);
+  run(input: string, args: unknown[]): string {
+    const [keyArg, ivArg, modeArg, inputType, outputType, aadArg] = args as [
+      ToggleStringArg,
+      ToggleStringArg,
+      string,
+      string,
+      string,
+      ToggleStringArg,
+    ];
+    const key = Utils.convertToByteString(keyArg.string, keyArg.option),
+      iv = Utils.convertToByteString(ivArg.string, ivArg.option),
+      mode = modeArg.split("/")[0],
+      noPadding = modeArg.endsWith("NoPadding"),
+      aad = Utils.convertToByteString(aadArg.string, aadArg.option);
 
     if ([16, 24, 32].indexOf(key.length) < 0) {
       throw new OperationError(`Invalid key length: ${key.length} bytes
@@ -163,7 +180,7 @@ The following algorithms will be used based on the size of the key:
       additionalData: mode === "GCM" ? aad : undefined,
     } as forge.cipher.StartOptions);
     if (noPadding) {
-      (cipher.mode as any).pad = function () {
+      (cipher.mode as ForgeMutableMode).pad = function () {
         return true;
       };
     }
@@ -173,10 +190,7 @@ The following algorithms will be used based on the size of the key:
     if (outputType === "Hex") {
       if (mode === "GCM") {
         return (
-          cipher.output.toHex() +
-          "\n\n" +
-          "Tag: " +
-          (cipher.mode as any).tag.toHex()
+          cipher.output.toHex() + "\n\n" + "Tag: " + cipher.mode.tag.toHex()
         );
       }
       return cipher.output.toHex();
@@ -186,7 +200,7 @@ The following algorithms will be used based on the size of the key:
           cipher.output.getBytes() +
           "\n\n" +
           "Tag: " +
-          (cipher.mode as any).tag.getBytes()
+          cipher.mode.tag.getBytes()
         );
       }
       return cipher.output.getBytes();
