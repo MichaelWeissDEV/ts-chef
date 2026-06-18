@@ -19,6 +19,17 @@ import OperationError from "../errors/OperationError";
 /**
  * AES Decrypt operation
  */
+interface ToggleStringArg {
+  string: string;
+  option: string;
+}
+
+// forge cipher Mode plus the optional pad/unpad hooks used for NoPadding modes.
+interface ForgeMutableMode extends forge.cipher.Mode {
+  pad?: () => boolean;
+  unpad?: () => boolean;
+}
+
 export class AESDecrypt extends Operation {
   /**
    * AESDecrypt constructor
@@ -116,15 +127,23 @@ export class AESDecrypt extends Operation {
    *
    * @throws {OperationError} if cannot decrypt input or invalid key length
    */
-  run(input: string, args: any[]): string {
-    const key = Utils.convertToByteString(args[0].string, args[0].option),
-      iv = Utils.convertToByteString(args[1].string, args[1].option),
-      mode = args[2].split("/")[0],
-      noPadding = args[2].endsWith("NoPadding"),
-      inputType = args[3],
-      outputType = args[4],
-      gcmTag = Utils.convertToByteString(args[5].string, args[5].option),
-      aad = Utils.convertToByteString(args[6].string, args[6].option);
+  run(input: string, args: unknown[]): string {
+    const [keyArg, ivArg, modeArg, inputType, outputType, gcmTagArg, aadArg] =
+      args as [
+        ToggleStringArg,
+        ToggleStringArg,
+        string,
+        string,
+        string,
+        ToggleStringArg,
+        ToggleStringArg,
+      ];
+    const key = Utils.convertToByteString(keyArg.string, keyArg.option),
+      iv = Utils.convertToByteString(ivArg.string, ivArg.option),
+      mode = modeArg.split("/")[0],
+      noPadding = modeArg.endsWith("NoPadding"),
+      gcmTag = Utils.convertToByteString(gcmTagArg.string, gcmTagArg.option),
+      aad = Utils.convertToByteString(aadArg.string, aadArg.option);
 
     if ([16, 24, 32].indexOf(key.length) < 0) {
       throw new OperationError(`Invalid key length: ${key.length} bytes
@@ -144,7 +163,7 @@ The following algorithms will be used based on the size of the key:
 
     /* Allow for a "no padding" mode */
     if (noPadding) {
-      (decipher.mode as any).unpad = function () {
+      (decipher.mode as ForgeMutableMode).unpad = function () {
         return true;
       };
     }
