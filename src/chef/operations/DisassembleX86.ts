@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import * as disassemble from "../vendor/DisassembleX86-64";
 import OperationError from "../errors/OperationError";
 
@@ -81,7 +81,7 @@ export class DisassembleX86 extends Operation {
    *
    * @throws {OperationError} if invalid mode value
    */
-  run(input: any, args: any[]): any {
+  run(input: string, args: unknown[]): AnyInput {
     const [
       mode,
       compatibility,
@@ -89,7 +89,7 @@ export class DisassembleX86 extends Operation {
       offset,
       showInstructionHex,
       showInstructionPos,
-    ] = args;
+    ] = args as [string, string, number, number, boolean, boolean];
 
     switch (mode) {
       case "64":
