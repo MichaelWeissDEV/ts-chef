@@ -20,6 +20,11 @@ import OperationError from "../errors/OperationError";
 /**
  * AES Key Unwrap operation
  */
+interface ToggleStringArg {
+  string: string;
+  option: string;
+}
+
 export class AESKeyUnwrap extends Operation {
   /**
    * AESKeyUnwrap constructor
@@ -65,11 +70,15 @@ export class AESKeyUnwrap extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
-    const kek = Utils.convertToByteString(args[0].string, args[0].option),
-      iv = Utils.convertToByteString(args[1].string, args[1].option),
-      inputType = args[2],
-      outputType = args[3];
+  run(input: string, args: unknown[]): string {
+    const [kekArg, ivArg, inputType, outputType] = args as [
+      ToggleStringArg,
+      ToggleStringArg,
+      string,
+      string,
+    ];
+    const kek = Utils.convertToByteString(kekArg.string, kekArg.option),
+      iv = Utils.convertToByteString(ivArg.string, ivArg.option);
 
     if (kek.length !== 16 && kek.length !== 24 && kek.length !== 32) {
       throw new OperationError(
