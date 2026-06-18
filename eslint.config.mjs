@@ -12,6 +12,6 @@ export default tseslint.config(
     }
   },
   {
-    ignores: ["dist/**", "out/**", "node_modules/**", "scripts/**"]
+    ignores: ["dist/**", "out/**", "node_modules/**", "scripts/**", "jest.config.js", "notes/**"]
   }
 );
