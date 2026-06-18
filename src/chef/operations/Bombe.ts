@@ -16,6 +16,11 @@ import { OperationError } from "../errors/OperationError";
 import { BombeMachine } from "../lib/Bombe";
 import { ROTORS, ROTORS_FOURTH, REFLECTORS, Reflector } from "../lib/Enigma";
 
+interface BombeResult {
+  nLoops: number;
+  result: [string, string, string][];
+}
+
 export class Bombe extends Operation {
   name = "Bombe";
   module = "Bletchley";
@@ -86,18 +91,18 @@ export class Bombe extends Operation {
     },
   ];
 
-  run(input: string, args: any[]): any {
-    const model = args[0];
-    const reflectorstr = args[5];
-    let crib = args[6];
-    const offset = args[7];
-    const check = args[8];
+  run(input: string, args: unknown[]): BombeResult {
+    const model = args[0] as string;
+    const reflectorstr = args[5] as string;
+    let crib = args[6] as string;
+    const offset = args[7] as number;
+    const check = args[8] as boolean;
     const rotors: string[] = [];
     for (let i = 0; i < 4; i++) {
       if (i === 0 && model === "3-rotor") {
         continue;
       }
-      let rstr = args[i + 1];
+      let rstr = args[i + 1] as string;
       if (rstr.includes("<")) {
         rstr = rstr.split("<", 2)[0];
       }
@@ -130,7 +135,7 @@ export class Bombe extends Operation {
     };
   }
 
-  present(output: any, _args: any[]): string {
+  present(output: BombeResult, _args: unknown[]): string {
     let html = `Bombe run on menu with ${output.nLoops} loop${output.nLoops === 1 ? "" : "s"} (2+ desirable). Note: Rotor positions are listed left to right and start at the beginning of the crib, and ignore stepping and the ring setting. Some plugboard settings are determined. A decryption preview starting at the beginning of the crib and ignoring stepping is also provided.\n\n`;
     html +=
       "<table class='table table-hover table-sm table-bordered table-nonfluid'><tr><th>Rotor stops</th>  <th>Partial plugboard</th>  <th>Decryption preview</th></tr>\n";
