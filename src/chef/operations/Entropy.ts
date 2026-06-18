@@ -14,7 +14,7 @@
 import * as d3temp from "d3";
 import * as nodomtemp from "nodom";
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 
 const d3 = (d3temp as any).default ? (d3temp as any).default : d3temp;
 const nodom = (nodomtemp as any).default
@@ -93,7 +93,7 @@ export class Entropy extends Operation {
    * @param {Uint8Array} inputBytes
    * @returns {any}
    */
-  calculateScanningEntropy(inputBytes: Uint8Array): any {
+  calculateScanningEntropy(inputBytes: Uint8Array): AnyInput {
     const entropyData: number[] = [];
     const binWidth = inputBytes.length < 256 ? 8 : 256;
 
@@ -467,8 +467,9 @@ export class Entropy extends Operation {
    * @param {any[]} args
    * @returns {any}
    */
-  run(input: ArrayBuffer, args: any[]): any {
-    const visualizationType = args[0];
+  run(input: ArrayBuffer, args: unknown[]): AnyInput {
+    const [arg0] = args as [string];
+    const visualizationType = arg0;
     const inputBytes = new Uint8Array(input);
 
     switch (visualizationType) {
@@ -477,7 +478,7 @@ export class Entropy extends Operation {
         return this.calculateByteFrequency(inputBytes);
       case "Curve":
       case "Image":
-        return this.calculateScanningEntropy(inputBytes).entropyData;
+        return (this.calculateScanningEntropy(inputBytes) as { entropyData: number[]; binWidth: number }).entropyData;
       case "Shannon scale":
       default:
         return this.calculateShannonEntropy(inputBytes);
@@ -491,8 +492,8 @@ export class Entropy extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  present(entropyData: any, args: any[]): string {
-    const visualizationType = args[0];
+  present(entropyData: any, args: unknown[]): string {
+    const [visualizationType] = args as [string];
 
     switch (visualizationType) {
       case "Histogram (Bar)":
