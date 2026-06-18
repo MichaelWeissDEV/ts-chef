@@ -51,7 +51,7 @@ export class AnalyseUUID extends Operation {
    * @param {any[]} args
    * @returns {string}
    */
-  run(input: string, args: any[]): string {
+  run(input: string, args: unknown[]): string {
     const trimmedInput = input.trim();
 
     let uuidVersion: number, uuidBytes: Uint8Array;
@@ -85,12 +85,21 @@ export class AnalyseUUID extends Operation {
   }
 }
 
+interface UuidMetadata {
+  timestamp: number;
+  isoTimestamp: string;
+  clock?: number;
+  node?: string;
+  randA?: number;
+  randB?: string;
+}
+
 /**
  * Metadata can be extracted for versions 1, 6, and 7.
  */
 const UUID_PARSERS: Record<
   number,
-  (uuidBytes: Uint8Array, dv: DataView) => any
+  (uuidBytes: Uint8Array, dv: DataView) => UuidMetadata
 > = Object.freeze({
   1: parsev1v6,
   6: parsev1v6,
@@ -144,7 +153,7 @@ function parsev7(uuidBytes: Uint8Array, dv: DataView) {
  * @param {any} decoded
  * @returns {string}
  */
-function formatDecoded(decoded: any): string {
+function formatDecoded(decoded: UuidMetadata | undefined): string {
   if (!decoded)
     return "No metadata available. Only versions 1, 6, 7 are supported.";
 
