@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import OperationError from "../errors/OperationError";
 import CryptoApi from "crypto-api/src/crypto-api";
@@ -105,15 +105,16 @@ export class DeriveHKDFKey extends Operation {
    * @param {Object[]} args
    * @returns {ArrayBuffer}
    */
-  run(input: any, args: any[]): any {
+  run(input: ArrayBuffer, args: unknown[]): AnyInput {
+    const [arg0, arg1, arg2, arg3, arg4] = args as [{ string: string; option: string }, { string: string; option: string }, string, string, number];
     const argSalt = Utils.convertToByteString(
-        args[0].string || "",
-        args[0].option,
+        arg0.string || "",
+        arg0.option,
       ),
-      info = Utils.convertToByteString(args[1].string || "", args[1].option),
-      hashFunc = args[2].toLowerCase(),
-      extractMode = args[3],
-      L = args[4],
+      info = Utils.convertToByteString(arg1.string || "", arg1.option),
+      hashFunc = arg2.toLowerCase(),
+      extractMode = arg3,
+      L = arg4,
       IKM = Utils.arrayBufferToStr(input, false),
       hasher = CryptoApi.getHasher(hashFunc),
       HashLen = hasher.finalize().length;
@@ -124,7 +125,7 @@ export class DeriveHKDFKey extends Operation {
     if (L > 255 * HashLen) {
       throw new OperationError(
         "L too large (maximum length for " +
-          args[2] +
+          arg2 +
           " is " +
           255 * HashLen +
           ")",
