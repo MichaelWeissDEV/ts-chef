@@ -65,7 +65,12 @@ export class FlaskSessionVerify extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): AnyInput {
-    const [arg0, arg1, arg2, arg3] = args as [{ string: string; option: string }, { string: string; option: string }, string, boolean];
+    const [arg0, arg1, arg2, arg3] = args as [
+      { string: string; option: string },
+      { string: string; option: string },
+      string,
+      boolean,
+    ];
     if (!arg0.string) {
       throw new OperationError("Secret key required");
     }
