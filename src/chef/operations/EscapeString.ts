@@ -73,7 +73,13 @@ export class EscapeString extends Operation {
    * > "Hello\nWorld"
    */
   run(input: string, args: unknown[]): AnyInput {
-    const [level, quotes, jsonCompat, es6Compat, uppercaseHex] = args as [string, string, boolean, boolean, boolean];
+    const [level, quotes, jsonCompat, es6Compat, uppercaseHex] = args as [
+      string,
+      string,
+      boolean,
+      boolean,
+      boolean,
+    ];
     const lowercaseHex = !uppercaseHex;
 
     return jsesc(input, {
