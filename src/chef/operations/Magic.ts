@@ -11,16 +11,31 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import Dish from "../Dish";
-import MagicLib from "../lib/Magic";
+import MagicLib, { MagicResult } from "../lib/Magic";
+
+/**
+ * Extended MagicResult with additional properties produced during speculative execution.
+ */
+interface MagicOption extends MagicResult {
+  entropy: number;
+  matchesCrib?: boolean;
+  matchingOps: Array<{ op: string }>;
+  useful: boolean;
+}
 
 /**
  * Magic operation
  */
 export class Magic extends Operation {
-  state: any;
+  state: {
+    progress: number;
+    dish: Dish;
+    opList: Array<{ ingValues: unknown[]; config?: unknown }>;
+    numJumps?: number;
+  };
 
   /**
    * Magic constructor
@@ -66,7 +81,12 @@ export class Magic extends Operation {
    * @param {Object} state - The current state of the recipe.
    * @returns {Object} The updated state of the recipe.
    */
-  async run(state: any): Promise<any> {
+  async run(input: AnyInput, _args: unknown[]): Promise<AnyInput> {
+    const state = input as {
+      progress: number;
+      dish: Dish;
+      opList: Array<{ ingValues: unknown[] }>;
+    };
     const ings = state.opList[state.progress].ingValues,
       [depth, intensive, extLang, crib] = ings,
       dish = state.dish,
@@ -86,7 +106,7 @@ export class Magic extends Operation {
 
     // Filter down to results which matched the crib
     if (cribRegex) {
-      options = options.filter((option: any) => option.matchesCrib);
+      options = (options as MagicOption[]).filter((option) => option.matchesCrib);
     }
 
     // Record the current state for use when presenting
@@ -102,8 +122,9 @@ export class Magic extends Operation {
    * @param {JSON} options
    * @returns {string}
    */
-  present(options: any[]): string {
-    const currentRecipeConfig = this.state.opList.map((op: any) => op.config);
+  present(input: AnyInput, _args: unknown[]): string {
+    const options = input as MagicOption[];
+    const currentRecipeConfig = this.state.opList.map((op: { config?: unknown }) => op.config);
 
     let output = `<table
                 class='table table-hover table-sm table-bordered'
@@ -148,14 +169,14 @@ export class Magic extends Operation {
 
       if (option.languageScores[0].probability > 0) {
         let likelyLangs = option.languageScores.filter(
-          (l: any) => l.probability > 0,
+          (l: { lang: string; score: number; probability?: number }) => (l as { probability?: number }).probability ?? 0 > 0,
         );
         if (likelyLangs.length < 1) likelyLangs = [option.languageScores[0]];
         language =
           "<span data-toggle='tooltip' data-container='body' title='Based on a statistical comparison of the frequency of bytes in various languages. Ordered by likelihood.'>" +
           "Possible languages:\n    " +
           likelyLangs
-            .map((lang: any) => {
+            .map((lang: { lang: string; score: number; probability?: number }) => {
               return MagicLib.codeToLanguage(lang.lang);
             })
             .join("\n    ") +
@@ -163,11 +184,11 @@ export class Magic extends Operation {
       }
 
       if (option.fileType) {
-        fileType = `<span data-toggle="tooltip" data-container="body" title="Based on the presence of magic bytes.">File type: ${option.fileType.mime} (${option.fileType.ext})</span>\n`;
+        fileType = `<span data-toggle="tooltip" data-container="body" title="Based on the presence of magic bytes.">File type: ${option.fileType.mime} (${option.fileType.extension})</span>\n`;
       }
 
       if (option.matchingOps.length) {
-        matchingOps = `Matching ops: ${[...new Set(option.matchingOps.map((op: any) => op.op))].join(", ")}\n`;
+        matchingOps = `Matching ops: ${[...new Set(option.matchingOps.map((op: { op: string }) => op.op))].join(", ")}\n`;
       }
 
       if (option.useful) {
