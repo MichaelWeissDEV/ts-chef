@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 
 /**
  * Encode NetBIOS Name operation
@@ -44,9 +44,10 @@ export class EncodeNetBIOSName extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  run(input: any, args: any[]): any {
+  run(input: number[], args: unknown[]): AnyInput {
+    const [arg0] = args as [number];
     const output = [],
-      offset = args[0];
+      offset = arg0;
 
     if (input.length <= 16) {
       const len = input.length;
