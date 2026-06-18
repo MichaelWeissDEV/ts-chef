@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import CryptoApi from "crypto-api/src/crypto-api";
 import Utils from "../Utils";
@@ -64,17 +64,18 @@ export class FlaskSessionVerify extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    if (!args[0].string) {
+  run(input: string, args: unknown[]): AnyInput {
+    const [arg0, arg1, arg2, arg3] = args as [{ string: string; option: string }, { string: string; option: string }, string, boolean];
+    if (!arg0.string) {
       throw new OperationError("Secret key required");
     }
 
-    const key = Utils.convertToByteString(args[0].string, args[0].option);
+    const key = Utils.convertToByteString(arg0.string, arg0.option);
     const salt = Utils.convertToByteString(
-      args[1].string || "cookie-session",
-      args[1].option,
+      arg1.string || "cookie-session",
+      arg1.option,
     );
-    const algorithm = args[2] || "sha1";
+    const algorithm = arg2 || "sha1";
 
     input = input.trim();
 
@@ -131,7 +132,7 @@ export class FlaskSessionVerify extends Operation {
 
     try {
       const decoded = JSON.parse(payloadJson);
-      if (!args[3]) {
+      if (!arg3) {
         return {
           valid: true,
           payload: decoded,
