@@ -52,7 +52,7 @@ export class Bcrypt extends Operation {
    * @param {number} args[0] - The number of rounds to use for salt generation.
    * @returns {Promise<string>} The generated bcrypt hash.
    */
-  async run(input: string, args: any[]): Promise<string> {
+  async run(input: string, args: unknown[]): Promise<string> {
     const rounds = args[0];
     const salt = await bcrypt.genSalt(rounds);
     return await bcrypt.hash(input, salt);
