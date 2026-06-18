@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { fromBase64, toBase64 } from "../lib/Base64";
 import { fromHex, toHexFast } from "../lib/Hex";
@@ -59,7 +59,7 @@ export class ECDSASignatureConversion extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: string, args: unknown[]): AnyInput {
     let inputFormat = args[0];
     const outputFormat = args[1];
 
