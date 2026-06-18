@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { decode } from "../lib/Bech32";
 import { toHex } from "../lib/Hex";
 
@@ -89,8 +89,9 @@ export class FromBech32 extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    const encoding = args[0];
+  run(input: string, args: unknown[]): AnyInput {
+    const [arg0] = args as [string];
+    const encoding = arg0;
     const outputFormat = args[1];
 
     input = input.trim();
