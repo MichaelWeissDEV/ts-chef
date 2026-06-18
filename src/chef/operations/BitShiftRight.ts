@@ -52,7 +52,7 @@ export class BitShiftRight extends Operation {
    * @param {string} args[1] - The type of shift ("Logical shift" or "Arithmetic shift").
    * @returns {ArrayBuffer} The shifted data.
    */
-  run(input: ArrayBuffer, args: any[]): ArrayBuffer {
+  run(input: ArrayBuffer, args: unknown[]): ArrayBuffer {
     const amount = args[0] as number;
     const type = args[1] as string;
     const mask = type === "Logical shift" ? 0 : 0x80;
