@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import fernet from "fernet";
 
@@ -52,8 +52,8 @@ export class FernetDecrypt extends Operation {
    * @param {Object[]} args
    * @returns {String}
    */
-  run(input: any, args: any[]): any {
-    const [secretInput] = args;
+  run(input: string, args: unknown[]): AnyInput {
+    const [secretInput] = args as [string];
     try {
       const secret = new fernet.Secret(secretInput);
       const token = new fernet.Token({
