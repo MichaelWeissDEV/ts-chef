@@ -69,11 +69,14 @@ export class DerivePBKDF2Key extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): AnyInput {
-    const [arg0, arg1, arg2, arg3, arg4] = args as [{ string: string; option: string }, number, number, string, { string: string; option: string }];
-    const passphrase = Utils.convertToByteString(
-        arg0.string,
-        arg0.option,
-      ),
+    const [arg0, arg1, arg2, arg3, arg4] = args as [
+      { string: string; option: string },
+      number,
+      number,
+      string,
+      { string: string; option: string },
+    ];
+    const passphrase = Utils.convertToByteString(arg0.string, arg0.option),
       keySize = arg1,
       iterations = arg2,
       hasher = arg3,
