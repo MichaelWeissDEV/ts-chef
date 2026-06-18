@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 
 /**
  * Dechunk HTTP response operation
@@ -45,7 +45,7 @@ export class DechunkHTTPResponse extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: string, _args: unknown[]): AnyInput {
     const chunks = [];
     let chunkSizeEnd = input.indexOf("\n") + 1;
     const lineEndings = input.charAt(chunkSizeEnd - 2) === "\r" ? "\r\n" : "\n";
