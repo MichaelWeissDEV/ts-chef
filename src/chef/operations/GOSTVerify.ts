@@ -104,7 +104,14 @@ export class GOSTVerify extends Operation {
    * @returns {string}
    */
   async run(input: string, args: unknown[]): Promise<AnyInput> {
-    const [keyObj, ivObj, macObj, inputType, version, sBox] = args as [{ string: string; option: string }, { string: string; option: string }, { string: string; option: string }, string, string, string];
+    const [keyObj, ivObj, macObj, inputType, version, sBox] = args as [
+      { string: string; option: string },
+      { string: string; option: string },
+      { string: string; option: string },
+      string,
+      string,
+      string,
+    ];
 
     const key = toHexFast(
       Utils.convertToByteArray(keyObj.string, keyObj.option),

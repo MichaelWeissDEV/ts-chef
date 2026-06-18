@@ -24,7 +24,7 @@ export class Pipeline {
     let current: AnyInput = input;
     for (const step of this.steps) {
       const result = runOp(step.opName, current, step.args);
-      current = (result instanceof Promise ? await result : result);
+      current = result instanceof Promise ? await result : result;
     }
     return current;
   }

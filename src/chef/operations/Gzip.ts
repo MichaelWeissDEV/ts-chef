@@ -65,20 +65,25 @@ export class Gzip extends Operation {
    * @returns {ArrayBuffer}
    */
   run(input: ArrayBuffer, args: unknown[]): AnyInput {
-    const [_compressionType, filename, comment, fhcrc] = args as [string, string, string, boolean];
+    const [_compressionType, filename, comment, fhcrc] = args as [
+      string,
+      string,
+      string,
+      boolean,
+    ];
     const options: {
-        deflateOptions: { compressionType: number };
-        flags: { fhcrc: boolean; fname?: boolean; comment?: boolean };
-        filename?: string;
-        comment?: string;
-      } = {
-        deflateOptions: {
-          compressionType: ZLIB_COMPRESSION_TYPE_LOOKUP[_compressionType],
-        },
-        flags: {
-          fhcrc: fhcrc,
-        },
-      };
+      deflateOptions: { compressionType: number };
+      flags: { fhcrc: boolean; fname?: boolean; comment?: boolean };
+      filename?: string;
+      comment?: string;
+    } = {
+      deflateOptions: {
+        compressionType: ZLIB_COMPRESSION_TYPE_LOOKUP[_compressionType],
+      },
+      flags: {
+        fhcrc: fhcrc,
+      },
+    };
 
     if (filename.length) {
       options.flags.fname = true;

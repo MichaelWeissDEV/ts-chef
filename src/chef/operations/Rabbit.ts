@@ -70,7 +70,13 @@ export class Rabbit extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): string {
-    const [arg0, arg1, endianness, inputType, outputType] = args as [{ string: string; option: string }, { string: string; option: string }, string, string, string];
+    const [arg0, arg1, endianness, inputType, outputType] = args as [
+      { string: string; option: string },
+      { string: string; option: string },
+      string,
+      string,
+      string,
+    ];
     const key = Utils.convertToByteArray(arg0.string, arg0.option);
     const iv = Utils.convertToByteArray(arg1.string, arg1.option);
 

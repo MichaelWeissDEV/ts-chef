@@ -92,7 +92,11 @@ export class RC4 extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): string {
-    const [arg0, inputFmt, outputFmt] = args as [{ string: string; option: string }, string, string];
+    const [arg0, inputFmt, outputFmt] = args as [
+      { string: string; option: string },
+      string,
+      string,
+    ];
     const message = format[inputFmt].parse(input),
       passphrase = format[arg0.option].parse(arg0.string),
       encrypted = CryptoJS.RC4.encrypt(message, passphrase);

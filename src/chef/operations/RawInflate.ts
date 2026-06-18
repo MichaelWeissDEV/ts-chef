@@ -82,7 +82,13 @@ export class RawInflate extends Operation {
    * @returns {ArrayBuffer}
    */
   run(input: ArrayBuffer, args: unknown[]): ArrayBuffer {
-    const [startIndex, bufferSize, bufferTypeKey, resize, verify] = args as [number, number, keyof typeof RAW_BUFFER_TYPE_LOOKUP, boolean, boolean];
+    const [startIndex, bufferSize, bufferTypeKey, resize, verify] = args as [
+      number,
+      number,
+      keyof typeof RAW_BUFFER_TYPE_LOOKUP,
+      boolean,
+      boolean,
+    ];
     const inflate = new Zlib.RawInflate(new Uint8Array(input), {
         index: startIndex,
         bufferSize,

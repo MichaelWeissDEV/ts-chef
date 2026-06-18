@@ -109,7 +109,15 @@ export class GOSTKeyWrap extends Operation {
    */
   async run(input: string, args: unknown[]): Promise<AnyInput> {
     const [keyObj, ukmObj, inputType, outputType, version, sBox, keyWrapping] =
-      args as [{ string: string; option: string }, { string: string; option: string }, string, string, string, string, string];
+      args as [
+        { string: string; option: string },
+        { string: string; option: string },
+        string,
+        string,
+        string,
+        string,
+        string,
+      ];
 
     const key = toHexFast(
       Utils.convertToByteArray(keyObj.string, keyObj.option),

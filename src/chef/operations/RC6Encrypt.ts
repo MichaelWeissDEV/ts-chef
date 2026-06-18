@@ -91,7 +91,17 @@ export class RC6Encrypt extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): string {
-    const [arg0, arg1, mode, inputType, outputType, padding, wordSize, rounds] = args as [{ string: string; option: string }, { string: string; option: string }, string, string, string, string, number, number];
+    const [arg0, arg1, mode, inputType, outputType, padding, wordSize, rounds] =
+      args as [
+        { string: string; option: string },
+        { string: string; option: string },
+        string,
+        string,
+        string,
+        string,
+        number,
+        number,
+      ];
     const key = Utils.convertToByteArray(arg0.string, arg0.option),
       iv = Utils.convertToByteArray(arg1.string, arg1.option);
 

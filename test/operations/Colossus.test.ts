@@ -70,7 +70,10 @@ describe("Colossus", () => {
 
   test("should run 'Letter Count' program correctly", () => {
     const input = "HELLO";
-    const result = colossus.run(input, defaultArgs) as { counters: number[]; printout: string };
+    const result = colossus.run(input, defaultArgs) as {
+      counters: number[];
+      printout: string;
+    };
 
     expect(result).toBeDefined();
     expect(result.counters).toBeDefined();

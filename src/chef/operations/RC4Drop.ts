@@ -88,7 +88,12 @@ export class RC4Drop extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): string {
-    const [arg0, inputFmt, outputFmt, drop] = args as [{ string: string; option: string }, string, string, number];
+    const [arg0, inputFmt, outputFmt, drop] = args as [
+      { string: string; option: string },
+      string,
+      string,
+      number,
+    ];
     const message = format[inputFmt].parse(input),
       passphrase = format[arg0.option].parse(arg0.string),
       encrypted = CryptoJS.RC4Drop.encrypt(message, passphrase, { drop });

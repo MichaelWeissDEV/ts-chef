@@ -76,15 +76,24 @@ export class RSADecrypt extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): string {
-    const [pemKey, password, scheme, md] = args as [string, string, string, string];
+    const [pemKey, password, scheme, md] = args as [
+      string,
+      string,
+      string,
+      string,
+    ];
     if (pemKey.replace("-----BEGIN RSA PRIVATE KEY-----", "").length === 0) {
       throw new OperationError("Please enter a private key.");
     }
     try {
       const privKey = forge.pki.decryptRsaPrivateKey(pemKey, password);
-      const dMsg = privKey.decrypt(input, scheme as forge.pki.rsa.EncryptionScheme, {
-        md: MD_ALGORITHMS[md as keyof typeof MD_ALGORITHMS].create(),
-      });
+      const dMsg = privKey.decrypt(
+        input,
+        scheme as forge.pki.rsa.EncryptionScheme,
+        {
+          md: MD_ALGORITHMS[md as keyof typeof MD_ALGORITHMS].create(),
+        },
+      );
       return forge.util.decodeUtf8(dMsg);
     } catch (err) {
       throw new OperationError(err);

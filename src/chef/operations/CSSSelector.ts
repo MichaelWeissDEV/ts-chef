@@ -76,7 +76,10 @@ export class CSSSelector extends Operation {
       );
     }
 
-    const nodeToString = function (node: { outerHTML?: string; toString(): string }): string {
+    const nodeToString = function (node: {
+      outerHTML?: string;
+      toString(): string;
+    }): string {
       return node.outerHTML || node.toString();
     };
 

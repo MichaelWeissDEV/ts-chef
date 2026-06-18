@@ -57,13 +57,20 @@ export class ParseTLV extends Operation {
    * @returns {string}
    */
   run(input: ArrayBuffer, args: unknown[]): AnyInput {
-    const [bytesInKey, bytesInLength, basicEncodingRules] = args as [number, number, boolean];
+    const [bytesInKey, bytesInLength, basicEncodingRules] = args as [
+      number,
+      number,
+      boolean,
+    ];
     const inputBytes = new Uint8Array(input);
 
     if (bytesInKey <= 0 && bytesInLength <= 0)
       throw new OperationError("Type or Length size must be greater than 0");
 
-    const tlv = new TLVParser(inputBytes, { bytesInLength, basicEncodingRules });
+    const tlv = new TLVParser(inputBytes, {
+      bytesInLength,
+      basicEncodingRules,
+    });
 
     const data = [];
 

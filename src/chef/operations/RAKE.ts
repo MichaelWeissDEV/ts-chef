@@ -61,7 +61,11 @@ export class RAKE extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): string {
-    const [wordDelimStr, sentDelimStr, stopWordsStr] = args as [string, string, string];
+    const [wordDelimStr, sentDelimStr, stopWordsStr] = args as [
+      string,
+      string,
+      string,
+    ];
     // Get delimiter regexs
     const wordDelim = new RegExp(wordDelimStr, "g");
     const sentDelim = new RegExp(sentDelimStr, "g");

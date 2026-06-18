@@ -59,8 +59,15 @@ export class GenerateTOTP extends Operation {
    *
    */
   run(input: AnyInput, args: unknown[]): AnyInput {
-    const [label, digits, epochOffset, period] = args as [string, number, number, number];
-    const secretStr = new TextDecoder("utf-8").decode(input as ArrayBuffer).trim();
+    const [label, digits, epochOffset, period] = args as [
+      string,
+      number,
+      number,
+      number,
+    ];
+    const secretStr = new TextDecoder("utf-8")
+      .decode(input as ArrayBuffer)
+      .trim();
     const secret = secretStr ? secretStr.toUpperCase().replace(/\s+/g, "") : "";
 
     const totp = new OTPAuth.TOTP({

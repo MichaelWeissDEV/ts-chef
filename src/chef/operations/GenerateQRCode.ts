@@ -69,7 +69,12 @@ export class GenerateQRCode extends Operation {
    * @returns {ArrayBuffer}
    */
   run(input: string, args: unknown[]): AnyInput {
-    const [format, size, margin, errorCorrection] = args as [string, number, number, string];
+    const [format, size, margin, errorCorrection] = args as [
+      string,
+      number,
+      number,
+      string,
+    ];
 
     return generateQrCode(input, format, size, margin, errorCorrection);
   }

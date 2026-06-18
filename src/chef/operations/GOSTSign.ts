@@ -112,7 +112,15 @@ export class GOSTSign extends Operation {
    */
   async run(input: string, args: unknown[]): Promise<AnyInput> {
     const [keyObj, ivObj, inputType, outputType, version, sBox, macLength] =
-      args as [{ string: string; option: string }, { string: string; option: string }, string, string, string, string, number];
+      args as [
+        { string: string; option: string },
+        { string: string; option: string },
+        string,
+        string,
+        string,
+        string,
+        number,
+      ];
 
     const key = toHexFast(
       Utils.convertToByteArray(keyObj.string, keyObj.option),

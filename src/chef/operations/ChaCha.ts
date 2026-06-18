@@ -160,7 +160,14 @@ export class ChaCha extends Operation {
    */
   run(input: string, args: unknown[]): string {
     const [keyArg, nonceArg, counterArg, roundsArg, inputType, outputType] =
-      args as [ToggleStringArg, ToggleStringArg, number, string, string, string];
+      args as [
+        ToggleStringArg,
+        ToggleStringArg,
+        number,
+        string,
+        string,
+        string,
+      ];
     const key = Utils.convertToByteArray(keyArg.string, keyArg.option);
     const nonceType = nonceArg.option;
     const rounds = parseInt(roundsArg, 10);

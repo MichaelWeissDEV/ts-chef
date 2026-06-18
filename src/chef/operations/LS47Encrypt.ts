@@ -58,7 +58,11 @@ export class LS47Encrypt extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): string {
-    const [password, paddingSizeArg, signature] = args as [string, number, string];
+    const [password, paddingSizeArg, signature] = args as [
+      string,
+      number,
+      string,
+    ];
     this.paddingSize = paddingSizeArg;
 
     LS47.initTiles();

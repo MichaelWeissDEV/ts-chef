@@ -61,7 +61,12 @@ export class ROT47BruteForce extends Operation {
    * @returns {string}
    */
   run(input: number[], args: unknown[]): string {
-    const [sampleLength, sampleOffset, printAmount, crib] = args as [number, number, boolean, string];
+    const [sampleLength, sampleOffset, printAmount, crib] = args as [
+      number,
+      number,
+      boolean,
+      string,
+    ];
     const sample = input.slice(sampleOffset, sampleOffset + sampleLength);
     const cribLower = crib.toLowerCase();
     const result = [];

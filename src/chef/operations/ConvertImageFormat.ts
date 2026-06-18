@@ -69,7 +69,12 @@ export class ConvertImageFormat extends Operation {
    * @returns {byteArray}
    */
   async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
-    const [format, jpegQuality, pngFilterType, pngDeflateLevel] = args as [string, number, string, number];
+    const [format, jpegQuality, pngFilterType, pngDeflateLevel] = args as [
+      string,
+      number,
+      string,
+      number,
+    ];
     const formatMap: Record<string, string> = {
       JPEG: JimpMime.jpeg,
       PNG: JimpMime.png,

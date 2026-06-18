@@ -128,7 +128,17 @@ export class GOSTDecrypt extends Operation {
       blockMode,
       keyMeshing,
       padding,
-    ] = args as [{ string: string; option: string }, { string: string; option: string }, string, string, string, string, string, string, string];
+    ] = args as [
+      { string: string; option: string },
+      { string: string; option: string },
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+    ];
 
     const key = toHexFast(
       Utils.convertToByteArray(keyObj.string, keyObj.option),

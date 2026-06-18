@@ -11,7 +11,12 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation, AnyInput, HighlightPos, HighlightResult } from "../Operation";
+import {
+  Operation,
+  AnyInput,
+  HighlightPos,
+  HighlightResult,
+} from "../Operation";
 import { rot, rotl, rotlCarry } from "../lib/Rotate";
 
 /**

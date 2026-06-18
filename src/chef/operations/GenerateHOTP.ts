@@ -56,7 +56,9 @@ export class GenerateHOTP extends Operation {
    */
   run(input: AnyInput, args: unknown[]): AnyInput {
     const [label, digits, counter] = args as [string, number, number];
-    const secretStr = new TextDecoder("utf-8").decode(input as ArrayBuffer).trim();
+    const secretStr = new TextDecoder("utf-8")
+      .decode(input as ArrayBuffer)
+      .trim();
     const secret = secretStr ? secretStr.toUpperCase().replace(/\s+/g, "") : "";
 
     const hotp = new OTPAuth.HOTP({

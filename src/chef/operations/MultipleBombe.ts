@@ -158,7 +158,15 @@ export class MultipleBombe extends Operation {
    * @returns {Object}
    */
   run(input: string, args: unknown[]): AnyInput {
-    const [, mainRotorsStr, fourthRotorsStr, reflectorsStr, cribArg, offset, check] = args as [unknown, string, string, string, string, number, boolean];
+    const [
+      ,
+      mainRotorsStr,
+      fourthRotorsStr,
+      reflectorsStr,
+      cribArg,
+      offset,
+      check,
+    ] = args as [unknown, string, string, string, string, number, boolean];
     let crib = cribArg;
     const rotors: string[] = [];
     const fourthRotors: string[] = [];
@@ -254,7 +262,14 @@ export class MultipleBombe extends Operation {
    * @returns {string}
    */
   present(data: AnyInput, _args: unknown[]): AnyInput {
-    const output = data as { nLoops: number; bombeRuns: { rotors: string[]; reflector: string; result: [string, string, string][] }[] };
+    const output = data as {
+      nLoops: number;
+      bombeRuns: {
+        rotors: string[];
+        reflector: string;
+        result: [string, string, string][];
+      }[];
+    };
     let html = `Bombe run on menu with ${output.nLoops} loop${output.nLoops === 1 ? "" : "s"} (2+ desirable). Note: Rotors and rotor positions are listed left to right, ignore stepping and the ring setting, and positions start at the beginning of the crib. Some plugboard settings are determined. A decryption preview starting at the beginning of the crib and ignoring stepping is also provided.\n`;
 
     for (const run of output.bombeRuns) {

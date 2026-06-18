@@ -74,7 +74,10 @@ export class HMAC extends Operation {
    * @returns {string}
    */
   run(input: ArrayBuffer, args: unknown[]): AnyInput {
-    const [keyObj, hashFuncArg] = args as [{ string: string; option: string }, string];
+    const [keyObj, hashFuncArg] = args as [
+      { string: string; option: string },
+      string,
+    ];
     const key = Utils.convertToByteString(keyObj.string || "", keyObj.option),
       hashFunc = hashFuncArg.toLowerCase(),
       msg = Utils.arrayBufferToStr(input, false),

@@ -56,7 +56,9 @@ export class RawDeflate extends Operation {
    * @returns {ArrayBuffer}
    */
   run(input: ArrayBuffer, args: unknown[]): ArrayBuffer {
-    const [compressionType] = args as [keyof typeof RAW_COMPRESSION_TYPE_LOOKUP];
+    const [compressionType] = args as [
+      keyof typeof RAW_COMPRESSION_TYPE_LOOKUP,
+    ];
     const deflate = new Zlib.RawDeflate(new Uint8Array(input), {
       compressionType: RAW_COMPRESSION_TYPE_LOOKUP[compressionType],
     });

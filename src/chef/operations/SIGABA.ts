@@ -277,13 +277,21 @@ export class Sigaba extends Operation {
     for (let i = 0; i < 5; i++) {
       const rotorWiring = a[i * 3] as string;
       cipherRotors.push(
-        new CRRotor(rotorWiring, a[i * 3 + 2] as string, a[i * 3 + 1] as boolean),
+        new CRRotor(
+          rotorWiring,
+          a[i * 3 + 2] as string,
+          a[i * 3 + 1] as boolean,
+        ),
       );
     }
     for (let i = 5; i < 10; i++) {
       const rotorWiring = a[i * 3] as string;
       controlRotors.push(
-        new CRRotor(rotorWiring, a[i * 3 + 2] as string, a[i * 3 + 1] as boolean),
+        new CRRotor(
+          rotorWiring,
+          a[i * 3 + 2] as string,
+          a[i * 3 + 1] as boolean,
+        ),
       );
     }
     for (let i = 15; i < 20; i++) {

@@ -108,7 +108,29 @@ export class HeatmapChart extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): string {
-    const [recordDelimArg, fieldDelimArg, vBins, hBins, columnHeadingsAreIncluded, xLabelArg, yLabelArg, drawEdges, minColour, maxColour] = args as [string, string, number, number, boolean, string, string, boolean, string, string];
+    const [
+      recordDelimArg,
+      fieldDelimArg,
+      vBins,
+      hBins,
+      columnHeadingsAreIncluded,
+      xLabelArg,
+      yLabelArg,
+      drawEdges,
+      minColour,
+      maxColour,
+    ] = args as [
+      string,
+      string,
+      number,
+      number,
+      boolean,
+      string,
+      string,
+      boolean,
+      string,
+      string,
+    ];
     const recordDelimiter = Utils.charRep(recordDelimArg),
       fieldDelimiter = Utils.charRep(fieldDelimArg),
       dimension = 500;

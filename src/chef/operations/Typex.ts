@@ -11,7 +11,12 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation, AnyInput, HighlightPos, HighlightResult } from "../Operation";
+import {
+  Operation,
+  AnyInput,
+  HighlightPos,
+  HighlightResult,
+} from "../Operation";
 import OperationError from "../errors/OperationError";
 import { LETTERS, Reflector } from "../lib/Enigma";
 import {
@@ -200,7 +205,10 @@ export class Typex extends Operation {
     const removeOther = a[23] as boolean;
     const rotors = [];
     for (let i = 0; i < 5; i++) {
-      const [rotorwiring, rotorsteps] = this.parseRotorStr(a[i * 4] as string, i + 1);
+      const [rotorwiring, rotorsteps] = this.parseRotorStr(
+        a[i * 4] as string,
+        i + 1,
+      );
       rotors.push(
         new Rotor(
           rotorwiring,

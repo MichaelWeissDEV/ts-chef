@@ -64,7 +64,11 @@ export class ParseIPRange extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): string {
-    const [includeNetworkInfo, enumerateAddresses, allowLargeList] = args as [boolean, boolean, boolean];
+    const [includeNetworkInfo, enumerateAddresses, allowLargeList] = args as [
+      boolean,
+      boolean,
+      boolean,
+    ];
 
     // Check what type of input we are looking at
     const ipv4CidrRegex = /^\s*((?:\d{1,3}\.){3}\d{1,3})\/(\d\d?)\s*$/,

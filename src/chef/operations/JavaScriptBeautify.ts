@@ -62,7 +62,8 @@ export class JavaScriptBeautify extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): string {
-    const [indentArg, quotesArg, beautifySemicolons, beautifyComment] = args as [string, string, boolean, boolean];
+    const [indentArg, quotesArg, beautifySemicolons, beautifyComment] =
+      args as [string, string, boolean, boolean];
     const beautifyIndent = indentArg || "\\t",
       quotes = quotesArg.toLowerCase();
     let result: string, AST;
@@ -92,7 +93,10 @@ export class JavaScriptBeautify extends Operation {
           AST.tokens || [],
         );
 
-      result = escodegen.generate(AST, options as Parameters<typeof escodegen.generate>[1]);
+      result = escodegen.generate(
+        AST,
+        options as Parameters<typeof escodegen.generate>[1],
+      );
     } catch (e: any) {
       // Leave original error so the user can see the detail
       throw new OperationError("Unable to parse JavaScript.<br>" + e.message);

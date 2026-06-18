@@ -79,7 +79,13 @@ export class ResizeImage extends Operation {
    * @returns {byteArray}
    */
   async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
-    const [widthArg, heightArg, unit, aspect, resizeAlg] = args as [number, number, string, boolean, string];
+    const [widthArg, heightArg, unit, aspect, resizeAlg] = args as [
+      number,
+      number,
+      string,
+      boolean,
+      string,
+    ];
     let width = widthArg,
       height = heightArg;
 

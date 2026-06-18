@@ -81,9 +81,13 @@ export class RSAEncrypt extends Operation {
       // https://github.com/digitalbazaar/forge/issues/465#issuecomment-271097600
       const plaintextBytes = forge.util.encodeUtf8(input);
       // Encrypt message
-      const eMsg = pubKey.encrypt(plaintextBytes, scheme as forge.pki.rsa.EncryptionScheme, {
-        md: MD_ALGORITHMS[md as keyof typeof MD_ALGORITHMS].create(),
-      });
+      const eMsg = pubKey.encrypt(
+        plaintextBytes,
+        scheme as forge.pki.rsa.EncryptionScheme,
+        {
+          md: MD_ALGORITHMS[md as keyof typeof MD_ALGORITHMS].create(),
+        },
+      );
       return eMsg;
     } catch (err: any) {
       if (

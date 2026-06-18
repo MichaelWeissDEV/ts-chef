@@ -55,7 +55,13 @@ export class ToModhex extends Operation {
     const [delimRaw, lineSize] = args as [string, number];
     const delim = Utils.charRep(delimRaw);
 
-    return toModhex(new Uint8Array(input as ArrayBuffer), delim, 2, "", lineSize);
+    return toModhex(
+      new Uint8Array(input as ArrayBuffer),
+      delim,
+      2,
+      "",
+      lineSize,
+    );
   }
 }
 

@@ -115,7 +115,31 @@ export class HexDensityChart extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): string {
-    const [recordDelimArg, fieldDelimArg, packRadius, drawRadius, columnHeadingsAreIncluded, xLabelArg, yLabelArg, drawEdges, minColour, maxColour, drawEmptyHexagons] = args as [string, string, number, number, boolean, string, string, boolean, string, string, boolean];
+    const [
+      recordDelimArg,
+      fieldDelimArg,
+      packRadius,
+      drawRadius,
+      columnHeadingsAreIncluded,
+      xLabelArg,
+      yLabelArg,
+      drawEdges,
+      minColour,
+      maxColour,
+      drawEmptyHexagons,
+    ] = args as [
+      string,
+      string,
+      number,
+      number,
+      boolean,
+      string,
+      string,
+      boolean,
+      string,
+      string,
+      boolean,
+    ];
     const recordDelimiter = Utils.charRep(recordDelimArg),
       fieldDelimiter = Utils.charRep(fieldDelimArg),
       dimension = 500;
