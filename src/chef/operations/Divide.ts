@@ -12,7 +12,7 @@
  */
 
 import BigNumber from "bignumber.js";
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import { div, createNumArray } from "../lib/Arithmetic";
 import { ARITHMETIC_DELIM_OPTIONS } from "../lib/Delim";
 
@@ -46,8 +46,9 @@ export class Divide extends Operation {
    * @param {Object[]} args
    * @returns {BigNumber}
    */
-  run(input: any, args: any[]): any {
-    const val = div(createNumArray(input, args[0]));
+  run(input: string, args: unknown[]): AnyInput {
+    const [arg0] = args as [string];
+    const val = div(createNumArray(input, arg0));
     return BigNumber.isBigNumber(val) ? val : new BigNumber(NaN);
   }
 }
