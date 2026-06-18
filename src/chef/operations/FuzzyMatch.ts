@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import {
   fuzzyMatch,
   calcMatchRanges,
@@ -92,16 +92,17 @@ export class FuzzyMatch extends Operation {
    * @param {Object[]} args
    * @returns {html}
    */
-  run(input: any, args: any[]): any {
-    const searchStr = args[0];
+  run(input: string, args: unknown[]): AnyInput {
+    const [arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7] = args as [unknown, number, number, number, number, number, number, number];
+    const searchStr = arg0;
     const weights = {
-      sequentialBonus: args[1],
-      separatorBonus: args[2],
-      camelBonus: args[3],
-      firstLetterBonus: args[4],
-      leadingLetterPenalty: args[5],
-      maxLeadingLetterPenalty: args[6],
-      unmatchedLetterPenalty: args[7],
+      sequentialBonus: arg1,
+      separatorBonus: arg2,
+      camelBonus: arg3,
+      firstLetterBonus: arg4,
+      leadingLetterPenalty: arg5,
+      maxLeadingLetterPenalty: arg6,
+      unmatchedLetterPenalty: arg7,
     };
     const matches = fuzzyMatch(searchStr, input, true, weights);
 
