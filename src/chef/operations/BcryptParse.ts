@@ -46,7 +46,7 @@ export class BcryptParse extends Operation {
    * @param {any[]} _args - The operation arguments (none).
    * @returns {Promise<string>} A string containing the parsed information (rounds, salt, password hash).
    */
-  async run(input: string, _args: any[]): Promise<string> {
+  async run(input: string, _args: unknown[]): Promise<string> {
     try {
       const rounds = bcrypt.getRounds(input);
       const salt = bcrypt.getSalt(input);
@@ -56,7 +56,7 @@ export class BcryptParse extends Operation {
 Salt: ${salt}
 Password hash: ${hash}
 Full hash: ${input}`;
-    } catch (err: any) {
+    } catch (err) {
       throw new OperationError("Error: " + err.toString());
     }
   }
