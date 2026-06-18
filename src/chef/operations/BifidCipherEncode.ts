@@ -48,8 +48,8 @@ export class BifidCipherEncode extends Operation {
    *
    * @throws {OperationError} if key is invalid
    */
-  run(input: string, args: any[]): string {
-    const keywordStr = args[0].toUpperCase().replace(/J/g, "I"),
+  run(input: string, args: unknown[]): string {
+    const keywordStr = (args[0] as string).toUpperCase().replace(/J/g, "I"),
       alpha = "ABCDEFGHIKLMNOPQRSTUVWXYZ",
       xCo: number[] = [],
       yCo: number[] = [],
