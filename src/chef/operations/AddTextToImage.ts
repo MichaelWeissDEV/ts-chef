@@ -29,6 +29,10 @@ import {
  *
  * @category Image
  */
+interface JimpFontPage {
+  bitmap?: { width: number; height: number; data: number[] };
+}
+
 export class AddTextToImage extends Operation {
   /**
    * AddTextToImage constructor
@@ -130,19 +134,35 @@ export class AddTextToImage extends Operation {
    * @param {number} args[10] - Alpha component (0-255).
    * @returns {Promise<ArrayBuffer>} - The modified image buffer.
    */
-  async run(input: any, args: any[]): Promise<any> {
-    const text = args[0],
-      hAlign = args[1],
-      vAlign = args[2],
-      size = args[5],
-      fontFace = args[6],
-      red = args[7],
-      green = args[8],
-      blue = args[9],
-      alpha = args[10];
+  async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
+    const [
+      text,
+      hAlign,
+      vAlign,
+      xPosArg,
+      yPosArg,
+      size,
+      fontFace,
+      red,
+      green,
+      blue,
+      alpha,
+    ] = args as [
+      string,
+      string,
+      string,
+      number,
+      number,
+      number,
+      string,
+      number,
+      number,
+      number,
+      number,
+    ];
 
-    let xPos = args[3],
-      yPos = args[4];
+    let xPos = xPosArg,
+      yPos = yPosArg;
 
     if (!isImage(input)) {
       throw new OperationError("Invalid file type.");
@@ -155,7 +175,7 @@ export class AddTextToImage extends Operation {
       throw new OperationError(`Error loading image. (${err})`);
     }
 
-    const fontsMap: { [key: string]: any } = {};
+    const fontsMap: { [key: string]: { default: string } } = {};
 
     /* WORKAROUND: temporary deactivated TODO later
         try {
@@ -205,10 +225,10 @@ export class AddTextToImage extends Operation {
       const font = fontsMap[fontFace];
 
       // LoadFont needs an absolute url, so append the font name to self.docURL
-      const docURL = (globalThis as any).docURL || "";
+      const docURL = (globalThis as { docURL?: string }).docURL || "";
       jimpFont = await loadFont(docURL + "/" + font.default);
 
-      jimpFont.pages.forEach(function (page: any) {
+      jimpFont.pages.forEach(function (page: JimpFontPage) {
         if (page.bitmap) {
           // Adjust the RGB values of the image pages to change the font colour.
           const pageWidth = page.bitmap.width;
@@ -305,7 +325,7 @@ export class AddTextToImage extends Operation {
       if (image.mime === "image/gif") {
         imageBuffer = await image.getBuffer(JimpMime.png);
       } else {
-        imageBuffer = await image.getBuffer(image.mime as any);
+        imageBuffer = await image.getBuffer(image.mime);
       }
       return imageBuffer.buffer;
     } catch (err) {
@@ -319,7 +339,7 @@ export class AddTextToImage extends Operation {
    * @param {ArrayBuffer} data
    * @returns {html}
    */
-  present(data: any) {
+  present(data: ArrayBuffer): string {
     if (!data.byteLength) return "";
     const dataArray = new Uint8Array(data);
 
