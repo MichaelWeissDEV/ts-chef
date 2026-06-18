@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { toBase64 } from "../lib/Base64";
@@ -48,7 +48,7 @@ export class FlipImage extends Operation {
    * @param {Object[]} args
    * @returns {byteArray}
    */
-  async run(input: any, args: any[]): Promise<any> {
+  async run(input: ArrayBuffer, args: unknown[]): Promise<AnyInput> {
     const [flipAxis] = args;
     if (!isImage(input)) {
       throw new OperationError("Invalid input file type.");
