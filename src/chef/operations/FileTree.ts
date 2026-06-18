@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import { INPUT_DELIM_OPTIONS } from "../lib/Delim";
 
@@ -51,14 +51,15 @@ export class FileTree extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
+  run(input: string, args: unknown[]): AnyInput {
+    const [arg0, arg1] = args as [string, string];
     // Set up arrow and pipe for nice output display
     const ARROW = "|---";
     const PIPE = "|   ";
 
     // Get args from input
-    const fileDelim = args[0];
-    const entryDelim = Utils.charRep(args[1]);
+    const fileDelim = arg0;
+    const entryDelim = Utils.charRep(arg1);
 
     // Store path to print
     const completedList: unknown[] = [];
