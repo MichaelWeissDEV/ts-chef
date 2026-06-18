@@ -77,7 +77,13 @@ export class ECDSAVerify extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): AnyInput {
-    const [inputFormatArg, mdAlgo, keyPem, msg, msgFormat] = args as [string, string, string, string, string];
+    const [inputFormatArg, mdAlgo, keyPem, msg, msgFormat] = args as [
+      string,
+      string,
+      string,
+      string,
+      string,
+    ];
     let inputFormat = inputFormatArg;
 
     if (keyPem.replace("-----BEGIN PUBLIC KEY-----", "").length === 0) {
