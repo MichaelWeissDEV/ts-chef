@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import notepack from "notepack.io";
 
@@ -40,7 +40,7 @@ export class FromMessagePack extends Operation {
    * @param {Object[]} args
    * @returns {JSON}
    */
-  run(input: any, _args: any[]): any {
+  run(input: ArrayBuffer, _args: unknown[]): AnyInput {
     try {
       const buf = Buffer.from(new Uint8Array(input));
       return notepack.decode(buf);
