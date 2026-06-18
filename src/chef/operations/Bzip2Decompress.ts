@@ -21,6 +21,13 @@ import Bzip2 from "libbzip2-wasm";
  * @category Compression
  * @see https://wikipedia.org/wiki/Bzip2
  */
+interface Bzip2Decompressor {
+  decompressBZ2(
+    data: Uint8Array,
+    small: number,
+  ): { error: number; error_msg: string; output: Uint8Array };
+}
+
 export class Bzip2Decompress extends Operation {
   /**
    * Bzip2Decompress constructor
@@ -48,16 +55,16 @@ export class Bzip2Decompress extends Operation {
    * @param {any[]} args
    * @returns {Promise<ArrayBuffer>}
    */
-  async run(input: ArrayBuffer, args: any[]): Promise<ArrayBuffer> {
-    const [small] = args;
+  async run(input: ArrayBuffer, args: unknown[]): Promise<ArrayBuffer> {
+    const [small] = args as [boolean];
     if (input.byteLength <= 0) {
       throw new OperationError("Please provide an input.");
     }
 
-    const bzip2 = await new Promise<any>((resolve) => {
+    const bzip2 = await new Promise<Bzip2Decompressor>((resolve) => {
       const m = Bzip2();
-      if (m.then) {
-        m.then((instance: any) => {
+      if ("then" in m) {
+        m.then((instance) => {
           resolve({ decompressBZ2: instance.decompressBZ2.bind(instance) });
         });
       } else {
