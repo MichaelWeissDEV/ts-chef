@@ -59,7 +59,12 @@ export class EscapeUnicodeCharacters extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): AnyInput {
-    const [prefix, encodeAll, padding, uppercaseHex] = args as [string, boolean, number, boolean];
+    const [prefix, encodeAll, padding, uppercaseHex] = args as [
+      string,
+      boolean,
+      number,
+      boolean,
+    ];
     const regexWhitelist = /[ -~]/i;
 
     let output = "",
