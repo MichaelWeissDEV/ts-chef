@@ -50,8 +50,8 @@ export class Argon2Compare extends Operation {
    * @param {any[]} args - The operation arguments.
    * @returns {Promise<string>} A string indicating whether it's a match.
    */
-  async run(input: string, args: any[]): Promise<string> {
-    const encoded = args[0];
+  async run(input: string, args: unknown[]): Promise<string> {
+    const encoded = args[0] as string;
 
     try {
       const match = await argon2.verify(encoded, input);
