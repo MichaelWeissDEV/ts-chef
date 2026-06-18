@@ -76,7 +76,8 @@ export class ExtractLSB extends Operation {
    * @returns {byteArray}
    */
   async run(input: ArrayBuffer, args: unknown[]): Promise<AnyInput> {
-    const [colourPat1, colourPat2, colourPat3, colourPat4, pixelOrder, bit] = args as [string, string, string, string, string, number];
+    const [colourPat1, colourPat2, colourPat3, colourPat4, pixelOrder, bit] =
+      args as [string, string, string, string, string, number];
     if (!isImage(input))
       throw new OperationError("Please enter a valid image file.");
 
