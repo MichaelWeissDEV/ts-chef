@@ -106,11 +106,14 @@ export class DeriveHKDFKey extends Operation {
    * @returns {ArrayBuffer}
    */
   run(input: ArrayBuffer, args: unknown[]): AnyInput {
-    const [arg0, arg1, arg2, arg3, arg4] = args as [{ string: string; option: string }, { string: string; option: string }, string, string, number];
-    const argSalt = Utils.convertToByteString(
-        arg0.string || "",
-        arg0.option,
-      ),
+    const [arg0, arg1, arg2, arg3, arg4] = args as [
+      { string: string; option: string },
+      { string: string; option: string },
+      string,
+      string,
+      number,
+    ];
+    const argSalt = Utils.convertToByteString(arg0.string || "", arg0.option),
       info = Utils.convertToByteString(arg1.string || "", arg1.option),
       hashFunc = arg2.toLowerCase(),
       extractMode = arg3,
