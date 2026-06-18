@@ -62,7 +62,12 @@ export class DefangURL extends Operation {
    * @returns {string}
    */
   run(input: string, args: unknown[]): AnyInput {
-    const [dots, http, slashes, process] = args as [boolean, boolean, boolean, string];
+    const [dots, http, slashes, process] = args as [
+      boolean,
+      boolean,
+      boolean,
+      string,
+    ];
 
     switch (process) {
       case "Valid domains and full URLs":
