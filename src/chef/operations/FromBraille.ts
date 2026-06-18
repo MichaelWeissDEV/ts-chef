@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput, HighlightPos, HighlightResult } from "../Operation";
 import { BRAILLE_LOOKUP } from "../lib/Braille";
 
 /**
@@ -38,7 +38,7 @@ export class FromBraille extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: string, _args: unknown[]): AnyInput {
     return input
       .split("")
       .map((b: string) => {
@@ -57,7 +57,7 @@ export class FromBraille extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlight(pos: any, _args: any[]): any {
+  highlight(pos: HighlightPos, _args: unknown[]): HighlightResult {
     return pos;
   }
 
@@ -70,7 +70,7 @@ export class FromBraille extends Operation {
    * @param {Object[]} args
    * @returns {Object[]} pos
    */
-  highlightReverse(pos: any, _args: any[]): any {
+  highlightReverse(pos: HighlightPos, _args: unknown[]): HighlightResult {
     return pos;
   }
 }
