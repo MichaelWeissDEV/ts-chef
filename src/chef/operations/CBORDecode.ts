@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { Operation, ArgConfig, AnyInput } from "../Operation";
 import * as Cbor from "cbor";
 
 export class CBORDecode extends Operation {
@@ -24,7 +24,7 @@ export class CBORDecode extends Operation {
   outputType = "JSON";
   args: ArgConfig[] = [];
 
-  run(input: any, _args: any[]): any {
+  run(input: string, _args: unknown[]): AnyInput {
     return Cbor.decodeFirstSync(Buffer.from(input).toString("hex"));
   }
 }
