@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 
 /**
@@ -39,13 +39,13 @@ export class Fletcher8Checksum extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: ArrayBuffer, _args: unknown[]): AnyInput {
     let a = 0,
       b = 0;
-    input = new Uint8Array(input);
+    const bytes = new Uint8Array(input);
 
-    for (let i = 0; i < input.length; i++) {
-      a = (a + input[i]) % 0xf;
+    for (let i = 0; i < bytes.length; i++) {
+      a = (a + bytes[i]) % 0xf;
       b = (b + a) % 0xf;
     }
 
