@@ -45,13 +45,13 @@ export class BSONDeserialise extends Operation {
    * @param {any[]} _args
    * @returns {string}
    */
-  run(input: ArrayBuffer, _args: any[]): string {
+  run(input: ArrayBuffer, _args: unknown[]): string {
     if (!input.byteLength) return "";
 
     try {
       const data = bson.deserialize(Buffer.from(input));
       return JSON.stringify(data, null, 2);
-    } catch (err: any) {
+    } catch (err) {
       throw new OperationError(err.toString());
     }
   }
