@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { fromBase64 } from "../lib/Base64";
 import { toHexFast } from "../lib/Hex";
@@ -76,9 +76,9 @@ export class ECDSAVerify extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, args: any[]): any {
-    let inputFormat = args[0];
-    const [, mdAlgo, keyPem, msg, msgFormat] = args;
+  run(input: string, args: unknown[]): AnyInput {
+    const [inputFormatArg, mdAlgo, keyPem, msg, msgFormat] = args as [string, string, string, string, string];
+    let inputFormat = inputFormatArg;
 
     if (keyPem.replace("-----BEGIN PUBLIC KEY-----", "").length === 0) {
       throw new OperationError("Please enter a public key.");
