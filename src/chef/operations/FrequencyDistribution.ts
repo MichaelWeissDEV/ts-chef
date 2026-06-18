@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import OperationError from "../errors/OperationError";
 
@@ -52,7 +52,7 @@ export class FrequencyDistribution extends Operation {
    * @param {Object[]} args
    * @returns {json}
    */
-  run(input: any, _args: any[]): any {
+  run(input: ArrayBuffer, _args: unknown[]): AnyInput {
     const data = new Uint8Array(input);
     if (!data.length) throw new OperationError("No data");
 
@@ -87,7 +87,7 @@ export class FrequencyDistribution extends Operation {
    * @param {json} freq
    * @returns {html}
    */
-  present(freq: any, args: any[]) {
+  present(freq: any, args: unknown[]) {
     const [showZeroes, showAscii] = args;
 
     // Print
