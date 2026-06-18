@@ -1,14 +1,10 @@
-/*
- * -----------------------------------------------------------------------------
- * Project:     ts-chef
- * Model:       Qwen 3.5 Coder Next (Local)
- * Version:     1.0.0
- * Author:      Michael Weiss
- * Source:      Ported from GCHQ's CyberChef (JavaScript)
- * License:     Apache License 2.0
- * Description: TypeScript implementation of CyberChef modules.
- * Note:        First Port done by Local Model, Cleanup and fixes by Author
- * -----------------------------------------------------------------------------
+/**
+ * @fileoverview GeneratePGPKeyPair operation - Ported from GCHQ's CyberChef
+ * @package chef/operations
+ * @license Apache-2.0
+ * @author Michael Weiss
+ * @copyright 2024-2026 Michael Weiss
+ * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
 import { Operation, AnyInput } from "../Operation";
@@ -72,7 +68,7 @@ export class GeneratePGPKeyPair extends Operation {
   async run(input: string, args: unknown[]): Promise<AnyInput> {
     const [, password, name, email] = args as [string, string, string, string];
     const parts = (args[0] as string).split("-");
-    let keyType = parts[0].toLowerCase();
+    const keyType = parts[0].toLowerCase();
     const keySize = parseInt(parts[1], 10);
     let userIdentifier = "";
 

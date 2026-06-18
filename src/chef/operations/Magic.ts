@@ -1,14 +1,10 @@
-/*
- * -----------------------------------------------------------------------------
- * Project:     ts-chef
- * Model:       Qwen 3.5 Coder Next (Local)
- * Version:     1.0.0
- * Author:      Michael Weiss
- * Source:      Ported from GCHQ's CyberChef (JavaScript)
- * License:     Apache License 2.0
- * Description: TypeScript implementation of CyberChef modules.
- * Note:        First Port done by Local Model, Cleanup and fixes by Author
- * -----------------------------------------------------------------------------
+/**
+ * @fileoverview Magic operation - Ported from GCHQ's CyberChef
+ * @package chef/operations
+ * @license Apache-2.0
+ * @author Michael Weiss
+ * @copyright 2024-2026 Michael Weiss
+ * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
 import { Operation, AnyInput } from "../Operation";
@@ -90,15 +86,15 @@ export class Magic extends Operation {
     const ings = state.opList[state.progress].ingValues,
       [depth, intensive, extLang, crib] = ings,
       dish = state.dish,
-      magic = new MagicLib(await dish.get(Dish.ARRAY_BUFFER)),
+      magic = new MagicLib(await dish.get(Dish.ARRAY_BUFFER) as Uint8Array),
       cribRegex =
         crib && (crib as string).length
           ? new RegExp(crib as string, "i")
           : null;
     let options = await magic.speculativeExecution(
-      depth,
-      extLang,
-      intensive,
+      depth as number,
+      extLang as boolean,
+      crib as string,
       [],
       false,
       cribRegex,
@@ -171,10 +167,10 @@ export class Magic extends Operation {
           ? "<span data-toggle='tooltip' data-container='body' title='The data could be a valid UTF8 string based on its encoding.'>Valid UTF8</span>\n"
           : "";
 
-      if (option.languageScores[0].probability > 0) {
+      if ((option.languageScores[0] as { probability?: number }).probability ?? 0 > 0) {
         let likelyLangs = option.languageScores.filter(
           (l: { lang: string; score: number; probability?: number }) =>
-            (l as { probability?: number }).probability ?? 0 > 0,
+            (l.probability ?? 0) > 0,
         );
         if (likelyLangs.length < 1) likelyLangs = [option.languageScores[0]];
         language =

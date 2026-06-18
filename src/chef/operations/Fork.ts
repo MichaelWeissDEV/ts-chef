@@ -1,14 +1,10 @@
-/*
- * -----------------------------------------------------------------------------
- * Project:     ts-chef
- * Model:       Qwen 3.5 Coder Next (Local)
- * Version:     1.0.0
- * Author:      Michael Weiss
- * Source:      Ported from GCHQ's CyberChef (JavaScript)
- * License:     Apache License 2.0
- * Description: TypeScript implementation of CyberChef modules.
- * Note:        First Port done by Local Model, Cleanup and fixes by Author
- * -----------------------------------------------------------------------------
+/**
+ * @fileoverview Fork operation - Ported from GCHQ's CyberChef
+ * @package chef/operations
+ * @license Apache-2.0
+ * @author Michael Weiss
+ * @copyright 2024-2026 Michael Weiss
+ * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
 import { Operation, AnyInput } from "../Operation";
@@ -52,24 +48,27 @@ export class Fork extends Operation {
   }
 
   /**
-   * @param {Object} state - The current state of the recipe.
-   * @param {number} state.progress - The current position in the recipe.
-   * @param {Dish} state.dish - The Dish being operated on.
-   * @param {Operation[]} state.opList - The list of operations in the recipe.
-   * @returns {Object} The updated state of the recipe.
+   * @param input - The current state of the recipe (passed as AnyInput for flow-control ops).
+   * @param _args - Unused – the operation reads its config from the recipe state directly.
+   * @returns The updated state of the recipe.
    */
-  async run(input: string, _args: unknown[]): Promise<AnyInput> {
-    const [arg0, arg1, arg2] = args as [unknown, unknown, boolean];
-    const state = input;
-    const opList = state.opList,
-      inputType = opList[state.progress].inputType,
-      outputType = opList[state.progress].outputType,
-      currentInput = await state.dish.get(inputType),
-      ings = opList[state.progress].ingValues,
-      [splitDelim, mergeDelim, ignoreErrors] = ings,
-      subOpList = [];
-    let inputs = [],
-      i;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async run(input: AnyInput, _args: unknown[]): Promise<AnyInput> {
+    // Flow-control operations receive the full recipe state as their input
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const state = input as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const opList: any[] = state.opList;
+    const inputType: string = opList[state.progress].inputType;
+    const outputType: string = opList[state.progress].outputType;
+    const currentInput: string = await state.dish.get(inputType);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ings: any[] = opList[state.progress].ingValues;
+    const [splitDelim, mergeDelim, ignoreErrors] = ings;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const subOpList: any[] = [];
+    let inputs: string[] = [];
+    let i: number;
 
     if (currentInput) inputs = currentInput.split(splitDelim);
 
@@ -92,7 +91,7 @@ export class Fork extends Operation {
     }
 
     const recipe = new Recipe();
-    const outputs = [];
+    const outputs: string[] = [];
     let progress = 0;
 
     state.forkOffset += state.progress + 1;
@@ -100,15 +99,17 @@ export class Fork extends Operation {
     recipe.addOperations(subOpList);
 
     // Take a deep(ish) copy of the ingredient values
-    const ingValues = subOpList.map((op) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ingValues = subOpList.map((op: any) =>
       JSON.parse(JSON.stringify(op.ingValues)),
     );
 
     // Run recipe over each tranche
     for (i = 0; i < inputs.length; i++) {
       // Baseline ing values for each tranche so that registers are reset
-      recipe.opList.forEach((op, i) => {
-        op.ingValues = JSON.parse(JSON.stringify(ingValues[i]));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      recipe.opList.forEach((op: any, idx: number) => {
+        op.ingValues = JSON.parse(JSON.stringify(ingValues[idx]));
       });
 
       const dish = new Dish();
@@ -116,13 +117,14 @@ export class Fork extends Operation {
 
       try {
         progress = await recipe.execute(dish, 0, state);
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (!ignoreErrors) {
           throw err;
         }
-        progress = err.progress + 1;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        progress = (err as any).progress + 1;
       }
-      outputs.push(await dish.get(outputType));
+      outputs.push(await dish.get(outputType) as string);
     }
 
     state.dish.set(outputs.join(mergeDelim), outputType);

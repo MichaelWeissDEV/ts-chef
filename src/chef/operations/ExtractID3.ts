@@ -1,14 +1,10 @@
-/*
- * -----------------------------------------------------------------------------
- * Project:     ts-chef
- * Model:       Qwen 3.5 Coder Next (Local)
- * Version:     1.0.0
- * Author:      Michael Weiss
- * Source:      Ported from GCHQ's CyberChef (JavaScript)
- * License:     Apache License 2.0
- * Description: TypeScript implementation of CyberChef modules.
- * Note:        First Port done by Local Model, Cleanup and fixes by Author
- * -----------------------------------------------------------------------------
+/**
+ * @fileoverview ExtractID3 operation - Ported from GCHQ's CyberChef
+ * @package chef/operations
+ * @license Apache-2.0
+ * @author Michael Weiss
+ * @copyright 2024-2026 Michael Weiss
+ * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
 import { Operation, AnyInput } from "../Operation";
@@ -163,12 +159,14 @@ export class ExtractID3 extends Operation {
     if (!data || !Object.prototype.hasOwnProperty.call(data, "Tags"))
       return JSON.stringify(data, null, 4);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const tagged = data as Record<string, any>;
     let output = `<table class="table table-hover table-sm table-bordered table-nonfluid">
             <tr><th>Tag</th><th>Description</th><th>Data</th></tr>`;
 
-    for (const tagID in data.Tags) {
-      const description = data.Tags[tagID].Description,
-        contents = data.Tags[tagID].Data;
+    for (const tagID in tagged.Tags) {
+      const description = tagged.Tags[tagID].Description,
+        contents = tagged.Tags[tagID].Data;
       output += `<tr><td>${tagID}</td><td>${Utils.escapeHtml(description)}</td><td>${Utils.escapeHtml(contents)}</td></tr>`;
     }
     output += "</table>";

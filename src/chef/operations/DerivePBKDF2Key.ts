@@ -1,14 +1,10 @@
-/*
- * -----------------------------------------------------------------------------
- * Project:     ts-chef
- * Model:       Qwen 3.5 Coder Next (Local)
- * Version:     1.0.0
- * Author:      Michael Weiss
- * Source:      Ported from GCHQ's CyberChef (JavaScript)
- * License:     Apache License 2.0
- * Description: TypeScript implementation of CyberChef modules.
- * Note:        First Port done by Local Model, Cleanup and fixes by Author
- * -----------------------------------------------------------------------------
+/**
+ * @fileoverview DerivePBKDF2Key operation - Ported from GCHQ's CyberChef
+ * @package chef/operations
+ * @license Apache-2.0
+ * @author Michael Weiss
+ * @copyright 2024-2026 Michael Weiss
+ * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
 import { Operation, AnyInput } from "../Operation";
@@ -88,7 +84,8 @@ export class DerivePBKDF2Key extends Operation {
         salt,
         iterations,
         keySize / 8,
-        hasher.toLowerCase(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        hasher.toLowerCase() as any,
       );
 
     return forge.util.bytesToHex(derivedKey);
