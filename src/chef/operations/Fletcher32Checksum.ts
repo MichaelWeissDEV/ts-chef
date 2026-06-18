@@ -11,7 +11,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { Operation } from "../Operation";
+import { Operation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 
 /**
@@ -40,21 +40,22 @@ export class Fletcher32Checksum extends Operation {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: any, _args: any[]): any {
+  run(input: ArrayBuffer, _args: unknown[]): AnyInput {
     let a = 0,
       b = 0;
+    let view: DataView;
     if (ArrayBuffer.isView(input)) {
-      input = new DataView(input.buffer, input.byteOffset, input.byteLength);
+      view = new DataView(input.buffer, input.byteOffset, input.byteLength);
     } else {
-      input = new DataView(input);
+      view = new DataView(input);
     }
 
-    for (let i = 0; i < input.byteLength - 1; i += 2) {
-      a = (a + input.getUint16(i, true)) % 0xffff;
+    for (let i = 0; i < view.byteLength - 1; i += 2) {
+      a = (a + view.getUint16(i, true)) % 0xffff;
       b = (b + a) % 0xffff;
     }
-    if (input.byteLength % 2 !== 0) {
-      a = (a + input.getUint8(input.byteLength - 1)) % 0xffff;
+    if (view.byteLength % 2 !== 0) {
+      a = (a + view.getUint8(view.byteLength - 1)) % 0xffff;
       b = (b + a) % 0xffff;
     }
 
