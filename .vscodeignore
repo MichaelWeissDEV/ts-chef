@@ -31,3 +31,15 @@ report.md
 
 # Large demo assets (referenced via the repo URL in the README, not from inside the VSIX)
 assets/Clip1.mp4
+
+# Test reports, coverage and docs
+coverage/**
+test-report/**
+docs/**
+notes/**
+jest.config.js
+eslint.config.mjs
+Makefile
+typedoc.json
+tsconfig.chef.json
+tsconfig.json

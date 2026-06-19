@@ -48,7 +48,7 @@ export function runOp(
   if (!entry) throw new Error(`Unknown operation: ${opName}`);
   const op = entry.factory();
   const normalised = normaliseInput(input, op.inputType);
-  return op.run(normalised as AnyInput, args);
+  return op.run(normalised as AnyInput, args) as AnyInput;
 }
 
 /**

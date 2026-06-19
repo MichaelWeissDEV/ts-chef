@@ -106,9 +106,9 @@ export function createTypedOperation<TInput, TOutput, TArgs extends unknown[]>(c
       return config.run(input, args);
     }
 
-    present(data: TOutput, args: TArgs): PipelineData {
+    present(data: Awaited<TOutput>, args: TArgs): PipelineData {
       if (config.present) {
-        return config.present(data, args);
+        return config.present(data as any, args);
       }
       return super.present(data, args);
     }

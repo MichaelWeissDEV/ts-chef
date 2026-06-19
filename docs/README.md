@@ -7,7 +7,7 @@ Welcome to the internal documentation for `ts-chef`.
 -   [Usage Guide](usage.md) - How to use the extension in VS Code.
 -   [Operations & Formatters](operations.md) - Detailed list of available data transformations.
 -   [Contributing Guide](contributing.md) - How to set up the environment and contribute to the project.
--   [API Reference](https://github.com/michaelweiss/ts-chef/wiki) - Automatically generated technical API documentation (GitHub Wiki).
+-   [API Reference](https://github.com/michaelweiss/ts-chef/releases) - Technical API documentation (download the offline HTML ZIP from releases).
 
 ---
 

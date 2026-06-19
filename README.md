@@ -91,11 +91,9 @@ Useful settings:
 ## Documentation
 
 - [Repository](https://github.com/MichaelWeissDEV/ts-chef)
-- [Wiki](https://github.com/MichaelWeissDEV/ts-chef/wiki)
 - [Usage Guide](docs/usage.md)
 - [Contributing Guide](docs/contributing.md)
-- [Operations Index](https://github.com/MichaelWeissDEV/ts-chef/wiki/Operations)
-- [Test and Coverage Reports](https://github.com/MichaelWeissDEV/ts-chef/wiki/test-report)
+- [API Documentation (Offline)](https://github.com/MichaelWeissDEV/ts-chef/releases) - Download `ts-chef-docs-VERSION.zip` from the releases to browse offline.
 
 ## Development
 

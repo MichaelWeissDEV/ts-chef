@@ -28,4 +28,4 @@
 
 ---
 
-For a full list of all 480+ operations, please refer to the [Full Operations Index](https://github.com/michaelweiss/ts-chef/wiki/Operations).
+For a full list of all 480+ operations, please refer to the generated API Documentation (available as a ZIP in each release).
