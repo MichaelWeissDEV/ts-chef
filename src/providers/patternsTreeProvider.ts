@@ -46,6 +46,10 @@ class MatchNode extends vscode.TreeItem {
   }
 }
 
+/**
+ * Tree data provider for the Patterns sidebar, showing detected encoding/encoding
+ * matches for the active editor grouped by their top classification label.
+ */
 export class PatternsTreeProvider implements vscode.TreeDataProvider<TreeNode> {
   private _onDidChangeTreeData = new vscode.EventEmitter<void>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;

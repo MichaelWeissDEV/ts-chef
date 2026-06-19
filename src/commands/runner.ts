@@ -11,9 +11,10 @@ import registry, { findOp } from "../opsRegistry";
 import type { Operation, AnyInput } from "../chef/Operation";
 import type { PipelineStep } from "../storage/store";
 import { resolveDefaultArg } from "./argDefaults";
+import { normaliseInput } from "../chef/types";
 
 // Re-exported for callers that already import it from the runner.
-export { resolveDefaultArg };
+export { resolveDefaultArg, normaliseInput };
 
 /**
  * Whether an operation needs free-text input to be useful — i.e. it has a
@@ -27,43 +28,13 @@ export function operationNeedsInput(op: Operation): boolean {
 }
 
 /**
- * Converts any intermediate value to the type an operation expects.
- * Needed because ToBase32/45/58/62/85/92 declare inputType="ArrayBuffer"
- * but callers may pass a plain string.
+ * Runs a single named operation on `input` with the given argument list.
+ *
+ * @param opName - The internal or display name of the operation.
+ * @param input - The value to transform; will be normalised to the operation's expected type.
+ * @param args - Argument list to pass to the operation's `run` method.
+ * @returns The operation's output value.
  */
-function normaliseInput(input: unknown, inputType: string): AnyInput {
-  let buf: Buffer;
-  if (typeof input === "string") {
-    buf = Buffer.from(input, "utf-8");
-  } else if (Array.isArray(input)) {
-    buf = Buffer.from(input as number[]);
-  } else if (input instanceof ArrayBuffer) {
-    buf = Buffer.from(new Uint8Array(input));
-  } else if (Buffer.isBuffer(input)) {
-    buf = input as Buffer;
-  } else if (input instanceof Uint8Array) {
-    buf = Buffer.from(input);
-  } else {
-    buf = Buffer.from(String(input), "utf-8");
-  }
-
-  switch (inputType) {
-    case "string":
-      return buf.toString("utf-8");
-    case "byteArray":
-      return Array.from(buf);
-    case "ArrayBuffer": {
-      const ab = new ArrayBuffer(buf.length);
-      new Uint8Array(ab).set(buf);
-      return ab;
-    }
-    case "number":
-      return Number(buf.toString("utf-8").trim());
-    default:
-      return buf.toString("utf-8");
-  }
-}
-
 export function runOp(
   opName: string,
   input: AnyInput,
@@ -80,6 +51,13 @@ export function runOp(
   return op.run(normalised as AnyInput, args);
 }
 
+/**
+ * Executes a sequence of pipeline steps, feeding each output into the next step's input.
+ *
+ * @param input - The initial value to feed into the first step.
+ * @param steps - Ordered list of operation names and their arguments.
+ * @returns The final result serialised as a UTF-8 string.
+ */
 export function runPipeline(input: AnyInput, steps: PipelineStep[]): string {
   let current: AnyInput = input;
   for (const step of steps) {
@@ -96,7 +74,15 @@ export function runPipeline(input: AnyInput, steps: PipelineStep[]): string {
   return JSON.stringify(current, null, 2);
 }
 
-// Mini pipe language parser: "From Base64 | To Hex | URL Encode(arg1=val1, arg2=val2)"
+/**
+ * Parses a pipe-syntax string into an ordered list of {@link PipelineStep}s.
+ *
+ * Syntax: `"From Base64 | To Hex | URL Encode(arg1=val1, arg2=val2)"`.
+ * Unknown operation names throw. Missing arguments fall back to operation defaults.
+ *
+ * @param raw - Raw pipe string to parse.
+ * @returns Ordered pipeline steps ready for {@link runPipeline}.
+ */
 export function parsePipeline(raw: string): PipelineStep[] {
   return raw
     .split("|")

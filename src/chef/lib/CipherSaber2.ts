@@ -7,6 +7,15 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
+/**
+ * Encrypts or decrypts data using the CipherSaber-2 RC4 variant.
+ *
+ * @param tempIVP - The initialisation vector (IV) prepended to the key.
+ * @param key - The secret key bytes.
+ * @param rounds - Number of key-scheduling rounds (CipherSaber-2 extension).
+ * @param input - The plaintext or ciphertext bytes to process.
+ * @returns The resulting byte array after RC4 stream-cipher application.
+ */
 export function encode(
   tempIVP: number[] | Uint8Array,
   key: number[],

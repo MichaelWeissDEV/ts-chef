@@ -7,6 +7,10 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
+/**
+ * Utility class for reading structured binary data from a Uint8Array, supporting byte-level and
+ * bit-level access with both big-endian and little-endian byte ordering.
+ */
 export class Stream {
   bytes: Uint8Array;
   length: number;

@@ -24,6 +24,14 @@ export const format: Record<string, CryptoJS.lib.WordArray | any> = {
   Base64: CryptoJS.enc.Base64,
 };
 
+/**
+ * Encodes a string using the Affine cipher with the given coefficients a and b.
+ *
+ * @param input - The plaintext string to encode.
+ * @param args - A two-element array where args[0] is coefficient `a` and args[1] is coefficient `b`.
+ * @returns The encoded ciphertext string.
+ * @throws {OperationError} If a or b are not integers, or if a is not coprime to 26.
+ */
 export function affineEncode(input: string, args: number[]): string {
   const alphabet = "abcdefghijklmnopqrstuvwxyz";
   const a = args[0];
@@ -56,6 +64,12 @@ export function affineEncode(input: string, args: number[]): string {
   return output;
 }
 
+/**
+ * Generates a 5x5 Polybius square seeded with the given keyword.
+ *
+ * @param keyword - The keyword used to fill the square before the remaining alphabet letters (J is omitted).
+ * @returns A 5x5 array of uppercase letter strings representing the Polybius square.
+ */
 export function genPolybiusSquare(keyword: string): string[][] {
   const alpha = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
   const polArray = [...new Set(`${keyword}${alpha}`.split(""))];

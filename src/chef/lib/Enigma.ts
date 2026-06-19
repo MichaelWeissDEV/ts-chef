@@ -35,6 +35,13 @@ export const REFLECTORS = [
 
 export const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
+/**
+ * Converts an uppercase ASCII letter to its 0-based alphabetical index.
+ *
+ * @param c - The character to convert (must be A–Z, or a–z when permissive)
+ * @param permissive - If true, lowercase letters are accepted and unknown chars return -1 instead of throwing
+ * @returns The 0-based index (0 for A, 25 for Z), or -1 if permissive and the character is not a letter
+ */
 export function a2i(c: string, permissive: boolean = false): number {
   const i = Utils.ord(c);
   if (i >= 65 && i <= 90) {
@@ -49,6 +56,12 @@ export function a2i(c: string, permissive: boolean = false): number {
   throw new OperationError("a2i called on non-uppercase ASCII character");
 }
 
+/**
+ * Converts a 0-based alphabetical index back to its uppercase ASCII letter.
+ *
+ * @param i - Index in the range 0–25
+ * @returns The corresponding uppercase letter (A–Z)
+ */
 export function i2a(i: number): string {
   if (i >= 0 && i < 26) {
     return Utils.chr(i + 65);
@@ -56,6 +69,9 @@ export function i2a(i: number): string {
   throw new OperationError("i2a called on value outside 0..25");
 }
 
+/**
+ * Represents a single Enigma rotor with a wiring permutation, step notches, ring setting, and initial position.
+ */
 export class Rotor {
   map: number[];
   revMap: number[];
@@ -173,6 +189,9 @@ class PairMapBase {
   }
 }
 
+/**
+ * Represents an Enigma reflector, which maps every letter to a unique partner via exactly 13 pairs.
+ */
 export class Reflector extends PairMapBase {
   constructor(pairs: string) {
     super(pairs, "Reflector");
@@ -194,12 +213,18 @@ export class Reflector extends PairMapBase {
   }
 }
 
+/**
+ * Represents an Enigma plugboard (Steckerbrett) that swaps pairs of letters before and after rotor traversal.
+ */
 export class Plugboard extends PairMapBase {
   constructor(pairs: string) {
     super(pairs, "Plugboard");
   }
 }
 
+/**
+ * Base class implementing the Enigma cipher mechanism: rotor stepping and symmetric letter encryption/decryption.
+ */
 export class EnigmaBase {
   rotors: Rotor[];
   rotorsRev: Rotor[];
@@ -250,6 +275,9 @@ export class EnigmaBase {
   }
 }
 
+/**
+ * A concrete Enigma machine that enforces exactly 3 or 4 rotors, matching the historical Wehrmacht/Kriegsmarine variants.
+ */
 export class EnigmaMachine extends EnigmaBase {
   constructor(rotors: Rotor[], reflector: Reflector, plugboard: Plugboard) {
     super(rotors, reflector, plugboard);

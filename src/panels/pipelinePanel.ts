@@ -19,6 +19,11 @@ import { pickScope } from "../commands/scopePicker";
 import { log } from "../logger";
 import registry from "../opsRegistry";
 
+/**
+ * Full-featured webview panel for building, editing, and running pipelines visually.
+ * Only one panel may be open at a time; subsequent calls to {@link open} reveal the
+ * existing panel instead of creating a new one.
+ */
 export class PipelinePanel {
   private static current: PipelinePanel | undefined;
   private readonly panel: vscode.WebviewPanel;

@@ -129,6 +129,13 @@ function buildOpPickItems(): (vscode.QuickPickItem & { opName?: string })[] {
   return items;
 }
 
+/**
+ * Extension entry point called by VS Code when the extension is first activated.
+ * Registers all providers, tree views, commands, and event listeners for the lifetime
+ * of the extension.
+ *
+ * @param context - The extension context used to register disposables and access storage.
+ */
 export function activate(context: vscode.ExtensionContext): void {
   initOutputChannel(context);
   log("Extension activated");
@@ -190,8 +197,9 @@ export function activate(context: vscode.ExtensionContext): void {
 
   /** Resolve the editor's input text (selection, else whole document). */
   function selectionInput(editor: vscode.TextEditor): string {
-    const raw =
-      editor.document.getText(editor.selection) || editor.document.getText();
+    const raw = editor.selection.isEmpty
+      ? editor.document.getText()
+      : editor.document.getText(editor.selection);
     return resolveVars(raw, varStore);
   }
 
@@ -731,4 +739,5 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(scanState);
 }
 
+/** Called by VS Code when the extension is deactivated; disposables are handled via subscriptions. */
 export function deactivate(): void {}

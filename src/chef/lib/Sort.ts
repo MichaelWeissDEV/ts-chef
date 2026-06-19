@@ -7,10 +7,25 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
+/**
+ * Comparator that sorts strings alphabetically, ignoring case.
+ *
+ * @param a - First string
+ * @param b - Second string
+ * @returns Negative, zero, or positive sort order value
+ */
 export function caseInsensitiveSort(a: string, b: string): number {
   return a.toLowerCase().localeCompare(b.toLowerCase());
 }
 
+/**
+ * Comparator that sorts IPv4 address strings numerically by their 32-bit value.
+ * Non-IP strings fall back to lexicographic ordering.
+ *
+ * @param a - First IP address string
+ * @param b - Second IP address string
+ * @returns Negative, zero, or positive sort order value
+ */
 export function ipSort(a: string, b: string): number {
   const partsA = a.split(".");
   const partsB = b.split(".");
@@ -31,6 +46,14 @@ export function ipSort(a: string, b: string): number {
   return numA - numB;
 }
 
+/**
+ * Comparator that sorts strings by embedded numeric segments so that natural ordering is preserved
+ * (e.g. "item2" before "item10").
+ *
+ * @param a - First string
+ * @param b - Second string
+ * @returns Negative, zero, or positive sort order value
+ */
 export function numericSort(a: string, b: string): number {
   const aP = a.split(/([^\d]+)/);
   const bP = b.split(/([^\d]+)/);
@@ -49,6 +72,14 @@ export function numericSort(a: string, b: string): number {
   return a.localeCompare(b);
 }
 
+/**
+ * Comparator that sorts strings by embedded hexadecimal numeric segments before falling back to
+ * lexicographic ordering for non-hex parts.
+ *
+ * @param a - First string
+ * @param b - Second string
+ * @returns Negative, zero, or positive sort order value
+ */
 export function hexadecimalSort(a: string, b: string): number {
   const mapFn = (v: string) => {
     const t = parseInt(v, 16);
@@ -71,6 +102,13 @@ export function hexadecimalSort(a: string, b: string): number {
   return a.localeCompare(b);
 }
 
+/**
+ * Comparator that sorts strings by character length, shortest first.
+ *
+ * @param a - First string
+ * @param b - Second string
+ * @returns Negative, zero, or positive sort order value
+ */
 export function lengthSort(a: string, b: string): number {
   return a.length - b.length;
 }

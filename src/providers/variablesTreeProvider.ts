@@ -25,6 +25,10 @@ class VariableNode extends vscode.TreeItem {
   }
 }
 
+/**
+ * Tree data provider for the Variables sidebar, listing all stored scoped variables
+ * (workspace and global) with their values and scope shown as item descriptions.
+ */
 export class VariablesTreeProvider implements vscode.TreeDataProvider<VariableNode> {
   private _onDidChangeTreeData = new vscode.EventEmitter<void>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;

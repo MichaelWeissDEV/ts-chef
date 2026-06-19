@@ -9,6 +9,13 @@
 
 import { Utils } from "../Utils";
 
+/**
+ * Parses a delimited decimal string into an array of byte values.
+ *
+ * @param data - The input string of space- or delimiter-separated decimal numbers.
+ * @param delim - The delimiter between values; defaults to `"Auto"` (space).
+ * @returns An array of numeric byte values parsed from the input.
+ */
 export function fromDecimal(data: string, delim: string = "Auto"): number[] {
   const delimStr = delim === "Auto" ? " " : Utils.charRep(delim);
   const output: number[] = [];
@@ -22,6 +29,13 @@ export function fromDecimal(data: string, delim: string = "Auto"): number[] {
   return output;
 }
 
+/**
+ * Converts a byte array to a delimited decimal string.
+ *
+ * @param data - The byte array or Uint8Array to convert.
+ * @param delim - The delimiter to place between values; defaults to `"Space"`.
+ * @returns A string of decimal byte values joined by the specified delimiter.
+ */
 export function toDecimal(
   data: number[] | Uint8Array,
   delim: string = "Space",

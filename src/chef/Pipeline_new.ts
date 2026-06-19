@@ -8,7 +8,7 @@
  */
 
 import { Operation, TypedOperation, OperationResult, PipelinedOperation, AnyInput, OperationWithArgs } from "./Operation_new";
-import { PipelineData } from "./types";
+import { PipelineData, normaliseInput } from "./types";
 import type { PipelineStep } from "../storage/store";
 
 /**
@@ -141,16 +141,15 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
    * Append a pre-configured PipelinedOperation to this pipeline
    */
   pipePipelined<T, U>(pipelined: PipelinedOperation<T, U>): Pipeline<TInput, U> {
-    // Extract the parts from the pipelined operation
-    // This is a simplified approach - for full type safety, we'd need to track types through the chain
     const newSteps: Array<{ opName?: string; op?: Operation; args: unknown[] }> = [...this.steps];
-    
-    // For now, we'll just add a placeholder that references the pipelined operation
-    // A more sophisticated implementation would flatten the pipelined operation's parts
-    newSteps.push({
-      opName: `(pipelined: ${pipelined.operationNames.join(" -> ")})`,
-      args: []
-    });
+
+    for (const part of pipelined.parts) {
+      if (part instanceof OperationWithArgs) {
+        newSteps.push({ op: part.operation as unknown as Operation, args: part.args as unknown[] });
+      } else {
+        newSteps.push({ op: part as unknown as Operation, args: [] });
+      }
+    }
 
     return new Pipeline(newSteps) as Pipeline<TInput, U>;
   }
@@ -167,13 +166,14 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
 
     for (const step of this.steps) {
       if (step.op) {
-        // Direct operation instance
-        current = await (step.op.run(
-          current as unknown as PipelineData,
+        // Direct operation instance — normalise to the declared inputType first
+        const normalised = normaliseInput(current, step.op.inputType ?? "string");
+        current = await Promise.resolve(step.op.run(
+          normalised as unknown as PipelineData,
           step.args as unknown as unknown[]
-        ) as Promise<PipelineData>);
+        )) as PipelineData;
       } else if (step.opName) {
-        // Operation by name - use the runner
+        // Operation by name - runner.runOp already normalises internally
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const runner = await import("../commands/runner.js" as string);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -224,18 +224,20 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
         let output: PipelineData;
         
         if (step.op) {
+          // Normalise to the declared inputType before running
+          const normalised = normaliseInput(current, step.op.inputType ?? "string");
           // runWithResult is available on TypedOperation; fall back to plain run for base Operation
           const typedOp = step.op as unknown as TypedOperation;
           let result: { success: boolean; data: unknown; error: Error | null; duration?: number } | undefined;
           if (typeof typedOp.runWithResult === "function") {
             result = await typedOp.runWithResult(
-              current as unknown as PipelineData,
+              normalised as unknown as PipelineData,
               step.args as unknown as unknown[]
             );
             output = result.data as unknown as PipelineData;
           } else {
             output = await Promise.resolve(step.op.run(
-              current as unknown as PipelineData,
+              normalised as unknown as PipelineData,
               step.args
             )) as PipelineData;
             result = { success: true, data: output, error: null };
@@ -294,11 +296,37 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
    * This bridges between the traditional Pipeline and the new PipelinedOperation
    */
   toPipelinedOperation(): PipelinedOperation<TInput, TOutput> {
-    // This is a simplified conversion
-    // A full implementation would need to resolve operation instances by name
-    // For now, return a basic pipelined operation
-    // The actual implementation would need access to the operation registry
-    return new PipelinedOperation([], undefined) as unknown as PipelinedOperation<TInput, TOutput>;
+    const parts: Array<OperationWithArgs | TypedOperation> = [];
+
+    for (const step of this.steps) {
+      if (step.op) {
+        // Direct operation instance: cast to TypedOperation and wrap with args if present
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const typedOp = step.op as unknown as TypedOperation<any, any, any>;
+        if (step.args.length > 0) {
+          parts.push(new OperationWithArgs(typedOp, step.args as unknown[]));
+        } else {
+          parts.push(typedOp);
+        }
+      } else if (step.opName) {
+        // For opName-based steps, create a wrapper that delegates to the runner
+        const opName = step.opName;
+        const stepArgs = step.args;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        class NamedWrapper extends TypedOperation<any, any, any[]> {
+          name = opName;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          async run(input: any, _args: any[]): Promise<any> {
+            const { runOp } = await import("../commands/runner.js" as string);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return (runOp as any)(opName, input, stepArgs);
+          }
+        }
+        parts.push(new NamedWrapper());
+      }
+    }
+
+    return new PipelinedOperation(parts, undefined) as unknown as PipelinedOperation<TInput, TOutput>;
   }
 
   /**

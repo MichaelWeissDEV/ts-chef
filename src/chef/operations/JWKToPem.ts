@@ -12,11 +12,11 @@ import { Operation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 /**
- * PEM to JWK operation
+ * JWK to PEM operation
  */
-export class PEMToJWK extends Operation {
+export class JWKToPem extends Operation {
   /**
-   * PEMToJWK constructor
+   * JWKToPem constructor
    */
   constructor() {
     super();
@@ -82,4 +82,4 @@ export class PEMToJWK extends Operation {
   }
 }
 
-export default PEMToJWK;
+export default JWKToPem;

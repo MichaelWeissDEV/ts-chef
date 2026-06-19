@@ -81,16 +81,54 @@ class Dish {
     this.value = value;
     if (typeof type === "number") {
       this.type = type;
+    } else {
+      const key = type.toUpperCase() as keyof typeof DISH_TYPES;
+      if (key in DISH_TYPES) {
+        this.type = DISH_TYPES[key];
+      }
     }
   }
 
   /**
    * Gets the value of the dish, optionally converted to a specific type.
    *
-   * @param _type - The requested type. Currently returns the raw value.
-   * @returns The value stored in the dish.
+   * @param _type - The requested type. Coerces the stored value when possible.
+   * @returns The value stored in the dish, coerced to the requested type.
    */
-  async get(_type: DishType | string): Promise<unknown> {
+  async get(_type?: DishType | string): Promise<unknown> {
+    // No conversion requested — return raw value
+    if (_type === undefined) return this.value;
+
+    // Resolve string type to numeric
+    let targetType: DishType;
+    if (typeof _type === "string") {
+      const key = _type.toUpperCase() as keyof typeof DISH_TYPES;
+      targetType = key in DISH_TYPES ? DISH_TYPES[key] : this.type;
+    } else {
+      targetType = _type;
+    }
+
+    // No coercion needed if already the right type
+    if (this.type === targetType) return this.value;
+
+    // Coerce to string
+    if (targetType === DISH_TYPES.STRING) {
+      if (typeof this.value === "string") return this.value;
+      if (this.value instanceof ArrayBuffer)
+        return new TextDecoder().decode(this.value);
+      if (Array.isArray(this.value))
+        return Buffer.from(this.value as number[]).toString("utf-8");
+      return String(this.value);
+    }
+
+    // Coerce to ArrayBuffer
+    if (targetType === DISH_TYPES.ARRAY_BUFFER) {
+      if (this.value instanceof ArrayBuffer) return this.value;
+      if (typeof this.value === "string")
+        return new TextEncoder().encode(this.value).buffer;
+    }
+
+    // For all other types: return raw value (caller is responsible for further conversion)
     return this.value;
   }
 

@@ -41,6 +41,14 @@ export interface ContainerInfo {
   mime?: string | null;
 }
 
+/**
+ * Creates an empty AudioReport with all tag fields set to null and empty collections.
+ *
+ * @param filename - The original filename of the audio artifact.
+ * @param byteLength - The total byte length of the audio file.
+ * @param container - The detected container type and MIME information.
+ * @returns A fully initialized but empty AudioReport.
+ */
 export function makeEmptyReport(
   filename: string,
   byteLength: number,
@@ -79,6 +87,12 @@ export function makeEmptyReport(
   };
 }
 
+/**
+ * Identifies the audio container format by inspecting magic bytes at the start of the buffer.
+ *
+ * @param b - The raw file bytes to inspect.
+ * @returns A ContainerInfo object with the detected type and MIME type, or type "unknown" if unrecognized.
+ */
 export function sniffContainer(b: Uint8Array): ContainerInfo {
   if (b.length >= 3 && b[0] === 0x49 && b[1] === 0x44 && b[2] === 0x33)
     return { type: "mp3", mime: "audio/mpeg" };

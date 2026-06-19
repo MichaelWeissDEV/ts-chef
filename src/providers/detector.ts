@@ -189,7 +189,7 @@ const PATTERNS: PatternDef[] = [
   // ── PEM / DER keys ─────────────────────────────────────────────────────
   {
     label: "PEM block",
-    opName: "ParseX509Certificate",
+    opName: "PubKeyFromCert",
     defaultArgs: [],
     pattern: /(-----BEGIN [A-Z ]+-----[\s\S]+?-----END [A-Z ]+-----)/g,
     confidence: () => 0.96,
@@ -205,7 +205,7 @@ const PATTERNS: PatternDef[] = [
   // ── Charcode / decimal bytes ───────────────────────────────────────────
   {
     label: "Char codes",
-    opName: "FromCharCode",
+    opName: "FromCharcode",
     defaultArgs: ["Comma", 10],
     pattern: /\b((?:\d{1,3},\s*){3,}\d{1,3})\b/g,
     confidence: (m) => {
@@ -298,6 +298,13 @@ export function analyseValue(value: string): DetectionResult[] {
   return results.sort((a, b) => b.confidence - a.confidence);
 }
 
+/**
+ * Scans an entire document for known encoded-data patterns and returns all matches
+ * with their confidence scores, merging overlapping matches for the same value.
+ *
+ * @param doc - The VS Code document to scan.
+ * @returns Array of detection matches sorted by descending confidence within each group.
+ */
 export function scanText(doc: vscode.TextDocument): DetectionMatch[] {
   const text = doc.getText();
   const results: DetectionMatch[] = [];

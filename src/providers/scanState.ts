@@ -10,6 +10,10 @@
 import * as vscode from "vscode";
 import { DetectionMatch, scanText } from "./detector";
 
+/**
+ * In-memory cache of per-document detection results. Fires `onDidChange` after
+ * every scan or clear so subscribers (decorations, tree, hover) can refresh.
+ */
 export class ScanState {
   private results = new Map<string, DetectionMatch[]>();
   private _onChange = new vscode.EventEmitter<void>();

@@ -54,6 +54,10 @@ export interface ScopedVariable extends Variable {
   scope: StorageScope;
 }
 
+/**
+ * Persists named variables to JSON files in both workspace and global storage scopes.
+ * Workspace variables take precedence over global ones when names collide.
+ */
 export class VariableStore {
   constructor(private readonly globalDir: string) {}
 
@@ -80,16 +84,17 @@ export class VariableStore {
     return [...ws, ...gl];
   }
 
-  save(scope: StorageScope, vars: Variable[]): void {
+  save(scope: StorageScope, vars: Variable[]): boolean {
     const dir = this.dir(scope);
     if (!dir) {
       vscode.window.showWarningMessage(
         "ts-chef: open a workspace folder to save workspace variables.",
       );
-      return;
+      return false;
     }
     ensureDir(dir);
     writeJSON(path.join(dir, "variables.json"), vars);
+    return true;
   }
 
   /** Resolve a value by name, workspace overriding global. */
@@ -104,14 +109,14 @@ export class VariableStore {
     name: string,
     value: string,
     description?: string,
-  ): void {
+  ): boolean {
     const vars = this.load(scope).filter((v) => v.name !== name);
     vars.push({ name, value, description });
-    this.save(scope, vars);
+    return this.save(scope, vars);
   }
 
-  delete(scope: StorageScope, name: string): void {
-    this.save(
+  delete(scope: StorageScope, name: string): boolean {
+    return this.save(
       scope,
       this.load(scope).filter((v) => v.name !== name),
     );
@@ -136,6 +141,10 @@ export interface ScopedPipeline extends Pipeline {
   scope: StorageScope;
 }
 
+/**
+ * Persists named pipelines (steps + raw pipe-syntax) to JSON files in both
+ * workspace and global storage scopes, with workspace entries taking precedence.
+ */
 export class PipelineStore {
   constructor(private readonly globalDir: string) {}
 
@@ -167,26 +176,27 @@ export class PipelineStore {
     return this.loadAll().find((p) => p.name === name);
   }
 
-  save(scope: StorageScope, pipelines: Pipeline[]): void {
+  save(scope: StorageScope, pipelines: Pipeline[]): boolean {
     const dir = this.dir(scope);
     if (!dir) {
       vscode.window.showWarningMessage(
         "ts-chef: open a workspace folder to save workspace pipelines.",
       );
-      return;
+      return false;
     }
     ensureDir(dir);
     writeJSON(path.join(dir, "pipelines.json"), pipelines);
+    return true;
   }
 
-  upsert(scope: StorageScope, pipeline: Pipeline): void {
+  upsert(scope: StorageScope, pipeline: Pipeline): boolean {
     const list = this.load(scope).filter((p) => p.name !== pipeline.name);
     list.push(pipeline);
-    this.save(scope, list);
+    return this.save(scope, list);
   }
 
-  delete(scope: StorageScope, name: string): void {
-    this.save(
+  delete(scope: StorageScope, name: string): boolean {
+    return this.save(
       scope,
       this.load(scope).filter((p) => p.name !== name),
     );

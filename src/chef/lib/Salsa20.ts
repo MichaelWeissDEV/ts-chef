@@ -38,6 +38,15 @@ function salsa20Permute(x: number[], rounds: number): void {
   }
 }
 
+/**
+ * Generate a 64-byte Salsa20 keystream block from a key, nonce, and counter.
+ *
+ * @param keyIn - Key as byte array (16 or 32 bytes)
+ * @param nonce - Nonce as byte array (8 bytes)
+ * @param counter - Counter as byte array (8 bytes)
+ * @param rounds - Number of Salsa20 rounds (typically 20)
+ * @returns 64-byte keystream block
+ */
 export function salsa20Block(
   keyIn: number[],
   nonce: number[],
@@ -80,6 +89,14 @@ export function salsa20Block(
   return output;
 }
 
+/**
+ * Compute the HSalsa20 core function, producing a 32-byte subkey used in XSalsa20.
+ *
+ * @param keyIn - Key as byte array (16 or 32 bytes)
+ * @param nonce - Nonce as byte array (16 bytes)
+ * @param rounds - Number of Salsa20 rounds (typically 20)
+ * @returns 32-byte derived subkey
+ */
 export function hsalsa20(
   keyIn: number[],
   nonce: number[],

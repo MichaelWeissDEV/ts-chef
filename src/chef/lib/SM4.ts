@@ -128,6 +128,16 @@ function intsToBytes(ints: number[]): number[] {
   return bArr;
 }
 
+/**
+ * Encrypt a message using the SM4 block cipher with the specified block mode and optional PKCS#7 padding.
+ *
+ * @param message - Plaintext as byte array
+ * @param key - 16-byte key as byte array
+ * @param iv - Initialisation vector as byte array (unused in ECB mode)
+ * @param mode - Block cipher mode ("ECB", "CBC", "CFB", "OFB", "CTR")
+ * @param noPadding - Skip padding; input must already be a 16-byte multiple in ECB/CBC modes
+ * @returns Ciphertext as byte array
+ */
 export function encryptSM4(
   message: number[],
   key: number[],
@@ -224,6 +234,16 @@ export function encryptSM4(
   return cipherText;
 }
 
+/**
+ * Decrypt a message using the SM4 block cipher with the specified block mode and optional PKCS#7 padding removal.
+ *
+ * @param cipherText - Ciphertext as byte array
+ * @param key - 16-byte key as byte array
+ * @param iv - Initialisation vector as byte array (unused in ECB mode)
+ * @param mode - Block cipher mode ("ECB", "CBC", "CFB", "OFB", "CTR")
+ * @param ignorePadding - Skip padding validation and removal in ECB/CBC modes
+ * @returns Plaintext as byte array
+ */
 export function decryptSM4(
   cipherText: number[],
   key: number[],

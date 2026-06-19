@@ -7,6 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
+/**
+ * Apply a single-byte rotation algorithm to each byte in the data array a given number of times.
+ *
+ * @param data - Array of bytes to rotate
+ * @param amount - Number of times to apply the algorithm per byte
+ * @param algo - Single-byte rotation function to apply
+ * @returns New array with each byte rotated
+ */
 export function rot(
   data: number[],
   amount: number,
@@ -23,16 +31,35 @@ export function rot(
   return result;
 }
 
+/**
+ * Rotate a single byte one position to the right, wrapping the LSB to the MSB.
+ *
+ * @param b - Byte to rotate
+ * @returns Rotated byte
+ */
 export function rotr(b: number): number {
   const bit = (b & 1) << 7;
   return (b >> 1) | bit;
 }
 
+/**
+ * Rotate a single byte one position to the left, wrapping the MSB to the LSB.
+ *
+ * @param b - Byte to rotate
+ * @returns Rotated byte
+ */
 export function rotl(b: number): number {
   const bit = (b >> 7) & 1;
   return ((b << 1) | bit) & 0xff;
 }
 
+/**
+ * Rotate an array of bytes to the right by a given number of bits, carrying bits across byte boundaries.
+ *
+ * @param data - Array of bytes to rotate
+ * @param amount - Number of bit positions to rotate right
+ * @returns New array with bytes rotated right with carry
+ */
 export function rotrCarry(data: number[], amount: number): number[] {
   const result: number[] = [];
   let carryBits = 0,
@@ -49,6 +76,13 @@ export function rotrCarry(data: number[], amount: number): number[] {
   return result;
 }
 
+/**
+ * Rotate an array of bytes to the left by a given number of bits, carrying bits across byte boundaries.
+ *
+ * @param data - Array of bytes to rotate
+ * @param amount - Number of bit positions to rotate left
+ * @returns New array with bytes rotated left with carry
+ */
 export function rotlCarry(data: number[], amount: number): number[] {
   const result: number[] = new Array(data.length);
   let carryBits = 0,

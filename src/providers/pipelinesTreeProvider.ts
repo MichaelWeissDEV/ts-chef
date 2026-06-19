@@ -27,6 +27,10 @@ class PipelineNode extends vscode.TreeItem {
   }
 }
 
+/**
+ * Tree data provider for the Pipelines sidebar, listing all saved scoped pipelines
+ * (workspace and global). Clicking a node runs the pipeline against the active selection.
+ */
 export class PipelinesTreeProvider implements vscode.TreeDataProvider<PipelineNode> {
   private _onDidChangeTreeData = new vscode.EventEmitter<void>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;

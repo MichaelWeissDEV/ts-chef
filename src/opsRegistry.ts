@@ -206,7 +206,7 @@ import { JSONMinify } from "./chef/operations/JSONMinify";
 import { JSONToCSV } from "./chef/operations/JSONToCSV";
 import { JSONtoYAML } from "./chef/operations/JSONtoYAML";
 import { Jump } from "./chef/operations/Jump";
-import { PEMToJWK as JWKToPem } from "./chef/operations/JWKToPem";
+import { JWKToPem } from "./chef/operations/JWKToPem";
 import { JWTDecode } from "./chef/operations/JWTDecode";
 import { JWTSign } from "./chef/operations/JWTSign";
 import { JWTVerify } from "./chef/operations/JWTVerify";
@@ -2990,12 +2990,23 @@ const registry: OpMeta[] = [
 
 export default registry;
 
+/**
+ * Looks up an operation by its display name (case-insensitive).
+ *
+ * @param displayName - The human-readable operation name to search for.
+ * @returns The matching {@link OpMeta} entry, or `undefined` if not found.
+ */
 export function findOp(displayName: string): OpMeta | undefined {
   return registry.find(
     (e) => e.displayName.toLowerCase() === displayName.toLowerCase(),
   );
 }
 
+/**
+ * Returns the full flat list of all registered operations.
+ *
+ * @returns Every {@link OpMeta} entry in the registry.
+ */
 export function allOps(): OpMeta[] {
   return registry;
 }

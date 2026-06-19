@@ -28,6 +28,11 @@ const LOW_CONFIDENCE_DECORATION = vscode.window.createTextEditorDecorationType({
   borderRadius: "2px",
 });
 
+/**
+ * Applies text-editor decorations (highlight borders) to detected pattern matches.
+ * High-confidence matches get a solid warning-coloured border; lower-confidence matches
+ * get a dashed info-coloured border. Decorations can be toggled globally at runtime.
+ */
 export class DecorationProvider {
   private enabled: boolean;
 

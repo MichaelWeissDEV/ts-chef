@@ -31,6 +31,22 @@ const NO_CHANGE = [
   "Universal Transverse Mercator",
 ];
 
+/**
+ * Converts geographic coordinates from one format to another.
+ *
+ * Supports Decimal Degrees, Degrees Decimal Minutes, Degrees Minutes Seconds,
+ * Geohash, MGRS, OS National Grid, and UTM as both input and output formats.
+ *
+ * @param input - Raw coordinate string in the source format.
+ * @param inFormat - Input coordinate format, or "Auto" to detect automatically.
+ * @param inDelim - Delimiter separating lat/lon in the input, or "Auto" to detect.
+ * @param outFormat - Desired output coordinate format.
+ * @param outDelim - Delimiter to use between lat/lon values in the output.
+ * @param includeDir - Where to include cardinal direction: "None", "Before", or "After".
+ * @param precision - Number of decimal places (or digits for grid references).
+ * @returns The converted coordinate string.
+ * @throws {OperationError} If the input cannot be parsed or converted.
+ */
 export function convertCoordinates(
   input: string,
   inFormat: string,
@@ -406,6 +422,13 @@ function convDDToDDM(
   };
 }
 
+/**
+ * Determines the cardinal directions (N/S and E/W) for a coordinate string.
+ *
+ * @param input - The coordinate string to inspect.
+ * @param delim - The delimiter separating latitude and longitude values.
+ * @returns A two-element array of direction strings, e.g. `["N", "E"]`.
+ */
 export function findDirs(input: string, delim: string): string[] {
   const upperInput = input.toUpperCase();
   const dirExp = new RegExp(/[NESW]/g);
@@ -457,6 +480,13 @@ export function findDirs(input: string, delim: string): string[] {
   return [latDir, longDir];
 }
 
+/**
+ * Detects the coordinate format of the given input string.
+ *
+ * @param input - The coordinate string to analyse.
+ * @param delim - The delimiter separating latitude and longitude values.
+ * @returns The detected format name, or `null` if it cannot be determined.
+ */
 export function findFormat(input: string, delim: string): string | null {
   let testData;
   const mgrsPattern = new RegExp(
@@ -516,6 +546,12 @@ export function findFormat(input: string, delim: string): string | null {
   return null;
 }
 
+/**
+ * Auto-detects the delimiter used to separate latitude and longitude in a coordinate string.
+ *
+ * @param input - The coordinate string to examine.
+ * @returns The detected delimiter string (e.g. `","`, `"Direction Preceding"`), or `null` if none found.
+ */
 export function findDelim(input: string): string | null {
   input = input.trim();
   const delims = [",", ";", ":"];
@@ -543,6 +579,12 @@ export function findDelim(input: string): string | null {
   return null;
 }
 
+/**
+ * Resolves a human-readable delimiter name to its actual string character.
+ *
+ * @param delim - The delimiter name (e.g. "Space", "Comma", "Colon") or a literal delimiter string.
+ * @returns The corresponding delimiter character or the original string if unrecognised.
+ */
 export function realDelim(delim: string): string {
   return (
     {

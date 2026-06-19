@@ -6,7 +6,7 @@
  * @copyright 2024-2026 Michael Weiss
  */
 
-import { PipelineData, InputType, INPUT_TYPES } from "./types";
+import { PipelineData, InputType, INPUT_TYPES, normaliseInput } from "./types";
 import { Operation, ArgConfig, HighlightPos, HighlightResult, AnyInput } from "./Operation";
 
 // Re-export Operation and related types from their canonical locations
@@ -132,16 +132,20 @@ export class PipelinedOperation<TInput = any, TOutput = any> {
 
   async run(input: TInput): Promise<TOutput> {
     let current: any = input;
-    
+
     for (const part of this.parts) {
       if (part instanceof OperationWithArgs) {
-        current = await part.run(current);
+        const opInputType = (part.operation as any).inputType ?? "string";
+        const normalised = normaliseInput(current, opInputType);
+        current = await Promise.resolve(part.operation.run(normalised as any, part.args));
       } else {
         const typedPart = part as any;
-        current = await typedPart.run(current, []);
+        const opInputType = typedPart.inputType ?? "string";
+        const normalised = normaliseInput(current, opInputType);
+        current = await typedPart.run(normalised, []);
       }
     }
-    
+
     return current as TOutput;
   }
 

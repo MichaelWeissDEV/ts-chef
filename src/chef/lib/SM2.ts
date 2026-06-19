@@ -94,6 +94,10 @@ function bytesToHex(bytes: number[]): string {
   return bytes.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+/**
+ * SM2 elliptic-curve public-key cryptosystem implementing encryption and decryption
+ * per the Chinese national standard (GM/T 0003).
+ */
 export class SM2 {
   private ecParams: {
     G: unknown;

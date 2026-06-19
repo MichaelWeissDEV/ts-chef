@@ -11,6 +11,10 @@ import * as vscode from "vscode";
 import { ScanState } from "./scanState";
 import { runOp } from "../commands/runner";
 
+/**
+ * Hover provider that surfaces high-confidence pattern detections as Markdown tooltips,
+ * including a decoded preview and an inline Convert command link for each match.
+ */
 export class HoverProvider implements vscode.HoverProvider {
   constructor(private state: ScanState) {}
 

@@ -240,3 +240,49 @@ export function normalizeInput(
       return data;
   }
 }
+
+/**
+ * Converts any intermediate pipeline value to the type a concrete operation
+ * declares in its {@link Operation.inputType} field.
+ *
+ * This mirrors the logic in `runner.ts` and is the single source of truth for
+ * inter-step normalisation in both the opName-based and instance-based pipeline
+ * execution paths.
+ *
+ * @param input - The raw output of the previous pipeline step.
+ * @param inputType - The `inputType` string declared by the next operation
+ *   (e.g. `"string"`, `"byteArray"`, `"ArrayBuffer"`, `"number"`).
+ * @returns The input coerced to the expected type.
+ */
+export function normaliseInput(input: unknown, inputType: string): unknown {
+  let buf: Buffer;
+  if (typeof input === "string") {
+    buf = Buffer.from(input, "utf-8");
+  } else if (Array.isArray(input)) {
+    buf = Buffer.from(input as number[]);
+  } else if (input instanceof ArrayBuffer) {
+    buf = Buffer.from(new Uint8Array(input));
+  } else if (Buffer.isBuffer(input)) {
+    buf = input as Buffer;
+  } else if (input instanceof Uint8Array) {
+    buf = Buffer.from(input);
+  } else {
+    buf = Buffer.from(String(input), "utf-8");
+  }
+
+  switch (inputType) {
+    case "string":
+      return buf.toString("utf-8");
+    case "byteArray":
+      return Array.from(buf);
+    case "ArrayBuffer": {
+      const ab = new ArrayBuffer(buf.length);
+      new Uint8Array(ab).set(buf);
+      return ab;
+    }
+    case "number":
+      return Number(buf.toString("utf-8").trim());
+    default:
+      return buf.toString("utf-8");
+  }
+}

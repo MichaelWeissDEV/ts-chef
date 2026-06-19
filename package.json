@@ -2,7 +2,7 @@
   "name": "vscode-ts-chef",
   "displayName": "ts-chef",
   "description": "CyberChef-style data transformations directly in VS Code",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "icon": "assets/logo.jpg",
   "publisher": "michaelweiss",
   "repository": {

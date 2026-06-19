@@ -9,6 +9,12 @@
 
 import { INIT_PATTERNS, ITA2_TABLE, ROTOR_SIZES } from "./Lorenz";
 
+/**
+ * Simulates the Colossus codebreaking computer used at Bletchley Park to attack Lorenz-ciphered traffic.
+ *
+ * Processes ciphertext through configurable Chi, Psi, and Motor rotor rings and Q-bus switch logic,
+ * counting character patterns to assist wheel-breaking.
+ */
 export class ColossusComputer {
   ITAlookup: Record<string, string>;
   ReverseITAlookup: Record<string, string>;
