@@ -26,7 +26,7 @@ interface MagicOption extends MagicResult {
  * Magic operation
  */
 export class Magic extends TypedOperation<AnyInput, Promise<AnyInput>, unknown[]> {
-  state: {
+  state!: {
     progress: number;
     dish: Dish;
     opList: Array<{ ingValues: unknown[]; config?: unknown }>;

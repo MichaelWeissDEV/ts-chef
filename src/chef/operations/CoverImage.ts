@@ -129,9 +129,9 @@ export class CoverImage extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer>
       if (image.mime === "image/gif") {
         imageBuffer = await image.getBuffer(JimpMime.png);
       } else {
-        imageBuffer = await image.getBuffer(image.mime);
+        imageBuffer = await image.getBuffer(image.mime as any);
       }
-      return imageBuffer.buffer;
+      return imageBuffer.buffer as ArrayBuffer;
     } catch (err) {
       throw new OperationError(`Error covering image. (${err})`);
     }

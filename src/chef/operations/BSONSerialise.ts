@@ -52,7 +52,7 @@ export class BSONSerialise extends TypedOperation<string, ArrayBuffer, unknown[]
         buffer.byteOffset + buffer.byteLength,
       ) as ArrayBuffer;
     } catch (err) {
-      throw new OperationError(err.toString());
+      throw new OperationError((err as any).toString());
     }
   }
 }

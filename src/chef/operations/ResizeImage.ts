@@ -113,13 +113,13 @@ export class ResizeImage extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer
         image.scaleToFit({
           w: width,
           h: height,
-          mode: resizeMap[resizeAlg],
+          mode: (resizeMap as any)[resizeAlg],
         });
       } else {
         image.resize({
           w: width,
           h: height,
-          mode: resizeMap[resizeAlg],
+          mode: (resizeMap as any)[resizeAlg],
         });
       }
 
@@ -137,7 +137,7 @@ export class ResizeImage extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer
             | "image/x-ms-bmp",
         );
       }
-      return imageBuffer.buffer;
+      return imageBuffer.buffer as ArrayBuffer;
     } catch (err) {
       throw new OperationError(`Error resizing image. (${err})`);
     }

@@ -350,7 +350,7 @@ function decryptBlock(
  * Provides block cipher operations and key schedule initialization.
  */
 export class BlowfishAlgorithm {
-  box: BlowfishBoxes;
+  box!: BlowfishBoxes;
   mode: unknown;
 
   /**
@@ -436,7 +436,7 @@ export class BlowfishAlgorithm {
       box.p[i++] = res.right;
     }
     for (let i = 0; i < 4; i++) {
-      const s = (box as BlowfishBoxes)["s" + i] as number[];
+      const s = (box as any)["s" + i] as number[];
       for (let j = 0, l = s.length; j < l; ) {
         eb(res, box);
         s[j++] = res.left;

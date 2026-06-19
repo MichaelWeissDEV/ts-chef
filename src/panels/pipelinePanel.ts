@@ -169,13 +169,16 @@ export class PipelinePanel {
       })
       .filter(Boolean);
 
+    const nonce = getNonce();
+
     return /* html */ `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${this.panel.webview.cspSource} https:; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}';">
 <title>ts-chef Pipeline Editor</title>
-<style>
+<style nonce="${nonce}">
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: var(--vscode-font-family); font-size: var(--vscode-font-size); color: var(--vscode-foreground); background: var(--vscode-editor-background); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
@@ -282,7 +285,7 @@ export class PipelinePanel {
 <div class="err" id="errMsg"></div>
 <div class="status-bar"><span id="statusText">Ready</span></div>
 
-<script>
+<script nonce="${nonce}">
 const vscode = acquireVsCodeApi();
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -701,4 +704,13 @@ function escHtmlAttr(s: string): string {
 
 function escHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function getNonce(): string {
+  let text = "";
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i < 32; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
 }

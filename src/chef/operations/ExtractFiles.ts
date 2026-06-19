@@ -77,8 +77,8 @@ export class ExtractFiles extends TypedOperation<ArrayBuffer, AnyInput, unknown[
   run(input: ArrayBuffer, args: unknown[]): AnyInput {
     const bytes = new Uint8Array(input),
       categories: string[] = [],
-      minSize = args.pop(),
-      ignoreFailedExtractions = args.pop();
+      minSize = args.pop() as number,
+      ignoreFailedExtractions = args.pop() as boolean;
 
     args.forEach((cat, i) => {
       if (cat) categories.push(Object.keys(FILE_SIGNATURES)[i]);

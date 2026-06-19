@@ -79,12 +79,12 @@ export class PGPEncryptAndSign extends TypedOperation<string, Promise<string>, u
     const pubKey = await importPublicKey(publicKey);
 
     try {
-      signedMessage = await promisify(kbpgp.box)({
+      signedMessage = (await promisify(kbpgp.box)({
         msg: message,
         encrypt_for: pubKey,
         sign_with: privKey,
         asp: ASP,
-      });
+      })) as string;
     } catch (err) {
       throw new OperationError(`Couldn't sign message: ${err}`);
     }

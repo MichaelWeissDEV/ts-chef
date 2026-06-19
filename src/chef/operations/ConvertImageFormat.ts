@@ -117,7 +117,7 @@ export class ConvertImageFormat extends TypedOperation<ArrayBuffer, Promise<Arra
           break;
       }
 
-      return buffer.buffer;
+      return buffer.buffer as ArrayBuffer;
     } catch (err) {
       throw new OperationError(`Error converting image format. (${err})`);
     }

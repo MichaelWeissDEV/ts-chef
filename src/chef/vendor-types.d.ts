@@ -9,6 +9,11 @@
 
 // Ambient module declarations for npm packages without @types
 
+declare module "crypto-api/src/crypto-api.mjs" {
+  const CryptoApi: any;
+  export default CryptoApi;
+}
+
 declare module "jsqr" {
   interface QRCode {
     data: string;

@@ -105,6 +105,7 @@ export class ParityBit extends TypedOperation<string, string, unknown[]> {
       return pos;
     }
     // need to be able to read input to do the highlighting when there is a delimiter
+    return pos;
   }
 
   /**
@@ -126,6 +127,7 @@ export class ParityBit extends TypedOperation<string, string, unknown[]> {
       }
       return pos;
     }
+    return pos;
   }
 }
 

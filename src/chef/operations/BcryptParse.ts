@@ -53,7 +53,7 @@ Salt: ${salt}
 Password hash: ${hash}
 Full hash: ${input}`;
     } catch (err) {
-      throw new OperationError("Error: " + err.toString());
+      throw new OperationError("Error: " + (err as any).toString());
     }
   }
 }

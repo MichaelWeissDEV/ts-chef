@@ -152,7 +152,7 @@ export class DisassembleARM extends TypedOperation<string, Promise<AnyInput>, un
 
     let instructions;
     try {
-      instructions = disassembler.disasm(bytes, startAddress);
+      instructions = disassembler.disasm(bytes, startAddress as number);
     } catch (e) {
       disassembler.close();
 

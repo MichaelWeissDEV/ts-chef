@@ -67,7 +67,7 @@ export class NormaliseImage extends TypedOperation<ArrayBuffer, Promise<ArrayBuf
             | "image/x-ms-bmp",
         );
       }
-      return imageBuffer.buffer;
+      return imageBuffer.buffer as ArrayBuffer;
     } catch (err) {
       throw new OperationError(`Error normalising image. (${err})`);
     }

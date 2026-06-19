@@ -57,7 +57,7 @@ export class ExtractAudioMetadata extends TypedOperation<ArrayBuffer, AnyInput, 
    */
   run(input: ArrayBuffer, args: unknown[]): AnyInput {
     const [arg0, arg1] = args as [string, number];
-    const filename = (arg0 || "").trim() || null;
+    const filename = (arg0 || "").trim();
     const maxTextBytes = Number.isFinite(arg1)
       ? Math.max(1024, arg1)
       : 1024 * 512;

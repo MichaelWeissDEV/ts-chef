@@ -74,7 +74,7 @@ export class RotateImage extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer
             | "image/x-ms-bmp",
         );
       }
-      return imageBuffer.buffer;
+      return imageBuffer.buffer as ArrayBuffer;
     } catch (err) {
       throw new OperationError(`Error rotating image. (${err})`);
     }
