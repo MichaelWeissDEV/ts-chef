@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, AnyInput } from "../Operation_new";
+import { TypedOperation, AnyInput } from "../Operation";
 import { detectFileType } from "../lib/FileType";
 import { FILE_SIGNATURES } from "../lib/FileSignatures";
 

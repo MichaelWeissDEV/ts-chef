@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 
 // 92 printable ASCII characters, skipping '"' (34) and '`' (96)
 function genBase92Alphabet(): string {

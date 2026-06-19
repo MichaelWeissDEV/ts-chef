@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, ArgConfig } from "../Operation_new";
+import { TypedOperation, ArgConfig } from "../Operation";
 import { encode } from "../lib/CipherSaber2";
 import { Utils } from "../Utils";
 import * as crypto from "crypto";

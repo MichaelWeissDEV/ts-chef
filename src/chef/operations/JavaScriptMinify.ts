@@ -8,7 +8,7 @@
  */
 
 import OperationError from "../errors/OperationError";
-import { TypedOperation, AnyInput } from "../Operation_new";
+import { TypedOperation, AnyInput } from "../Operation";
 import * as terser from "terser";
 
 /**

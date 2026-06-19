@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, AnyInput } from "../Operation_new";
+import { TypedOperation, AnyInput } from "../Operation";
 import { INFLATE_BUFFER_TYPE } from "../lib/Zlib";
 import rawinflate from "zlibjs/bin/rawinflate.min.js";
 

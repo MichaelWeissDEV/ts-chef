@@ -8,7 +8,7 @@
  */
 
 import { format } from "sql-formatter";
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 
 export class SQLBeautify extends TypedOperation<string, string, unknown[]> {
   constructor() {

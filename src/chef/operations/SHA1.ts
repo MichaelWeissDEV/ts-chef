@@ -8,7 +8,7 @@
  */
 
 import { createHash } from "crypto";
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 
 export class SHA1 extends TypedOperation<ArrayBuffer, string, unknown[]> {
   constructor() {

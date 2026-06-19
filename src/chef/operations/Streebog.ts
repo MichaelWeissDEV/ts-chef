@@ -8,7 +8,7 @@
  */
 
 import { streebog256, streebog512 } from "@li0ard/streebog";
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 import { OperationError } from "../errors/OperationError";
 
 export class Streebog extends TypedOperation<ArrayBuffer, string, unknown[]> {

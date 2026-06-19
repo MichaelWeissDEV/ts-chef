@@ -8,7 +8,7 @@
  */
 
 import r from "jsrsasign";
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 
 /**
  * Hex to Object Identifier operation

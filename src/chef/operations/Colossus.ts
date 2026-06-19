@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, ArgConfig, AnyInput } from "../Operation_new";
+import { TypedOperation, ArgConfig, AnyInput } from "../Operation";
 import { OperationError } from "../errors/OperationError";
 import { ColossusComputer } from "../lib/Colossus";
 import { SWITCHES, VALID_ITA2, ROTOR_SIZES } from "../lib/Lorenz";

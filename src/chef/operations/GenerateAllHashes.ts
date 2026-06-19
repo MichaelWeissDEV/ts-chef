@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, Operation } from "../Operation_new";
+import { TypedOperation, Operation } from "../Operation";
 import Utils from "../Utils";
 import MD2 from "./MD2";
 import MD4 from "./MD4";

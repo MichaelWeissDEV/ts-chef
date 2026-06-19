@@ -8,7 +8,7 @@
  */
 
 import BigNumber from "bignumber.js";
-import { TypedOperation, AnyInput } from "../Operation_new";
+import { TypedOperation, AnyInput } from "../Operation";
 import { div, createNumArray } from "../lib/Arithmetic";
 import { ARITHMETIC_DELIM_OPTIONS } from "../lib/Delim";
 

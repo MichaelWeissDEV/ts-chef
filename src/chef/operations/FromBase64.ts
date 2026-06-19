@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation";
 import { fromBase64 } from "../lib/Base64";
 
 export const ALPHABET_OPTIONS = [

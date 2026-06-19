@@ -8,7 +8,7 @@
  */
 
 import * as ssdeepjs from "ssdeep.js";
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 
 export class SSDEEP extends TypedOperation<string, string, unknown[]> {
   constructor() {

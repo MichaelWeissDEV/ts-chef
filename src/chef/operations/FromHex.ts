@@ -7,11 +7,36 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
+import { TypedOperation, OperationResult, HighlightResult, HighlightPos, INPUT_TYPES } from "../Operation";
 import { fromHex, FROM_HEX_DELIM_OPTIONS } from "../lib/Hex";
 import { Utils } from "../Utils";
 
-export class FromHex extends TypedOperation<string, number[], unknown[]> {
+/**
+ * Strongly typed argument configuration for FromHex operation
+ */
+export interface FromHexArgs {
+  /** The delimiter used in the hex string */
+  delimiter: string;
+}
+
+/**
+ * FromHex operation with strong typing
+ *
+ * Converts a hexadecimal string back to raw bytes.
+ *
+ * @example
+ * // Basic usage
+ * const op = new FromHex();
+ * const result = await op.run("48 65 6c 6c 6f", ["Space"]);
+ * // Result: Uint8Array [72, 101, 108, 108, 111]
+ *
+ * @example
+ * // Pipeline usage
+ * const pipeline = new FromHex()
+ *   .withArgs("Space")
+ *   .pipe(new ToString());
+ */
+export class FromHex extends TypedOperation<string, number[], [delimiter: string]> {
   constructor() {
     super();
     this.name = "From Hex";
@@ -19,8 +44,8 @@ export class FromHex extends TypedOperation<string, number[], unknown[]> {
     this.description =
       "Converts a hexadecimal byte string back into its raw value.<br><br>e.g. <code>ce 93 ce b5 ce b9 ce ac 20 cf 83 ce bf cf 85 0a</code> becomes the UTF-8 encoded string <code>Geia sou</code>";
     this.infoURL = "https://wikipedia.org/wiki/Hexadecimal";
-    this.inputType = "string";
-    this.outputType = "byteArray";
+    this.inputType = INPUT_TYPES.STRING;
+    this.outputType = INPUT_TYPES.BYTE_ARRAY;
     this.args = [
       {
         name: "Delimiter",
@@ -70,13 +95,23 @@ export class FromHex extends TypedOperation<string, number[], unknown[]> {
     ];
   }
 
-  run(input: string, args: unknown[]): number[] {
-    const delim = (args[0] as string) || "Auto";
-    return fromHex(input, delim, 2);
+  /**
+   * Main execution method with strong typing
+   *
+   * @param input - The hexadecimal string to convert
+   * @param args - Tuple of arguments: [delimiter]
+   * @returns Byte array (Uint8Array values as number[])
+   */
+  run(input: string, args: [string]): number[] {
+    const [delim] = args;
+    return fromHex(input, delim || "Auto", 2);
   }
 
-  highlight(pos: HighlightPos, args: unknown[]): HighlightResult {
-    const delimStr = (args[0] as string) || "Space";
+  /**
+   * Calculate highlight positions for input-output mapping
+   */
+  highlight(pos: HighlightPos, args: [string]): HighlightResult {
+    const [delimStr] = args;
     if (delimStr === "Auto") return false;
     const delim = Utils.charRep(delimStr);
     const len = delim === "\r\n" ? 1 : delim.length;
@@ -94,8 +129,11 @@ export class FromHex extends TypedOperation<string, number[], unknown[]> {
     return pos;
   }
 
-  highlightReverse(pos: HighlightPos, args: unknown[]): HighlightResult {
-    const delimStr = (args[0] as string) || "Space";
+  /**
+   * Calculate reverse highlight positions
+   */
+  highlightReverse(pos: HighlightPos, args: [string]): HighlightResult {
+    const [delimStr] = args;
     const delim = Utils.charRep(delimStr);
     const len = delim === "\r\n" ? 1 : delim.length;
 
@@ -108,6 +146,27 @@ export class FromHex extends TypedOperation<string, number[], unknown[]> {
     }
     return pos;
   }
+
+  /**
+   * Execute with detailed result information
+   */
+  async runWithResult(
+    input: string,
+    args: [string]
+  ): Promise<OperationResult<number[], Error>> {
+    return super.runWithResult(input, args);
+  }
+}
+
+/**
+ * Convenience method for creating a FromHex operation with pre-configured arguments
+ *
+ * @param delimiter - The delimiter used in the hex string
+ * @returns OperationWithArgs instance ready for piping
+ */
+export function fromHexOp(delimiter: string = "Auto") {
+  const op = new FromHex();
+  return op.withArgs(delimiter);
 }
 
 export default FromHex;

@@ -9,7 +9,7 @@
 
 import { fromBase64, toBase64 } from "../lib/Base64";
 import { fromHex } from "../lib/Hex";
-import { TypedOperation, AnyInput } from "../Operation_new";
+import { TypedOperation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { isType, detectFileType } from "../lib/FileType";

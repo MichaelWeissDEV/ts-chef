@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, AnyInput } from "../Operation_new";
+import { TypedOperation, AnyInput } from "../Operation";
 import Recipe from "../Recipe";
 import Dish from "../Dish";
 
@@ -128,7 +128,7 @@ export class Fork extends TypedOperation<AnyInput, Promise<AnyInput>, unknown[]>
     }
 
     state.dish.set(outputs.join(mergeDelim), outputType);
-    state.progress += progress;
+    state.progress = i;
     return state;
   }
 }

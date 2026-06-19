@@ -8,7 +8,7 @@
  */
 
 import scryptsy from "scryptsy";
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 import { Utils } from "../Utils";
 import { OperationError } from "../errors/OperationError";
 

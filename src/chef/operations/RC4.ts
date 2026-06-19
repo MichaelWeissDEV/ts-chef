@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation";
 import CryptoJS from "crypto-js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

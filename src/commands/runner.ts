@@ -11,7 +11,9 @@ import registry, { findOp } from "../opsRegistry";
 import type { Operation, AnyInput } from "../chef/Operation";
 import type { PipelineStep } from "../storage/store";
 import { resolveDefaultArg } from "./argDefaults";
-import { normaliseInput } from "../chef/types";
+import { normaliseInput, PipelineData } from "../chef/types";
+import Recipe from "../chef/Recipe";
+import Dish from "../chef/Dish";
 
 // Re-exported for callers that already import it from the runner.
 export { resolveDefaultArg, normaliseInput };
@@ -59,20 +61,31 @@ export function runOp(
  * @returns The final result serialised as a UTF-8 string.
  */
 export async function runPipeline(input: AnyInput, steps: PipelineStep[]): Promise<string> {
-  let current: AnyInput = input;
-  for (const step of steps) {
-    const result = runOp(step.opName, current, step.args);
-    current = result instanceof Promise ? await result : result;
+  const recipeConfig = steps.map((step) => ({
+    op: step.opName,
+    args: step.args as (PipelineData | null)[],
+  }));
+
+  const recipe = new Recipe(recipeConfig);
+  const dish = new Dish();
+
+  // Set the initial dish value
+  if (input instanceof ArrayBuffer) {
+    dish.set(input, "ArrayBuffer");
+  } else if (Array.isArray(input)) {
+    const buffer = Buffer.from(input as number[]);
+    const ab = new ArrayBuffer(buffer.length);
+    new Uint8Array(ab).set(buffer);
+    dish.set(ab, "ArrayBuffer");
+  } else if (typeof input === "string") {
+    dish.set(input, "string");
+  } else {
+    dish.set(input, "string");
   }
-  // Convert final result to displayable string
-  if (Array.isArray(current))
-    return Buffer.from(current as number[]).toString("utf-8");
-  if (current instanceof ArrayBuffer)
-    return Buffer.from(new Uint8Array(current as ArrayBuffer)).toString(
-      "utf-8",
-    );
-  if (typeof current === "string") return current;
-  return JSON.stringify(current, null, 2);
+
+  await recipe.execute(dish);
+  const finalOutput = await dish.get("string");
+  return typeof finalOutput === "string" ? finalOutput : String(finalOutput);
 }
 
 /**

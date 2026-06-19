@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 
 function ROL32(x: number, n: number): number {
   return ((x << n) >>> 0) | (x >>> (32 - n));

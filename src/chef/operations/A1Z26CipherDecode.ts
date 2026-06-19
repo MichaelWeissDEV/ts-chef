@@ -6,7 +6,7 @@
  * @author Michael Weiss
  */
 
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 import { Utils } from "../Utils";
 import { DELIM_OPTIONS } from "../lib/Delim";
 import { OperationError } from "../errors/OperationError";

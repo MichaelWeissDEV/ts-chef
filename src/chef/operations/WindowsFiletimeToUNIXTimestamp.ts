@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 import { OperationError } from "../errors/OperationError";
 
 // Windows FILETIME is 100-nanosecond intervals since 1 Jan 1601

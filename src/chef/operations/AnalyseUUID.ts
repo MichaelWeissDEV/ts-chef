@@ -8,7 +8,7 @@
  */
 
 import * as uuid from "uuid";
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { toHex } from "../lib/Hex";
 

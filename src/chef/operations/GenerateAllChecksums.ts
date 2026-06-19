@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, TypedOperation, AnyInput } from "../Operation_new";
+import { Operation, TypedOperation, AnyInput } from "../Operation";
 import Adler32Checksum from "./Adler32Checksum";
 import CRCChecksum from "./CRCChecksum";
 import Fletcher8Checksum from "./Fletcher8Checksum";

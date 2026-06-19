@@ -10,6 +10,7 @@
 import Dish from "./Dish";
 import { Operation, AnyInput } from "./Operation";
 import { PipelineData, normalizeInput, InputType } from "./types";
+import registry from "../opsRegistry";
 
 /**
  * Represents a single operation entry in a recipe's internal list.
@@ -74,11 +75,19 @@ class Recipe {
   ) {
     if (recipeConfig) {
       recipeConfig.forEach((c) => {
+        const entry = registry.find(
+          (e) => e.opName === c.op || e.displayName.toLowerCase() === c.op.toLowerCase()
+        );
+        const op = entry ? entry.factory() : undefined;
         this.opList.push({
           name: c.op,
           ingValues: c.args,
           breakpoint: c.breakpoint,
           disabled: c.disabled || c.op === "Comment",
+          op: op,
+          inputType: op?.inputType,
+          outputType: op?.outputType,
+          flowControl: op?.flowControl,
         });
       });
     }
@@ -90,6 +99,19 @@ class Recipe {
    * @param ops - The operation items to add.
    */
   addOperations(ops: OpListItem[]): void {
+    ops.forEach(op => {
+      if (!op.op) {
+        const entry = registry.find(
+          (e) => e.opName === op.name || e.displayName.toLowerCase() === op.name.toLowerCase()
+        );
+        op.op = entry ? entry.factory() : undefined;
+      }
+      if (op.op) {
+        op.inputType = op.inputType ?? op.op.inputType;
+        op.outputType = op.outputType ?? op.op.outputType;
+        op.flowControl = op.flowControl ?? op.op.flowControl;
+      }
+    });
     this.opList = this.opList.concat(ops);
   }
 
@@ -113,10 +135,23 @@ class Recipe {
     for (let i = progress; i < opList.length; i++) {
       const item = opList[i];
       if (item.disabled) continue;
+      
+      if (!item.op) {
+        const entry = registry.find(
+          (e) => e.opName === item.name || e.displayName.toLowerCase() === item.name.toLowerCase()
+        );
+        item.op = entry ? entry.factory() : undefined;
+      }
+      
       if (!item.op) continue;
 
+      const op = item.op;
+      const isFlowControl = item.flowControl ?? op.flowControl;
+      const inputType = item.inputType ?? op.inputType ?? "string";
+      const outputType = item.outputType ?? op.outputType ?? "string";
+
       try {
-        if (item.flowControl) {
+        if (isFlowControl) {
           const currentState: RecipeState = {
             progress: i,
             dish,
@@ -124,7 +159,7 @@ class Recipe {
             forkOffset: state?.forkOffset ?? 0,
             ...state,
           };
-          const result = await item.op.run(
+          const result = await op.run(
             currentState,
             item.ingValues as unknown[],
           );
@@ -133,18 +168,18 @@ class Recipe {
           }
         } else {
           // Type-safe input normalization
-          const rawInput = await dish.get(item.inputType ?? "string");
-          const input = item.inputType
+          const rawInput = await dish.get(inputType);
+          const input = inputType
             ? normalizeInput(
                 rawInput as PipelineData,
-                item.inputType as InputType,
+                inputType as InputType,
               )
             : rawInput;
-          const output = await item.op.run(
+          const output = await op.run(
             input as AnyInput,
             item.ingValues as unknown[],
           );
-          dish.set(output, dish.type);
+          dish.set(output, outputType);
         }
         progress = i;
       } catch (err) {

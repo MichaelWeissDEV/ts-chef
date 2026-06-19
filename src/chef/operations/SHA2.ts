@@ -8,7 +8,7 @@
  */
 
 import { createHash } from "crypto";
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 import { OperationError } from "../errors/OperationError";
 
 const SIZE_MAP: Record<string, string> = {

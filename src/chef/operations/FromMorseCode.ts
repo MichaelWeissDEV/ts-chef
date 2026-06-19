@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 import { Utils } from "../Utils";
 import { LETTER_DELIM_OPTIONS, WORD_DELIM_OPTIONS } from "../lib/Delim";
 

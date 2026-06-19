@@ -8,7 +8,7 @@
  */
 
 import * as JSSHA3 from "js-sha3";
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 import { OperationError } from "../errors/OperationError";
 
 export class Shake extends TypedOperation<ArrayBuffer, string, unknown[]> {

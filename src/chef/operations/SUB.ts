@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation";
 import { Utils } from "../Utils";
 import { bitOp, sub, BITWISE_OP_DELIMS } from "../lib/BitwiseOp";
 

@@ -8,7 +8,7 @@
  */
 
 import hljs from "highlight.js";
-import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation";
 
 export class SyntaxHighlighter extends TypedOperation<string, string, unknown[]> {
   constructor() {

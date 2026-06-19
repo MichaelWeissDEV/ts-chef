@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, ArgConfig } from "../Operation_new";
+import { TypedOperation, ArgConfig } from "../Operation";
 import { OperationError } from "../errors/OperationError";
 import { BombeMachine } from "../lib/Bombe";
 import { ROTORS, ROTORS_FOURTH, REFLECTORS, Reflector } from "../lib/Enigma";

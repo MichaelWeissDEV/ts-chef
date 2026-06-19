@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation,  AnyInput  } from "../Operation_new";
+import { TypedOperation,  AnyInput  } from "../Operation";
 import "reflect-metadata"; // Required as a shim for the amf library
 import { AMF0, AMF3 } from "@astronautlabs/amf";
 

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, AnyInput, HighlightPos, HighlightResult } from "../Operation_new";
+import { TypedOperation, AnyInput, HighlightPos, HighlightResult } from "../Operation";
 import { BRAILLE_LOOKUP } from "../lib/Braille";
 
 /**

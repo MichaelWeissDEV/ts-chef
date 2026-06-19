@@ -8,7 +8,7 @@
  */
 
 import * as r from "jsrsasign";
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 import { formatDnObj } from "../lib/PublicKey";
 import Utils from "../Utils";
 

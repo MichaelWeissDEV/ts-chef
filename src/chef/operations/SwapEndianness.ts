@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation";
 import { Utils } from "../Utils";
 import { toHex, fromHex } from "../lib/Hex";
 import { OperationError } from "../errors/OperationError";

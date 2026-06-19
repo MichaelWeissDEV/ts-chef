@@ -7,13 +7,13 @@
  */
 
 // Local imports needed for this module's own code (type aliases and createTypedOperation factory)
-import type { ArgConfig, HighlightPos, HighlightResult, AnyInput, OperationResult } from "../Operation_new";
-import { TypedOperation } from "../Operation_new";
+import type { ArgConfig, HighlightPos, HighlightResult, AnyInput, OperationResult } from "../Operation";
+import { TypedOperation } from "../Operation";
 import type { PipelineData, InputType } from "../types";
 
 // Re-export all the new strongly typed operations
-export { ToHex, toHex } from "./ToHex_new";
-export { FromHex, fromHexOp } from "./FromHex_new";
+export { ToHex, toHex } from "./ToHex";
+export { FromHex, fromHexOp } from "./FromHex";
 
 // Re-export types from the base operation module
 export type {
@@ -22,7 +22,7 @@ export type {
   ArgConfig,
   HighlightPos,
   HighlightResult,
-} from "../Operation_new";
+} from "../Operation";
 
 // Re-export OperationInput/OperationOutput from canonical location
 export type { OperationInput, OperationOutput } from "../Operation";
@@ -32,12 +32,12 @@ export {
   TypedOperation,
   OperationWithArgs,
   PipelinedOperation,
-} from "../Operation_new";
+} from "../Operation";
 
 /**
  * Type-safe pipeline building functions
  */
-export { Pipeline, PipelineBuilder, PipelineStepResult, pipe } from "../Pipeline_new";
+export { Pipeline, PipelineBuilder, PipelineStepResult, pipe } from "../Pipeline";
 
 /**
  * Helper types for common operation signatures

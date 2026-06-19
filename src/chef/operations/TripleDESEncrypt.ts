@@ -3,7 +3,7 @@
  * @license Apache-2.0
  */
 
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 import { OperationError } from "../errors/OperationError";
 import { createCipheriv } from "crypto";
 import { fromHex } from "../lib/Hex";

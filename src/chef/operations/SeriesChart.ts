@@ -15,7 +15,7 @@ import {
   FIELD_DELIMITER_OPTIONS,
 } from "../lib/Charts";
 
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 import Utils from "../Utils";
 
 const d3 = (d3temp as any).default ? (d3temp as any).default : d3temp;

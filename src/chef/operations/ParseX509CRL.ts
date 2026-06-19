@@ -8,7 +8,7 @@
  */
 
 import * as r from "jsrsasign";
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 import { fromBase64 } from "../lib/Base64";
 import { toHex } from "../lib/Hex";
 import { formatDnObj } from "../lib/PublicKey";

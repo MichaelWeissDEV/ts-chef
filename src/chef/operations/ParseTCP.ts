@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, AnyInput } from "../Operation_new";
+import { TypedOperation, AnyInput } from "../Operation";
 import Stream from "../lib/Stream";
 import { toHexFast, fromHex } from "../lib/Hex";
 import { toBinary } from "../lib/Binary";

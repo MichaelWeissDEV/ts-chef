@@ -16,7 +16,7 @@ import {
   FIELD_DELIMITER_OPTIONS,
 } from "../lib/Charts";
 
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 

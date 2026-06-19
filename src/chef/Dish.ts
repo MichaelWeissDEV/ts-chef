@@ -27,6 +27,8 @@ export const DISH_TYPES = {
   LIST_FILE: 6,
   /** BigInt representation. */
   BIG_NUMBER: 7,
+  /** Byte array representation. */
+  BYTE_ARRAY: 8,
 } as const;
 
 /**
@@ -56,6 +58,7 @@ class Dish {
   static readonly FILE = DISH_TYPES.FILE;
   static readonly LIST_FILE = DISH_TYPES.LIST_FILE;
   static readonly BIG_NUMBER = DISH_TYPES.BIG_NUMBER;
+  static readonly BYTE_ARRAY = DISH_TYPES.BYTE_ARRAY;
 
   /**
    * Creates a new Dish.
@@ -82,9 +85,14 @@ class Dish {
     if (typeof type === "number") {
       this.type = type;
     } else {
-      const key = type.toUpperCase() as keyof typeof DISH_TYPES;
+      let key = type.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if (key === "BYTEARRAY") key = "BYTE_ARRAY";
+      if (key === "ARRAYBUFFER") key = "ARRAY_BUFFER";
+      if (key === "BIGNUMBER") key = "BIG_NUMBER";
+      if (key === "LISTFILE") key = "LIST_FILE";
+      
       if (key in DISH_TYPES) {
-        this.type = DISH_TYPES[key];
+        this.type = DISH_TYPES[key as keyof typeof DISH_TYPES];
       }
     }
   }
@@ -102,8 +110,12 @@ class Dish {
     // Resolve string type to numeric
     let targetType: DishType;
     if (typeof _type === "string") {
-      const key = _type.toUpperCase() as keyof typeof DISH_TYPES;
-      targetType = key in DISH_TYPES ? DISH_TYPES[key] : this.type;
+      let key = _type.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if (key === "BYTEARRAY") key = "BYTE_ARRAY";
+      if (key === "ARRAYBUFFER") key = "ARRAY_BUFFER";
+      if (key === "BIGNUMBER") key = "BIG_NUMBER";
+      if (key === "LISTFILE") key = "LIST_FILE";
+      targetType = key in DISH_TYPES ? DISH_TYPES[key as keyof typeof DISH_TYPES] : this.type;
     } else {
       targetType = _type;
     }
@@ -126,6 +138,21 @@ class Dish {
       if (this.value instanceof ArrayBuffer) return this.value;
       if (typeof this.value === "string")
         return new TextEncoder().encode(this.value).buffer;
+      if (Array.isArray(this.value)) {
+        const buf = Buffer.from(this.value as number[]);
+        const ab = new ArrayBuffer(buf.length);
+        new Uint8Array(ab).set(buf);
+        return ab;
+      }
+    }
+
+    // Coerce to byte array (number[])
+    if (targetType === DISH_TYPES.BYTE_ARRAY) {
+      if (Array.isArray(this.value)) return this.value;
+      if (this.value instanceof ArrayBuffer)
+        return Array.from(new Uint8Array(this.value));
+      if (typeof this.value === "string")
+        return Array.from(new TextEncoder().encode(this.value));
     }
 
     // For all other types: return raw value (caller is responsible for further conversion)

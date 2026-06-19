@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, AnyInput } from "../Operation_new";
+import { TypedOperation, AnyInput } from "../Operation";
 import { TO_MODHEX_DELIM_OPTIONS, toModhex } from "../lib/Modhex";
 import Utils from "../Utils";
 

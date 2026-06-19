@@ -12,7 +12,7 @@ import { fromBase64 } from "../lib/Base64";
 import { runHash } from "../lib/Hash";
 import { fromHex, toHex } from "../lib/Hex";
 import { formatByteStr, formatDnObj } from "../lib/PublicKey";
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 import Utils from "../Utils";
 import OperationError from "../errors/OperationError";
 

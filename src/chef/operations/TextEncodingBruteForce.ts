@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, AnyInput } from "../Operation_new";
+import { TypedOperation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import cptable from "codepage";
 import { CHR_ENC_CODE_PAGES } from "../lib/ChrEnc";

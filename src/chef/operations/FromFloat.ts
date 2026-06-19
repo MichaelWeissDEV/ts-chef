@@ -8,7 +8,7 @@
  */
 
 import * as ieee754 from "ieee754";
-import { TypedOperation } from "../Operation_new";
+import { TypedOperation } from "../Operation";
 import { Utils } from "../Utils";
 import { DELIM_OPTIONS } from "../lib/Delim";
 

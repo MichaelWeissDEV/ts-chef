@@ -8,7 +8,7 @@
  */
 
 import { removeEXIF } from "../vendor/remove-exif";
-import { TypedOperation, AnyInput } from "../Operation_new";
+import { TypedOperation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 /**
