@@ -7,12 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 /**
  * P-list Viewer operation
  */
-export class PlistViewer extends Operation {
+export class PlistViewer extends TypedOperation<string, string, unknown[]> {
   /**
    * PlistViewer constructor
    */

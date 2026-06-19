@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Utils from "../Utils";
 
 /**
  * Fletcher-16 Checksum operation
  */
-export class Fletcher16Checksum extends Operation {
+export class Fletcher16Checksum extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /**
    * Fletcher16Checksum constructor
    */

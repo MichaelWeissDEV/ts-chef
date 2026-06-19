@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 function genBase92Alphabet(): string {
   let s = "";
@@ -19,7 +19,7 @@ function genBase92Alphabet(): string {
 
 const BASE92_ALPHABET = genBase92Alphabet();
 
-export class FromBase92 extends Operation {
+export class FromBase92 extends TypedOperation<string, number[], unknown[]> {
   constructor() {
     super();
     this.name = "From Base92";

@@ -3,7 +3,7 @@
  * @license Apache-2.0
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import { createCipheriv } from "crypto";
 import { fromHex } from "../lib/Hex";
@@ -17,7 +17,7 @@ import { Utils } from "../Utils";
  * @category Ciphers
  * @see https://wikipedia.org/wiki/Triple_DES
  */
-export class TripleDESEncrypt extends Operation {
+export class TripleDESEncrypt extends TypedOperation<string | ArrayBuffer, ArrayBuffer, unknown[]> {
   constructor() {
     super();
     this.name = "Triple DES Encrypt";

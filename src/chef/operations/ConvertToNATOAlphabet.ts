@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 const NATO_LOOKUP: Record<string, string> = {
   A: "Alfa ",
@@ -57,7 +57,7 @@ const NATO_LOOKUP: Record<string, string> = {
  * @category Default
  * @see https://wikipedia.org/wiki/NATO_phonetic_alphabet
  */
-export class ConvertToNATOAlphabet extends Operation {
+export class ConvertToNATOAlphabet extends TypedOperation<string, string, unknown[]> {
   /**
    * ConvertToNATOAlphabet constructor
    */

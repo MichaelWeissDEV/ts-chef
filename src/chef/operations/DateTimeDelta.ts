@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import moment from "moment-timezone";
 import { DATETIME_FORMATS, FORMAT_EXAMPLES } from "../lib/DateTime";
 
 /**
  * DateTime Delta operation
  */
-export class DateTimeDelta extends Operation {
+export class DateTimeDelta extends TypedOperation<string, string, unknown[]> {
   /**
    * DateTimeDelta constructor
    */

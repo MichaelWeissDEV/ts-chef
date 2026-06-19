@@ -34,11 +34,10 @@ export interface OperationResult<T = PipelineData, E = Error> {
  * `as any` in internal pipeline code bridges the gap at runtime.
  */
 export abstract class TypedOperation<TInput = any, TOutput = any, TArgs extends unknown[] = any[]> extends Operation {
-  // @ts-expect-error TS2416 – intentional narrowing: TInput ⊂ AnyInput
   abstract run(input: TInput, args: TArgs): TOutput | Promise<TOutput>;
 
   // @ts-expect-error TS2416 – intentional narrowing: TOutput ⊂ AnyInput
-  present(data: TOutput, args: TArgs): PipelineData {
+  present(data: Awaited<TOutput>, args: TArgs): PipelineData {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return data as any;
   }

@@ -7,9 +7,9 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, HighlightPos, HighlightResult } from "../Operation";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
 
-export class SwapCase extends Operation {
+export class SwapCase extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "Swap case";

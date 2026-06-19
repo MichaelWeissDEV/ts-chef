@@ -7,12 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import BigNumber from "bignumber.js";
 import { median, createNumArray } from "../lib/Arithmetic";
 import { ARITHMETIC_DELIM_OPTIONS } from "../lib/Delim";
 
-export class Median extends Operation {
+export class Median extends TypedOperation<string, BigNumber, unknown[]> {
   constructor() {
     super();
     this.name = "Median";

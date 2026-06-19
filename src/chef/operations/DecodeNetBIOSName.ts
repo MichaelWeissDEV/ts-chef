@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 /**
  * Decode NetBIOS Name operation
@@ -16,7 +16,7 @@ import { Operation } from "../Operation";
  * @see https://wikipedia.org/wiki/NetBIOS
  * @see RFC 1001
  */
-export class DecodeNetBIOSName extends Operation {
+export class DecodeNetBIOSName extends TypedOperation<number[], number[], unknown[]> {
   /**
    * DecodeNetBIOSName constructor
    */

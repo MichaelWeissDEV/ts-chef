@@ -7,12 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, HighlightPos, HighlightResult } from "../Operation";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
 import { Utils } from "../Utils";
 import { BIN_DELIM_OPTIONS } from "../lib/Delim";
 import { fromBinary } from "../lib/Binary";
 
-export class FromBinary extends Operation {
+export class FromBinary extends TypedOperation<string, number[], unknown[]> {
   constructor() {
     super();
     this.name = "From Binary";

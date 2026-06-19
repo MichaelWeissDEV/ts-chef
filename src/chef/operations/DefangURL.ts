@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import { URL_REGEX, DOMAIN_REGEX } from "../lib/Extract";
 
 /**
  * DefangURL operation
  */
-export class DefangURL extends Operation {
+export class DefangURL extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * DefangURL constructor
    */

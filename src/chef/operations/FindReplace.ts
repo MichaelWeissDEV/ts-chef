@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 
 interface ToggleStringArg {
@@ -15,7 +15,7 @@ interface ToggleStringArg {
   option: string;
 }
 
-export class FindReplace extends Operation {
+export class FindReplace extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "Find / Replace";

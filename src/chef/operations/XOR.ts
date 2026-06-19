@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import { fromHex } from "../lib/Hex";
 
@@ -17,7 +17,7 @@ type XORScheme =
   | "Output differential"
   | "Cascade";
 
-export class XOR extends Operation {
+export class XOR extends TypedOperation<ArrayBuffer, ArrayBuffer, unknown[]> {
   constructor() {
     super();
     this.name = "XOR";

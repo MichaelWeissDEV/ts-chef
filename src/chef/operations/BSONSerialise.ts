@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import * as bson from "bson";
 import OperationError from "../errors/OperationError";
 
@@ -17,7 +17,7 @@ import OperationError from "../errors/OperationError";
  * @category Serialise
  * @see https://wikipedia.org/wiki/BSON
  */
-export class BSONSerialise extends Operation {
+export class BSONSerialise extends TypedOperation<string, ArrayBuffer, unknown[]> {
   /**
    * BSONSerialise constructor
    */

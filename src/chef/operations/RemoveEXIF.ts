@@ -8,13 +8,13 @@
  */
 
 import { removeEXIF } from "../vendor/remove-exif";
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 
 /**
  * Remove EXIF operation
  */
-export class RemoveEXIF extends Operation {
+export class RemoveEXIF extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /**
    * RemoveEXIF constructor
    */

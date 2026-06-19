@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import BigNumber from "bignumber.js";
 import OperationError from "../errors/OperationError";
 
 /**
  * From Base operation
  */
-export class FromBase extends Operation {
+export class FromBase extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * FromBase constructor
    */

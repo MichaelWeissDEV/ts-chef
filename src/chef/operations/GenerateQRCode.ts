@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import { generateQrCode } from "../lib/QRCode";
 import { toBase64 } from "../lib/Base64";
@@ -17,7 +17,7 @@ import Utils from "../Utils";
 /**
  * Generate QR Code operation
  */
-export class GenerateQRCode extends Operation {
+export class GenerateQRCode extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * GenerateQRCode constructor
    */

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { toHexFast } from "../lib/Hex";
@@ -19,7 +19,7 @@ import {
 /**
  * GOST Verify operation
  */
-export class GOSTVerify extends Operation {
+export class GOSTVerify extends TypedOperation<string, Promise<AnyInput>, unknown[]> {
   /**
    * GOSTVerify constructor
    */

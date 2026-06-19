@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 
 const BASE45_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
@@ -15,7 +15,7 @@ const BASE45_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 /**
  * To Base45 operation
  */
-export class ToBase45 extends Operation {
+export class ToBase45 extends TypedOperation<ArrayBuffer, string, unknown[]> {
   /**
    * ToBase45 constructor
    */

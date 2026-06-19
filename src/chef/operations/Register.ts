@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import XRegExp from "xregexp";
 import Dish from "../Dish";
 
 /**
  * Register operation
  */
-export class Register extends Operation {
+export class Register extends TypedOperation<any, any, any[]> {
   /**
    * Register constructor
    */

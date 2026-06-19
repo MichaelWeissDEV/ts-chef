@@ -8,13 +8,13 @@
  */
 
 import jsonata from "jsonata";
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 
 /**
  * Jsonata Query operation
  */
-export class JsonataQuery extends Operation {
+export class JsonataQuery extends TypedOperation<string, Promise<AnyInput>, unknown[]> {
   /**
    * JsonataQuery constructor
    */

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 
 /**
@@ -16,7 +16,7 @@ import { Utils } from "../Utils";
  * @category Crypto
  * @see https://wikipedia.org/wiki/Adler-32
  */
-export class Adler32Checksum extends Operation {
+export class Adler32Checksum extends TypedOperation<ArrayBuffer, string, unknown[]> {
   constructor() {
     super();
     this.name = "Adler-32 Checksum";

@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation, { AnyInput } from "../Operation";
+import { TypedOperation,  AnyInput  } from "../Operation_new";
 import { runHash } from "../lib/Hash";
 
 /**
  * MD4 operation
  */
-export class MD4 extends Operation {
+export class MD4 extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /**
    * MD4 constructor
    */

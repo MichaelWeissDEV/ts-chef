@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 
 const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
@@ -55,7 +55,7 @@ function convertBits(
   return ret;
 }
 
-export class ToBech32 extends Operation {
+export class ToBech32 extends TypedOperation<ArrayBuffer, string, unknown[]> {
   constructor() {
     super();
     this.name = "To Bech32";

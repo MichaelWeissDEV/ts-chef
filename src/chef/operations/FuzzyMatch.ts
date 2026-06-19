@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import {
   fuzzyMatch,
   calcMatchRanges,
@@ -18,7 +18,7 @@ import Utils from "../Utils";
 /**
  * Fuzzy Match operation
  */
-export class FuzzyMatch extends Operation {
+export class FuzzyMatch extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * FuzzyMatch constructor
    */

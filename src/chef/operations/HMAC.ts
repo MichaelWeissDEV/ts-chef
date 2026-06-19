@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Utils from "../Utils";
 import CryptoApi from "crypto-api/src/crypto-api";
 
 /**
  * HMAC operation
  */
-export class HMAC extends Operation {
+export class HMAC extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /**
    * HMAC constructor
    */

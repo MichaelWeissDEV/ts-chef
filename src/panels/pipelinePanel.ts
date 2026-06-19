@@ -70,13 +70,13 @@ export class PipelinePanel {
         try {
           let result: string;
           if (msg.steps) {
-            result = runPipeline(input, msg.steps as PipelineStep[]);
+            result = await runPipeline(input, msg.steps as PipelineStep[]);
             log(
               `Pipeline ran: ${(msg.steps as PipelineStep[]).length} step(s), input ${input.length} chars → ${result.length} chars`,
             );
           } else {
             const steps = parsePipeline(msg.raw as string);
-            result = runPipeline(input, steps);
+            result = await runPipeline(input, steps);
             log(
               `Pipeline ran (text): "${msg.raw}", input ${input.length} chars → ${result.length} chars`,
             );

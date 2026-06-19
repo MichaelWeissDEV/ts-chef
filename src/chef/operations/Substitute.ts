@@ -7,10 +7,10 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 
-export class Substitute extends Operation {
+export class Substitute extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "Substitute";

@@ -7,11 +7,11 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import JSZip from "jszip";
 
-export class Unzip extends Operation {
+export class Unzip extends TypedOperation<ArrayBuffer, Promise<string>, unknown[]> {
   constructor() {
     super();
     this.name = "Unzip";

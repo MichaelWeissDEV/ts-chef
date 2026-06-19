@@ -16,7 +16,7 @@ import {
   FIELD_DELIMITER_OPTIONS,
 } from "../lib/Charts";
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 
@@ -28,7 +28,7 @@ const nodom = (nodomtemp as any).default
 /**
  * Heatmap chart operation
  */
-export class HeatmapChart extends Operation {
+export class HeatmapChart extends TypedOperation<string, string, unknown[]> {
   /**
    * HeatmapChart constructor
    */

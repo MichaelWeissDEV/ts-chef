@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import * as avro from "avsc";
 
@@ -17,7 +17,7 @@ import * as avro from "avsc";
  * @category Serialise
  * @see https://wikipedia.org/wiki/Apache_Avro
  */
-export class AvroToJSON extends Operation {
+export class AvroToJSON extends TypedOperation<ArrayBuffer, Promise<string>, unknown[]> {
   /**
    * AvroToJSON constructor
    */

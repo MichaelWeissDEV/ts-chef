@@ -7,18 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import {
-  Operation,
-  AnyInput,
-  HighlightPos,
-  HighlightResult,
-} from "../Operation";
+import { TypedOperation, AnyInput, HighlightPos, HighlightResult } from "../Operation_new";
 import { rot, rotl, rotlCarry } from "../lib/Rotate";
 
 /**
  * Rotate left operation.
  */
-export class RotateLeft extends Operation {
+export class RotateLeft extends TypedOperation<number[], AnyInput, unknown[]> {
   /**
    * RotateLeft constructor
    */

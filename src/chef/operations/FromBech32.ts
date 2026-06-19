@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import { decode } from "../lib/Bech32";
 import { toHex } from "../lib/Hex";
 
 /**
  * From Bech32 operation
  */
-export class FromBech32 extends Operation {
+export class FromBech32 extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * FromBech32 constructor
    */

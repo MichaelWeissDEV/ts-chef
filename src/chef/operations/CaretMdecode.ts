@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 /**
  * Caret/M-decode operation
  *
  * @category Default
  */
-export class CaretMdecode extends Operation {
+export class CaretMdecode extends TypedOperation<string, number[], unknown[]> {
   /**
    * CaretMdecode constructor
    */

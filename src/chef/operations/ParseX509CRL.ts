@@ -8,7 +8,7 @@
  */
 
 import * as r from "jsrsasign";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { fromBase64 } from "../lib/Base64";
 import { toHex } from "../lib/Hex";
 import { formatDnObj } from "../lib/PublicKey";
@@ -18,7 +18,7 @@ import Utils from "../Utils";
 /**
  * Parse X.509 CRL operation
  */
-export class ParseX509CRL extends Operation {
+export class ParseX509CRL extends TypedOperation<string, string, unknown[]> {
   /**
    * ParseX509CRL constructor
    */

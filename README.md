@@ -61,6 +61,23 @@ Requirements:
 3. Add operations, configure their arguments, and bake the selected input.
 4. Save pipelines when you want to reuse a recipe later.
 
+### Pipeline Syntax
+
+You can run pipelines programmatically or via commands using the pipe-syntax string representation.
+
+Syntax format:
+```
+OperationName | OperationName(arg1=value1, arg2=value2)
+```
+
+- Steps are separated by the pipe character `|`.
+- Arguments for an operation are passed inside parentheses `(...)` as `key=value` pairs or indices.
+- Example:
+  ```
+  From Base64 | To Hex(Uppercase=true) | URL Encode
+  ```
+- Pipe characters inside parentheses are preserved and not treated as step separators (e.g. for regex patterns).
+
 ### Document Scanning
 
 Run **tschef: Scan Document for Patterns** to find recognizable encoded or structured values in the current document. Detected values can be highlighted in the editor and inspected through hover actions.

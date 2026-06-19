@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { OperationError } from "../errors/OperationError";
 import { toHex } from "../lib/Hex";
 import { encryptSM4 } from "../lib/SM4";
 
-export class SM4Encrypt extends Operation {
+export class SM4Encrypt extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "SM4 Encrypt";

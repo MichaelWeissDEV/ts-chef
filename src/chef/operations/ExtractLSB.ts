@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { fromBinary } from "../lib/Binary";
@@ -17,7 +17,7 @@ import { Jimp } from "jimp";
 /**
  * Extract LSB operation
  */
-export class ExtractLSB extends Operation {
+export class ExtractLSB extends TypedOperation<ArrayBuffer, Promise<AnyInput>, unknown[]> {
   /**
    * ExtractLSB constructor
    */

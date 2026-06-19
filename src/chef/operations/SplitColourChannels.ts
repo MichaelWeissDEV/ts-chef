@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { isImage } from "../lib/FileType";
@@ -16,7 +16,7 @@ import { Jimp, JimpMime } from "jimp";
 /**
  * Split Colour Channels operation
  */
-export class SplitColourChannels extends Operation {
+export class SplitColourChannels extends TypedOperation<AnyInput, Promise<AnyInput>, unknown[]> {
   /**
    * SplitColourChannels constructor
    */

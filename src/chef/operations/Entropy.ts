@@ -10,7 +10,7 @@
 import * as d3temp from "d3";
 import * as nodomtemp from "nodom";
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 
 const d3 = (d3temp as any).default ? (d3temp as any).default : d3temp;
 const nodom = (nodomtemp as any).default
@@ -20,7 +20,7 @@ const nodom = (nodomtemp as any).default
 /**
  * Entropy operation
  */
-export class Entropy extends Operation {
+export class Entropy extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /**
    * Entropy constructor
    */

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import { COMPRESSION_TYPE } from "../lib/Zlib";
 import rawdeflate from "zlibjs/bin/rawdeflate.min.js";
 
@@ -23,7 +23,7 @@ const RAW_COMPRESSION_TYPE_LOOKUP = {
 /**
  * Raw Deflate operation
  */
-export class RawDeflate extends Operation {
+export class RawDeflate extends TypedOperation<ArrayBuffer, ArrayBuffer, unknown[]> {
   /**
    * RawDeflate constructor
    */

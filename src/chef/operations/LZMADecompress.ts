@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation, { AnyInput } from "../Operation";
+import { TypedOperation,  AnyInput  } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import { decompress } from "@blu3r4y/lzma";
 import Utils from "../Utils";
@@ -15,7 +15,7 @@ import Utils from "../Utils";
 /**
  * LZMA Decompress operation
  */
-export class LZMADecompress extends Operation {
+export class LZMADecompress extends TypedOperation<ArrayBuffer, Promise<AnyInput>, unknown[]> {
   /**
    * LZMADecompress constructor
    */

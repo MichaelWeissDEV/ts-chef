@@ -2990,16 +2990,27 @@ const registry: OpMeta[] = [
 
 export default registry;
 
+/** O(1) lookup map by opName (built once at module load) */
+const registryMap = new Map<string, typeof registry[number]>(
+  registry.map((e) => [e.opName, e])
+);
+
 /**
- * Looks up an operation by its display name (case-insensitive).
- *
- * @param displayName - The human-readable operation name to search for.
- * @returns The matching {@link OpMeta} entry, or `undefined` if not found.
+ * Find an operation by opName or displayName.
+ * Uses O(1) map lookup for opName, falls back to linear scan for displayName.
  */
-export function findOp(displayName: string): OpMeta | undefined {
-  return registry.find(
-    (e) => e.displayName.toLowerCase() === displayName.toLowerCase(),
-  );
+export function findOp(name: string): typeof registry[number] | undefined {
+  // Exact opName match (O(1))
+  const exact = registryMap.get(name);
+  if (exact) return exact;
+  // Lowercase display name fallback (O(n))
+  const lower = name.toLowerCase();
+  for (const entry of registry) {
+    if (entry.displayName.toLowerCase() === lower || entry.opName.toLowerCase() === lower) {
+      return entry;
+    }
+  }
+  return undefined;
 }
 
 /**

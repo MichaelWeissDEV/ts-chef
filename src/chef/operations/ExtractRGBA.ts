@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { Jimp } from "jimp";
@@ -17,7 +17,7 @@ import { DELIM_OPTIONS as RGBA_DELIM_OPTIONS } from "../lib/Delim";
 /**
  * Extract RGBA operation
  */
-export class ExtractRGBA extends Operation {
+export class ExtractRGBA extends TypedOperation<ArrayBuffer, Promise<AnyInput>, unknown[]> {
   /**
    * ExtractRGBA constructor
    */

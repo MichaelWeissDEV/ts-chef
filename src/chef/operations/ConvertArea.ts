@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { TypedOperation, ArgConfig } from "../Operation_new";
 import BigNumber from "bignumber.js";
 
 /**
@@ -15,7 +15,7 @@ import BigNumber from "bignumber.js";
  *
  * @category Default
  */
-export class ConvertArea extends Operation {
+export class ConvertArea extends TypedOperation<string, string, unknown[]> {
   name = "Convert area";
   module = "Default";
   description = "Converts a unit of area to another format.";

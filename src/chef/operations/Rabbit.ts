@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { toHexFast } from "../lib/Hex";
 import { OperationError } from "../errors/OperationError";
@@ -15,7 +15,7 @@ import { OperationError } from "../errors/OperationError";
 /**
  * Rabbit operation
  */
-export class Rabbit extends Operation {
+export class Rabbit extends TypedOperation<string, string, unknown[]> {
   /**
    * Rabbit constructor
    */

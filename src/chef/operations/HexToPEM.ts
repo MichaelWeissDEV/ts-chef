@@ -8,12 +8,12 @@
  */
 
 import r from "jsrsasign";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 /**
  * Hex to PEM operation
  */
-export class HexToPEM extends Operation {
+export class HexToPEM extends TypedOperation<string, string, unknown[]> {
   /**
    * HexToPEM constructor
    */

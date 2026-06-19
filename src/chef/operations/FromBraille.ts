@@ -7,18 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import {
-  Operation,
-  AnyInput,
-  HighlightPos,
-  HighlightResult,
-} from "../Operation";
+import { TypedOperation, AnyInput, HighlightPos, HighlightResult } from "../Operation_new";
 import { BRAILLE_LOOKUP } from "../lib/Braille";
 
 /**
  * From Braille operation
  */
-export class FromBraille extends Operation {
+export class FromBraille extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * FromBraille constructor
    */

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 const MORSE_TABLE: Record<string, string> = {
   A: ".-",
@@ -66,7 +66,7 @@ const MORSE_TABLE: Record<string, string> = {
   $: "...-..-",
 };
 
-export class ToMorseCode extends Operation {
+export class ToMorseCode extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "To Morse Code";

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 // 92 printable ASCII characters, skipping '"' (34) and '`' (96)
 function genBase92Alphabet(): string {
@@ -20,7 +20,7 @@ function genBase92Alphabet(): string {
 
 const BASE92_ALPHABET = genBase92Alphabet(); // length = 92
 
-export class ToBase92 extends Operation {
+export class ToBase92 extends TypedOperation<ArrayBuffer, string, unknown[]> {
   constructor() {
     super();
     this.name = "To Base92";

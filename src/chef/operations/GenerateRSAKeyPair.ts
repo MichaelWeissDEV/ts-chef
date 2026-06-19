@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import forge from "node-forge";
 import { cryptNotice } from "../lib/Crypt";
 
 /**
  * Generate RSA Key Pair operation
  */
-export class GenerateRSAKeyPair extends Operation {
+export class GenerateRSAKeyPair extends TypedOperation<string, Promise<AnyInput>, unknown[]> {
   /**
    * GenerateRSAKeyPair constructor
    */

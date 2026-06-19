@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import kbpgp from "kbpgp";
 import { ASP, importPrivateKey } from "../lib/PGP";
 import OperationError from "../errors/OperationError";
@@ -16,7 +16,7 @@ import promisify from "es6-promisify";
 /**
  * PGP Decrypt operation
  */
-export class PGPDecrypt extends Operation {
+export class PGPDecrypt extends TypedOperation<string, Promise<string>, unknown[]> {
   /**
    * PGPDecrypt constructor
    */

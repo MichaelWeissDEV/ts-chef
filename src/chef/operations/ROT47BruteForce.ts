@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Utils from "../Utils";
 
 /**
  * ROT47 Brute Force operation.
  */
-export class ROT47BruteForce extends Operation {
+export class ROT47BruteForce extends TypedOperation<number[], string, unknown[]> {
   /**
    * ROT47BruteForce constructor
    */

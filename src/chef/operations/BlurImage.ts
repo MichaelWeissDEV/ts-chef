@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { toBase64 } from "../lib/Base64";
@@ -16,7 +16,7 @@ import { Jimp, JimpMime } from "jimp";
 /**
  * Blur Image operation
  */
-export class BlurImage extends Operation {
+export class BlurImage extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer>, unknown[]> {
   /**
    * BlurImage constructor
    */

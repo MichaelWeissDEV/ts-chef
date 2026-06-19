@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { OperationError } from "../errors/OperationError";
 import { blake3 } from "hash-wasm";
@@ -18,7 +18,7 @@ import { blake3 } from "hash-wasm";
  * @category Hashing
  * @see https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE3
  */
-export class BLAKE3 extends Operation {
+export class BLAKE3 extends TypedOperation<string, Promise<string>, unknown[]> {
   constructor() {
     super();
     this.name = "BLAKE3";

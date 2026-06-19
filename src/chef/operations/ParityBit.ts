@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, HighlightPos, HighlightResult } from "../Operation";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
 import { calculateParityBit, decodeParityBit } from "../lib/ParityBit";
 
 /**
  * Parity Bit operation
  */
-export class ParityBit extends Operation {
+export class ParityBit extends TypedOperation<string, string, unknown[]> {
   /**
    * ParityBit constructor
    */

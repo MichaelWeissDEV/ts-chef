@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 const BRAILLE_MAP: Record<string, string> = {
   " ": "⠀",
@@ -57,7 +57,7 @@ const BRAILLE_MAP: Record<string, string> = {
   ":": "⠒",
 };
 
-export class ToBraille extends Operation {
+export class ToBraille extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "To Braille";

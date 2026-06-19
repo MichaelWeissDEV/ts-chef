@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { TypedOperation, ArgConfig } from "../Operation_new";
 import { encode } from "../lib/CipherSaber2";
 import { Utils } from "../Utils";
 import * as crypto from "crypto";
@@ -23,7 +23,7 @@ interface ToggleStringArg {
   option: string;
 }
 
-export class CipherSaber2Encrypt extends Operation {
+export class CipherSaber2Encrypt extends TypedOperation<ArrayBuffer, ArrayBuffer, unknown[]> {
   name = "CipherSaber2 Encrypt";
   module = "Crypto";
   description =

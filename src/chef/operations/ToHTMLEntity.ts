@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 const NAMED_ENTITIES: Record<string, string> = {
   "&": "&amp;",
@@ -21,7 +21,7 @@ const NAMED_ENTITIES: Record<string, string> = {
   "™": "&trade;",
 };
 
-export class ToHTMLEntity extends Operation {
+export class ToHTMLEntity extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "To HTML entity";

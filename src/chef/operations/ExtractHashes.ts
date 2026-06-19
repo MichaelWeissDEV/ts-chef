@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import { search } from "../lib/Extract";
 
 /**
  * Extract Hash Values operation
  */
-export class ExtractHashes extends Operation {
+export class ExtractHashes extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * ExtractHashValues constructor
    */

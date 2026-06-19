@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import { search, DOMAIN_REGEX, DMARC_DOMAIN_REGEX } from "../lib/Extract";
 import { caseInsensitiveSort } from "../lib/Sort";
 
 /**
  * Extract domains operation
  */
-export class ExtractDomains extends Operation {
+export class ExtractDomains extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * ExtractDomains constructor
    */

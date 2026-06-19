@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 const ALPHABET_BITCOIN =
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -17,7 +17,7 @@ const ALPHABET_RIPPLE =
 /**
  * To Base58 operation
  */
-export class ToBase58 extends Operation {
+export class ToBase58 extends TypedOperation<ArrayBuffer, string, unknown[]> {
   /**
    * ToBase58 constructor
    */

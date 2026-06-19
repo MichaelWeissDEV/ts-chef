@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import Utils from "../Utils";
 import { toJA4S } from "../lib/JA4";
 
 /**
  * JA4Server Fingerprint operation
  */
-export class JA4ServerFingerprint extends Operation {
+export class JA4ServerFingerprint extends TypedOperation<string, string, unknown[]> {
   /**
    * JA4ServerFingerprint constructor
    */

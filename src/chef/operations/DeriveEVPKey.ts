@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Utils from "../Utils";
 import CryptoJS from "crypto-js";
 
 /**
  * Derive EVP key operation
  */
-export class DeriveEVPKey extends Operation {
+export class DeriveEVPKey extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * DeriveEVPKey constructor
    */

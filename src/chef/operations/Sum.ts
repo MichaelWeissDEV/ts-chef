@@ -8,11 +8,11 @@
  */
 
 import BigNumber from "bignumber.js";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { sum, createNumArray } from "../lib/Arithmetic";
 import { ARITHMETIC_DELIM_OPTIONS } from "../lib/Delim";
 
-export class Sum extends Operation {
+export class Sum extends TypedOperation<string, BigNumber, unknown[]> {
   constructor() {
     super();
     this.name = "Sum";

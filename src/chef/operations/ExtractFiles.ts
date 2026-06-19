@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { scanForFileTypes, extractFile } from "../lib/FileType";
@@ -16,7 +16,7 @@ import { FILE_SIGNATURES } from "../lib/FileSignatures";
 /**
  * Extract Files operation
  */
-export class ExtractFiles extends Operation {
+export class ExtractFiles extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /**
    * ExtractFiles constructor
    */

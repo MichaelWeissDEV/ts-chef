@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import YAML from "yaml";
 
 /**
  * JSON to YAML operation
  */
-export class JSONtoYAML extends Operation {
+export class JSONtoYAML extends TypedOperation<AnyInput, AnyInput, unknown[]> {
   /**
    * JSONtoYAML constructor
    */

@@ -9,13 +9,13 @@
 
 import { fromBase64 } from "../lib/Base64";
 import { toHexFast } from "../lib/Hex";
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 
 /**
  * PEM to Hex operation
  */
-export class PEMToHex extends Operation {
+export class PEMToHex extends TypedOperation<string, string, unknown[]> {
   /**
    * PEMToHex constructor
    */

@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { TypedOperation, ArgConfig } from "../Operation_new";
 
 /**
  * Comment operation
  *
  * @category Default
  */
-export class Comment extends Operation {
+export class Comment extends TypedOperation<string, string, unknown[]> {
   name = "Comment";
   module = "Default";
   description =

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import moment from "moment-timezone";
 
@@ -21,7 +21,7 @@ const DATETIME_FORMATS = [
   "MMMM DD, YYYY",
 ];
 
-export class TranslateDateTimeFormat extends Operation {
+export class TranslateDateTimeFormat extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "Translate DateTime format";

@@ -8,13 +8,13 @@
  */
 
 import OperationError from "../errors/OperationError";
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import * as terser from "terser";
 
 /**
  * JavaScript Minify operation
  */
-export class JavaScriptMinify extends Operation {
+export class JavaScriptMinify extends TypedOperation<string, Promise<AnyInput>, unknown[]> {
   /**
    * JavaScriptMinify constructor
    */

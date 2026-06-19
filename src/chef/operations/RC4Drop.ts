@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, HighlightPos, HighlightResult } from "../Operation";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
 import { format } from "../lib/Ciphers";
 import CryptoJS from "crypto-js";
 
 /**
  * RC4 Drop operation
  */
-export class RC4Drop extends Operation {
+export class RC4Drop extends TypedOperation<string, string, unknown[]> {
   /**
    * RC4Drop constructor
    */

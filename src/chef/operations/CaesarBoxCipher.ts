@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 /**
  * Caesar Box Cipher operation
  *
  * @category Ciphers
  */
-export class CaesarBoxCipher extends Operation {
+export class CaesarBoxCipher extends TypedOperation<string, string, number[]> {
   /**
    * CaesarBoxCipher constructor
    */

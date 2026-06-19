@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 const ALPHABETS: Record<string, string> = {
   ASCII85:
@@ -17,7 +17,7 @@ const ALPHABETS: Record<string, string> = {
   Z85: "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!/*?&<>()[]{}@%$#",
 };
 
-export class ToBase85 extends Operation {
+export class ToBase85 extends TypedOperation<ArrayBuffer, string, unknown[]> {
   constructor() {
     super();
     this.name = "To Base85";

@@ -7,10 +7,10 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 
-export class DropNthBytes extends Operation {
+export class DropNthBytes extends TypedOperation<number[], number[], unknown[]> {
   constructor() {
     super();
     this.name = "Drop nth bytes";

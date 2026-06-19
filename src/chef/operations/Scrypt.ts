@@ -8,11 +8,11 @@
  */
 
 import scryptsy from "scryptsy";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { OperationError } from "../errors/OperationError";
 
-export class Scrypt extends Operation {
+export class Scrypt extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "Scrypt";

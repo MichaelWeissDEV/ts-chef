@@ -7,12 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { fromHex } from "../lib/Hex";
 import { OperationError } from "../errors/OperationError";
 
-export class HammingDistance extends Operation {
+export class HammingDistance extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "Hamming Distance";

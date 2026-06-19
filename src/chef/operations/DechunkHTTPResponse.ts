@@ -7,12 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 
 /**
  * Dechunk HTTP response operation
  */
-export class DechunkHTTPResponse extends Operation {
+export class DechunkHTTPResponse extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * DechunkHTTPResponse constructor
    */

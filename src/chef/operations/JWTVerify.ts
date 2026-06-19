@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation, { AnyInput } from "../Operation";
+import { TypedOperation,  AnyInput  } from "../Operation_new";
 import jwt from "jsonwebtoken";
 import OperationError from "../errors/OperationError";
 import { JWT_ALGORITHMS } from "../lib/JWT";
@@ -15,7 +15,7 @@ import { JWT_ALGORITHMS } from "../lib/JWT";
 /**
  * JWT Verify operation
  */
-export class JWTVerify extends Operation {
+export class JWTVerify extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * JWTVerify constructor
    */

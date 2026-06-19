@@ -7,10 +7,10 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
-import * as argon2 from "argon2";
+import { argon2id, argon2i, argon2d } from "hash-wasm";
 
 /**
  * Argon2 operation
@@ -23,7 +23,7 @@ interface ToggleStringArg {
   option: string;
 }
 
-export class Argon2 extends Operation {
+export class Argon2 extends TypedOperation<string, Promise<string>, unknown[]> {
   /**
    * Argon2 constructor
    */
@@ -87,41 +87,50 @@ export class Argon2 extends Operation {
    * @throws {OperationError} If hashing fails.
    */
   async run(input: string, args: unknown[]): Promise<string> {
-    const argon2Types: Record<string, 0 | 1 | 2> = {
-      Argon2i: argon2.argon2i,
-      Argon2d: argon2.argon2d,
-      Argon2id: argon2.argon2id,
+    const argon2Types: Record<string, typeof argon2id> = {
+      Argon2i: argon2i,
+      Argon2d: argon2d,
+      Argon2id: argon2id,
     };
 
     const [saltArg, time, mem, parallelism, hashLen, typeName, outFormat] =
       args as [ToggleStringArg, number, number, number, number, string, string];
-    const salt = Buffer.from(
-        Utils.convertToByteString(saltArg.string || "", saltArg.option),
-        "latin1",
-      ),
-      type = argon2Types[typeName];
+
+    if (mem < 8) {
+      // Argon2 standard requires at least 8 KiB in hash-wasm
+      throw new OperationError("Error: memory cost must be at least 8 KiB");
+    }
+
+    const saltBytes = Utils.convertToByteArray(saltArg.string || "", saltArg.option);
+    const salt = new Uint8Array(saltBytes);
+    const type = argon2Types[typeName];
+    if (!type) {
+      throw new OperationError(`Error: unknown Argon2 type: ${typeName}`);
+    }
 
     try {
-      const options = {
+      const hashHex = await type({
+        password: input,
         salt: salt,
-        timeCost: time,
-        memoryCost: mem,
+        iterations: time,
+        memorySize: mem,
         parallelism: parallelism,
         hashLength: hashLen,
-        type: type,
-        raw: outFormat === "Raw hash" || outFormat === "Hex hash",
-      };
+        outputType: "hex",
+      });
 
-      const result = await argon2.hash(input, options);
-
-      if (typeof result === "string") {
-        return result;
+      if (outFormat === "Hex hash") {
+        return hashHex;
+      } else if (outFormat === "Raw hash") {
+        const buf = Buffer.from(hashHex, "hex");
+        return buf.toString("latin1");
       } else {
-        const buffer = result as Buffer;
-        if (outFormat === "Hex hash") {
-          return buffer.toString("hex");
-        }
-        return buffer.toString("latin1");
+        // Encoded hash format
+        // Base64 encode without padding
+        const saltB64 = Buffer.from(salt).toString("base64").replace(/=+$/, "");
+        const hashB64 = Buffer.from(hashHex, "hex").toString("base64").replace(/=+$/, "");
+        const algorithmName = typeName.toLowerCase(); // argon2i, argon2d, argon2id
+        return `$${algorithmName}$v=19$m=${mem},t=${time},p=${parallelism}$${saltB64}$${hashB64}`;
       }
     } catch (err) {
       throw new OperationError(

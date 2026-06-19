@@ -12,14 +12,14 @@ import { fromBase64 } from "../lib/Base64";
 import { runHash } from "../lib/Hash";
 import { fromHex, toHex } from "../lib/Hex";
 import { formatByteStr, formatDnObj } from "../lib/PublicKey";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import Utils from "../Utils";
 import OperationError from "../errors/OperationError";
 
 /**
  * Parse X.509 certificate operation
  */
-export class ParseX509Certificate extends Operation {
+export class ParseX509Certificate extends TypedOperation<string, string, unknown[]> {
   /**
    * ParseX509Certificate constructor
    */

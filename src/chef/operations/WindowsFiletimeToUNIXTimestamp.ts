@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 
 // Windows FILETIME is 100-nanosecond intervals since 1 Jan 1601
@@ -15,7 +15,7 @@ import { OperationError } from "../errors/OperationError";
 // Difference: 11644473600 seconds = 116444736000000000 * 100ns intervals
 const EPOCH_DIFF = BigInt("11644473600");
 
-export class WindowsFiletimeToUNIXTimestamp extends Operation {
+export class WindowsFiletimeToUNIXTimestamp extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "Windows Filetime to UNIX Timestamp";

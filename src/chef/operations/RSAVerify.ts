@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import forge from "node-forge";
 import { MD_ALGORITHMS } from "../lib/RSA";
@@ -16,7 +16,7 @@ import Utils from "../Utils";
 /**
  * RSA Verify operation
  */
-export class RSAVerify extends Operation {
+export class RSAVerify extends TypedOperation<string, string, unknown[]> {
   /**
    * RSAVerify constructor
    */

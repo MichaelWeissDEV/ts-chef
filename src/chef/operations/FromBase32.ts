@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { B32_ALPHA } from "./ToBase32";
 import OperationError from "../errors/OperationError";
@@ -15,7 +15,7 @@ import OperationError from "../errors/OperationError";
 /**
  * From Base32 operation
  */
-export class FromBase32 extends Operation {
+export class FromBase32 extends TypedOperation<string, number[], unknown[]> {
   /**
    * FromBase32 constructor
    */

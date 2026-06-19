@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 const DELIM_OPTIONS = [
   "Space",
@@ -23,7 +23,7 @@ const DELIM_OPTIONS = [
   "None",
 ];
 
-export class ToHex extends Operation {
+export class ToHex extends TypedOperation<ArrayBuffer, string, unknown[]> {
   constructor() {
     super();
     this.name = "To hex";

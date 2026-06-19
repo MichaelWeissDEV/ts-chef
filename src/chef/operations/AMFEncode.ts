@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation, { AnyInput } from "../Operation";
+import { TypedOperation,  AnyInput  } from "../Operation_new";
 import "reflect-metadata"; // Required as a shim for the amf library
 import { AMF0, AMF3 } from "@astronautlabs/amf";
 
@@ -16,7 +16,7 @@ import { AMF0, AMF3 } from "@astronautlabs/amf";
  *
  * @category Encodings
  */
-export class AMFEncode extends Operation {
+export class AMFEncode extends TypedOperation<AnyInput, ArrayBuffer, unknown[]> {
   /**
    * AMFEncode constructor
    */

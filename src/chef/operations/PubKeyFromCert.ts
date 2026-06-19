@@ -8,13 +8,13 @@
  */
 
 import r from "jsrsasign";
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 
 /**
  * Public Key from Certificate operation
  */
-export class PubKeyFromCert extends Operation {
+export class PubKeyFromCert extends TypedOperation<string, string, unknown[]> {
   /**
    * PubKeyFromCert constructor
    */

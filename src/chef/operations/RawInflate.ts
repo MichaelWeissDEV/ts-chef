@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import { INFLATE_BUFFER_TYPE } from "../lib/Zlib";
 import rawinflate from "zlibjs/bin/rawinflate.min.js";
 
@@ -22,7 +22,7 @@ const RAW_BUFFER_TYPE_LOOKUP = {
 /**
  * Raw Inflate operation
  */
-export class RawInflate extends Operation {
+export class RawInflate extends TypedOperation<ArrayBuffer, ArrayBuffer, unknown[]> {
   /**
    * RawInflate constructor
    */

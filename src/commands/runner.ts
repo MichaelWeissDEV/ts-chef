@@ -58,10 +58,11 @@ export function runOp(
  * @param steps - Ordered list of operation names and their arguments.
  * @returns The final result serialised as a UTF-8 string.
  */
-export function runPipeline(input: AnyInput, steps: PipelineStep[]): string {
+export async function runPipeline(input: AnyInput, steps: PipelineStep[]): Promise<string> {
   let current: AnyInput = input;
   for (const step of steps) {
-    current = runOp(step.opName, current, step.args);
+    const result = runOp(step.opName, current, step.args);
+    current = result instanceof Promise ? await result : result;
   }
   // Convert final result to displayable string
   if (Array.isArray(current))
@@ -84,11 +85,21 @@ export function runPipeline(input: AnyInput, steps: PipelineStep[]): string {
  * @returns Ordered pipeline steps ready for {@link runPipeline}.
  */
 export function parsePipeline(raw: string): PipelineStep[] {
-  return raw
-    .split("|")
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .map((part) => parseStep(part));
+  const parts: string[] = [];
+  let depth = 0;
+  let current = "";
+  for (const ch of raw) {
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    if (ch === "|" && depth === 0) {
+      parts.push(current.trim());
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  if (current.trim()) parts.push(current.trim());
+  return parts.filter(Boolean).map((part) => parseStep(part));
 }
 
 function parseStep(part: string): PipelineStep {

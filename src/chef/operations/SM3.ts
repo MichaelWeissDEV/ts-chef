@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 function ROL32(x: number, n: number): number {
   return ((x << n) >>> 0) | (x >>> (32 - n));
@@ -93,7 +93,7 @@ function sm3(data: Uint8Array): string {
   return V.map((h) => h.toString(16).padStart(8, "0")).join("");
 }
 
-export class SM3 extends Operation {
+export class SM3 extends TypedOperation<ArrayBuffer, string, unknown[]> {
   constructor() {
     super();
     this.name = "SM3";

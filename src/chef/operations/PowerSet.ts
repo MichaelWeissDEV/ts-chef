@@ -7,9 +7,9 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
-export class PowerSet extends Operation {
+export class PowerSet extends TypedOperation<string, string, unknown[]> {
   private itemDelimiter = ",";
 
   constructor() {

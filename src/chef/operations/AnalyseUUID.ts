@@ -8,7 +8,7 @@
  */
 
 import * as uuid from "uuid";
-import Operation from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import { toHex } from "../lib/Hex";
 
@@ -17,7 +17,7 @@ import { toHex } from "../lib/Hex";
  *
  * @category Crypto
  */
-export class AnalyseUUID extends Operation {
+export class AnalyseUUID extends TypedOperation<string, string, unknown[]> {
   /**
    * AnalyseUUID constructor
    */

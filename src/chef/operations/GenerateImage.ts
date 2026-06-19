@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { isImage } from "../lib/FileType";
@@ -17,7 +17,7 @@ import { Jimp, JimpMime, ResizeStrategy, rgbaToInt } from "jimp";
 /**
  * Generate Image operation
  */
-export class GenerateImage extends Operation {
+export class GenerateImage extends TypedOperation<ArrayBuffer, Promise<AnyInput>, unknown[]> {
   /**
    * GenerateImage constructor
    */

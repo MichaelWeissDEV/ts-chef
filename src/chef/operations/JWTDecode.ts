@@ -7,11 +7,11 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import jwt from "jsonwebtoken";
 import { OperationError } from "../errors/OperationError";
 
-export class JWTDecode extends Operation {
+export class JWTDecode extends TypedOperation<string, AnyInput, unknown[]> {
   constructor() {
     super();
     this.name = "JWT Decode";

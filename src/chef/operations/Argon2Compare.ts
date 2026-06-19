@@ -7,8 +7,8 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation from "../Operation";
-import * as argon2 from "argon2";
+import { TypedOperation } from "../Operation_new";
+import { argon2id, argon2i, argon2d } from "hash-wasm";
 
 /**
  * Argon2 compare operation
@@ -16,7 +16,7 @@ import * as argon2 from "argon2";
  * @category Crypto
  * @see https://wikipedia.org/wiki/Argon2
  */
-export class Argon2Compare extends Operation {
+export class Argon2Compare extends TypedOperation<string, Promise<string>, unknown[]> {
   /**
    * Argon2Compare constructor
    */
@@ -50,9 +50,47 @@ export class Argon2Compare extends Operation {
     const encoded = args[0] as string;
 
     try {
-      const match = await argon2.verify(encoded, input);
+      const parts = encoded.split("$");
+      if (parts.length < 6) return "No match";
 
-      if (match) {
+      const typeName = parts[1]; // argon2i, argon2d, argon2id
+      const paramsStr = parts[3]; // m=4096,t=3,p=1
+      const saltB64 = parts[4];
+      const hashB64 = parts[5];
+
+      const params: Record<string, number> = {};
+      paramsStr.split(",").forEach((p) => {
+        const [k, v] = p.split("=");
+        params[k] = parseInt(v, 10);
+      });
+
+      const padBase64 = (str: string) => {
+        return str + "=".repeat((4 - (str.length % 4)) % 4);
+      };
+
+      const salt = new Uint8Array(Buffer.from(padBase64(saltB64), "base64"));
+      const expectedHashHex = Buffer.from(padBase64(hashB64), "base64").toString("hex");
+
+      const argon2Types: Record<string, typeof argon2id> = {
+        argon2i: argon2i,
+        argon2d: argon2d,
+        argon2id: argon2id,
+      };
+
+      const type = argon2Types[typeName];
+      if (!type) return "No match";
+
+      const computedHex = await type({
+        password: input,
+        salt: salt,
+        iterations: params.t,
+        memorySize: params.m,
+        parallelism: params.p,
+        hashLength: expectedHashHex.length / 2,
+        outputType: "hex",
+      });
+
+      if (computedHex === expectedHashHex) {
         return `Match: ${input}`;
       } else {
         return "No match";

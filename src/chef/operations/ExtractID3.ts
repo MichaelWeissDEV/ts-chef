@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import { Utils } from "../Utils";
 
 /**
  * Extract ID3 operation
  */
-export class ExtractID3 extends Operation {
+export class ExtractID3 extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /**
    * ExtractID3 constructor
    */

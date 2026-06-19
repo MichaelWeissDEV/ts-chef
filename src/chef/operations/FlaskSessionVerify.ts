@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import CryptoApi from "crypto-api/src/crypto-api";
 import Utils from "../Utils";
@@ -16,7 +16,7 @@ import { toBase64, fromBase64 } from "../lib/Base64";
 /**
  * Flask Session Verify operation
  */
-export class FlaskSessionVerify extends Operation {
+export class FlaskSessionVerify extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * FlaskSessionVerify constructor
    */

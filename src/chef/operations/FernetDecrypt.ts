@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import fernet from "fernet";
 
 /**
  * FernetDecrypt operation
  */
-export class FernetDecrypt extends Operation {
+export class FernetDecrypt extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * FernetDecrypt constructor
    */

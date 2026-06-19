@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { TypedOperation, ArgConfig } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import { BombeMachine } from "../lib/Bombe";
 import { ROTORS, ROTORS_FOURTH, REFLECTORS, Reflector } from "../lib/Enigma";
@@ -17,7 +17,7 @@ interface BombeResult {
   result: [string, string, string][];
 }
 
-export class Bombe extends Operation {
+export class Bombe extends TypedOperation<string, BombeResult, unknown[]> {
   name = "Bombe";
   module = "Bletchley";
   description =

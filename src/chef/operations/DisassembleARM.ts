@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import cs from "@alexaltea/capstone-js/dist/capstone.min.js";
 
 /**
  * Disassemble ARM operation
  */
-export class DisassembleARM extends Operation {
+export class DisassembleARM extends TypedOperation<string, Promise<AnyInput>, unknown[]> {
   /**
    * DisassembleARM constructor
    */

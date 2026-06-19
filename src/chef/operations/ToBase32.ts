@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 
 const B32_ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
@@ -16,7 +16,7 @@ const B32HEX_ALPHA = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
 /**
  * To Base32 operation
  */
-export class ToBase32 extends Operation {
+export class ToBase32 extends TypedOperation<ArrayBuffer, string, unknown[]> {
   /**
    * ToBase32 constructor
    */

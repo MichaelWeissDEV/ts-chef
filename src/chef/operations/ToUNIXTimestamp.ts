@@ -7,12 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import moment from "moment-timezone";
 import { UNITS } from "../lib/DateTime";
 
-export class ToUNIXTimestamp extends Operation {
+export class ToUNIXTimestamp extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "To UNIX Timestamp";

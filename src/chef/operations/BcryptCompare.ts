@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import bcrypt from "bcryptjs";
 
 /**
@@ -17,7 +17,7 @@ import bcrypt from "bcryptjs";
  * @see {@link Bcrypt}
  * @see {@link BcryptParse}
  */
-export class BcryptCompare extends Operation {
+export class BcryptCompare extends TypedOperation<string, Promise<string>, unknown[]> {
   /**
    * BcryptCompare constructor
    */

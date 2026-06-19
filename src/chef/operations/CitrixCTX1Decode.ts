@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { TypedOperation, ArgConfig } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 
 /**
@@ -16,7 +16,7 @@ import { OperationError } from "../errors/OperationError";
  * @category Encodings
  * @see https://www.reddit.com/r/AskNetsec/comments/1s3r6y/citrix_ctx1_hash_decoding/
  */
-export class CitrixCTX1Decode extends Operation {
+export class CitrixCTX1Decode extends TypedOperation<ArrayBuffer, string, unknown[]> {
   name = "Citrix CTX1 Decode";
   module = "Encodings";
   description =

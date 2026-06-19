@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import { fromBase64 } from "../lib/Base64";
 import { toHexFast } from "../lib/Hex";
@@ -17,7 +17,7 @@ import Utils from "../Utils";
 /**
  * ECDSA Verify operation
  */
-export class ECDSAVerify extends Operation {
+export class ECDSAVerify extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * ECDSAVerify constructor
    */

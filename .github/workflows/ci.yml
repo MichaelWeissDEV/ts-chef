@@ -25,10 +25,10 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Lint
-        run: npm run lint || true # Continue to see test results
+        run: npm run lint
 
       - name: Run Tests with Coverage
         run: npm test -- --coverage

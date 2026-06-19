@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import notepack from "notepack.io";
 
 /**
  * To MessagePack operation
  */
-export class ToMessagePack extends Operation {
+export class ToMessagePack extends TypedOperation<AnyInput, AnyInput, unknown[]> {
   /**
    * ToMessagePack constructor
    */

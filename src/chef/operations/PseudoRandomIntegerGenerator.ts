@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import { Utils } from "../Utils";
 import { DELIM_OPTIONS } from "../lib/Delim";
@@ -16,7 +16,7 @@ import { randomBytes } from "crypto";
 const BUFFER_SIZE = 1024;
 const MAX_RANGE = Number.MAX_SAFE_INTEGER;
 
-export class PseudoRandomIntegerGenerator extends Operation {
+export class PseudoRandomIntegerGenerator extends TypedOperation<string, string, unknown[]> {
   private randomBuffer: Uint32Array;
   private randomBufferOffset: number;
 

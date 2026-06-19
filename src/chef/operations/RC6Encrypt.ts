@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import Utils from "../Utils";
 import OperationError from "../errors/OperationError";
 import { toHex } from "../lib/Hex";
@@ -16,7 +16,7 @@ import { encryptRC6, getBlockSize, getDefaultRounds } from "../lib/RC6";
 /**
  * RC6 Encrypt operation
  */
-export class RC6Encrypt extends Operation {
+export class RC6Encrypt extends TypedOperation<string, string, unknown[]> {
   /**
    * RC6Encrypt constructor
    */

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 
 interface ToggleStringArg {
@@ -20,7 +20,7 @@ interface ToggleStringArg {
  *
  * @category Default
  */
-export class CountOccurrences extends Operation {
+export class CountOccurrences extends TypedOperation<string, number, ToggleStringArg[]> {
   /**
    * CountOccurrences constructor
    */

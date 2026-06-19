@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation, { AnyInput } from "../Operation";
+import { TypedOperation,  AnyInput  } from "../Operation_new";
 import { keccak224, keccak256, keccak384, keccak512 } from "js-sha3";
 import OperationError from "../errors/OperationError";
 
 /**
  * Keccak operation
  */
-export class Keccak extends Operation {
+export class Keccak extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /**
    * Keccak constructor
    */

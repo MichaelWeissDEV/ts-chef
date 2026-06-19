@@ -7,10 +7,10 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 
-export class Reverse extends Operation {
+export class Reverse extends TypedOperation<number[], number[], unknown[]> {
   constructor() {
     super();
     this.name = "Reverse";

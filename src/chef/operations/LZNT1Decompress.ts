@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation, { AnyInput } from "../Operation";
+import { TypedOperation,  AnyInput  } from "../Operation_new";
 import { decompress } from "../lib/LZNT1";
 
 /**
  * LZNT1 Decompress operation
  */
-export class LZNT1Decompress extends Operation {
+export class LZNT1Decompress extends TypedOperation<AnyInput, AnyInput, unknown[]> {
   /**
    * LZNT1 Decompress constructor
    */

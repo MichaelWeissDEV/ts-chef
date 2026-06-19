@@ -7,12 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 
 const EPOCH_DIFF_S = BigInt("11644473600");
 
-export class UNIXTimestampToWindowsFiletime extends Operation {
+export class UNIXTimestampToWindowsFiletime extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "UNIX Timestamp to Windows Filetime";

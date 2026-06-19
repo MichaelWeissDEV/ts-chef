@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Utils from "../Utils";
 import OperationError from "../errors/OperationError";
 import { strToIpv6, ipv6ToStr, ipv4ToStr, IPV6_REGEX } from "../lib/IP";
@@ -16,7 +16,7 @@ import BigNumber from "bignumber.js";
 /**
  * Parse IPv6 address operation
  */
-export class ParseIPv6Address extends Operation {
+export class ParseIPv6Address extends TypedOperation<string, string, unknown[]> {
   /**
    * ParseIPv6Address constructor
    */

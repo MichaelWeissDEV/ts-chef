@@ -7,10 +7,10 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, HighlightPos, HighlightResult } from "../Operation";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
 import { bitOp, not } from "../lib/BitwiseOp";
 
-export class NOT extends Operation {
+export class NOT extends TypedOperation<ArrayBuffer, number[], unknown[]> {
   constructor() {
     super();
     this.name = "NOT";

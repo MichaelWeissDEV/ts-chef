@@ -7,11 +7,11 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import { Stream } from "../lib/Stream";
 
-export class StripIPv4Header extends Operation {
+export class StripIPv4Header extends TypedOperation<ArrayBuffer, ArrayBuffer, unknown[]> {
   constructor() {
     super();
     this.name = "Strip IPv4 header";

@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Utils from "../Utils";
 import { encrypt } from "../lib/XXTEA";
 
 /**
  * XXTEA Encrypt operation
  */
-export class XXTEAEncrypt extends Operation {
+export class XXTEAEncrypt extends TypedOperation<AnyInput, AnyInput, unknown[]> {
   /**
    * XXTEAEncrypt constructor
    */

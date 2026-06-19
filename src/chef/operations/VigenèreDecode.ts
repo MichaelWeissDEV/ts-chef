@@ -7,17 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import {
-  Operation,
-  AnyInput,
-  HighlightPos,
-  HighlightResult,
-} from "../Operation";
+import { TypedOperation, AnyInput, HighlightPos, HighlightResult } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 /**
  * Vigenère Decode operation
  */
-class VigenèreDecode extends Operation {
+class VigenèreDecode extends TypedOperation<AnyInput, AnyInput, unknown[]> {
   /**
    * VigenèreDecode constructor
    */

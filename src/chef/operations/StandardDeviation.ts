@@ -8,11 +8,11 @@
  */
 
 import BigNumber from "bignumber.js";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { stdDev, createNumArray } from "../lib/Arithmetic";
 import { ARITHMETIC_DELIM_OPTIONS } from "../lib/Delim";
 
-export class StandardDeviation extends Operation {
+export class StandardDeviation extends TypedOperation<string, BigNumber, unknown[]> {
   constructor() {
     super();
     this.name = "Standard Deviation";

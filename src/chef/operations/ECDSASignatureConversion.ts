@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import { fromBase64, toBase64 } from "../lib/Base64";
 import { fromHex, toHexFast } from "../lib/Hex";
@@ -16,7 +16,7 @@ import r from "jsrsasign";
 /**
  * ECDSA Sign operation
  */
-export class ECDSASignatureConversion extends Operation {
+export class ECDSASignatureConversion extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * ECDSASignatureConversion constructor
    */

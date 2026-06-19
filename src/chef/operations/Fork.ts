@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Recipe from "../Recipe";
 import Dish from "../Dish";
 
 /**
  * Fork operation
  */
-export class Fork extends Operation {
+export class Fork extends TypedOperation<AnyInput, Promise<AnyInput>, unknown[]> {
   /**
    * Fork constructor
    */

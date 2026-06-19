@@ -7,9 +7,9 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, HighlightPos, HighlightResult } from "../Operation";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
 
-export class ROT47 extends Operation {
+export class ROT47 extends TypedOperation<number[], number[], unknown[]> {
   constructor() {
     super();
     this.name = "ROT47";

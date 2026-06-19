@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import { EMAIL_REGEX, search } from "../lib/Extract";
 import { caseInsensitiveSort } from "../lib/Sort";
 
 /**
  * Extract email addresses operation
  */
-export class ExtractEmailAddresses extends Operation {
+export class ExtractEmailAddresses extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * ExtractEmailAddresses constructor
    */

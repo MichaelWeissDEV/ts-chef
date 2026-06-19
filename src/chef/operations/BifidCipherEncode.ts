@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { genPolybiusSquare } from "../lib/Ciphers";
 import OperationError from "../errors/OperationError";
 
 /**
  * Bifid Cipher Encode operation
  */
-export class BifidCipherEncode extends Operation {
+export class BifidCipherEncode extends TypedOperation<string, string, unknown[]> {
   /**
    * BifidCipherEncode constructor
    */

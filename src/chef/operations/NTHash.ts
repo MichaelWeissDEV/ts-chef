@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import { runHash } from "../lib/Hash";
 
 /**
  * NT Hash operation
  */
-export class NTHash extends Operation {
+export class NTHash extends TypedOperation<string, string, unknown[]> {
   /**
    * NTHash constructor
    */

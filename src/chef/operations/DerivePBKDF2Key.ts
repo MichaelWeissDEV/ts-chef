@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Utils from "../Utils";
 import forge from "node-forge";
 
 /**
  * Derive PBKDF2 key operation
  */
-export class DerivePBKDF2Key extends Operation {
+export class DerivePBKDF2Key extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * DerivePBKDF2Key constructor
    */

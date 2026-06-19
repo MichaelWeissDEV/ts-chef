@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import BigNumber from "bignumber.js";
 
 /**
@@ -16,7 +16,7 @@ import BigNumber from "bignumber.js";
  * @category Default
  * @see https://wikipedia.org/wiki/Orders_of_magnitude_(mass)
  */
-export class ConvertMass extends Operation {
+export class ConvertMass extends TypedOperation<string, string, unknown[]> {
   /**
    * ConvertMass constructor
    */

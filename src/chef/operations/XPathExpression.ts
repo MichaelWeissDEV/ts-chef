@@ -7,12 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import { DOMParser } from "@xmldom/xmldom";
 import * as xpath from "xpath";
 
-export class XPathExpression extends Operation {
+export class XPathExpression extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "XPath expression";

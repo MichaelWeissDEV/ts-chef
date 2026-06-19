@@ -8,14 +8,14 @@
  */
 
 import BigNumber from "bignumber.js";
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import { div, createNumArray } from "../lib/Arithmetic";
 import { ARITHMETIC_DELIM_OPTIONS } from "../lib/Delim";
 
 /**
  * Divide operation
  */
-export class Divide extends Operation {
+export class Divide extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * Divide constructor
    */

@@ -10,6 +10,7 @@
 import { Operation, TypedOperation, OperationResult, PipelinedOperation, AnyInput, OperationWithArgs } from "./Operation_new";
 import { PipelineData, normaliseInput } from "./types";
 import type { PipelineStep } from "../storage/store";
+import { runOpCore, parsePipelineCore } from "./opsCore";
 
 /**
  * Extended pipeline step that can contain either operation names or operation instances
@@ -101,11 +102,8 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
    * Parse a pipe-language string and return a Pipeline.
    * This maintains backwards compatibility with the original parsePipeline function.
    */
-  static async parse(raw: string): Promise<Pipeline> {
-    // Dynamic import to avoid circular dependency
-    const { parsePipeline } = await import("../commands/runner.js" as string);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const steps = parsePipeline(raw) as any[];
+  static parse(raw: string): Pipeline {
+    const steps = parsePipelineCore(raw);
     return new Pipeline(steps.map(step => ({ opName: step.opName, args: step.args })));
   }
 
@@ -173,11 +171,8 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
           step.args as unknown as unknown[]
         )) as PipelineData;
       } else if (step.opName) {
-        // Operation by name - runner.runOp already normalises internally
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const runner = await import("../commands/runner.js" as string);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = (runner.runOp as any)(step.opName, current, step.args);
+        // Operation by name — runOpCore normalises internally
+        const result = runOpCore(step.opName, current as AnyInput, step.args);
         current = result instanceof Promise ? await result : result;
       }
     }
@@ -253,9 +248,7 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
             duration: result.duration,
           });
         } else if (step.opName) {
-          const runner2 = await import("../commands/runner.js" as string);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const result = (runner2.runOp as any)(step.opName, current, step.args);
+          const result = runOpCore(step.opName, current as AnyInput, step.args);
           output = result instanceof Promise ? await result : result as PipelineData;
           
           results.push({
@@ -315,11 +308,8 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         class NamedWrapper extends TypedOperation<any, any, any[]> {
           name = opName;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          async run(input: any, _args: any[]): Promise<any> {
-            const { runOp } = await import("../commands/runner.js" as string);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return (runOp as any)(opName, input, stepArgs);
+          run(input: any, _args: any[]): any {
+            return runOpCore(opName, input as AnyInput, stepArgs);
           }
         }
         parts.push(new NamedWrapper());

@@ -17,7 +17,7 @@ import {
   FIELD_DELIMITER_OPTIONS,
 } from "../lib/Charts";
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 
 const d3 = (d3temp as any).default ? (d3temp as any).default : d3temp;
@@ -28,7 +28,7 @@ const nodom = (nodomtemp as any).default
 /**
  * Scatter chart operation
  */
-export class ScatterChart extends Operation {
+export class ScatterChart extends TypedOperation<string, string, unknown[]> {
   /**
    * ScatterChart constructor
    */

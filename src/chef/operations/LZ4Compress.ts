@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation, { AnyInput } from "../Operation";
+import { TypedOperation,  AnyInput  } from "../Operation_new";
 import lz4 from "lz4js";
 
 /**
  * LZ4 Compress operation
  */
-export class LZ4Compress extends Operation {
+export class LZ4Compress extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /**
    * LZ4Compress constructor
    */

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 
 const BASE62_ALPHABET =
@@ -16,7 +16,7 @@ const BASE62_ALPHABET =
 /**
  * To Base62 operation
  */
-export class ToBase62 extends Operation {
+export class ToBase62 extends TypedOperation<ArrayBuffer, string, unknown[]> {
   /**
    * ToBase62 constructor
    */

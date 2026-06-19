@@ -200,45 +200,13 @@ export function toArrayBuffer(data: PipelineData): ArrayBuffer {
 
 /**
  * Normalizes input data to the expected type.
- * This is used for type-safe conversions between pipeline steps.
+ * @deprecated - Use normaliseInput instead.
  */
 export function normalizeInput(
   data: PipelineData,
   expectedType: InputType,
 ): PipelineData {
-  switch (expectedType) {
-    case INPUT_TYPES.ARRAY_BUFFER:
-      return toArrayBuffer(data);
-    case INPUT_TYPES.UINT8_ARRAY:
-      return toUint8Array(data);
-    case INPUT_TYPES.STRING:
-      return toString(data);
-    case INPUT_TYPES.NUMBER:
-      return isNumber(data) ? data : parseFloat(toString(data)) || 0;
-    case INPUT_TYPES.BIGINT:
-      return isBigInt(data)
-        ? data
-        : BigInt(toString(data).replace(/[^0-9]/g, ""));
-    case INPUT_TYPES.BOOLEAN:
-      return isBoolean(data) ? data : Boolean(toString(data));
-    case INPUT_TYPES.HEX:
-    case INPUT_TYPES.BYTE_ARRAY:
-      return toUint8Array(data);
-    case INPUT_TYPES.BASE64:
-      // For base64, we keep as string but ensure it's valid base64
-      return toString(data);
-    case INPUT_TYPES.JSON:
-      try {
-        if (isString(data)) {
-          return JSON.parse(data);
-        }
-        return data;
-      } catch {
-        return data;
-      }
-    default:
-      return data;
-  }
+  return normaliseInput(data, expectedType as string) as PipelineData;
 }
 
 /**

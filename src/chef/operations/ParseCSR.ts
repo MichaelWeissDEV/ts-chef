@@ -8,14 +8,14 @@
  */
 
 import * as r from "jsrsasign";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { formatDnObj } from "../lib/PublicKey";
 import Utils from "../Utils";
 
 /**
  * Parse CSR operation
  */
-export class ParseCSR extends Operation {
+export class ParseCSR extends TypedOperation<string, string, unknown[]> {
   /**
    * ParseCSR constructor
    */

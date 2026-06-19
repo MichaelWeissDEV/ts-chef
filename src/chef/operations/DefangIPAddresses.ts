@@ -7,12 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 /**
  * Defang IP Addresses operation
  */
-export class DefangIPAddresses extends Operation {
+export class DefangIPAddresses extends TypedOperation<string, string, unknown[]> {
   /**
    * DefangIPAddresses constructor
    */

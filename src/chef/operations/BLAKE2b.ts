@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { OperationError } from "../errors/OperationError";
 import { toBase64 } from "../lib/Base64";
@@ -24,7 +24,7 @@ interface ToggleStringArg {
  * @category Hashing
  * @see https://wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2b_algorithm
  */
-export class BLAKE2b extends Operation {
+export class BLAKE2b extends TypedOperation<ArrayBuffer, string, unknown[]> {
   constructor() {
     super();
     this.name = "BLAKE2b";

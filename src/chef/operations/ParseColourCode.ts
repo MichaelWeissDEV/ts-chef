@@ -7,12 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 /**
  * Parse colour code operation
  */
-export class ParseColourCode extends Operation {
+export class ParseColourCode extends TypedOperation<string, string, unknown[]> {
   /**
    * ParseColourCode constructor
    */

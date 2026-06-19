@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import * as OTPAuth from "otpauth";
 
 /**
  * Generate HOTP operation
  */
-export class GenerateHOTP extends Operation {
+export class GenerateHOTP extends TypedOperation<AnyInput, AnyInput, unknown[]> {
   /**
    *
    */

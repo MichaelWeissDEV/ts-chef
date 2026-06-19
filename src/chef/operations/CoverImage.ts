@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { toBase64 } from "../lib/Base64";
@@ -22,7 +22,7 @@ import {
 /**
  * Cover Image operation
  */
-export class CoverImage extends Operation {
+export class CoverImage extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer>, unknown[]> {
   /**
    * CoverImage constructor
    */

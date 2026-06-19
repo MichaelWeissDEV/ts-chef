@@ -3,7 +3,7 @@
  * @license Apache-2.0
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import JSZip from "jszip";
 
@@ -15,7 +15,7 @@ import JSZip from "jszip";
  * @category Compression
  * @see https://wikipedia.org/wiki/ZIP_(file_format)
  */
-export class Zip extends Operation {
+export class Zip extends TypedOperation<string | ArrayBuffer, Promise<ArrayBuffer>, unknown[]> {
   constructor() {
     super();
     this.name = "Zip";

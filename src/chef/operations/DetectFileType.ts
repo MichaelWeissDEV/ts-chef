@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import { detectFileType } from "../lib/FileType";
 import { FILE_SIGNATURES } from "../lib/FileSignatures";
 
@@ -26,7 +26,7 @@ const exts = [...new Set(([] as string[]).concat(..._allExts))]
 /**
  * Detect File Type operation
  */
-export class DetectFileType extends Operation {
+export class DetectFileType extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /**
    * DetectFileType constructor
    */

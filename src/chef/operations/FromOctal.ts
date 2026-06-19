@@ -7,11 +7,11 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { DELIM_OPTIONS } from "../lib/Delim";
 
-export class FromOctal extends Operation {
+export class FromOctal extends TypedOperation<string, number[], unknown[]> {
   constructor() {
     super();
     this.name = "From Octal";

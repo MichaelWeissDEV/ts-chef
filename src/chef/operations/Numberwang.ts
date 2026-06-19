@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 const DID_YOU_KNOW = [
   "Numberwang, contrary to popular belief, is a fruit and not a vegetable.",
@@ -22,7 +22,7 @@ const DID_YOU_KNOW = [
   '"Numberwang" has the code U+46402 in Unicode.',
 ];
 
-export class Numberwang extends Operation {
+export class Numberwang extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "Numberwang";

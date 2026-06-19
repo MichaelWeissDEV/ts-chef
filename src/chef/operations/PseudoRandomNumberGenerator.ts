@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Utils from "../Utils";
 import forge from "node-forge";
 import BigNumber from "bignumber.js";
@@ -15,7 +15,7 @@ import BigNumber from "bignumber.js";
 /**
  * Pseudo-Random Number Generator operation
  */
-export class PseudoRandomNumberGenerator extends Operation {
+export class PseudoRandomNumberGenerator extends TypedOperation<string, string, unknown[]> {
   /**
    * PseudoRandomNumberGenerator constructor
    */

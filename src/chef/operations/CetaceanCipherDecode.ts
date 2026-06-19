@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 /**
  * Cetacean Cipher Decode operation
  *
  * @category Ciphers
  */
-export class CetaceanCipherDecode extends Operation {
+export class CetaceanCipherDecode extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "Cetacean Cipher Decode";

@@ -8,9 +8,9 @@
  */
 
 import * as ssdeepjs from "ssdeep.js";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
-export class SSDEEP extends Operation {
+export class SSDEEP extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "SSDEEP";

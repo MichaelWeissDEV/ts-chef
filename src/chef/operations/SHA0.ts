@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 function sha0(data: Uint8Array): string {
   const H = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0];
@@ -71,7 +71,7 @@ function sha0(data: Uint8Array): string {
   return H.map((h) => h.toString(16).padStart(8, "0")).join("");
 }
 
-export class SHA0 extends Operation {
+export class SHA0 extends TypedOperation<ArrayBuffer, string, unknown[]> {
   constructor() {
     super();
     this.name = "SHA0";

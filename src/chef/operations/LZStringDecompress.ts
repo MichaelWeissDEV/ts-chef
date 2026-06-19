@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import {
   COMPRESSION_OUTPUT_FORMATS,
   DECOMPRESSION_FUNCTIONS,
 } from "../lib/LZString";
 
-export class LZStringDecompress extends Operation {
+export class LZStringDecompress extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "LZString Decompress";

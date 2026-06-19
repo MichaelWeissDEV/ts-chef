@@ -8,12 +8,12 @@
  */
 
 import r from "jsrsasign";
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 
 /**
  * Parse ASN.1 hex string operation
  */
-export class ParseASN1HexString extends Operation {
+export class ParseASN1HexString extends TypedOperation<string, string, unknown[]> {
   /**
    * ParseASN1HexString constructor
    */

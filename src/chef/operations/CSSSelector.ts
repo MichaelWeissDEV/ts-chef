@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import { JSDOM } from "jsdom";
 
@@ -17,7 +17,7 @@ import { JSDOM } from "jsdom";
  * @category Code
  * @see https://wikipedia.org/wiki/Cascading_Style_Sheets#Selector
  */
-export class CSSSelector extends Operation {
+export class CSSSelector extends TypedOperation<string, string, unknown[]> {
   /**
    * CSSSelector constructor
    */

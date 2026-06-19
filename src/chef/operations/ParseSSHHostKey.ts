@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { fromBase64 } from "../lib/Base64";
@@ -16,7 +16,7 @@ import { fromHex, toHexFast } from "../lib/Hex";
 /**
  * Parse SSH Host Key operation
  */
-export class ParseSSHHostKey extends Operation {
+export class ParseSSHHostKey extends TypedOperation<string, string, unknown[]> {
   /**
    * ParseSSHHostKey constructor
    */

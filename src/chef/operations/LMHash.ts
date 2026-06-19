@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import * as ntlm from "ntlm";
 
 /**
  * LM Hash operation
  */
-export class LMHash extends Operation {
+export class LMHash extends TypedOperation<string, string, unknown[]> {
   /**
    * LMHash constructor
    */

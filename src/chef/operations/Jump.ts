@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { getLabelIndex } from "../lib/FlowControl";
 
 /**
  * Jump operation
  */
-export class Jump extends Operation {
+export class Jump extends TypedOperation<any, any, unknown[]> {
   /**
    * Jump constructor
    */

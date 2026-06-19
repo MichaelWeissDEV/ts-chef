@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import Stream from "../lib/Stream";
@@ -16,7 +16,7 @@ import { runHash } from "../lib/Hash";
 /**
  * HASSH Client Fingerprint operation
  */
-export class HASSHClientFingerprint extends Operation {
+export class HASSHClientFingerprint extends TypedOperation<string, string, unknown[]> {
   /**
    * HASSHClientFingerprint constructor
    */

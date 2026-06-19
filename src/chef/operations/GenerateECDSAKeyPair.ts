@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import { cryptNotice } from "../lib/Crypt";
 import r from "jsrsasign";
 
 /**
  * Generate ECDSA Key Pair operation
  */
-export class GenerateECDSAKeyPair extends Operation {
+export class GenerateECDSAKeyPair extends TypedOperation<string, Promise<AnyInput>, unknown[]> {
   /**
    * GenerateECDSAKeyPair constructor
    */

@@ -8,9 +8,9 @@
  */
 
 import { createHash } from "crypto";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
-export class SHA1 extends Operation {
+export class SHA1 extends TypedOperation<ArrayBuffer, string, unknown[]> {
   constructor() {
     super();
     this.name = "SHA1";

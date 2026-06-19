@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { Operation, TypedOperation, AnyInput } from "../Operation_new";
 import Adler32Checksum from "./Adler32Checksum";
 import CRCChecksum from "./CRCChecksum";
 import Fletcher8Checksum from "./Fletcher8Checksum";
@@ -18,7 +18,7 @@ import Fletcher64Checksum from "./Fletcher64Checksum";
 /**
  * Generate all checksums operation
  */
-export class GenerateAllChecksums extends Operation {
+export class GenerateAllChecksums extends TypedOperation<AnyInput, AnyInput, unknown[]> {
   checksums: Array<{ name: string; algo: Operation; params: string[] }> = [];
 
   /**

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import Utils from "../Utils";
 import MD2 from "./MD2";
 import MD4 from "./MD4";
@@ -35,7 +35,7 @@ import OperationError from "../errors/OperationError";
 /**
  * Generate all hashes operation
  */
-export class GenerateAllHashes extends Operation {
+export class GenerateAllHashes extends TypedOperation<ArrayBuffer, string, [length: string, includeNames: boolean]> {
   hashes: {
     name: string;
     algo: Operation;

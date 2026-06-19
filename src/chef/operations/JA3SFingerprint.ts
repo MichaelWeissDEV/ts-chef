@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import Stream from "../lib/Stream";
@@ -16,7 +16,7 @@ import { runHash } from "../lib/Hash";
 /**
  * JA3S Fingerprint operation
  */
-export class JA3SFingerprint extends Operation {
+export class JA3SFingerprint extends TypedOperation<string, string, unknown[]> {
   /**
    * JA3SFingerprint constructor
    */

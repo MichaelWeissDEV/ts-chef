@@ -8,10 +8,10 @@
  */
 
 import * as JSSHA3 from "js-sha3";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 
-export class Shake extends Operation {
+export class Shake extends TypedOperation<ArrayBuffer, string, unknown[]> {
   constructor() {
     super();
     this.name = "Shake";

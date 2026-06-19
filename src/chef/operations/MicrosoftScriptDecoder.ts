@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 const D_DECODE: string[] = [
   "",
@@ -146,7 +146,7 @@ const D_COMBINATION: number[] = [
   0, 0, 1, 2, 2, 0, 0, 1, 2, 0, 2, 1,
 ];
 
-export class MicrosoftScriptDecoder extends Operation {
+export class MicrosoftScriptDecoder extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "Microsoft Script Decoder";

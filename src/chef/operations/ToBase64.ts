@@ -7,11 +7,11 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, HighlightPos, HighlightResult } from "../Operation";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
 import { toBase64 } from "../lib/Base64";
 import { ALPHABET_OPTIONS } from "./FromBase64";
 
-export class ToBase64 extends Operation {
+export class ToBase64 extends TypedOperation<number[], string, unknown[]> {
   constructor() {
     super();
     this.name = "To Base64";

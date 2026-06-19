@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation, { AnyInput } from "../Operation";
+import { TypedOperation,  AnyInput  } from "../Operation_new";
 import jwt from "jsonwebtoken";
 import OperationError from "../errors/OperationError";
 import { JWT_ALGORITHMS } from "../lib/JWT";
@@ -15,7 +15,7 @@ import { JWT_ALGORITHMS } from "../lib/JWT";
 /**
  * JWT Sign operation
  */
-export class JWTSign extends Operation {
+export class JWTSign extends TypedOperation<AnyInput, AnyInput, unknown[]> {
   /**
    * JWTSign constructor
    */

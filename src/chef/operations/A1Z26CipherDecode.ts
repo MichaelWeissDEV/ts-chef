@@ -6,7 +6,7 @@
  * @author Michael Weiss
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { DELIM_OPTIONS } from "../lib/Delim";
 import { OperationError } from "../errors/OperationError";
@@ -16,7 +16,7 @@ import { OperationError } from "../errors/OperationError";
  *
  * @category Ciphers
  */
-export class A1Z26CipherDecode extends Operation {
+export class A1Z26CipherDecode extends TypedOperation<string, string, string[]> {
   /**
    * A1Z26CipherDecode constructor
    */

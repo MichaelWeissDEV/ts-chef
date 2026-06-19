@@ -1,5 +1,5 @@
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { DELIM_OPTIONS } from "../lib/Delim";
 
@@ -8,7 +8,7 @@ import { DELIM_OPTIONS } from "../lib/Delim";
  *
  * @category Ciphers
  */
-export class A1Z26CipherEncode extends Operation {
+export class A1Z26CipherEncode extends TypedOperation<string, string, string[]> {
   /**
    * A1Z26CipherEncode constructor
    */

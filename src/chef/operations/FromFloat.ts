@@ -8,11 +8,11 @@
  */
 
 import * as ieee754 from "ieee754";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { DELIM_OPTIONS } from "../lib/Delim";
 
-export class FromFloat extends Operation {
+export class FromFloat extends TypedOperation<string, number[], unknown[]> {
   constructor() {
     super();
     this.name = "From Float";

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import kbpgp from "kbpgp";
 import { getSubkeySize, ASP } from "../lib/PGP";
 import { cryptNotice } from "../lib/Crypt";
@@ -16,7 +16,7 @@ import promisify from "es6-promisify";
 /**
  * Generate PGP Key Pair operation
  */
-export class GeneratePGPKeyPair extends Operation {
+export class GeneratePGPKeyPair extends TypedOperation<string, Promise<AnyInput>, unknown[]> {
   /**
    * GeneratePGPKeyPair constructor
    */

@@ -7,12 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 
 /**
  * Remove Diacritics operation
  */
-export class RemoveDiacritics extends Operation {
+export class RemoveDiacritics extends TypedOperation<string, string, unknown[]> {
   /**
    * RemoveDiacritics constructor
    */

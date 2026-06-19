@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import CryptoApi from "crypto-api/src/crypto-api";
 import Utils from "../Utils";
 import { toBase64 } from "../lib/Base64";
@@ -16,7 +16,7 @@ import OperationError from "../errors/OperationError";
 /**
  * Flask Session Sign operation
  */
-export class FlaskSessionSign extends Operation {
+export class FlaskSessionSign extends TypedOperation<AnyInput, AnyInput, unknown[]> {
   /**
    * FlaskSessionSign constructor
    */

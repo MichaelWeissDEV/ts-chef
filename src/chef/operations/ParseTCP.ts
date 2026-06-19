@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Stream from "../lib/Stream";
 import { toHexFast, fromHex } from "../lib/Hex";
 import { toBinary } from "../lib/Binary";
@@ -19,7 +19,7 @@ import BigNumber from "bignumber.js";
 /**
  * Parse TCP operation
  */
-export class ParseTCP extends Operation {
+export class ParseTCP extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * ParseTCP constructor
    */

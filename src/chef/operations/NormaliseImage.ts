@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { toBase64 } from "../lib/Base64";
@@ -16,7 +16,7 @@ import { Jimp, JimpMime } from "jimp";
 /**
  * Normalise Image operation
  */
-export class NormaliseImage extends Operation {
+export class NormaliseImage extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer>, unknown[]> {
   /**
    * NormaliseImage constructor
    */

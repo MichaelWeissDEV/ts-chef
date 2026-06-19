@@ -7,10 +7,10 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { TypedOperation, ArgConfig } from "../Operation_new";
 import * as Cbor from "cbor";
 
-export class CBOREncode extends Operation {
+export class CBOREncode extends TypedOperation<string, ArrayBuffer, unknown[]> {
   name = "CBOR Encode";
   module = "Serialise";
   description =

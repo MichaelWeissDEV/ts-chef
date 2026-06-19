@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import {
   BACON_ALPHABETS,
   BACON_TRANSLATION_CASE,
@@ -24,7 +24,7 @@ import {
  * @category Ciphers
  * @see {@link BaconCipherEncode}
  */
-export class BaconCipherDecode extends Operation {
+export class BaconCipherDecode extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "Bacon Cipher Decode";

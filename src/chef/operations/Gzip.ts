@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import { COMPRESSION_TYPE, ZLIB_COMPRESSION_TYPE_LOOKUP } from "../lib/Zlib";
 import gzip from "zlibjs/bin/gzip.min.js";
 
@@ -17,7 +17,7 @@ const Zlib = (gzip as any).Zlib;
 /**
  * Gzip operation
  */
-export class Gzip extends Operation {
+export class Gzip extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /**
    * Gzip constructor
    */

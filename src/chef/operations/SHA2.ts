@@ -8,7 +8,7 @@
  */
 
 import { createHash } from "crypto";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 
 const SIZE_MAP: Record<string, string> = {
@@ -20,7 +20,7 @@ const SIZE_MAP: Record<string, string> = {
   "512/224": "sha512-224",
 };
 
-export class SHA2 extends Operation {
+export class SHA2 extends TypedOperation<ArrayBuffer, string, unknown[]> {
   constructor() {
     super();
     this.name = "SHA2";

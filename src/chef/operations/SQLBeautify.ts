@@ -8,9 +8,9 @@
  */
 
 import { format } from "sql-formatter";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
-export class SQLBeautify extends Operation {
+export class SQLBeautify extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "SQL Beautify";

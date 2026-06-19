@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { TypedOperation, ArgConfig } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import { Utils } from "../Utils";
 import { HASH_DELIM_OPTIONS } from "../lib/Delim";
 import * as ssdeepjs from "ssdeep.js";
 
-export class CompareSSDEEPHashes extends Operation {
+export class CompareSSDEEPHashes extends TypedOperation<string, number, unknown[]> {
   name = "Compare SSDEEP hashes";
   module = "Crypto";
   description =

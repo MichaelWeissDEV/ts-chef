@@ -7,11 +7,11 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import { flatten } from "flat";
 
-export class JSONToCSV extends Operation {
+export class JSONToCSV extends TypedOperation<unknown, string, unknown[]> {
   private cellDelim = ",";
   private rowDelim = "\r\n";
   private flattened: unknown[] = [];

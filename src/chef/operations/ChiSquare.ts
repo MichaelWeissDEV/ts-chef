@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 /**
  * Chi Square operation
  *
  * @category Default
  */
-export class ChiSquare extends Operation {
+export class ChiSquare extends TypedOperation<ArrayBuffer, number, unknown[]> {
   constructor() {
     super();
     this.name = "Chi Square";

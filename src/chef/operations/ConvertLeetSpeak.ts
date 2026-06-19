@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 const TO_LEET_MAP: Record<string, string> = {
   a: "4",
@@ -73,7 +73,7 @@ const FROM_LEET_MAP: Record<string, string> = {
  * @category Default
  * @see https://wikipedia.org/wiki/Leet
  */
-export class ConvertLeetSpeak extends Operation {
+export class ConvertLeetSpeak extends TypedOperation<string, string, string[]> {
   /**
    * ConvertLeetSpeak constructor
    */

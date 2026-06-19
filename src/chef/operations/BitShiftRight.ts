@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 /**
  * Bit shift right operation
@@ -15,7 +15,7 @@ import { Operation } from "../Operation";
  * @category Default
  * @see https://wikipedia.org/wiki/Bitwise_operation#Bit_shifts
  */
-export class BitShiftRight extends Operation {
+export class BitShiftRight extends TypedOperation<ArrayBuffer, ArrayBuffer, unknown[]> {
   constructor() {
     super();
     this.name = "Bit shift right";

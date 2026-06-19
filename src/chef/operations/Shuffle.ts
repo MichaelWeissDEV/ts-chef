@@ -7,12 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { INPUT_DELIM_OPTIONS } from "../lib/Delim";
 import { randomBytes } from "crypto";
 
-export class Shuffle extends Operation {
+export class Shuffle extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "Shuffle";

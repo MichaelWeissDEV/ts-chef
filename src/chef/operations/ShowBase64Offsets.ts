@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import Utils from "../Utils";
 import { fromBase64, toBase64 } from "../lib/Base64";
 import OperationError from "../errors/OperationError";
@@ -15,7 +15,7 @@ import OperationError from "../errors/OperationError";
 /**
  * Show Base64 offsets operation
  */
-export class ShowBase64Offsets extends Operation {
+export class ShowBase64Offsets extends TypedOperation<number[], string, unknown[]> {
   /**
    * ShowBase64Offsets constructor
    */

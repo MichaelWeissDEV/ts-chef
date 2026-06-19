@@ -8,13 +8,13 @@
  */
 
 import r from "jsrsasign";
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 
 /**
  * JWK to PEM operation
  */
-export class JWKToPem extends Operation {
+export class JWKToPem extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * JWKToPem constructor
    */

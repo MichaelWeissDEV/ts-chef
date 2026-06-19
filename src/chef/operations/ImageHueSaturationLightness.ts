@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { toBase64 } from "../lib/Base64";
@@ -16,7 +16,7 @@ import { Jimp, JimpMime } from "jimp";
 /**
  * Image Hue/Saturation/Lightness operation
  */
-export class ImageHueSaturationLightness extends Operation {
+export class ImageHueSaturationLightness extends TypedOperation<ArrayBuffer, Promise<AnyInput>, unknown[]> {
   /**
    * ImageHueSaturationLightness constructor
    */

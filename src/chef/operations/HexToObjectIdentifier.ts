@@ -8,12 +8,12 @@
  */
 
 import r from "jsrsasign";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 /**
  * Hex to Object Identifier operation
  */
-export class HexToObjectIdentifier extends Operation {
+export class HexToObjectIdentifier extends TypedOperation<string, string, unknown[]> {
   /**
    * HexToObjectIdentifier constructor
    */

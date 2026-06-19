@@ -7,11 +7,11 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { OperationError } from "../errors/OperationError";
 
-export class AffineCipherDecode extends Operation {
+export class AffineCipherDecode extends TypedOperation<string, string, number[]> {
   constructor() {
     super();
     this.name = "Affine Cipher Decode";

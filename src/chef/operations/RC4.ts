@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, HighlightPos, HighlightResult } from "../Operation";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
 import CryptoJS from "crypto-js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,7 +24,7 @@ const format: Record<string, any> = {
 /**
  * RC4 operation
  */
-export class RC4 extends Operation {
+export class RC4 extends TypedOperation<string, string, unknown[]> {
   /**
    * RC4 constructor
    */

@@ -7,10 +7,10 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 
-export class SetIntersection extends Operation {
+export class SetIntersection extends TypedOperation<string, string, unknown[]> {
   private sampleDelim = "\n\n";
   private itemDelimiter = ",";
 

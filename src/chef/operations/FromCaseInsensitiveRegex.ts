@@ -7,12 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 
 /**
  * From Case Insensitive Regex operation
  */
-export class FromCaseInsensitiveRegex extends Operation {
+export class FromCaseInsensitiveRegex extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * FromCaseInsensitiveRegex constructor
    */

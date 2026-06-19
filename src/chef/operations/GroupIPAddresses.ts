@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import Utils from "../Utils";
 import OperationError from "../errors/OperationError";
 import { IP_DELIM_OPTIONS } from "../lib/Delim";
@@ -24,7 +24,7 @@ import {
 /**
  * Group IP addresses operation
  */
-export class GroupIPAddresses extends Operation {
+export class GroupIPAddresses extends TypedOperation<string, string, unknown[]> {
   /**
    * GroupIPAddresses constructor
    */

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import { SNEFRU_SBOX, SNEFRU_SHIFT_TABLE } from "../lib/SnefruSbox";
 
@@ -80,7 +80,7 @@ function snefruHash(
   return result;
 }
 
-export class Snefru extends Operation {
+export class Snefru extends TypedOperation<ArrayBuffer, string, unknown[]> {
   constructor() {
     super();
     this.name = "Snefru";

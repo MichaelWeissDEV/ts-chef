@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { bitOp, add, BITWISE_OP_DELIMS } from "../lib/BitwiseOp";
 
@@ -22,7 +22,7 @@ interface ToggleStringArg {
  * @category BitwiseOp
  * @see https://wikipedia.org/wiki/Bitwise_operation#Bitwise_operators
  */
-export class ADD extends Operation {
+export class ADD extends TypedOperation<number[], number[], ToggleStringArg[]> {
   /**
    * ADD constructor
    */

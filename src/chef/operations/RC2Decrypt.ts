@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import Utils from "../Utils";
 import forge from "node-forge";
 
 /**
  * RC2 Decrypt operation
  */
-export class RC2Decrypt extends Operation {
+export class RC2Decrypt extends TypedOperation<string, string, unknown[]> {
   /**
    * RC2Decrypt constructor
    */

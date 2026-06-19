@@ -214,7 +214,7 @@ export function activate(context: vscode.ExtensionContext): void {
       return;
     }
     try {
-      const result = runPipeline(selectionInput(editor), steps);
+      const result = await runPipeline(selectionInput(editor), steps);
       log(`Recipe applied: ${steps.length} step(s)`);
       await presentPipelineResult(editor, result, "Recipe", resultRenderers);
     } catch (e) {
@@ -271,13 +271,21 @@ export function activate(context: vscode.ExtensionContext): void {
     ),
   );
 
+  let debounceTimeout: NodeJS.Timeout | undefined;
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor) decorations.update(editor);
     }),
     vscode.workspace.onDidChangeTextDocument((e) => {
       const editor = vscode.window.activeTextEditor;
-      if (editor && e.document === editor.document) decorations.update(editor);
+      if (editor && e.document === editor.document) {
+        if (debounceTimeout) {
+          clearTimeout(debounceTimeout);
+        }
+        debounceTimeout = setTimeout(() => {
+          decorations.update(editor);
+        }, 200);
+      }
     }),
   );
 
@@ -521,7 +529,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
       try {
         const steps = parsePipeline(raw);
-        const result = runPipeline(text, steps);
+        const result = await runPipeline(text, steps);
         log(
           `Pipeline ran: "${raw}", input ${text.length} chars → ${result.length} chars`,
         );
@@ -556,7 +564,7 @@ export function activate(context: vscode.ExtensionContext): void {
           editor.document.getText();
         const text = resolveVars(rawText, varStore);
         try {
-          const result = runPipeline(text, pipeline.steps);
+          const result = await runPipeline(text, pipeline.steps);
           log(
             `Ran saved pipeline "${name}": ${pipeline.steps.length} step(s), ${text.length} → ${result.length} chars`,
           );

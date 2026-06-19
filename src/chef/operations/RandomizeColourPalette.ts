@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { isImage } from "../lib/FileType";
@@ -18,7 +18,7 @@ import { Jimp } from "jimp";
 /**
  * Randomize Colour Palette operation
  */
-export class RandomizeColourPalette extends Operation {
+export class RandomizeColourPalette extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer>, unknown[]> {
   /**
    * RandomizeColourPalette constructor
    */

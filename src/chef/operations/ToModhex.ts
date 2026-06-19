@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import { TO_MODHEX_DELIM_OPTIONS, toModhex } from "../lib/Modhex";
 import Utils from "../Utils";
 
 /**
  * To Modhex operation
  */
-export class ToModhex extends Operation {
+export class ToModhex extends TypedOperation<AnyInput, AnyInput, unknown[]> {
   /**
    * ToModhex constructor
    */

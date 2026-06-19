@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Utils from "../Utils";
 import cptable from "codepage";
 import { CHR_ENC_CODE_PAGES } from "../lib/ChrEnc";
@@ -15,7 +15,7 @@ import { CHR_ENC_CODE_PAGES } from "../lib/ChrEnc";
 /**
  * Text Encoding Brute Force operation
  */
-export class TextEncodingBruteForce extends Operation {
+export class TextEncodingBruteForce extends TypedOperation<AnyInput, AnyInput, unknown[]> {
   /**
    * TextEncodingBruteForce constructor
    */

@@ -7,9 +7,9 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
-export class DropBytes extends Operation {
+export class DropBytes extends TypedOperation<ArrayBuffer, ArrayBuffer, unknown[]> {
   constructor() {
     super();
     this.name = "Drop bytes";

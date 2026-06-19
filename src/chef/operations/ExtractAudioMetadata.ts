@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { makeEmptyReport, sniffContainer } from "../lib/AudioMetaSchema";
@@ -26,7 +26,7 @@ import {
 /**
  * Extract Audio Metadata operation.
  */
-export class ExtractAudioMetadata extends Operation {
+export class ExtractAudioMetadata extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /** Creates the Extract Audio Metadata operation. */
   constructor() {
     super();

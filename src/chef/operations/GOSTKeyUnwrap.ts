@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { toHexFast, fromHex } from "../lib/Hex";
@@ -19,7 +19,7 @@ import {
 /**
  * GOST Key Unwrap operation
  */
-export class GOSTKeyUnwrap extends Operation {
+export class GOSTKeyUnwrap extends TypedOperation<string, Promise<AnyInput>, unknown[]> {
   /**
    * GOSTKeyUnwrap constructor
    */

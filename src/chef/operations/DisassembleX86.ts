@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import * as disassemble from "../vendor/DisassembleX86-64";
 import OperationError from "../errors/OperationError";
 
 /**
  * Disassemble x86 operation
  */
-export class DisassembleX86 extends Operation {
+export class DisassembleX86 extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * DisassembleX86 constructor
    */

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Bzip2 from "libbzip2-wasm";
 
@@ -25,7 +25,7 @@ interface Bzip2Compressor {
   ): { error: number; error_msg: string; output: Uint8Array };
 }
 
-export class Bzip2Compress extends Operation {
+export class Bzip2Compress extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer>, unknown[]> {
   /**
    * Bzip2Compress constructor
    */

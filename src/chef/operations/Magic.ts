@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Utils from "../Utils";
 import Dish from "../Dish";
 import MagicLib, { MagicResult } from "../lib/Magic";
@@ -25,7 +25,7 @@ interface MagicOption extends MagicResult {
 /**
  * Magic operation
  */
-export class Magic extends Operation {
+export class Magic extends TypedOperation<AnyInput, Promise<AnyInput>, unknown[]> {
   state: {
     progress: number;
     dish: Dish;

@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import { ALPHABET_BITCOIN_B58, ALPHABET_RIPPLE_B58 } from "./ToBase58";
 
 /**
  * From Base58 operation
  */
-export class FromBase58 extends Operation {
+export class FromBase58 extends TypedOperation<string, number[], unknown[]> {
   /**
    * FromBase58 constructor
    */

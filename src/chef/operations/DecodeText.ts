@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import cptable from "codepage";
 import { CHR_ENC_CODE_PAGES } from "../lib/ChrEnc";
 
 /**
  * Decode text operation
  */
-export class DecodeText extends Operation {
+export class DecodeText extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /**
    * DecodeText constructor
    */

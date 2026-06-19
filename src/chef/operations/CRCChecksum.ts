@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { TypedOperation, ArgConfig } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 
 /**
@@ -16,7 +16,7 @@ import { OperationError } from "../errors/OperationError";
  * @category Default
  * @see https://wikipedia.org/wiki/Cyclic_redundancy_check
  */
-export class CRCChecksum extends Operation {
+export class CRCChecksum extends TypedOperation<ArrayBuffer, string, unknown[]> {
   name = "CRC Checksum";
   module = "Default";
   description =

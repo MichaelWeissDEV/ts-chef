@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 
 const FORMAT_MAP: Record<string, [number, number]> = {
   Bold: [0x1d400, 0x1d41a],
@@ -23,7 +23,7 @@ const FORMAT_MAP: Record<string, [number, number]> = {
   Monospace: [0x1d670, 0x1d68a],
 };
 
-export class UnicodeTextFormat extends Operation {
+export class UnicodeTextFormat extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "Unicode Text Format";

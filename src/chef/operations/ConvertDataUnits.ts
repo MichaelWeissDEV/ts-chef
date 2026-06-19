@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import BigNumber from "bignumber.js";
 
 /**
  * Convert data units operation
  */
-export class ConvertDataUnits extends Operation {
+export class ConvertDataUnits extends TypedOperation<BigNumber, BigNumber, unknown[]> {
   /**
    * ConvertDataUnits constructor
    */

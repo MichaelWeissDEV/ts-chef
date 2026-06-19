@@ -7,12 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { INPUT_DELIM_OPTIONS } from "../lib/Delim";
 import { OperationError } from "../errors/OperationError";
 
-export class Filter extends Operation {
+export class Filter extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "Filter";

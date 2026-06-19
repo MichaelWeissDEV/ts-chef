@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import Utils from "../Utils";
 import forge from "node-forge";
 import OperationError from "../errors/OperationError";
@@ -26,7 +26,7 @@ interface ForgeMutableMode extends forge.cipher.Mode {
   unpad?: () => boolean;
 }
 
-export class AESDecrypt extends Operation {
+export class AESDecrypt extends TypedOperation<string, string, unknown[]> {
   /**
    * AESDecrypt constructor
    */

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import { toHexFast } from "../lib/Hex";
 import { objToTable } from "../lib/Protocol";
 import Stream from "../lib/Stream";
@@ -15,7 +15,7 @@ import Stream from "../lib/Stream";
 /**
  * Parse TLS record operation.
  */
-export class ParseTLSRecord extends Operation {
+export class ParseTLSRecord extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   private _handshakeParser: HandshakeParser;
   private _contentTypes: Record<number, string>;
 

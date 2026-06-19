@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import * as LS47 from "../lib/LS47";
 
 /**
  * LS47 Encrypt operation
  */
-export class LS47Encrypt extends Operation {
+export class LS47Encrypt extends TypedOperation<string, string, unknown[]> {
   paddingSize: number = 0;
 
   /**

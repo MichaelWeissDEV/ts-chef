@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import * as ctphjs from "ctph.js";
 
 /**
@@ -16,7 +16,7 @@ import * as ctphjs from "ctph.js";
  * @category Hashing
  * @see https://forensics.wiki/context_triggered_piecewise_hashing/
  */
-export class CTPH extends Operation {
+export class CTPH extends TypedOperation<string, string, unknown[]> {
   /**
    * CTPH constructor
    */

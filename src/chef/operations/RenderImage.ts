@@ -9,7 +9,7 @@
 
 import { fromBase64, toBase64 } from "../lib/Base64";
 import { fromHex } from "../lib/Hex";
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { isImage } from "../lib/FileType";
@@ -17,7 +17,7 @@ import { isImage } from "../lib/FileType";
 /**
  * Render Image operation
  */
-export class RenderImage extends Operation {
+export class RenderImage extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * RenderImage constructor
    */

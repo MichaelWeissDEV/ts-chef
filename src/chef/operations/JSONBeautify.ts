@@ -7,11 +7,11 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import JSON5 from "json5";
 import { OperationError } from "../errors/OperationError";
 
-export class JSONBeautify extends Operation {
+export class JSONBeautify extends TypedOperation<string, string, unknown[]> {
   constructor() {
     super();
     this.name = "JSON Beautify";

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Utils from "../Utils";
 import OperationError from "../errors/OperationError";
 import { ENCODING_SCHEME, ENCODING_LOOKUP, FORMAT } from "../lib/BCD";
@@ -16,7 +16,7 @@ import BigNumber from "bignumber.js";
 /**
  * From BCD operation
  */
-export class FromBCD extends Operation {
+export class FromBCD extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * FromBCD constructor
    */

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Utils from "../Utils";
 import { scanForFileTypes } from "../lib/FileType";
 import { FILE_SIGNATURES } from "../lib/FileSignatures";
@@ -15,7 +15,7 @@ import { FILE_SIGNATURES } from "../lib/FileSignatures";
 /**
  * Scan for Embedded Files operation
  */
-export class ScanForEmbeddedFiles extends Operation {
+export class ScanForEmbeddedFiles extends TypedOperation<AnyInput, AnyInput, unknown[]> {
   /**
    * ScanForEmbeddedFiles constructor
    */

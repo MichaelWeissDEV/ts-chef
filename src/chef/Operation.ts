@@ -147,7 +147,7 @@ export abstract class Operation {
    * @returns The processed data.
    * @throws {OperationError} If processing fails.
    */
-  abstract run(input: AnyInput, args: unknown[]): AnyInput;
+  abstract run(input: unknown, args: unknown[]): unknown | Promise<unknown>;
 
   /**
    * Formats the output data for presentation in the UI.

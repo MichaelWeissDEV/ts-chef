@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { TypedOperation, ArgConfig } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import { Utils, LETTERS } from "../Utils";
 
@@ -244,7 +244,7 @@ class EnigmaMachine extends EnigmaBase {
 /**
  * Enigma operation
  */
-export class Enigma extends Operation {
+export class Enigma extends TypedOperation<string, string, unknown[]> {
   args: ArgConfig[] = [
     {
       name: "Model",

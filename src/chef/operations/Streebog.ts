@@ -8,10 +8,10 @@
  */
 
 import { streebog256, streebog512 } from "@li0ard/streebog";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 
-export class Streebog extends Operation {
+export class Streebog extends TypedOperation<ArrayBuffer, string, unknown[]> {
   constructor() {
     super();
     this.name = "Streebog";

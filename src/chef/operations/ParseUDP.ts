@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Stream from "../lib/Stream";
 import { toHexFast, fromHex } from "../lib/Hex";
 import { objToTable } from "../lib/Protocol";
@@ -17,7 +17,7 @@ import OperationError from "../errors/OperationError";
 /**
  * Parse UDP operation
  */
-export class ParseUDP extends Operation {
+export class ParseUDP extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * ParseUDP constructor
    */

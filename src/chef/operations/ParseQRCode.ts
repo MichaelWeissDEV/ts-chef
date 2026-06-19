@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { parseQrCode } from "../lib/QRCode";
@@ -15,7 +15,7 @@ import { parseQrCode } from "../lib/QRCode";
 /**
  * Parse QR Code operation
  */
-export class ParseQRCode extends Operation {
+export class ParseQRCode extends TypedOperation<ArrayBuffer, Promise<string>, unknown[]> {
   /**
    * ParseQRCode constructor
    */

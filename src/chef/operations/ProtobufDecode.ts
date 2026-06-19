@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import Protobuf from "../lib/Protobuf";
 
 /**
  * Protobuf Decode operation
  */
-export class ProtobufDecode extends Operation {
+export class ProtobufDecode extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /**
    * ProtobufDecode constructor
    */

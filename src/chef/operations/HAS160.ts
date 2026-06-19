@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import { runHash } from "../lib/Hash";
 
 /**
  * HAS-160 operation
  */
-export class HAS160 extends Operation {
+export class HAS160 extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /**
    * HAS-160 constructor
    */

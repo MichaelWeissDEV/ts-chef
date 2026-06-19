@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { TypedOperation, ArgConfig } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import { Utils } from "../Utils";
 import { fromHex } from "../lib/Hex";
@@ -17,7 +17,7 @@ import { fromHex } from "../lib/Hex";
  *
  * @category Default
  */
-export class ChangeIPFormat extends Operation {
+export class ChangeIPFormat extends TypedOperation<string, string, unknown[]> {
   name = "Change IP format";
   module = "Default";
   description =

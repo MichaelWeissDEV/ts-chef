@@ -7,12 +7,12 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, HighlightPos, HighlightResult } from "../Operation";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
 
 /**
  * ROT8000 operation.
  */
-export class ROT8000 extends Operation {
+export class ROT8000 extends TypedOperation<string, string, unknown[]> {
   /**
    * ROT8000 constructor
    */

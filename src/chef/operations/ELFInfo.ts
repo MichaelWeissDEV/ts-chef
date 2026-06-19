@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import Stream from "../lib/Stream";
 import { Utils } from "../Utils";
 import OperationError from "../errors/OperationError";
@@ -15,7 +15,7 @@ import OperationError from "../errors/OperationError";
 /**
  * ELF Info operation
  */
-export class ELFInfo extends Operation {
+export class ELFInfo extends TypedOperation<ArrayBuffer, string, unknown[]> {
   /**
    * ELFInfo constructor
    */

@@ -7,13 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 
 /**
  * Rail Fence Cipher Decode operation
  */
-export class RailFenceCipherDecode extends Operation {
+export class RailFenceCipherDecode extends TypedOperation<string, string, unknown[]> {
   /**
    * RailFenceCipherDecode constructor
    */

@@ -7,11 +7,11 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, HighlightPos, HighlightResult } from "../Operation";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
 import { Utils } from "../Utils";
 import { bitOp, sub, BITWISE_OP_DELIMS } from "../lib/BitwiseOp";
 
-export class SUB extends Operation {
+export class SUB extends TypedOperation<number[], number[], unknown[]> {
   constructor() {
     super();
     this.name = "SUB";

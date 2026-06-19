@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 
 /**
@@ -15,7 +15,7 @@ import { OperationError } from "../errors/OperationError";
  *
  * @category Default
  */
-export class CartesianProduct extends Operation {
+export class CartesianProduct extends TypedOperation<string, string, string[]> {
   private sampleDelim: string = "\n\n";
   private itemDelimiter: string = ",";
 

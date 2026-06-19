@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import { BombeMachine } from "../lib/Bombe";
 import { ROTORS, ROTORS_FOURTH, REFLECTORS, Reflector } from "../lib/Enigma";
@@ -30,7 +30,7 @@ function rotorsFormat(rotors: any[], s: number, n: number): string {
 /**
  * Bombe operation
  */
-export class MultipleBombe extends Operation {
+export class MultipleBombe extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * Bombe constructor
    */

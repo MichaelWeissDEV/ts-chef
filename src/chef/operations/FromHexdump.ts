@@ -7,10 +7,10 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, HighlightPos, HighlightResult } from "../Operation";
+import { TypedOperation, HighlightPos, HighlightResult } from "../Operation_new";
 import { fromHex } from "../lib/Hex";
 
-export class FromHexdump extends Operation {
+export class FromHexdump extends TypedOperation<string, number[], unknown[]> {
   constructor() {
     super();
     this.name = "From Hexdump";

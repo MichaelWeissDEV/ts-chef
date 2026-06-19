@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { TypedOperation, ArgConfig } from "../Operation_new";
 import { OperationError } from "../errors/OperationError";
 import { Utils } from "../Utils";
 import { toHexFast } from "../lib/Hex";
@@ -24,7 +24,7 @@ interface ToggleStringArg {
   option: string;
 }
 
-export class CMAC extends Operation {
+export class CMAC extends TypedOperation<ArrayBuffer, string, unknown[]> {
   name = "CMAC";
   module = "Crypto";
   description =

@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import Operation, { AnyInput } from "../Operation";
+import { TypedOperation,  AnyInput  } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import NodeMD6 from "node-md6";
 
 /**
  * MD6 operation
  */
-export class MD6 extends Operation {
+export class MD6 extends TypedOperation<string, string, unknown[]> {
   /**
    * MD6 constructor
    */

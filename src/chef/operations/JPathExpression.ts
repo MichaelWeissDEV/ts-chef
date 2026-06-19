@@ -8,13 +8,13 @@
  */
 
 import { JSONPath } from "jsonpath-plus";
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 
 /**
  * JPath expression operation
  */
-export class JPathExpression extends Operation {
+export class JPathExpression extends TypedOperation<string, string, unknown[]> {
   /**
    * JPathExpression constructor
    */

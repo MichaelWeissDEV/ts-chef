@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 import rison from "rison";
 
 /**
  * Rison Decode operation
  */
-export class RisonDecode extends Operation {
+export class RisonDecode extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * RisonDecode constructor
    */

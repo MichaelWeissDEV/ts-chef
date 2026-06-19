@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { TypedOperation, ArgConfig } from "../Operation_new";
 import vkbeautify from "vkbeautify";
 
 /**
@@ -15,7 +15,7 @@ import vkbeautify from "vkbeautify";
  *
  * @category Code
  */
-export class CSSMinify extends Operation {
+export class CSSMinify extends TypedOperation<string, string, unknown[]> {
   name = "CSS Minify";
   module = "Code";
   description = "Compresses Cascading Style Sheets (CSS) code.";

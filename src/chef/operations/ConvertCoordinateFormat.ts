@@ -7,10 +7,10 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { TypedOperation, ArgConfig } from "../Operation_new";
 import { FORMATS, convertCoordinates } from "../lib/ConvertCoordinates";
 
-export class ConvertCoordinateFormat extends Operation {
+export class ConvertCoordinateFormat extends TypedOperation<string, string, unknown[]> {
   name = "Convert co-ordinate format";
   module = "Hashing";
   description =

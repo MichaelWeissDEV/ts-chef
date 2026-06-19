@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation } from "../Operation";
+import { TypedOperation } from "../Operation_new";
 import { Utils } from "../Utils";
 import { LETTER_DELIM_OPTIONS, WORD_DELIM_OPTIONS } from "../lib/Delim";
 
@@ -69,7 +69,7 @@ const MORSE_TABLE: Record<string, string> = {
   " ": "<dot><dot><dot><dot><dot><dot><dot>",
 };
 
-export class FromMorseCode extends Operation {
+export class FromMorseCode extends TypedOperation<string, string, unknown[]> {
   private reversedTable: Record<string, string> | null = null;
 
   constructor() {

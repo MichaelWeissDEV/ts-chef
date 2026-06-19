@@ -8,13 +8,13 @@
  */
 
 import ExifParser from "exif-parser";
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import OperationError from "../errors/OperationError";
 
 /**
  * Extract EXIF operation
  */
-export class ExtractEXIF extends Operation {
+export class ExtractEXIF extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
   /**
    * ExtractEXIF constructor
    */

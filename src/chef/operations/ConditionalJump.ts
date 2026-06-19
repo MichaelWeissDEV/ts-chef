@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, ArgConfig } from "../Operation";
+import { TypedOperation, ArgConfig } from "../Operation_new";
 
 /**
  * Conditional Jump operation
  *
  * @category Default
  */
-export class ConditionalJump extends Operation {
+export class ConditionalJump extends TypedOperation<string, string, unknown[]> {
   name = "Conditional Jump";
   module = "Default";
   description =

@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation_new";
 import Utils from "../Utils";
 import * as JsDiff from "diff";
 import OperationError from "../errors/OperationError";
@@ -15,7 +15,7 @@ import OperationError from "../errors/OperationError";
 /**
  * Diff operation
  */
-export class Diff extends Operation {
+export class Diff extends TypedOperation<string, AnyInput, unknown[]> {
   /**
    * Diff constructor
    */
