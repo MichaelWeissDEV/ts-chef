@@ -139,6 +139,11 @@ export const window = {
   showInformationMessage,
   showWarningMessage,
   showQuickPick,
+  activeTextEditor: undefined as unknown,
+  visibleTextEditors: [] as unknown[],
+  createTextEditorDecorationType: (_opts: unknown) => ({
+    dispose: () => undefined,
+  }),
   setStatusBarMessage: (msg: string, timeout?: number) =>
     statusBarMessage(msg, timeout),
   createWebviewPanel: (..._args: unknown[]): FakeWebviewPanel => {
@@ -172,6 +177,14 @@ export const languages = {
     dispose: () => undefined,
   }),
 };
+
+export const OverviewRulerLane = { Left: 1, Center: 2, Right: 4, Full: 7 };
+
+export const ConfigurationTarget = { Global: 1, Workspace: 2, WorkspaceFolder: 3 };
+
+export class ThemeColor {
+  constructor(public readonly id: string) {}
+}
 
 export const commands = {
   registerCommand: (id: string, cb: (...args: unknown[]) => unknown) => {

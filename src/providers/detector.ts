@@ -254,6 +254,30 @@ const PATTERNS: PatternDef[] = [
     pattern: /\b([0-7]{3}(?:\s[0-7]{3}){3,})\b/g,
     confidence: () => 0.75,
   },
+  // ── bcrypt hash ────────────────────────────────────────────────────────
+  {
+    label: "bcrypt hash",
+    opName: "AnalyseHash",
+    defaultArgs: [],
+    pattern: /(\$2[abxy]?\$\d{2}\$[./A-Za-z0-9]{53})/g,
+    confidence: () => 0.96,
+  },
+  // ── Base64 payload of a data: URI ──────────────────────────────────────
+  {
+    label: "Data URI (Base64)",
+    opName: "FromBase64",
+    defaultArgs: ["A-Za-z0-9+/=", true, false],
+    pattern: /data:[a-z0-9.+/-]+;base64,([A-Za-z0-9+/]{8,}={0,2})/gi,
+    confidence: () => 0.95,
+  },
+  // ── \x-escaped hex bytes (shellcode / JS string escapes) ───────────────
+  {
+    label: "Hex (\\x-escaped)",
+    opName: "FromHex",
+    defaultArgs: ["\\x"],
+    pattern: /((?:\\x[0-9a-fA-F]{2}){4,})/g,
+    confidence: () => 0.93,
+  },
   // ── ROT13 (high letter-only entropy strings) ───────────────────────────
   {
     label: "ROT13",

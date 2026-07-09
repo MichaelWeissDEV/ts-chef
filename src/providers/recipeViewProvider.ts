@@ -68,6 +68,8 @@ export class RecipeViewProvider implements vscode.WebviewViewProvider {
     const argDefs = this.deps.argDefsFor(opName);
     if (!argDefs) return;
     this.steps.push({ opName, args: argDefs.map(resolveDefaultArg) });
+    // Reveal (without stealing focus) so the user sees the step land.
+    this.view?.show?.(false);
     this.postState();
   }
 
@@ -146,8 +148,8 @@ export class RecipeViewProvider implements vscode.WebviewViewProvider {
 <div class="hdr">
   <input id="name" placeholder="Recipe name…" oninput="onName(this.value)">
   <div class="hdr-btns">
-    <button class="btn" onclick="apply()">Apply</button>
-    <button class="btn" onclick="save()">Save</button>
+    <button class="btn" onclick="apply()" title="Run the recipe on the current selection">Apply to selection</button>
+    <button class="btn" onclick="save()" title="Save the recipe as a named pipeline">Save as pipeline</button>
   </div>
 </div>
 <div class="steps" id="steps"></div>
@@ -218,15 +220,20 @@ function argEditors(s, i) {
 }
 
 function argRow(argDef, val, ai) {
-  const label = '<span class="arg-label">' + escHtml(argDef.name) + '</span>';
+  const hint = argDef.hint ? ' title="' + escAttr(argDef.hint) + '"' : '';
+  const label = '<span class="arg-label"' + hint + '>' + escHtml(argDef.name) + '</span>';
   let input = '';
   switch (argDef.type) {
     case 'boolean':
       input = '<input type="checkbox" ' + (val ? 'checked' : '') + ' data-arg="' + ai + '" data-type="boolean">';
       break;
-    case 'number':
-      input = '<input type="number" value="' + escAttr(val) + '" data-arg="' + ai + '" data-type="number">';
+    case 'number': {
+      const bounds = (argDef.min != null ? ' min="' + argDef.min + '"' : '')
+        + (argDef.max != null ? ' max="' + argDef.max + '"' : '')
+        + (argDef.step != null ? ' step="' + argDef.step + '"' : '');
+      input = '<input type="number" value="' + escAttr(val) + '"' + bounds + ' data-arg="' + ai + '" data-type="number">';
       break;
+    }
     case 'option': {
       const opts = Array.isArray(argDef.value) ? argDef.value : [];
       input = '<select data-arg="' + ai + '" data-type="option">'

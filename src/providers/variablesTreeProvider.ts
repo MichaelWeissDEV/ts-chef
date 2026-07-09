@@ -13,12 +13,13 @@ import { VariableStore, ScopedVariable } from "../storage/store";
 class VariableNode extends vscode.TreeItem {
   constructor(public readonly variable: ScopedVariable) {
     super(variable.name, vscode.TreeItemCollapsibleState.None);
+    const scopeLabel = variable.scope === "global" ? "Global" : "Workspace";
     const value =
       variable.value.length > 40
         ? variable.value.slice(0, 40) + "…"
         : variable.value;
-    this.description = `${value}  [${variable.scope}]`;
-    this.tooltip = `${variable.name}: ${variable.value}${variable.description ? "\n" + variable.description : ""}\n(${variable.scope})`;
+    this.description = `${scopeLabel} · ${value}`;
+    this.tooltip = `${variable.name}: ${variable.value}${variable.description ? "\n" + variable.description : ""}\n(${scopeLabel})`;
     // Scope-qualified for future scope-targeted context menus.
     this.contextValue = `variable-${variable.scope}`;
     this.iconPath = new vscode.ThemeIcon("key");

@@ -22,10 +22,13 @@ import {
 import { PipelinePanel } from "./panels/pipelinePanel";
 import {
   runOp,
+  runOpAsync,
   parsePipeline,
   runPipeline,
   resolveDefaultArg,
 } from "./commands/runner";
+import { EntropyMapProvider } from "./providers/entropyMapProvider";
+import { detectFormat, makeReadable } from "./providers/format";
 import {
   presentPipelineResult,
   type ResultRenderer,
@@ -50,7 +53,11 @@ function defaultScope(
     .getConfiguration("tschef")
     .get<StorageScope>(key, "global");
 }
-import { analyseValue } from "./providers/detector";
+import {
+  magicAnalyse,
+  stringStats,
+  type MagicChain,
+} from "./providers/magic";
 import { initOutputChannel, log } from "./logger";
 import registry from "./opsRegistry";
 import type { ArgConfig, Operation } from "./chef/Operation";
@@ -142,6 +149,8 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const scanState = new ScanState();
   const decorations = new DecorationProvider(scanState);
+  const entropyMap = new EntropyMapProvider();
+  context.subscriptions.push({ dispose: () => entropyMap.dispose() });
   const globalDir = context.globalStorageUri.fsPath;
   const varStore = new VariableStore(globalDir);
   const pipeStore = new PipelineStore(globalDir);
@@ -274,7 +283,10 @@ export function activate(context: vscode.ExtensionContext): void {
   let debounceTimeout: NodeJS.Timeout | undefined;
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor((editor) => {
-      if (editor) decorations.update(editor);
+      if (editor) {
+        decorations.update(editor);
+        entropyMap.update(editor);
+      }
     }),
     vscode.workspace.onDidChangeTextDocument((e) => {
       const editor = vscode.window.activeTextEditor;
@@ -284,6 +296,7 @@ export function activate(context: vscode.ExtensionContext): void {
         }
         debounceTimeout = setTimeout(() => {
           decorations.update(editor);
+          entropyMap.update(editor);
         }, 200);
       }
     }),
@@ -324,10 +337,69 @@ export function activate(context: vscode.ExtensionContext): void {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("tschef.clearScanResults", () => {
+      scanState.clear();
       const editor = vscode.window.activeTextEditor;
-      scanState.clear(editor?.document.uri);
       if (editor) decorations.update(editor);
       log("Scan results cleared");
+    }),
+  );
+
+  // tschef.scanWorkspace — scan every (text) file in the workspace for patterns
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tschef.scanWorkspace", async () => {
+      const include =
+        "**/*.{txt,log,json,xml,yaml,yml,md,csv,ini,conf,cfg,env,toml,js,jsx,ts,tsx,py,sh,ps1,bat,html,htm,php,java,go,rb,c,cpp,h}";
+      const exclude =
+        "**/{node_modules,.git,dist,out,build,coverage,vendor}/**";
+      const files = await vscode.workspace.findFiles(include, exclude, 300);
+      if (!files.length) {
+        vscode.window.showInformationMessage(
+          "ts-chef: No scannable files found in the workspace.",
+        );
+        return;
+      }
+
+      let totalMatches = 0;
+      let filesWithHits = 0;
+      let scanned = 0;
+      await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: "ts-chef: Scanning workspace",
+          cancellable: true,
+        },
+        async (progress, token) => {
+          for (const uri of files) {
+            if (token.isCancellationRequested) break;
+            progress.report({
+              message: `${scanned + 1}/${files.length} — ${uri.path.split("/").pop()}`,
+              increment: 100 / files.length,
+            });
+            try {
+              const stat = await vscode.workspace.fs.stat(uri);
+              if (stat.size > 512 * 1024) continue; // skip huge files
+              const doc = await vscode.workspace.openTextDocument(uri);
+              const matches = scanState.scan(doc, false);
+              scanned++;
+              if (matches.length) {
+                filesWithHits++;
+                totalMatches += matches.length;
+              }
+            } catch {
+              // unreadable/binary file — skip
+            }
+          }
+        },
+      );
+      scanState.notify();
+      const editor = vscode.window.activeTextEditor;
+      if (editor) decorations.update(editor);
+      log(
+        `Workspace scan: ${scanned} file(s) scanned, ${totalMatches} pattern(s) in ${filesWithHits} file(s)`,
+      );
+      vscode.window.showInformationMessage(
+        `ts-chef: Found ${totalMatches} pattern(s) in ${filesWithHits} of ${scanned} scanned file(s).`,
+      );
     }),
   );
 
@@ -615,7 +687,8 @@ export function activate(context: vscode.ExtensionContext): void {
     ),
   );
 
-  // tschef.deepAnalysis — analyse selected text to detect encoding/format
+  // tschef.deepAnalysis — recursively analyse selected text: detect encodings,
+  // follow multi-step decode chains (Magic) and show decoded previews.
   context.subscriptions.push(
     vscode.commands.registerCommand("tschef.deepAnalysis", async () => {
       const editor = vscode.window.activeTextEditor;
@@ -629,36 +702,48 @@ export function activate(context: vscode.ExtensionContext): void {
       log(
         `Deep analysis: "${text.slice(0, 40)}${text.length > 40 ? "…" : ""}"`,
       );
-      const matches = analyseValue(text);
+      const trimmed = text.trim();
+      const stats = stringStats(trimmed);
+      const chains = magicAnalyse(trimmed);
 
-      if (!matches.length) {
+      if (!chains.length) {
         vscode.window.showInformationMessage(
-          "ts-chef: No recognisable encoding/format detected in selection.",
+          `ts-chef: No recognisable encoding/format detected ` +
+            `(${stats.length} chars, entropy ${stats.entropy} bits/char, ${stats.charset}).`,
         );
         return;
       }
 
-      const items = matches.map((m) => ({
-        label: m.label,
-        description: `${Math.round(m.confidence * 100)}% confidence`,
-        detail: `→ Apply operation: ${m.opName}`,
-        opName: m.opName,
-        defaultArgs: m.defaultArgs,
-      }));
+      type ChainItem = vscode.QuickPickItem & { chain?: MagicChain };
+      const items: ChainItem[] = [
+        {
+          label: `${stats.length} chars · entropy ${stats.entropy} bits/char · looks like ${stats.charset}`,
+          kind: vscode.QuickPickItemKind.Separator,
+        },
+        ...chains.map((chain) => ({
+          label: chain.steps.map((s) => s.label).join(" → "),
+          description: `${Math.round(chain.confidence * 100)}%`,
+          detail: `→ ${chain.preview.slice(0, 100).replace(/\s+/g, " ")}`,
+          chain,
+        })),
+      ];
 
       const picked = await vscode.window.showQuickPick(items, {
-        placeHolder: `Deep analysis: ${items.length} pattern(s) detected — pick to decode/apply`,
+        placeHolder: `Deep analysis: ${chains.length} decode path(s) found — pick to apply`,
+        matchOnDetail: true,
       });
-      if (!picked) return;
+      if (!picked?.chain) return;
 
       try {
-        const str = resultToString(
-          runOp(picked.opName, text, picked.defaultArgs as unknown[]),
-        );
+        const steps = picked.chain.steps.map((s) => ({
+          opName: s.opName,
+          args: s.args,
+        }));
+        const str = await runPipeline(trimmed, steps);
         log(
-          `Deep analysis applied "${picked.opName}": ${text.length} → ${str.length} chars`,
+          `Deep analysis applied "${picked.label}": ${trimmed.length} → ${str.length} chars`,
         );
-        await presentPipelineResult(editor, str, "Result", resultRenderers);
+        await presentPipelineResult(editor, str, picked.label, resultRenderers);
       } catch (e) {
         log(`Deep analysis error: ${e}`);
         vscode.window.showErrorMessage(`ts-chef deep analysis error: ${e}`);
@@ -743,6 +828,250 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     }),
   );
+
+  /** Open text in a fresh editor beside the current one, in the given language. */
+  async function showInNewEditor(
+    content: string,
+    languageId: string,
+  ): Promise<void> {
+    const doc = await vscode.workspace.openTextDocument({
+      content,
+      language: languageId,
+    });
+    await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
+  }
+
+  /** Input text: selection if any, else the whole document. */
+  function editorInput(editor: vscode.TextEditor): string {
+    return editor.selection.isEmpty
+      ? editor.document.getText()
+      : editor.document.getText(editor.selection);
+  }
+
+  // tschef.toggleEntropyMap — colour lines by Shannon entropy to spot
+  // packed/encrypted/encoded blocks at a glance.
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tschef.toggleEntropyMap", () => {
+      const on = entropyMap.toggle();
+      log(`Entropy map ${on ? "enabled" : "disabled"}`);
+      vscode.window.setStatusBarMessage(
+        `ts-chef: Entropy map ${on ? "on" : "off"}`,
+        2500,
+      );
+    }),
+  );
+
+  // tschef.yaraScan — run YARA rules against the selection/document.
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tschef.yaraScan", async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showWarningMessage("ts-chef: No active editor.");
+        return;
+      }
+      const source = await vscode.window.showQuickPick(
+        [
+          { label: "$(file) Load rules from a .yar file", kind: "file" as const },
+          { label: "$(edit) Type/paste rules", kind: "inline" as const },
+        ],
+        { placeHolder: "YARA rules source" },
+      );
+      if (!source) return;
+
+      let rules: string | undefined;
+      if (source.kind === "file") {
+        const picked = await vscode.window.showOpenDialog({
+          canSelectMany: false,
+          filters: { "YARA rules": ["yar", "yara", "rules", "txt"] },
+          openLabel: "Use these rules",
+        });
+        if (!picked?.length) return;
+        rules = Buffer.from(
+          await vscode.workspace.fs.readFile(picked[0]),
+        ).toString("utf-8");
+      } else {
+        rules = await vscode.window.showInputBox({
+          prompt: "YARA rule(s)",
+          placeHolder: "rule demo { strings: $a = \"foo\" condition: $a }",
+        });
+      }
+      if (!rules) return;
+
+      try {
+        // args: rules, showStrings, showLengths, showMeta, showCounts,
+        //       showRuleWarnings, showConsole
+        const result = (await runOpAsync("YARARules", editorInput(editor), [
+          rules,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+        ])) as string;
+        log(`YARA scan produced ${String(result).length} chars`);
+        await showInNewEditor(
+          String(result) || "(no matches)",
+          "plaintext",
+        );
+      } catch (e) {
+        log(`YARA scan error: ${e}`);
+        vscode.window.showErrorMessage(`ts-chef YARA error: ${e}`);
+      }
+    }),
+  );
+
+  // tschef.exportScanResults — write all scan matches to JSON or CSV.
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tschef.exportScanResults", async () => {
+      const entries = scanState.entries();
+      if (!entries.length) {
+        vscode.window.showInformationMessage(
+          "ts-chef: No scan results to export. Scan a document or the workspace first.",
+        );
+        return;
+      }
+      const format = await vscode.window.showQuickPick(["JSON", "CSV"], {
+        placeHolder: "Export format",
+      });
+      if (!format) return;
+
+      type Row = {
+        file: string;
+        line: number;
+        column: number;
+        value: string;
+        label: string;
+        confidence: number;
+        operation: string;
+      };
+      const rows: Row[] = [];
+      for (const { uri, matches } of entries) {
+        for (const m of matches) {
+          const top = m.matches[0];
+          rows.push({
+            file: uri.fsPath,
+            line: m.range.start.line + 1,
+            column: m.range.start.character + 1,
+            value: m.value,
+            label: top?.label ?? "",
+            confidence: top ? Math.round(top.confidence * 100) / 100 : 0,
+            operation: top?.opName ?? "",
+          });
+        }
+      }
+
+      let content: string;
+      let ext: string;
+      if (format === "CSV") {
+        const esc = (v: unknown): string => {
+          const s = String(v);
+          return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        };
+        const header = "file,line,column,label,confidence,operation,value";
+        content = [
+          header,
+          ...rows.map((r) =>
+            [
+              r.file,
+              r.line,
+              r.column,
+              r.label,
+              r.confidence,
+              r.operation,
+              r.value,
+            ]
+              .map(esc)
+              .join(","),
+          ),
+        ].join("\n");
+        ext = "csv";
+      } else {
+        content = JSON.stringify(rows, null, 2);
+        ext = "json";
+      }
+
+      const target = await vscode.window.showSaveDialog({
+        filters: { [format]: [ext] },
+        saveLabel: "Export scan results",
+      });
+      if (!target) return;
+      await vscode.workspace.fs.writeFile(target, Buffer.from(content, "utf-8"));
+      log(`Exported ${rows.length} scan result(s) as ${format}`);
+      vscode.window.showInformationMessage(
+        `ts-chef: Exported ${rows.length} result(s) to ${target.fsPath}.`,
+      );
+    }),
+  );
+
+  // tschef.smartFormat — auto-detect a structured format and pretty-print it
+  // into a new editor with the matching language mode.
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tschef.smartFormat", async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showWarningMessage("ts-chef: No active editor.");
+        return;
+      }
+      const text = editorInput(editor);
+      if (!text.trim()) {
+        vscode.window.showWarningMessage("ts-chef: Nothing to format.");
+        return;
+      }
+      const choice = detectFormat(text);
+      if (!choice || !choice.opName) {
+        // No structured format recognised — fall back to readable reflow.
+        await vscode.commands.executeCommand("tschef.makeReadable");
+        return;
+      }
+      try {
+        const formatted = resultToString(runOp(choice.opName, text, choice.args));
+        log(`smartFormat: detected ${choice.label}`);
+        await showInNewEditor(formatted, choice.languageId);
+        vscode.window.setStatusBarMessage(
+          `ts-chef: Formatted as ${choice.label}`,
+          2500,
+        );
+      } catch (e) {
+        log(`smartFormat error: ${e}`);
+        vscode.window.showErrorMessage(`ts-chef format error: ${e}`);
+      }
+    }),
+  );
+
+  // tschef.makeReadable — reflow extremely long lines/blobs into a readable
+  // multi-line form (no data change, whitespace only) in a new editor.
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tschef.makeReadable", async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showWarningMessage("ts-chef: No active editor.");
+        return;
+      }
+      const text = editorInput(editor);
+      if (!text.trim()) {
+        vscode.window.showWarningMessage("ts-chef: Nothing to reflow.");
+        return;
+      }
+      const width = vscode.workspace
+        .getConfiguration("tschef")
+        .get<number>("readableLineWidth", 100);
+      const out = makeReadable(text, width);
+      if (out === text) {
+        vscode.window.showInformationMessage(
+          "ts-chef: Lines are already within a readable width.",
+        );
+        return;
+      }
+      log(`makeReadable: reflowed at width ${width}`);
+      await showInNewEditor(out, editor.document.languageId);
+    }),
+  );
+
+  // Apply the entropy map to the editor that is active at startup.
+  if (entropyMap.isEnabled() && vscode.window.activeTextEditor) {
+    entropyMap.update(vscode.window.activeTextEditor);
+  }
 
   context.subscriptions.push(scanState);
 }

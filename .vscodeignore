@@ -28,9 +28,11 @@ tsconfig*.json
 
 # Misc
 report.md
+*.vsix
 
-# Large demo assets (referenced via the repo URL in the README, not from inside the VSIX)
-assets/Clip1.mp4
+# Assets: ship only the extension icon; demo media is referenced via the repo URL
+assets/**
+!assets/logo.jpg
 
 # Test reports, coverage and docs
 coverage/**

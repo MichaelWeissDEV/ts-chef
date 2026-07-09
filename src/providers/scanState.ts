@@ -19,15 +19,27 @@ export class ScanState {
   private _onChange = new vscode.EventEmitter<void>();
   readonly onDidChange = this._onChange.event;
 
-  scan(doc: vscode.TextDocument): DetectionMatch[] {
+  scan(doc: vscode.TextDocument, fireEvent = true): DetectionMatch[] {
     const matches = scanText(doc);
     this.results.set(doc.uri.toString(), matches);
-    this._onChange.fire();
+    if (fireEvent) this._onChange.fire();
     return matches;
+  }
+
+  /** Manually notify subscribers, e.g. after a batch of silent scans. */
+  notify(): void {
+    this._onChange.fire();
   }
 
   get(uri: vscode.Uri): DetectionMatch[] {
     return this.results.get(uri.toString()) ?? [];
+  }
+
+  /** All scanned documents that produced at least one match. */
+  entries(): { uri: vscode.Uri; matches: DetectionMatch[] }[] {
+    return [...this.results.entries()]
+      .filter(([, matches]) => matches.length > 0)
+      .map(([uri, matches]) => ({ uri: vscode.Uri.parse(uri), matches }));
   }
 
   clear(uri?: vscode.Uri): void {

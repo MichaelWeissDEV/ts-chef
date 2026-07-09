@@ -54,6 +54,27 @@ export function runOp(
 }
 
 /**
+ * Like {@link runOp} but awaits the operation's result, so operations whose
+ * `run` returns a Promise (e.g. YARA Rules) produce their real output instead
+ * of an unawaited `[object Promise]`. Safe for synchronous ops too.
+ */
+export async function runOpAsync(
+  opName: string,
+  input: AnyInput,
+  args: unknown[],
+): Promise<AnyInput> {
+  const entry = registry.find(
+    (e) =>
+      e.opName === opName ||
+      e.displayName.toLowerCase() === opName.toLowerCase(),
+  );
+  if (!entry) throw new Error(`Unknown operation: ${opName}`);
+  const op = entry.factory();
+  const normalised = normaliseInput(input, op.inputType);
+  return (await op.run(normalised as AnyInput, args)) as AnyInput;
+}
+
+/**
  * Executes a sequence of pipeline steps, feeding each output into the next step's input.
  *
  * @param input - The initial value to feed into the first step.

@@ -11,7 +11,8 @@ export default tseslint.config(
       "jest.config.js",
       "notes/**",
       "test-report/**",
-      "coverage/**"
+      "coverage/**",
+      "docs/**"
     ]
   },
   eslint.configs.recommended,

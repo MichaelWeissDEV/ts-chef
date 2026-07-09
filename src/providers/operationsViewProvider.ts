@@ -82,58 +82,88 @@ export class OperationsViewProvider implements vscode.WebviewViewProvider {
   body { font-family: var(--vscode-font-family); font-size: var(--vscode-font-size); color: var(--vscode-foreground); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
   #search { margin: 5px; padding: 3px 6px; background: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border,#555); }
   .list { flex: 1; overflow-y: auto; }
-  .group-hdr { padding: 3px 8px; font-size: 10px; opacity: 0.55; text-transform: uppercase; letter-spacing: 0.5px; }
-  .op-row { display: flex; align-items: center; gap: 4px; padding: 2px 8px; }
+  .group-hdr { display: flex; align-items: center; gap: 4px; padding: 3px 8px; cursor: pointer; font-size: 11px; font-weight: 600; opacity: 0.8; user-select: none; }
+  .group-hdr:hover { background: var(--vscode-list-hoverBackground); }
+  .group-count { opacity: 0.55; font-weight: normal; margin-left: auto; font-size: 10px; }
+  .op-row { display: flex; align-items: center; gap: 4px; padding: 2px 8px 2px 22px; cursor: pointer; }
   .op-row:hover { background: var(--vscode-list-hoverBackground); }
-  .op-name { flex: 1; cursor: pointer; font-size: 12px; }
+  .op-name { flex: 1; font-size: 12px; }
   .op-add { cursor: pointer; border: none; background: none; color: var(--vscode-foreground); opacity: 0.55; font-size: 13px; padding: 0 4px; }
   .op-add:hover { opacity: 1; }
   .empty { padding: 8px; opacity: 0.5; font-size: 11px; }
 </style>
 </head>
 <body>
-<input id="search" placeholder="Filter operations…" oninput="filter(this.value)">
+<input id="search" placeholder="Filter operations…">
 <div class="list" id="list"></div>
 <script>
 const vscode = acquireVsCodeApi();
+const searchEl = document.getElementById('search');
+const listEl = document.getElementById('list');
 let allOps = [];
+const expanded = new Set();
 
 window.addEventListener('message', e => {
-  if (e.data.type === 'opsList') { allOps = e.data.ops; render(allOps, ''); }
+  if (e.data.type === 'opsList') { allOps = e.data.ops; render(); }
 });
 vscode.postMessage({ type: 'getOps' });
 
 function escHtml(s) {
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function render(ops, query) {
-  const grouped = {};
-  for (const op of ops) (grouped[op.module] = grouped[op.module] || []).push(op);
+function groupsFor(ql) {
+  const byModule = new Map();
+  for (const op of allOps) {
+    if (ql
+      && !op.displayName.toLowerCase().includes(ql)
+      && !op.opName.toLowerCase().includes(ql)
+      && !op.module.toLowerCase().includes(ql)) continue;
+    if (!byModule.has(op.module)) byModule.set(op.module, []);
+    byModule.get(op.module).push(op);
+  }
+  return [...byModule.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+}
+
+function render() {
+  const q = searchEl.value.trim().toLowerCase();
+  const filtering = q.length > 0;
   let html = '';
-  for (const [mod, list] of Object.entries(grouped).sort()) {
-    const open = query ? ' open' : '';
-    html += '<div class="group-hdr">' + escHtml(mod) + '</div>';
-    for (const op of list) {
-      html += '<div class="op-row">'
-        + '<span class="op-name" title="Apply to selection" onclick="apply(\\'' + op.opName + '\\')">' + escHtml(op.displayName) + '</span>'
-        + '<button class="op-add" title="Add to recipe" onclick="addToRecipe(\\'' + op.opName + '\\')">＋</button>'
-        + '</div>';
+  for (const [mod, ops] of groupsFor(q)) {
+    const open = filtering || expanded.has(mod);
+    html += '<div class="group-hdr" data-mod="' + escHtml(mod) + '">'
+      + (open ? '▾ ' : '▸ ') + escHtml(mod)
+      + '<span class="group-count">' + ops.length + '</span></div>';
+    if (open) {
+      ops.sort((a, b) => a.displayName.localeCompare(b.displayName));
+      for (const op of ops) {
+        html += '<div class="op-row" data-op="' + escHtml(op.opName) + '" title="Apply to selection">'
+          + '<span class="op-name">' + escHtml(op.displayName) + '</span>'
+          + '<button class="op-add" title="Add to recipe">＋</button>'
+          + '</div>';
+      }
     }
   }
-  document.getElementById('list').innerHTML = html || '<div class="empty">No matching operations.</div>';
+  listEl.innerHTML = html || '<div class="empty">No matching operations.</div>';
 }
 
-function filter(q) {
-  const ql = q.toLowerCase();
-  const filtered = q
-    ? allOps.filter(o => o.displayName.toLowerCase().includes(ql) || o.module.toLowerCase().includes(ql))
-    : allOps;
-  render(filtered, q);
-}
-
-function apply(opName) { vscode.postMessage({ type: 'apply', opName }); }
-function addToRecipe(opName) { vscode.postMessage({ type: 'addToRecipe', opName }); }
+searchEl.addEventListener('input', render);
+listEl.addEventListener('click', e => {
+  const addEl = e.target.closest('.op-add');
+  if (addEl) {
+    const row = addEl.closest('.op-row[data-op]');
+    if (row) vscode.postMessage({ type: 'addToRecipe', opName: row.dataset.op });
+    return;
+  }
+  const opEl = e.target.closest('.op-row[data-op]');
+  if (opEl) { vscode.postMessage({ type: 'apply', opName: opEl.dataset.op }); return; }
+  const hdr = e.target.closest('.group-hdr');
+  if (hdr && !searchEl.value.trim()) {
+    const mod = hdr.dataset.mod;
+    if (expanded.has(mod)) expanded.delete(mod); else expanded.add(mod);
+    render();
+  }
+});
 </script>
 </body>
 </html>`;

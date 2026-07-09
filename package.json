@@ -2,22 +2,32 @@
   "name": "vscode-ts-chef",
   "displayName": "ts-chef",
   "description": "CyberChef-style data transformations directly in VS Code",
-  "version": "0.5.2",
+  "version": "0.7.0",
   "icon": "assets/logo.jpg",
   "publisher": "michaelweiss",
   "repository": {
     "type": "git",
-    "url": "https://github.com/michaelweiss/ts-chef.git"
+    "url": "https://github.com/MichaelWeissDEV/ts-chef.git"
   },
   "bugs": {
-    "url": "https://github.com/michaelweiss/ts-chef/issues"
+    "url": "https://github.com/MichaelWeissDEV/ts-chef/issues"
   },
-  "homepage": "https://github.com/michaelweiss/ts-chef#readme",
+  "homepage": "https://github.com/MichaelWeissDEV/ts-chef#readme",
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": [
     "Other"
+  ],
+  "keywords": [
+    "cyberchef",
+    "encoding",
+    "decoding",
+    "base64",
+    "hex",
+    "hash",
+    "converter",
+    "crypto"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -32,6 +42,11 @@
       {
         "command": "tschef.scanDocument",
         "title": "tschef: Scan Document for Patterns"
+      },
+      {
+        "command": "tschef.scanWorkspace",
+        "title": "tschef: Scan Workspace for Patterns",
+        "icon": "$(folder-opened)"
       },
       {
         "command": "tschef.toggleHighlight",
@@ -81,6 +96,29 @@
         "command": "tschef.loadRecipe",
         "title": "tschef: Load into Recipe",
         "icon": "$(list-flat)"
+      },
+      {
+        "command": "tschef.yaraScan",
+        "title": "tschef: YARA Scan Selection/Document",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "tschef.exportScanResults",
+        "title": "tschef: Export Scan Results",
+        "icon": "$(export)"
+      },
+      {
+        "command": "tschef.toggleEntropyMap",
+        "title": "tschef: Toggle Entropy Heatmap",
+        "icon": "$(flame)"
+      },
+      {
+        "command": "tschef.smartFormat",
+        "title": "tschef: Smart Format (Auto-Detect & Beautify)"
+      },
+      {
+        "command": "tschef.makeReadable",
+        "title": "tschef: Make Readable (Reflow Long Lines)"
       }
     ],
     "viewsContainers": {
@@ -123,6 +161,40 @@
         }
       ]
     },
+    "keybindings": [
+      {
+        "command": "tschef.quickConvert",
+        "key": "ctrl+alt+c",
+        "mac": "ctrl+cmd+c",
+        "when": "editorTextFocus && editorHasSelection"
+      },
+      {
+        "command": "tschef.runSavedPipelinePicker",
+        "key": "ctrl+alt+r",
+        "mac": "ctrl+cmd+r",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "tschef.smartFormat",
+        "key": "ctrl+alt+f",
+        "mac": "ctrl+cmd+f",
+        "when": "editorTextFocus"
+      }
+    ],
+    "viewsWelcome": [
+      {
+        "view": "tschef.pipelinesView",
+        "contents": "No saved pipelines yet.\nBuild a recipe in the Recipe pane and save it, or use the editor:\n[Open Pipeline Editor](command:tschef.openPipelineEditor)"
+      },
+      {
+        "view": "tschef.variablesView",
+        "contents": "No variables yet. Variables can be referenced in inputs as $name or {{name}}.\n[Add Variable](command:tschef.addVariable)"
+      },
+      {
+        "view": "tschef.patternsView",
+        "contents": "No patterns found yet.\n[Scan Document](command:tschef.scanDocument)\n[Scan Workspace](command:tschef.scanWorkspace)"
+      }
+    ],
     "menus": {
       "editor/context": [
         {
@@ -134,11 +206,29 @@
           "command": "tschef.deepAnalysis",
           "when": "editorHasSelection",
           "group": "tschef"
+        },
+        {
+          "command": "tschef.smartFormat",
+          "group": "tschef"
+        },
+        {
+          "command": "tschef.makeReadable",
+          "group": "tschef"
         }
       ],
       "view/title": [
         {
           "command": "tschef.refreshScan",
+          "when": "view == tschef.patternsView",
+          "group": "navigation"
+        },
+        {
+          "command": "tschef.scanWorkspace",
+          "when": "view == tschef.patternsView",
+          "group": "navigation"
+        },
+        {
+          "command": "tschef.exportScanResults",
           "when": "view == tschef.patternsView",
           "group": "navigation"
         },
@@ -183,6 +273,16 @@
           "type": "boolean",
           "default": false,
           "description": "Automatically scan the document when it is saved"
+        },
+        "tschef.entropyMap.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Colour editor lines by Shannon entropy (heatmap) to spot packed, encrypted, or encoded blocks. Toggle at runtime with 'tschef: Toggle Entropy Heatmap'."
+        },
+        "tschef.readableLineWidth": {
+          "type": "number",
+          "default": 100,
+          "description": "Target line width used by 'tschef: Make Readable' when reflowing extremely long lines."
         },
         "tschef.pipelineResultAction": {
           "type": "string",
