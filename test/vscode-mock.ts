@@ -86,6 +86,51 @@ export class EventEmitter<T> {
 
 export const ViewColumn = { Beside: 2 } as const;
 
+export const TreeItemCollapsibleState = {
+  None: 0,
+  Collapsed: 1,
+  Expanded: 2,
+} as const;
+
+export class TreeItem {
+  label: string;
+  description?: string;
+  tooltip?: unknown;
+  iconPath?: unknown;
+  resourceUri?: unknown;
+  contextValue?: string;
+  command?: unknown;
+  collapsibleState: number;
+  constructor(label: string, collapsibleState = 0) {
+    this.label = label;
+    this.collapsibleState = collapsibleState;
+  }
+}
+
+export class ThemeIcon {
+  static readonly File = new ThemeIcon("file");
+  constructor(public readonly id: string) {}
+}
+
+export class Uri {
+  private constructor(
+    public readonly scheme: string,
+    public readonly fsPath: string,
+  ) {}
+  toString(): string {
+    return `${this.scheme}://${this.fsPath}`;
+  }
+  static file(fsPath: string): Uri {
+    return new Uri("file", fsPath);
+  }
+  static parse(value: string): Uri {
+    const idx = value.indexOf("://");
+    return idx >= 0
+      ? new Uri(value.slice(0, idx), value.slice(idx + 3))
+      : new Uri("file", value);
+  }
+}
+
 // ── test-controlled state ─────────────────────────────────────────────────────
 let configValues: Record<string, unknown> = {};
 let infoMessageResponse: string | undefined = undefined;
@@ -211,6 +256,12 @@ export function __reset(): void {
   showInformationMessage.mockClear();
   showWarningMessage.mockClear();
   showQuickPick.mockClear();
+  window.activeTextEditor = undefined;
+}
+
+/** Set the active editor (a minimal `{ document: { uri } }` is enough). */
+export function __setActiveEditor(editor: unknown): void {
+  window.activeTextEditor = editor;
 }
 
 /** Set the value returned by `getConfiguration("tschef").get(key, …)`. */

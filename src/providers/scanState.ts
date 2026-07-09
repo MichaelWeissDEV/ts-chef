@@ -35,6 +35,11 @@ export class ScanState {
     return this.results.get(uri.toString()) ?? [];
   }
 
+  /** Whether this document has been scanned (even if it produced no matches). */
+  hasScanned(uri: vscode.Uri): boolean {
+    return this.results.has(uri.toString());
+  }
+
   /** All scanned documents that produced at least one match. */
   entries(): { uri: vscode.Uri; matches: DetectionMatch[] }[] {
     return [...this.results.entries()]

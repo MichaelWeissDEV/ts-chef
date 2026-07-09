@@ -49,6 +49,16 @@
         "icon": "$(folder-opened)"
       },
       {
+        "command": "tschef.followActiveEditorOn",
+        "title": "tschef: Patterns Follow Active Editor",
+        "icon": "$(eye-closed)"
+      },
+      {
+        "command": "tschef.followActiveEditorOff",
+        "title": "tschef: Pin Patterns (Stop Following)",
+        "icon": "$(eye)"
+      },
+      {
         "command": "tschef.toggleHighlight",
         "title": "tschef: Toggle Pattern Highlighting"
       },
@@ -218,6 +228,16 @@
       ],
       "view/title": [
         {
+          "command": "tschef.followActiveEditorOff",
+          "when": "view == tschef.patternsView && tschef.patternsFollow",
+          "group": "navigation@0"
+        },
+        {
+          "command": "tschef.followActiveEditorOn",
+          "when": "view == tschef.patternsView && !tschef.patternsFollow",
+          "group": "navigation@0"
+        },
+        {
           "command": "tschef.refreshScan",
           "when": "view == tschef.patternsView",
           "group": "navigation"
@@ -273,6 +293,16 @@
           "type": "boolean",
           "default": false,
           "description": "Automatically scan the document when it is saved"
+        },
+        "tschef.patterns.followActiveEditor": {
+          "type": "boolean",
+          "default": true,
+          "description": "Let the Found Patterns view follow the active editor and show that file's matches. Turn off (or use the eye button in the view title) to pin the current results so switching editors keeps them."
+        },
+        "tschef.patterns.autoScanOnFocus": {
+          "type": "boolean",
+          "default": false,
+          "description": "When following the active editor, automatically scan a document the first time it becomes active (skipped for files larger than 512 KB)."
         },
         "tschef.entropyMap.enabled": {
           "type": "boolean",

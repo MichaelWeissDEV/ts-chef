@@ -159,6 +159,41 @@ export function activate(context: vscode.ExtensionContext): void {
   const varTree = new VariablesTreeProvider(varStore);
   const pipeTree = new PipelinesTreeProvider(pipeStore);
 
+  // Drives the Follow/Pin toggle button shown in the Patterns view title bar.
+  void vscode.commands.executeCommand(
+    "setContext",
+    "tschef.patternsFollow",
+    patternsTree.isFollowing(),
+  );
+
+  /** Whether a document is worth auto-scanning when it gains focus. */
+  function isScannableDoc(doc: vscode.TextDocument): boolean {
+    return (
+      doc.uri.scheme === "file" &&
+      !doc.isUntitled &&
+      doc.lineCount > 0 &&
+      doc.getText().length <= 512 * 1024
+    );
+  }
+
+  /**
+   * React to the active editor changing: if the Patterns view follows the
+   * active editor, switch it to that document (optionally auto-scanning it).
+   */
+  function onEditorFocused(editor: vscode.TextEditor): void {
+    if (!patternsTree.isFollowing()) return;
+    const cfg = vscode.workspace.getConfiguration("tschef");
+    if (
+      cfg.get("patterns.autoScanOnFocus", false) &&
+      !scanState.hasScanned(editor.document.uri) &&
+      isScannableDoc(editor.document)
+    ) {
+      scanState.scan(editor.document); // fires change → tree refresh
+    } else {
+      patternsTree.focusActive();
+    }
+  }
+
   // Custom result presenters for the `inline` / `panel` modes, injected into
   // presentPipelineResult via the renderer map below.
   const inlineResult = new InlineResultController();
@@ -286,6 +321,7 @@ export function activate(context: vscode.ExtensionContext): void {
       if (editor) {
         decorations.update(editor);
         entropyMap.update(editor);
+        onEditorFocused(editor);
       }
     }),
     vscode.workspace.onDidChangeTextDocument((e) => {
@@ -391,6 +427,8 @@ export function activate(context: vscode.ExtensionContext): void {
           }
         },
       );
+      // Show every file's results even while following the active editor.
+      patternsTree.pinAll();
       scanState.notify();
       const editor = vscode.window.activeTextEditor;
       if (editor) decorations.update(editor);
@@ -407,6 +445,40 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand("tschef.refreshScan", () => {
       vscode.commands.executeCommand("tschef.scanDocument");
     }),
+  );
+
+  /** Turn Patterns-view following on/off and sync the toggle button + setting. */
+  function setPatternsFollow(follow: boolean): void {
+    patternsTree.setFollow(follow);
+    void vscode.commands.executeCommand(
+      "setContext",
+      "tschef.patternsFollow",
+      follow,
+    );
+    void vscode.workspace
+      .getConfiguration("tschef")
+      .update(
+        "patterns.followActiveEditor",
+        follow,
+        vscode.ConfigurationTarget.Global,
+      );
+    const editor = vscode.window.activeTextEditor;
+    if (follow && editor) onEditorFocused(editor);
+    vscode.window.setStatusBarMessage(
+      follow
+        ? "ts-chef: Patterns now follow the active editor"
+        : "ts-chef: Patterns pinned — keeping the current results",
+      3000,
+    );
+  }
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tschef.followActiveEditorOn", () =>
+      setPatternsFollow(true),
+    ),
+    vscode.commands.registerCommand("tschef.followActiveEditorOff", () =>
+      setPatternsFollow(false),
+    ),
   );
 
   context.subscriptions.push(

@@ -63,17 +63,55 @@ class MatchNode extends vscode.TreeItem {
 }
 
 /**
- * Tree data provider for the Patterns sidebar. With a single scanned document
- * the matches are grouped by their top classification label; after a workspace
- * scan (multiple documents) the top level is one node per file instead.
+ * Tree data provider for the Patterns sidebar.
+ *
+ * Two display modes, controlled by the `follow` flag:
+ * - **follow** (default): the view mirrors the active editor and shows just that
+ *   document's matches, grouped by their top classification label. Switching
+ *   editors switches the view. A workspace scan temporarily pins the "show all"
+ *   view ({@link pinAll}) until the user focuses a single file again.
+ * - **not following**: the view keeps whatever has been scanned (all documents,
+ *   one node per file when several) and does not change as editors switch — so
+ *   the previous scan stays put.
  */
 export class PatternsTreeProvider implements vscode.TreeDataProvider<TreeNode> {
   private _onDidChangeTreeData = new vscode.EventEmitter<void>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
   private filter = "";
+  private follow: boolean;
+  /** When following, temporarily show every scanned file (e.g. after a workspace scan). */
+  private pinnedAll = false;
 
   constructor(private state: ScanState) {
+    this.follow = vscode.workspace
+      .getConfiguration("tschef")
+      .get("patterns.followActiveEditor", true);
     state.onDidChange(() => this._onDidChangeTreeData.fire());
+  }
+
+  isFollowing(): boolean {
+    return this.follow;
+  }
+
+  /** Turn active-editor following on/off and refresh. */
+  setFollow(follow: boolean): void {
+    this.follow = follow;
+    this.pinnedAll = false;
+    this._onDidChangeTreeData.fire();
+  }
+
+  /** Show only the active editor's matches (used when the editor changes). */
+  focusActive(): void {
+    if (this.pinnedAll) {
+      this.pinnedAll = false;
+      this._onDidChangeTreeData.fire();
+    }
+  }
+
+  /** Show every scanned document (used after a workspace scan). */
+  pinAll(): void {
+    this.pinnedAll = true;
+    this._onDidChangeTreeData.fire();
   }
 
   setFilter(text: string): void {
@@ -90,32 +128,47 @@ export class PatternsTreeProvider implements vscode.TreeDataProvider<TreeNode> {
       return element.children;
     if (element) return [];
 
+    // Follow the active editor: show just that document.
+    if (this.follow && !this.pinnedAll) {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) return [];
+      const matches = this.applyFilter(this.state.get(editor.document.uri));
+      return this.groupByLabel(editor.document.uri, matches);
+    }
+
+    // Otherwise show every scanned document (persistent view).
     const entries = this.state
       .entries()
       .map(({ uri, matches }) => ({ uri, matches: this.applyFilter(matches) }))
       .filter((e) => e.matches.length > 0);
     if (!entries.length) return [];
 
-    // Workspace scan: one node per file.
-    if (entries.length > 1) {
-      return entries.map(
-        ({ uri, matches }) =>
-          new FileNode(
-            uri,
-            matches.map((m) => new MatchNode(m, uri, true)),
-          ),
-      );
+    if (entries.length === 1) {
+      return this.groupByLabel(entries[0].uri, entries[0].matches);
     }
 
-    // Single document: group by top label.
-    const { uri, matches } = entries[0];
+    // Multiple files: one node per file.
+    return entries.map(
+      ({ uri, matches }) =>
+        new FileNode(
+          uri,
+          matches.map((m) => new MatchNode(m, uri, true)),
+        ),
+    );
+  }
+
+  /** Group a single document's matches by their top classification label. */
+  private groupByLabel(
+    uri: vscode.Uri,
+    matches: DetectionMatch[],
+  ): TreeNode[] {
+    if (!matches.length) return [];
     const groups = new Map<string, DetectionMatch[]>();
     for (const m of matches) {
       const key = m.matches[0]?.label ?? "Unknown";
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(m);
     }
-
     return Array.from(groups.entries()).map(
       ([label, items]) =>
         new GroupNode(

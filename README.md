@@ -58,7 +58,7 @@ Open the **ts-chef** container in the Activity Bar to reach the Operations, Reci
 ### Analyze data
 
 - **Deep Analysis of Selection** — recursively detect encodings and decode chains; each candidate shows a preview before you apply it.
-- **Scan Document / Scan Workspace for Patterns** — find recognizable encoded or structured values; results appear in the Found Patterns pane and can be highlighted, hovered, and exported.
+- **Scan Document / Scan Workspace for Patterns** — find recognizable encoded or structured values; results appear in the Found Patterns pane and can be highlighted, hovered, and exported. The pane follows the active editor by default; use the eye button in its title bar to pin the current results instead.
 - **YARA Scan Selection/Document** — match the input against YARA rules.
 - **Toggle Entropy Heatmap** — shade lines by entropy (also `tschef.entropyMap.enabled`).
 
@@ -92,6 +92,8 @@ From Base64 | To Hex(Uppercase=true) | URL Encode
 | `tschef.highlightingEnabled` | `true` | Highlight detected patterns in the editor. |
 | `tschef.confidenceThreshold` | `0.9` | Minimum confidence for hover conversion options. |
 | `tschef.autoScanOnSave` | `false` | Scan documents automatically on save. |
+| `tschef.patterns.followActiveEditor` | `true` | Found Patterns view follows the active editor; turn off to pin the current results. |
+| `tschef.patterns.autoScanOnFocus` | `false` | Scan a document the first time it becomes active (when following). |
 | `tschef.entropyMap.enabled` | `false` | Colour lines by Shannon entropy (heatmap). |
 | `tschef.readableLineWidth` | `100` | Target width for **Make Readable** reflow. |
 | `tschef.pipelineResultAction` | `popup` | How to present a pipeline/operation result (popup, replace, copy, inline, panel). |
