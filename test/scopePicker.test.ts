@@ -10,6 +10,7 @@
 import { pickScope } from "../src/commands/scopePicker";
 import {
   __reset,
+  __setWorkspaceFolder,
   __setQuickPickResponse,
   __getLastQuickPickItems,
   showQuickPick,
@@ -21,6 +22,7 @@ beforeEach(() => __reset());
 
 describe("pickScope", () => {
   test("lists the default scope first, labeled (default)", async () => {
+    __setWorkspaceFolder("/tmp/workspace");
     await pickScope("global", "Save x");
     const items = __getLastQuickPickItems() as ScopeItem[];
     expect(items[0].scope).toBe("global");
@@ -30,6 +32,7 @@ describe("pickScope", () => {
   });
 
   test("honours a workspace default ordering", async () => {
+    __setWorkspaceFolder("/tmp/workspace");
     await pickScope("workspace", "Save x");
     const items = __getLastQuickPickItems() as ScopeItem[];
     expect(items[0].scope).toBe("workspace");
@@ -37,6 +40,7 @@ describe("pickScope", () => {
   });
 
   test("returns the picked scope", async () => {
+    __setWorkspaceFolder("/tmp/workspace");
     __setQuickPickResponse((items) =>
       (items as ScopeItem[]).find((i) => i.scope === "workspace"),
     );
@@ -47,5 +51,12 @@ describe("pickScope", () => {
     __setQuickPickResponse(() => undefined);
     expect(await pickScope("global", "Save x")).toBeUndefined();
     expect(showQuickPick).toHaveBeenCalled();
+  });
+
+  test("does not offer workspace scope without an open folder", async () => {
+    expect(await pickScope("workspace", "Save x")).toBe("global");
+    const items = __getLastQuickPickItems() as ScopeItem[];
+    expect(items.map((item) => item.scope)).toEqual(["global"]);
+    expect(items[0].label).toContain("(default)");
   });
 });

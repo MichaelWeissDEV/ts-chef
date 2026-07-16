@@ -8,6 +8,11 @@
  */
 
 import * as vscode from "vscode";
+import {
+  captureTextEditSnapshot,
+  replaceTextEditSnapshot,
+  type TextEditSnapshot,
+} from "./textEditSnapshot";
 
 /**
  * How a pipeline/operation result is presented, configurable via the
@@ -30,6 +35,7 @@ export type PipelineResultAction =
 export type ResultRenderer = (
   editor: vscode.TextEditor,
   result: string,
+  target: TextEditSnapshot,
 ) => void | Promise<void>;
 
 /**
@@ -43,6 +49,12 @@ export function replaceTarget(editor: vscode.TextEditor): vscode.Selection {
         editor.document.positionAt(editor.document.getText().length),
       )
     : editor.selection;
+}
+
+export function capturePipelineResultTarget(
+  editor: vscode.TextEditor,
+): TextEditSnapshot {
+  return captureTextEditSnapshot(editor, replaceTarget(editor));
 }
 
 function preview(result: string, max = 80): string {
@@ -61,13 +73,14 @@ export async function presentPipelineResult(
   result: string,
   label: string,
   render?: Partial<Record<"inline" | "panel", ResultRenderer>>,
+  target: TextEditSnapshot = capturePipelineResultTarget(editor),
 ): Promise<void> {
   const mode = vscode.workspace
     .getConfiguration("tschef")
     .get<PipelineResultAction>("pipelineResultAction", "popup");
 
   if (mode === "replace") {
-    await editor.edit((eb) => eb.replace(replaceTarget(editor), result));
+    if (!(await replaceTextEditSnapshot(target, result))) return;
     vscode.window.setStatusBarMessage(
       "ts-chef: result replaced selection",
       3000,
@@ -84,7 +97,7 @@ export async function presentPipelineResult(
   if (mode === "inline" || mode === "panel") {
     const renderer = render?.[mode];
     if (renderer) {
-      await renderer(editor, result);
+      await renderer(editor, result, target);
       return;
     }
     // No renderer wired up → fall through to popup.
@@ -96,7 +109,7 @@ export async function presentPipelineResult(
     "Copy",
   );
   if (action === "Replace") {
-    await editor.edit((eb) => eb.replace(replaceTarget(editor), result));
+    await replaceTextEditSnapshot(target, result);
   }
   if (action === "Copy") {
     vscode.env.clipboard.writeText(result);

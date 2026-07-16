@@ -8,7 +8,11 @@
  */
 
 import * as vscode from "vscode";
-import { replaceTarget } from "./pipelineResult";
+import { capturePipelineResultTarget } from "./pipelineResult";
+import {
+  replaceTextEditSnapshot,
+  type TextEditSnapshot,
+} from "./textEditSnapshot";
 
 /**
  * The source editor + frozen target range a panel result belongs to. Stored so
@@ -16,8 +20,7 @@ import { replaceTarget } from "./pipelineResult";
  * when its buttons are clicked.
  */
 type PanelState = {
-  editor: vscode.TextEditor;
-  targetRange: vscode.Range;
+  target: TextEditSnapshot;
   result: string;
 };
 type ResultMessage = { type: "replace" | "copy" | "close" };
@@ -75,8 +78,12 @@ export class WebviewResultController {
   }
 
   /** Show `result` in the panel, (re)creating it if necessary. */
-  show(editor: vscode.TextEditor, result: string): void {
-    this.state = { editor, targetRange: replaceTarget(editor), result };
+  show(
+    editor: vscode.TextEditor,
+    result: string,
+    target: TextEditSnapshot = capturePipelineResultTarget(editor),
+  ): void {
+    this.state = { target, result };
     if (!this.panel) {
       this.panel = vscode.window.createWebviewPanel(
         "tschef.result",
@@ -98,21 +105,7 @@ export class WebviewResultController {
     const state = this.state;
     if (!state) return;
     if (msg.type === "replace") {
-      if (state.editor.document.isClosed) {
-        vscode.window.showWarningMessage(
-          "ts-chef: Cannot replace — the editor is no longer open.",
-        );
-        return;
-      }
-      try {
-        await state.editor.edit((eb) =>
-          eb.replace(state.targetRange, state.result),
-        );
-      } catch {
-        vscode.window.showWarningMessage(
-          "ts-chef: Could not replace — the editor is no longer available.",
-        );
-      }
+      await replaceTextEditSnapshot(state.target, state.result);
     } else if (msg.type === "copy") {
       vscode.env.clipboard.writeText(state.result);
       vscode.window.setStatusBarMessage(

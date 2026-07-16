@@ -56,9 +56,23 @@ export function fromBinary(
   byteLen: number = 8,
 ): number[] {
   if (!data) return [];
+  if (!Number.isInteger(byteLen) || byteLen < 1 || byteLen > 8) {
+    throw new OperationError("Byte length must be an integer between 1 and 8");
+  }
 
   let parts: string[];
-  if (delim && delim !== "None") {
+  if (delim === "None") {
+    const raw = data.replace(/\s+/g, "");
+    if (raw.length % byteLen !== 0) {
+      throw new OperationError(
+        `Binary input length ${raw.length} is not divisible by byte length ${byteLen}`,
+      );
+    }
+    parts = [];
+    for (let i = 0; i < raw.length; i += byteLen) {
+      parts.push(raw.slice(i, i + byteLen));
+    }
+  } else if (delim) {
     parts = data.split(Utils.charRep(delim));
   } else {
     // Auto split by any non-binary chars or chunk by byteLen
@@ -75,5 +89,23 @@ export function fromBinary(
     }
   }
 
-  return parts.filter((p) => p.length > 0).map((p) => parseInt(p, 2));
+  return parts
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0)
+    .map((part, index) => {
+      if (!/^[01]+$/.test(part)) {
+        throw new OperationError(
+          `Invalid binary value "${part}" at token ${index + 1}`,
+        );
+      }
+      if (part.length > byteLen) {
+        throw new OperationError(
+          `Binary value "${part}" exceeds the configured ${byteLen}-bit byte length`,
+        );
+      }
+      const value = parseInt(part, 2);
+      if (value > 255)
+        throw new OperationError(`Binary value "${part}" exceeds 255`);
+      return value;
+    });
 }

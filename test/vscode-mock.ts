@@ -21,6 +21,15 @@ export class Position {
     public readonly line: number,
     public readonly character: number,
   ) {}
+  isBefore(other: Position): boolean {
+    return (
+      this.line < other.line ||
+      (this.line === other.line && this.character < other.character)
+    );
+  }
+  isAfter(other: Position): boolean {
+    return other.isBefore(this);
+  }
 }
 
 export class Selection {
@@ -52,14 +61,56 @@ export class Selection {
 export class Range {
   readonly start: Position;
   readonly end: Position;
+  constructor(start: Position, end: Position);
+  constructor(startLine: number, startChar: number, endLine: number, endChar: number);
   constructor(
-    startLine: number,
-    startChar: number,
-    endLine: number,
-    endChar: number,
+    startOrLine: Position | number,
+    endOrChar: Position | number,
+    endLine?: number,
+    endChar?: number,
   ) {
-    this.start = new Position(startLine, startChar);
-    this.end = new Position(endLine, endChar);
+    if (startOrLine instanceof Position && endOrChar instanceof Position) {
+      this.start = startOrLine;
+      this.end = endOrChar;
+    } else {
+      this.start = new Position(startOrLine as number, endOrChar as number);
+      this.end = new Position(endLine as number, endChar as number);
+    }
+  }
+  contains(position: Position): boolean {
+    return !position.isBefore(this.start) && !position.isAfter(this.end);
+  }
+  intersection(other: Range): Range | undefined {
+    const start = this.start.isAfter(other.start) ? this.start : other.start;
+    const end = this.end.isBefore(other.end) ? this.end : other.end;
+    return end.isBefore(start) ? undefined : new Range(start, end);
+  }
+}
+
+export class MarkdownString {
+  value: string;
+  isTrusted: boolean | { enabledCommands: readonly string[] } | undefined;
+  supportHtml = false;
+  constructor(value = "", _supportThemeIcons?: boolean) {
+    this.value = value;
+  }
+  appendMarkdown(value: string): MarkdownString {
+    this.value += value;
+    return this;
+  }
+  appendCodeblock(value: string, language = ""): MarkdownString {
+    this.value += `\n\`\`\`${language}\n${value}\n\`\`\`\n`;
+    return this;
+  }
+}
+
+export class Hover {
+  readonly contents: MarkdownString[];
+  constructor(
+    contents: MarkdownString,
+    public readonly range?: Range,
+  ) {
+    this.contents = [contents];
   }
 }
 
@@ -135,6 +186,7 @@ export class Uri {
 let configValues: Record<string, unknown> = {};
 let infoMessageResponse: string | undefined = undefined;
 let workspaceFolder: string | undefined = undefined;
+let workspaceTrusted = true;
 let quickPickResponse: ((items: readonly unknown[]) => unknown) | undefined;
 let lastQuickPickItems: readonly unknown[] = [];
 let registeredCommands: Record<string, (...args: unknown[]) => unknown> = {};
@@ -163,6 +215,9 @@ export const workspace = {
   }),
   get workspaceFolders() {
     return workspaceFolder ? [{ uri: { fsPath: workspaceFolder } }] : undefined;
+  },
+  get isTrusted() {
+    return workspaceTrusted;
   },
 };
 
@@ -247,6 +302,7 @@ export function __reset(): void {
   configValues = {};
   infoMessageResponse = undefined;
   workspaceFolder = undefined;
+  workspaceTrusted = true;
   quickPickResponse = undefined;
   lastQuickPickItems = [];
   registeredCommands = {};
@@ -277,6 +333,11 @@ export function __setInfoResponse(response: string | undefined): void {
 /** Set (or clear) the first workspace folder's path. */
 export function __setWorkspaceFolder(fsPath: string | undefined): void {
   workspaceFolder = fsPath;
+}
+
+/** Set whether the mock workspace is trusted (Restricted Mode when false). */
+export function __setWorkspaceTrusted(trusted: boolean): void {
+  workspaceTrusted = trusted;
 }
 
 /** Choose which item `showQuickPick` returns, given the items it was passed. */

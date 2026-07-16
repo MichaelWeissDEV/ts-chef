@@ -7,9 +7,10 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { analyseValue } from "./detector";
-import { runOp } from "../commands/runner";
+import { analyseValue, type DetectionResult } from "./detector";
+import { readableUtf8, runOp } from "../commands/runner";
 import type { AnyInput } from "../chef/Operation";
+import { gunzipSync, inflateSync } from "zlib";
 
 /** One operation applied within a decode chain. */
 export interface MagicStep {
@@ -25,6 +26,8 @@ export interface MagicChain {
   preview: string;
   /** Product of the per-step detection confidences. */
   confidence: number;
+  /** Captured inner value when the recognisable payload is wrapped (e.g. data URI). */
+  input?: string;
 }
 
 /** Basic statistics about a string, shown in the deep-analysis picker. */
@@ -42,6 +45,46 @@ const NO_RECURSE = new Set(["AnalyseHash", "AnalyseUUID", "PubKeyFromCert"]);
 const MAX_DEPTH = 3;
 const MAX_CANDIDATES_PER_LEVEL = 4;
 const MAX_CHAINS = 24;
+const DEFAULT_MAX_INTERMEDIATE_BYTES = 256 * 1024;
+
+/**
+ * Explicit Magic analysis is allowed to recognise short, complete Base64
+ * values.  The document-wide detector deliberately starts at 20 characters to
+ * avoid decorating ordinary identifiers; that trade-off is too conservative
+ * once the user has explicitly asked Magic to analyse a complete value.
+ */
+function shortBase64Candidate(value: string): DetectionResult[] {
+  const compact = value.trim();
+  if (
+    compact.length < 8 ||
+    compact.length >= 20 ||
+    compact.length % 4 !== 0 ||
+    !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(
+      compact,
+    )
+  )
+    return [];
+
+  const decoded = Buffer.from(compact, "base64");
+  if (!decoded.length || decoded.toString("base64") !== compact) return [];
+
+  return [
+    {
+      label: "Base64",
+      opName: "FromBase64",
+      defaultArgs: ["A-Za-z0-9+/=", true, false],
+      confidence: 0.82,
+      inputValue: compact,
+    },
+  ];
+}
+
+export interface MagicAnalysisOptions {
+  /** Hard cap for the input and every decoded/decompressed intermediate. */
+  maxIntermediateBytes?: number;
+  /** Disable even bounded decompression, useful for latency-sensitive hovers. */
+  allowDecompression?: boolean;
+}
 
 /** Shannon entropy of a string in bits per character. */
 export function shannonEntropy(s: string): number {
@@ -85,6 +128,15 @@ function toBytes(v: unknown): Buffer {
   return Buffer.from(String(v ?? ""), "utf-8");
 }
 
+function knownByteLength(value: unknown): number | undefined {
+  if (typeof value === "string") return Buffer.byteLength(value, "utf-8");
+  if (Buffer.isBuffer(value) || value instanceof Uint8Array)
+    return value.byteLength;
+  if (value instanceof ArrayBuffer) return value.byteLength;
+  if (Array.isArray(value)) return value.length;
+  return undefined;
+}
+
 /** Ratio of bytes that are printable ASCII or common whitespace. */
 export function printableRatio(bytes: Buffer): number {
   if (!bytes.length) return 0;
@@ -102,7 +154,7 @@ export function printableRatio(bytes: Buffer): number {
  */
 function sniffBinary(
   bytes: Buffer,
-): { label: string; opName: string; defaultArgs: unknown[]; confidence: number }[] {
+): DetectionResult[] {
   const out: ReturnType<typeof sniffBinary> = [];
   if (bytes.length >= 2 && bytes[0] === 0x1f && bytes[1] === 0x8b)
     out.push({ label: "Gzip", opName: "Gunzip", defaultArgs: [], confidence: 0.96 });
@@ -139,35 +191,94 @@ function sniffBinary(
  * Only chains whose final output is mostly printable are returned, deepest and
  * most confident first — the CyberChef "Magic" idea, scoped to ts-chef's ops.
  */
-export function magicAnalyse(value: string, maxDepth = MAX_DEPTH): MagicChain[] {
+export function magicAnalyse(
+  value: string,
+  maxDepth = MAX_DEPTH,
+  options: MagicAnalysisOptions = {},
+): MagicChain[] {
   const chains: MagicChain[] = [];
   const seenPaths = new Set<string>();
+  const maxIntermediateBytes = Math.max(
+    1_024,
+    Math.min(
+      options.maxIntermediateBytes ?? DEFAULT_MAX_INTERMEDIATE_BYTES,
+      4 * 1024 * 1024,
+    ),
+  );
+  const allowDecompression = options.allowDecompression ?? true;
+
+  function runCandidate(
+    candidate: DetectionResult,
+    input: AnyInput,
+  ): AnyInput | undefined {
+    const knownLength = knownByteLength(input);
+    if (knownLength !== undefined && knownLength > maxIntermediateBytes)
+      return undefined;
+    const bytes = toBytes(input);
+    if (bytes.length > maxIntermediateBytes) return undefined;
+    try {
+      // Node's bounded zlib helpers abort once maxOutputLength is reached. Do
+      // not call the general operations here: their underlying libraries
+      // allocate the complete expansion first, which makes hover-triggered
+      // compression bombs possible.
+      if (candidate.opName === "Gunzip") {
+        if (!allowDecompression) return undefined;
+        return gunzipSync(bytes, { maxOutputLength: maxIntermediateBytes });
+      }
+      if (candidate.opName === "ZlibInflate") {
+        if (!allowDecompression) return undefined;
+        return inflateSync(bytes, { maxOutputLength: maxIntermediateBytes });
+      }
+      // lz4js exposes no bounded-output API, so recursive analysis only
+      // identifies LZ4 data; explicit user-run pipelines can still process it.
+      if (candidate.opName === "LZ4Decompress") return undefined;
+      return runOp(
+        candidate.opName,
+        input,
+        candidate.defaultArgs as unknown[],
+      );
+    } catch {
+      return undefined;
+    }
+  }
 
   function walk(
     current: AnyInput,
     steps: MagicStep[],
     confidence: number,
     depthLeft: number,
+    chainInput?: string,
   ): void {
     if (depthLeft <= 0 || chains.length >= MAX_CHAINS) return;
+    const knownLength = knownByteLength(current);
+    if (knownLength !== undefined && knownLength > maxIntermediateBytes) return;
     const bytes = toBytes(current);
-    if (!bytes.length) return;
+    if (!bytes.length || bytes.length > maxIntermediateBytes) return;
 
-    const textual = printableRatio(bytes) >= 0.9;
+    const decodedText = readableUtf8(bytes);
     const candidates = [
-      ...(textual ? analyseValue(bytes.toString("utf-8")) : []),
+      ...(decodedText !== undefined
+        ? [...analyseValue(decodedText), ...shortBase64Candidate(decodedText)]
+        : []),
       ...sniffBinary(bytes),
     ].slice(0, MAX_CANDIDATES_PER_LEVEL);
 
     for (const cand of candidates) {
-      let out: AnyInput;
-      try {
-        out = runOp(cand.opName, current, cand.defaultArgs as unknown[]);
-      } catch {
-        continue;
-      }
+      const operationInput = cand.inputValue ?? current;
+      const nextInput =
+        chainInput ??
+        (steps.length === 0 && typeof operationInput === "string"
+          ? operationInput
+          : undefined);
+      const out = runCandidate(cand, operationInput);
+      if (out === undefined) continue;
       const outBytes = toBytes(out);
-      if (!outBytes.length || outBytes.equals(bytes)) continue;
+      if (
+        !outBytes.length ||
+        outBytes.length > maxIntermediateBytes ||
+        outBytes.equals(bytes)
+      )
+        continue;
 
       const nextSteps = [
         ...steps,
@@ -176,17 +287,19 @@ export function magicAnalyse(value: string, maxDepth = MAX_DEPTH): MagicChain[] 
       const nextConfidence = confidence * cand.confidence;
       const pathKey = nextSteps.map((s) => s.opName).join(">");
 
-      if (printableRatio(outBytes) >= 0.85 && !seenPaths.has(pathKey)) {
+      const preview = readableUtf8(outBytes);
+      if (preview !== undefined && !seenPaths.has(pathKey)) {
         seenPaths.add(pathKey);
         chains.push({
           steps: nextSteps,
-          preview: outBytes.toString("utf-8").slice(0, 200),
+          preview: preview.slice(0, 200),
           confidence: nextConfidence,
+          input: nextInput,
         });
       }
 
       if (!NO_RECURSE.has(cand.opName)) {
-        walk(out, nextSteps, nextConfidence, depthLeft - 1);
+        walk(out, nextSteps, nextConfidence, depthLeft - 1, nextInput);
       }
     }
   }

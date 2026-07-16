@@ -8,15 +8,63 @@
  */
 
 import registry, { findOp } from "../opsRegistry";
-import type { Operation, AnyInput } from "../chef/Operation";
+import type { Operation, AnyInput, ArgConfig } from "../chef/Operation";
 import type { PipelineStep } from "../storage/store";
 import { resolveDefaultArg } from "./argDefaults";
 import { normaliseInput, PipelineData } from "../chef/types";
 import Recipe from "../chef/Recipe";
 import Dish from "../chef/Dish";
+import { splitPipelineParts } from "../panels/pipelinePanelModel";
 
 // Re-exported for callers that already import it from the runner.
 export { resolveDefaultArg, normaliseInput };
+
+export function readableUtf8(bytes: Uint8Array): string | undefined {
+  if (bytes.byteLength === 0) return "";
+  let text: string;
+  try {
+    text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return undefined;
+  }
+  const characters = Array.from(text);
+  const printable = characters.filter((character) => {
+    const code = character.codePointAt(0) ?? 0;
+    return code === 9 || code === 10 || code === 13 || (code >= 32 && code !== 127);
+  }).length;
+  return printable / Math.max(1, characters.length) >= 0.75 ? text : undefined;
+}
+
+export function presentBytes(bytes: Uint8Array): string {
+  return readableUtf8(bytes) ?? Buffer.from(bytes).toString("hex");
+}
+
+/** Lossless text presentation for the final, still-typed Dish value. */
+export function presentPipelineValue(value: unknown, dishType: number): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value;
+  if (dishType === Dish.JSON) return JSON.stringify(value, null, 2);
+  if (value instanceof ArrayBuffer)
+    return presentBytes(new Uint8Array(value));
+  if (value instanceof Uint8Array) return presentBytes(value);
+  if (
+    dishType === Dish.BYTE_ARRAY &&
+    Array.isArray(value) &&
+    value.every(
+      (item) => Number.isInteger(item) && Number(item) >= 0 && Number(item) <= 255,
+    )
+  )
+    return presentBytes(Uint8Array.from(value as number[]));
+  if (typeof value === "bigint") return value.toString(10);
+  if (typeof value === "object") {
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch {
+      return String(value);
+    }
+  }
+  return String(value);
+}
 
 /**
  * Whether an operation needs free-text input to be useful — i.e. it has a
@@ -81,7 +129,16 @@ export async function runOpAsync(
  * @param steps - Ordered list of operation names and their arguments.
  * @returns The final result serialised as a UTF-8 string.
  */
-export async function runPipeline(input: AnyInput, steps: PipelineStep[]): Promise<string> {
+export interface RunPipelineOptions {
+  /** Abort after a step exceeds this size; intended for automatic previews. */
+  maxIntermediateSize?: number;
+}
+
+export async function runPipeline(
+  input: AnyInput,
+  steps: PipelineStep[],
+  options: RunPipelineOptions = {},
+): Promise<string> {
   const recipeConfig = steps.map((step) => ({
     op: step.opName,
     args: step.args as (PipelineData | null)[],
@@ -104,9 +161,11 @@ export async function runPipeline(input: AnyInput, steps: PipelineStep[]): Promi
     dish.set(input, "string");
   }
 
-  await recipe.execute(dish);
-  const finalOutput = await dish.get("string");
-  return typeof finalOutput === "string" ? finalOutput : String(finalOutput);
+  await recipe.execute(dish, 0, undefined, {
+    maxIntermediateSize: options.maxIntermediateSize,
+  });
+  const finalOutput = await dish.get();
+  return presentPipelineValue(finalOutput, dish.type);
 }
 
 /**
@@ -119,21 +178,7 @@ export async function runPipeline(input: AnyInput, steps: PipelineStep[]): Promi
  * @returns Ordered pipeline steps ready for {@link runPipeline}.
  */
 export function parsePipeline(raw: string): PipelineStep[] {
-  const parts: string[] = [];
-  let depth = 0;
-  let current = "";
-  for (const ch of raw) {
-    if (ch === "(") depth++;
-    else if (ch === ")") depth--;
-    if (ch === "|" && depth === 0) {
-      parts.push(current.trim());
-      current = "";
-    } else {
-      current += ch;
-    }
-  }
-  if (current.trim()) parts.push(current.trim());
-  return parts.filter(Boolean).map((part) => parseStep(part));
+  return splitPipelineParts(raw).map((part) => parseStep(part));
 }
 
 function parseStep(part: string): PipelineStep {
@@ -146,36 +191,142 @@ function parseStep(part: string): PipelineStep {
     };
   }
 
+  if (!part.endsWith(")"))
+    throw new Error(`Unexpected text after arguments in pipeline step: "${part}"`);
   const name = part.slice(0, parenIdx).trim();
   const argsStr = part.slice(parenIdx + 1, part.lastIndexOf(")")).trim();
   const op = resolveOp(name);
-  // Parse key=value pairs, handling quoted strings
-  const overrides: Record<string, string> = {};
-  const kvRe = /([^,=]+)=("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|[^,]*)/g;
-  let kv: RegExpExecArray | null;
-  while ((kv = kvRe.exec(argsStr)) !== null) {
-    const key = kv[1].trim();
-    let val = kv[2].trim();
-    if (
-      (val.startsWith('"') && val.endsWith('"')) ||
-      (val.startsWith("'") && val.endsWith("'"))
-    ) {
-      val = val.slice(1, -1);
+  const opDef = op.factory();
+  const finalArgs = opDef.args.map(resolveDefaultArg);
+  const assigned = new Set<number>();
+  let panelMetadataSeen = false;
+
+  for (const assignment of splitArgumentAssignments(argsStr)) {
+    const equals = topLevelEquals(assignment);
+    if (equals < 1)
+      throw new Error(`Malformed argument "${assignment}" in "${name}"`);
+    const key = assignment.slice(0, equals).trim();
+    const value = decodeArgumentValue(assignment.slice(equals + 1).trim());
+    if (key === "__tschef_args") {
+      if (panelMetadataSeen || !/^[A-Za-z0-9_-]+$/.test(value))
+        throw new Error(`Invalid panel argument metadata in "${name}"`);
+      panelMetadataSeen = true;
+      continue;
     }
-    overrides[key] = val;
+
+    const numeric = /^\d+$/.test(key) ? Number(key) : undefined;
+    const argumentIndex =
+      numeric !== undefined
+        ? numeric
+        : opDef.args.findIndex((argument) => argument.name === key);
+    if (
+      !Number.isSafeInteger(argumentIndex) ||
+      argumentIndex < 0 ||
+      argumentIndex >= opDef.args.length
+    ) {
+      throw new Error(`Unknown argument "${key}" for operation "${name}"`);
+    }
+    if (assigned.has(argumentIndex))
+      throw new Error(`Argument "${key}" is assigned more than once in "${name}"`);
+    assigned.add(argumentIndex);
+    finalArgs[argumentIndex] = castArg(value, opDef.args[argumentIndex]);
   }
 
-  // Apply overrides by name to defaultArgs
-  const opDef = op.factory();
-  const finalArgs = opDef.args.map((argDef, i) => {
-    if (argDef.name in overrides)
-      return castArg(overrides[argDef.name], argDef.type);
-    if (String(i) in overrides)
-      return castArg(overrides[String(i)], argDef.type);
-    return resolveDefaultArg(argDef);
-  });
-
   return { opName: op.opName, args: finalArgs };
+}
+
+function splitArgumentAssignments(value: string): string[] {
+  if (!value) return [];
+  const result: string[] = [];
+  const stack: string[] = [];
+  let current = "";
+  let quote = "";
+  let escaped = false;
+  const closing: Record<string, string> = { "(": ")", "[": "]", "{": "}" };
+  for (const character of value) {
+    if (escaped) {
+      current += character;
+      escaped = false;
+      continue;
+    }
+    if (quote) {
+      current += character;
+      if (character === "\\") escaped = true;
+      else if (character === quote) quote = "";
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      quote = character;
+      current += character;
+      continue;
+    }
+    if (character in closing) stack.push(character);
+    else if (character === ")" || character === "]" || character === "}") {
+      const opener = stack.pop();
+      if (!opener || closing[opener] !== character)
+        throw new Error("Pipeline argument has unbalanced delimiters");
+    }
+    if (character === "," && stack.length === 0) {
+      if (!current.trim()) throw new Error("Pipeline contains an empty argument");
+      result.push(current.trim());
+      current = "";
+    } else {
+      current += character;
+    }
+  }
+  if (quote) throw new Error("Pipeline argument has an unterminated quote");
+  if (stack.length) throw new Error("Pipeline argument has unbalanced delimiters");
+  if (!current.trim()) throw new Error("Pipeline contains a trailing empty argument");
+  result.push(current.trim());
+  return result;
+}
+
+function topLevelEquals(value: string): number {
+  let quote = "";
+  let escaped = false;
+  let depth = 0;
+  for (let index = 0; index < value.length; index++) {
+    const character = value[index];
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (quote) {
+      if (character === "\\") escaped = true;
+      else if (character === quote) quote = "";
+      continue;
+    }
+    if (character === '"' || character === "'") quote = character;
+    else if (character === "(" || character === "[" || character === "{") depth++;
+    else if (character === ")" || character === "]" || character === "}") depth--;
+    else if (character === "=" && depth === 0) return index;
+  }
+  return -1;
+}
+
+function decodeArgumentValue(value: string): string {
+  if (!value) return "";
+  const quote = value[0];
+  if (quote !== '"' && quote !== "'") {
+    if (value.includes('"') || value.includes("'"))
+      throw new Error(`Malformed quoted argument value: ${value}`);
+    return value;
+  }
+  if (value.length < 2 || value[value.length - 1] !== quote)
+    throw new Error("Pipeline argument has an unterminated quote");
+  let decoded = "";
+  const body = value.slice(1, -1);
+  for (let index = 0; index < body.length; index++) {
+    const character = body[index];
+    const next = body[index + 1];
+    if (character === "\\" && (next === quote || next === "\\")) {
+      decoded += next;
+      index++;
+    } else {
+      decoded += character;
+    }
+  }
+  return decoded;
 }
 
 function resolveOp(name: string) {
@@ -186,8 +337,23 @@ function resolveOp(name: string) {
   return op;
 }
 
-function castArg(val: string, type: string): unknown {
-  if (type === "boolean") return val === "true" || val === "1";
-  if (type === "number") return Number(val);
+function castArg(val: string, definition: ArgConfig): unknown {
+  if (definition.type === "boolean") {
+    if (/^(?:true|1)$/i.test(val)) return true;
+    if (/^(?:false|0)$/i.test(val)) return false;
+    throw new Error(`Invalid boolean value "${val}" for "${definition.name}"`);
+  }
+  if (definition.type === "number") {
+    const number = Number(val);
+    if (!val.trim() || !Number.isFinite(number))
+      throw new Error(`Invalid number value "${val}" for "${definition.name}"`);
+    return number;
+  }
+  if (definition.type === "toggleString") {
+    return {
+      string: val,
+      option: definition.toggleValues?.[0] ?? "Hex",
+    };
+  }
   return val;
 }

@@ -27,7 +27,9 @@ export function resolveDefaultArg(arg: ArgConfig): unknown {
     }
     case "option": {
       const opts = arg.value as unknown[];
-      return Array.isArray(opts) ? (opts[0] ?? "") : arg.value;
+      if (!Array.isArray(opts)) return arg.value;
+      const idx = typeof arg.defaultIndex === "number" ? arg.defaultIndex : 0;
+      return opts[idx] ?? opts[0] ?? "";
     }
     case "argSelector": {
       // run() receives the selected option name string (e.g. "CBC")

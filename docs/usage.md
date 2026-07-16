@@ -1,6 +1,12 @@
 # Usage Guide
 
-`ts-chef` is designed to be intuitive and non-intrusive. There are three primary ways to interact with it.
+`ts-chef` is designed to be intuitive and non-intrusive. The quickest entry points are instant hovers, one-operation conversion, reusable recipes, and the list/graph pipeline editor.
+
+## Instant Hover Analysis
+
+Hover a recognized encoded value to see its likely format, confidence, statistics, and a bounded decoded preview. No document scan is required. **Decode here** replaces the exact hovered occurrence; multi-step candidates can be applied as a pipeline. Long tokens are tracked as complete values while preview work stays bounded.
+
+In source code, hovering an integer literal such as `0xffu8`, `0b1010`, `0755`, or `1_000_000` displays decimal, hexadecimal, binary, octal, inferred/declared width, and signed and unsigned two's-complement interpretations. The hover can rewrite the literal into another radix using syntax appropriate for the document language.
 
 ## 1. Quick Convert Selection
 
@@ -8,15 +14,22 @@
 2.  Right-click and select **ts-chef: Quick Convert Selection**.
 3.  Choose from a list of automatically suggested transformations based on the data format.
 
-## 2. Pipeline Editor (Recipes)
+## 2. Pipeline Editor (List and Graph)
 
 For complex multi-step transformations:
 
 1.  Open the command palette (`Ctrl+Shift+P` / `Cmd+Shift+P`).
 2.  Type **ts-chef: Open Pipeline Editor**.
 3.  Search for and add operations to your pipeline.
-4.  Configure arguments for each step.
-5.  Click **Bake** to see the final output and optionally replace your selection.
+4.  Switch between **List** and **Graph**. Both edit the same ordered pipeline.
+5.  Configure arguments, drag nodes to reorder them, and select an input source: manual text, editor selection/document, or clipboard.
+6.  Select preview, clipboard, editor replacement, or a new editor as output and click **Run**.
+
+Live preview is available only for bounded deterministic operations with manual input and preview-only output. Potentially expensive, random, networked, file-oriented, or analysis operations always require an explicit run.
+
+Use **tschef: Open Pipeline Graph** to open this editor directly in graph mode. The Pipelines sidebar separates bundled **Standard Pipelines** from workspace/global **My Pipelines** in two collapsible groups; both can be opened in the same editor.
+
+Use **tschef: Browse Standard Recipe Library** to load one of the bundled pipelines into the Recipe pane, or **tschef: Open Saved/Standard Pipeline in Editor** to open any bundled/saved pipeline directly in the list/graph editor. The same action is available from each item in the Pipelines tree.
 
 ## 3. Pattern Highlighting & Scanning
 
@@ -24,6 +37,14 @@ For complex multi-step transformations:
 -   **Auto-Scan:** Enable `ts-chef.autoScanOnSave` in settings to automatically scan files when they are saved.
 -   **Highlighting:** All identified blobs will be highlighted in the editor. Hover over them to see quick decoding previews.
 
+## Static Malware Triage
+
+Run **tschef: Static Malware Triage** on a selection or the active file. The bounded offline analyzer reports entropy and byte statistics, validated file signatures, defanged IOCs, suspicious commands/LOLBins/persistence/injection behavior, embedded encodings, extracted ASCII/UTF-16 strings, and a heuristic risk summary. It does not execute the payload, resolve domains, or make network requests.
+
 ## Variables
+
+Stored global/workspace variables use the explicit `{{name}}` syntax in operation, saved-pipeline, and list/graph-editor input. `$name` is never expanded automatically, so shell, PowerShell, and malware-analysis samples remain byte-for-byte intact unless an explicit template is present.
+
+Workspace-scoped variables and pipelines are not loaded or written while VS Code is in Restricted Mode. Store files are schema-validated, bounded, written atomically, and are not loaded or overwritten through repository-controlled symbolic links.
 
 You can use the **Register** operation to save intermediate results into variables (e.g., `$R0`, `$R1`). These can then be passed as arguments into subsequent operations in the same pipeline.

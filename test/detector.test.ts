@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { analyseValue } from "../src/providers/detector";
+import { analyseValue, scanString } from "../src/providers/detector";
 
 function labels(value: string): string[] {
   return analyseValue(value).map((r) => r.label);
@@ -20,6 +20,25 @@ describe("analyseValue", () => {
       "utf-8",
     ).toString("base64");
     expect(labels(encoded)).toContain("Base64");
+  });
+
+  test("detects Base64 immediately after an assignment delimiter", () => {
+    const encoded = "SGVsbG8gV29ybGQhISEh";
+    const match = scanString(`PAYLOAD=${encoded}`).find((entry) =>
+      entry.matches.some((candidate) => candidate.label === "Base64"),
+    );
+    expect(match?.value).toBe(encoded);
+    expect(match?.start).toBe("PAYLOAD=".length);
+  });
+
+  test("does not begin a new Base64 token inside double padding", () => {
+    const encoded = "SGVsbG8gV29ybGQhISEh";
+    const match = scanString(`AAAA==${encoded}`).find(
+      (entry) =>
+        entry.start === "AAAA==".length &&
+        entry.matches.some((candidate) => candidate.label === "Base64"),
+    );
+    expect(match).toBeUndefined();
   });
 
   test("detects JWTs with high confidence first", () => {
@@ -77,5 +96,43 @@ describe("analyseValue", () => {
         results[i].confidence,
       );
     }
+  });
+
+  test("ranks exact hash signatures above generic hexadecimal data", () => {
+    const results = analyseValue("d41d8cd98f00b204e9800998ecf8427e");
+    expect(results[0]?.label).toBe("MD5 hash");
+  });
+
+  test("does not flag a normal long source-code identifier as Base64", () => {
+    expect(labels("authenticationConfigurationValue")).not.toContain("Base64");
+  });
+
+  test("keeps a data URI wrapper as the replacement range and its payload as input", () => {
+    const uri = "data:text/plain;base64,SGVsbG8gd29ybGQ=";
+    const match = scanString(uri).find((entry) =>
+      entry.matches.some((item) => item.label === "Data URI (Base64)"),
+    );
+    expect(match?.value).toBe(uri);
+    expect(
+      match?.matches.find((item) => item.label === "Data URI (Base64)")
+        ?.inputValue,
+    ).toBe("SGVsbG8gd29ybGQ=");
+  });
+
+  test("scans long non-URL payloads without catastrophic URL-regex backtracking", () => {
+    const payload = "A".repeat(65_536);
+    const started = Date.now();
+    scanString(payload);
+    expect(Date.now() - started).toBeLessThan(250);
+  });
+
+  test("skips the URL regex in linear time when only one escape is present", () => {
+    const payload = `${"A".repeat(65_536)}%41`;
+    const started = Date.now();
+    const detected = scanString(payload).flatMap((match) =>
+      match.matches.map((candidate) => candidate.label),
+    );
+    expect(detected).not.toContain("URL encoded");
+    expect(Date.now() - started).toBeLessThan(250);
   });
 });

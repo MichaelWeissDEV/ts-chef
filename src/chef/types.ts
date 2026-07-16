@@ -223,34 +223,66 @@ export function normalizeInput(
  * @returns The input coerced to the expected type.
  */
 export function normaliseInput(input: unknown, inputType: string): unknown {
-  let buf: Buffer;
-  if (typeof input === "string") {
-    buf = Buffer.from(input, "utf-8");
-  } else if (Array.isArray(input)) {
-    buf = Buffer.from(input as number[]);
-  } else if (input instanceof ArrayBuffer) {
-    buf = Buffer.from(new Uint8Array(input));
-  } else if (Buffer.isBuffer(input)) {
-    buf = input as Buffer;
-  } else if (input instanceof Uint8Array) {
-    buf = Buffer.from(input);
-  } else {
-    buf = Buffer.from(String(input), "utf-8");
-  }
+  const type = inputType.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const textValue = (): string => {
+    if (input === null || input === undefined) return "";
+    if (typeof input === "string") return input;
+    if (input instanceof ArrayBuffer)
+      return Buffer.from(new Uint8Array(input)).toString("utf-8");
+    if (Buffer.isBuffer(input) || input instanceof Uint8Array)
+      return Buffer.from(input).toString("utf-8");
+    if (Array.isArray(input) && input.every((item) => typeof item === "number"))
+      return Buffer.from(input as number[]).toString("utf-8");
+    if (typeof input === "object") return JSON.stringify(input);
+    return String(input);
+  };
+  const byteValue = (): Buffer => {
+    if (input instanceof ArrayBuffer) return Buffer.from(new Uint8Array(input));
+    if (Buffer.isBuffer(input) || input instanceof Uint8Array)
+      return Buffer.from(input);
+    if (Array.isArray(input) && input.every((item) => typeof item === "number"))
+      return Buffer.from(input as number[]);
+    return Buffer.from(textValue(), "utf-8");
+  };
 
-  switch (inputType) {
+  switch (type) {
     case "string":
-      return buf.toString("utf-8");
-    case "byteArray":
-      return Array.from(buf);
-    case "ArrayBuffer": {
+    case "html":
+      return textValue();
+    case "json":
+    case "object": {
+      if (input !== null && typeof input === "object" && !Buffer.isBuffer(input))
+        return input;
+      const text = textValue().trim();
+      if (!text) return null;
+      try {
+        return JSON.parse(text) as unknown;
+      } catch (error) {
+        throw new TypeError(`Invalid JSON input: ${String(error)}`, {
+          cause: error,
+        });
+      }
+    }
+    case "bytearray":
+      return Array.from(byteValue());
+    case "arraybuffer": {
+      const buf = byteValue();
       const ab = new ArrayBuffer(buf.length);
       new Uint8Array(ab).set(buf);
       return ab;
     }
     case "number":
-      return Number(buf.toString("utf-8").trim());
+    {
+      if (typeof input === "number") return input;
+      const value = Number(textValue().trim());
+      if (!Number.isFinite(value)) throw new TypeError("Invalid numeric input");
+      return value;
+    }
+    case "bignumber":
+    case "bigint":
+      return typeof input === "bigint" ? input : BigInt(textValue().trim());
     default:
-      return buf.toString("utf-8");
+      // File-like and future operation-specific values must remain lossless.
+      return input;
   }
 }

@@ -97,7 +97,6 @@ import { DESDecrypt } from "./chef/operations/DESDecrypt";
 import { DESEncrypt } from "./chef/operations/DESEncrypt";
 import { DetectFileType } from "./chef/operations/DetectFileType";
 import { Diff } from "./chef/operations/Diff";
-import { DisassembleX86 } from "./chef/operations/DisassembleX86";
 import { DitherImage } from "./chef/operations/DitherImage";
 import { Divide } from "./chef/operations/Divide";
 import { DNSOverHTTPS } from "./chef/operations/DNSOverHTTPS";
@@ -969,12 +968,6 @@ const registry: OpMeta[] = [
     displayName: "Diff",
     module: "Diff",
     factory: () => new Diff(),
-  },
-  {
-    opName: "DisassembleX86",
-    displayName: "Disassemble x86",
-    module: "Shellcode",
-    factory: () => new DisassembleX86(),
   },
   {
     opName: "DitherImage",

@@ -33,4 +33,16 @@ describe("FromDecimal", () => {
   test("Converts 0 to null byte", () => {
     expect(op.run("0", ["Space", false])).toEqual([0]);
   });
+
+  test("ignores repeated delimiters instead of inserting NUL bytes", () => {
+    expect(op.run("65  66", ["Space", false])).toEqual([65, 66]);
+  });
+
+  test("rejects invalid and out-of-range decimal bytes", () => {
+    expect(() => op.run("65 nope 66", ["Space", false])).toThrow();
+    expect(() => op.run("256", ["Space", false])).toThrow();
+    expect(() => op.run("-1", ["Space", false])).toThrow();
+    expect(op.run("-1 -128", ["Space", true])).toEqual([255, 128]);
+    expect(() => op.run("-129", ["Space", true])).toThrow();
+  });
 });

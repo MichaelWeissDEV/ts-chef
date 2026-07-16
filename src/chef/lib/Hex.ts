@@ -93,9 +93,25 @@ export function fromHex(
 
   const output: number[] = [];
   for (let i = 0; i < parts.length; i++) {
-    for (let j = 0; j < parts[i].length; j += byteLen) {
-      const val = parseInt(parts[i].substr(j, byteLen), 16);
-      if (!isNaN(val)) output.push(val);
+    const part = parts[i].trim();
+    if (!part) continue;
+    if (!/^[0-9a-f]+$/i.test(part)) {
+      throw new OperationError(`Invalid hexadecimal value "${part}"`);
+    }
+    if (part.length % byteLen !== 0) {
+      throw new OperationError(
+        `Hexadecimal group "${part}" is not divisible into ${byteLen}-digit bytes`,
+      );
+    }
+    for (let j = 0; j < part.length; j += byteLen) {
+      const token = part.slice(j, j + byteLen);
+      const val = parseInt(token, 16);
+      if (val > 255) {
+        throw new OperationError(
+          `Hexadecimal value "${token}" exceeds the byte range 00–ff`,
+        );
+      }
+      output.push(val);
     }
   }
   return output;

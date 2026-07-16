@@ -128,8 +128,15 @@ export class DisassembleX86 extends TypedOperation<string, AnyInput, unknown[]> 
     disassemble.SetBasePosition(codeSegment + ":" + offset);
     disassemble.setShowInstructionHex(showInstructionHex);
     disassemble.setShowInstructionPos(showInstructionPos);
-    disassemble.LoadBinCode(input.replace(/\s/g, ""));
-    return disassemble.LDisassemble();
+    const code = input.replace(/\s/g, "");
+    disassemble.LoadBinCode(code);
+    const output = disassemble.LDisassemble();
+    if (code && !output) {
+      throw new OperationError(
+        "The x86 disassembly backend is unavailable in this build",
+      );
+    }
+    return output;
   }
 }
 

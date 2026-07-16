@@ -42,6 +42,26 @@ jest.mock("../src/commands/runner", () => {
   }
 
   return {
+    readableUtf8: (bytes: Uint8Array): string | undefined => {
+      try {
+        const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+        const chars = Array.from(text);
+        const printable = chars.filter((character) => {
+          const code = character.codePointAt(0) ?? 0;
+          return (
+            code === 9 ||
+            code === 10 ||
+            code === 13 ||
+            (code >= 32 && code !== 127)
+          );
+        }).length;
+        return printable / Math.max(1, chars.length) >= 0.75
+          ? text
+          : undefined;
+      } catch {
+        return undefined;
+      }
+    },
     runOp: (opName: string, input: unknown, args: unknown[]): unknown => {
       switch (opName) {
         case "FromBase64":
@@ -103,6 +123,20 @@ describe("stringStats", () => {
 });
 
 describe("magicAnalyse", () => {
+  test("recognises a complete short Base64 value during explicit analysis", () => {
+    const chains = magicAnalyse("SGVsbG8=");
+    expect(chains).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          preview: "Hello",
+          steps: [
+            expect.objectContaining({ opName: "FromBase64" }),
+          ],
+        }),
+      ]),
+    );
+  });
+
   test("finds a single-step Base64 chain with a printable preview", () => {
     const encoded = Buffer.from(PLAIN, "utf-8").toString("base64");
     const chains = magicAnalyse(encoded);
@@ -136,6 +170,34 @@ describe("magicAnalyse", () => {
     );
     expect(chain).toBeDefined();
     expect(chain!.preview).toBe(PLAIN);
+  });
+
+  test("bounds gzip expansion and can disable hover decompression", () => {
+    const encoded = zlib.gzipSync("A".repeat(1024 * 1024)).toString("base64");
+    const started = Date.now();
+    const bounded = magicAnalyse(encoded, 3, {
+      maxIntermediateBytes: 64 * 1024,
+    });
+    expect(
+      bounded.some((chain) =>
+        chain.steps.some((step) => step.opName === "Gunzip"),
+      ),
+    ).toBe(false);
+    expect(Date.now() - started).toBeLessThan(500);
+
+    const small = zlib.gzipSync(PLAIN).toString("base64");
+    expect(
+      magicAnalyse(small, 3, { allowDecompression: false }).some((chain) =>
+        chain.steps.some((step) => step.opName === "Gunzip"),
+      ),
+    ).toBe(false);
+  });
+
+  test("decodes the captured payload inside a data URI", () => {
+    const payload = Buffer.from(PLAIN, "utf-8").toString("base64");
+    const chains = magicAnalyse(`data:text/plain;base64,${payload}`);
+    expect(chains.some((chain) => chain.preview === PLAIN)).toBe(true);
+    expect(chains[0]?.input).toBe(payload);
   });
 
   test("deepest chains are sorted first", () => {

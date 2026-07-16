@@ -8,9 +8,16 @@
  */
 
 import * as vscode from "vscode";
+import { createHash } from "crypto";
 import { ScanState } from "./providers/scanState";
 import { DecorationProvider } from "./providers/decorationProvider";
-import { HoverProvider } from "./providers/hoverProvider";
+import {
+  HoverProvider,
+  type HoverOperationPayload,
+  type HoverPipelinePayload,
+  type HoverReplacementPayload,
+  type HoverTextTarget,
+} from "./providers/hoverProvider";
 import { PatternsTreeProvider } from "./providers/patternsTreeProvider";
 import { VariablesTreeProvider } from "./providers/variablesTreeProvider";
 import { PipelinesTreeProvider } from "./providers/pipelinesTreeProvider";
@@ -18,21 +25,29 @@ import {
   VariableStore,
   PipelineStore,
   type StorageScope,
+  type Pipeline,
 } from "./storage/store";
+import { resolveVariableTemplates } from "./storage/variableResolution";
 import { PipelinePanel } from "./panels/pipelinePanel";
 import {
-  runOp,
   runOpAsync,
   parsePipeline,
   runPipeline,
   resolveDefaultArg,
+  presentBytes,
 } from "./commands/runner";
 import { EntropyMapProvider } from "./providers/entropyMapProvider";
 import { detectFormat, makeReadable } from "./providers/format";
 import {
+  capturePipelineResultTarget,
   presentPipelineResult,
   type ResultRenderer,
 } from "./commands/pipelineResult";
+import {
+  captureTextEditSnapshot,
+  replaceTextEditSnapshot,
+  type TextEditSnapshot,
+} from "./commands/textEditSnapshot";
 import { InlineResultController } from "./commands/inlineResult";
 import { WebviewResultController } from "./commands/webviewResult";
 import {
@@ -44,6 +59,19 @@ import {
   type RecipeStep,
 } from "./providers/recipeViewProvider";
 import { pickScope } from "./commands/scopePicker";
+import {
+  loadStandardRecipes,
+  type BuiltInPipeline,
+} from "./recipes/standardRecipes";
+import {
+  analyseMalwarePayload,
+  renderMalwareTriageMarkdown,
+} from "./analysis/malwareTriage";
+import {
+  MAX_YARA_RULE_BYTES,
+  MAX_YARA_SAMPLE_BYTES,
+  yaraLimitError,
+} from "./chef/operations/YARARules";
 
 /** The configured default scope for a given preset kind. */
 function defaultScope(
@@ -62,25 +90,44 @@ import { initOutputChannel, log } from "./logger";
 import registry from "./opsRegistry";
 import type { ArgConfig, Operation } from "./chef/Operation";
 
-function resultToString(result: unknown): string {
-  if (Array.isArray(result))
-    return Buffer.from(result as number[]).toString("utf-8");
+function resultToString(result: unknown, outputType?: string): string {
+  const normalisedType = outputType?.toLowerCase().replace(/[^a-z]/g, "");
+  if (normalisedType === "json" || normalisedType === "object") {
+    return JSON.stringify(result, null, 2);
+  }
+  let bytes: Buffer | undefined;
+  if (result instanceof ArrayBuffer)
+    bytes = Buffer.from(new Uint8Array(result));
+  else if (Buffer.isBuffer(result) || result instanceof Uint8Array)
+    bytes = Buffer.from(result);
+  else if (
+    (normalisedType === "bytearray" || normalisedType === "arraybuffer") &&
+    Array.isArray(result) &&
+    result.every(
+      (item) => Number.isInteger(item) && Number(item) >= 0 && Number(item) <= 255,
+    )
+  )
+    bytes = Buffer.from(result as number[]);
+  if (bytes) {
+    return presentBytes(bytes);
+  }
   if (typeof result === "string") return result;
   if (result === null || result === undefined) return "";
   return JSON.stringify(result, null, 2);
 }
 
-/** Replace $varName / {{varName}} references with stored variable values. */
-function resolveVars(text: string, varStore: VariableStore): string {
-  return text
-    .replace(
-      /\{\{([^}]+)\}\}/g,
-      (_, name) => varStore.get(name.trim()) ?? `{{${name}}}`,
-    )
-    .replace(
-      /\$([A-Za-z_][A-Za-z0-9_-]*)/g,
-      (_, name) => varStore.get(name) ?? `$${name}`,
-    );
+function parseCommandPayload<T>(payload: T | string): T {
+  if (typeof payload !== "string") return payload;
+  return JSON.parse(decodeURIComponent(payload)) as T;
+}
+
+function targetRange(target: HoverTextTarget): vscode.Range {
+  return new vscode.Range(
+    target.start.line,
+    target.start.character,
+    target.end.line,
+    target.end.character,
+  );
 }
 
 async function promptForArgs(opInstance: Operation): Promise<unknown[] | null> {
@@ -154,10 +201,49 @@ export function activate(context: vscode.ExtensionContext): void {
   const globalDir = context.globalStorageUri.fsPath;
   const varStore = new VariableStore(globalDir);
   const pipeStore = new PipelineStore(globalDir);
+  const standardPipelines = loadStandardRecipes();
+
+  const allPipelines = (): Array<Pipeline | BuiltInPipeline> => [
+    ...standardPipelines,
+    ...pipeStore.loadAll(),
+  ];
+  type PipelineCommandValue =
+    | string
+    | Pipeline
+    | BuiltInPipeline
+    | { pipeline?: Pipeline | BuiltInPipeline };
+  const resolvePipeline = (
+    value: PipelineCommandValue | undefined,
+  ): Pipeline | BuiltInPipeline | undefined => {
+    if (!value) return undefined;
+    let resolved: Pipeline | BuiltInPipeline | undefined;
+    if (typeof value === "object" && "pipeline" in value) {
+      resolved = value.pipeline;
+    } else if (typeof value !== "string") {
+      resolved = value as Pipeline | BuiltInPipeline;
+    } else {
+      resolved =
+        pipeStore.findByName(value) ??
+        standardPipelines.find(
+          (pipeline) => pipeline.id === value || pipeline.name === value,
+        );
+    }
+    if (
+      resolved &&
+      vscode.workspace.isTrusted === false &&
+      (resolved as Pipeline & { scope?: string }).scope === "workspace"
+    ) {
+      void vscode.window.showWarningMessage(
+        "ts-chef: Workspace pipelines are unavailable in Restricted Mode.",
+      );
+      return undefined;
+    }
+    return resolved;
+  };
 
   const patternsTree = new PatternsTreeProvider(scanState);
   const varTree = new VariablesTreeProvider(varStore);
-  const pipeTree = new PipelinesTreeProvider(pipeStore);
+  const pipeTree = new PipelinesTreeProvider(pipeStore, standardPipelines);
 
   // Drives the Follow/Pin toggle button shown in the Patterns view title bar.
   void vscode.commands.executeCommand(
@@ -201,8 +287,10 @@ export function activate(context: vscode.ExtensionContext): void {
   inlineResult.register(context);
   webviewResult.register(context);
   const resultRenderers: Partial<Record<"inline" | "panel", ResultRenderer>> = {
-    inline: (editor, result) => inlineResult.show(editor, result),
-    panel: (editor, result) => webviewResult.show(editor, result),
+    inline: (editor, result, target) =>
+      inlineResult.show(editor, result, target),
+    panel: (editor, result, target) =>
+      webviewResult.show(editor, result, target),
   };
 
   // Lazily instantiate operations only when their arg defs are first needed,
@@ -239,12 +327,41 @@ export function activate(context: vscode.ExtensionContext): void {
     addToRecipe: (opName) => recipeView.addOperation(opName),
   });
 
-  /** Resolve the editor's input text (selection, else whole document). */
-  function selectionInput(editor: vscode.TextEditor): string {
-    const raw = editor.selection.isEmpty
-      ? editor.document.getText()
-      : editor.document.getText(editor.selection);
-    return resolveVars(raw, varStore);
+  /** Re-open and revalidate the exact text range captured by a hover action. */
+  async function resolveHoverTarget(
+    target: HoverTextTarget,
+  ): Promise<TextEditSnapshot | undefined> {
+    try {
+      const uri = vscode.Uri.parse(target.uri);
+      const document = await vscode.workspace.openTextDocument(uri);
+      const range = targetRange(target);
+      const value = document.getText(range);
+      const digest = createHash("sha256").update(value, "utf-8").digest("hex");
+      if (digest !== target.sha256) {
+        vscode.window.showWarningMessage(
+          "ts-chef: The hovered text changed. Hover it again before applying the conversion.",
+        );
+        return undefined;
+      }
+      const editor =
+        vscode.window.visibleTextEditors.find(
+          (candidate) => candidate.document.uri.toString() === uri.toString(),
+        ) ?? (await vscode.window.showTextDocument(document));
+      const snapshot = captureTextEditSnapshot(editor, range);
+      if (snapshot.value !== value) {
+        vscode.window.showWarningMessage(
+          "ts-chef: The hovered text changed. Hover it again before applying the conversion.",
+        );
+        return undefined;
+      }
+      return snapshot;
+    } catch (error) {
+      log(`Hover target validation failed: ${error}`);
+      vscode.window.showWarningMessage(
+        "ts-chef: The original hover target is no longer available.",
+      );
+      return undefined;
+    }
   }
 
   async function applyRecipeToSelection(steps: RecipeStep[]): Promise<void> {
@@ -257,10 +374,20 @@ export function activate(context: vscode.ExtensionContext): void {
       vscode.window.showWarningMessage("ts-chef: The recipe is empty.");
       return;
     }
+    const target = capturePipelineResultTarget(editor);
     try {
-      const result = await runPipeline(selectionInput(editor), steps);
+      const result = await runPipeline(
+        resolveVariableTemplates(target.value, varStore),
+        steps,
+      );
       log(`Recipe applied: ${steps.length} step(s)`);
-      await presentPipelineResult(editor, result, "Recipe", resultRenderers);
+      await presentPipelineResult(
+        editor,
+        result,
+        "Recipe",
+        resultRenderers,
+        target,
+      );
     } catch (e) {
       log(`Recipe error: ${e}`);
       vscode.window.showErrorMessage(`ts-chef recipe error: ${e}`);
@@ -287,7 +414,7 @@ export function activate(context: vscode.ExtensionContext): void {
     );
     if (!scope) return;
     const raw = steps.map((s) => displayNameFor(s.opName)).join(" | ");
-    pipeStore.upsert(scope, { name, raw, steps });
+    if (!pipeStore.upsert(scope, { name, raw, steps })) return;
     pipeTree.refresh();
     log(
       `Recipe "${name}" saved as pipeline (${steps.length} step(s), ${scope})`,
@@ -325,6 +452,13 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     }),
     vscode.workspace.onDidChangeTextDocument((e) => {
+      // Cached ranges refer to a specific document snapshot. Discard them on
+      // the first edit so decorations, the tree and legacy hover actions can
+      // never target shifted or stale text. Instant hover still analyses the
+      // current line on demand.
+      if (scanState.hasScanned(e.document.uri)) {
+        scanState.clear(e.document.uri);
+      }
       const editor = vscode.window.activeTextEditor;
       if (editor && e.document === editor.document) {
         if (debounceTimeout) {
@@ -498,12 +632,13 @@ export function activate(context: vscode.ExtensionContext): void {
       const editor = vscode.window.activeTextEditor;
       if (!editor) return;
       const selection = editor.selection;
-      const rawText = editor.document.getText(selection);
+      const target = captureTextEditSnapshot(editor, selection);
+      const rawText = target.value;
       if (!rawText) {
         vscode.window.showWarningMessage("ts-chef: Select text first.");
         return;
       }
-      const text = resolveVars(rawText, varStore);
+      const text = resolveVariableTemplates(rawText, varStore);
 
       const picked = await vscode.window.showQuickPick(buildOpPickItems(), {
         placeHolder: "Pick a ts-chef operation…",
@@ -518,14 +653,17 @@ export function activate(context: vscode.ExtensionContext): void {
       if (args === null) return;
 
       try {
-        const str = resultToString(runOp(picked.opName, text, args));
+        const str = resultToString(
+          await runOpAsync(picked.opName, text, args),
+          opInstance.outputType,
+        );
         if (str === "" && text !== "") {
           vscode.window.showWarningMessage(
             `ts-chef: "${picked.label}" produced an empty result — nothing replaced.`,
           );
           return;
         }
-        await editor.edit((eb) => eb.replace(selection, str));
+        if (!(await replaceTextEditSnapshot(target, str))) return;
         log(`quickConvert: "${picked.label}" applied`);
         vscode.window.setStatusBarMessage(
           `ts-chef: Applied "${picked.label}"`,
@@ -542,32 +680,104 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(
       "tschef.applyConversion",
       async (
-        payload: { opName: string; value: string; args: unknown[] } | string,
+        payload:
+          | HoverOperationPayload
+          | { opName: string; value: string; args: unknown[] }
+          | string,
       ) => {
-        const data =
-          typeof payload === "string"
-            ? JSON.parse(decodeURIComponent(payload))
-            : payload;
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) return;
-
-        const matches = scanState.get(editor.document.uri);
-        const match = matches.find((m) => m.value === data.value);
-        if (!match) return;
-
         try {
-          const str = resultToString(runOp(data.opName, data.value, data.args));
-          if (str === "" && data.value !== "") {
+          const data = parseCommandPayload<
+            HoverOperationPayload | { opName: string; value: string; args: unknown[] }
+          >(payload);
+          let target: TextEditSnapshot;
+          if ("target" in data) {
+            const resolved = await resolveHoverTarget(data.target);
+            if (!resolved) return;
+            target = resolved;
+          } else {
+            // Compatibility with hovers created by releases before exact-range
+            // targets were introduced. Never guess when the value is ambiguous.
+            const active = vscode.window.activeTextEditor;
+            if (!active) return;
+            const matches = scanState
+              .get(active.document.uri)
+              .filter((match) => match.value === data.value);
+            if (matches.length !== 1) {
+              vscode.window.showWarningMessage(
+                "ts-chef: The old hover target is ambiguous. Hover the value again.",
+              );
+              return;
+            }
+            target = captureTextEditSnapshot(active, matches[0].range);
+            if (target.value !== data.value) {
+              vscode.window.showWarningMessage(
+                "ts-chef: The old hover target changed. Hover it again.",
+              );
+              return;
+            }
+          }
+
+          const operationInput =
+            "input" in data && data.input
+              ? target.value.slice(data.input.start, data.input.end)
+              : target.value;
+          const str = resultToString(
+            await runOpAsync(data.opName, operationInput, data.args),
+            registry.find((entry) => entry.opName === data.opName)?.factory()
+              .outputType,
+          );
+          if (str === "" && target.value !== "") {
             vscode.window.showWarningMessage(
               `ts-chef: Operation produced an empty result — nothing replaced.`,
             );
             return;
           }
-          await editor.edit((eb) => eb.replace(match.range, str));
+          if (!(await replaceTextEditSnapshot(target, str))) return;
           log(`applyConversion: "${data.opName}" applied`);
         } catch (e) {
           log(`applyConversion error: ${e}`);
           vscode.window.showErrorMessage(`ts-chef: ${e}`);
+        }
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tschef.applyPipelineConversion",
+      async (payload: HoverPipelinePayload | string) => {
+        try {
+          const data = parseCommandPayload<HoverPipelinePayload>(payload);
+          const target = await resolveHoverTarget(data.target);
+          if (!target) return;
+          const input = data.input
+            ? target.value.slice(data.input.start, data.input.end)
+            : target.value;
+          const result = await runPipeline(input, data.steps);
+          if (!result && target.value) {
+            vscode.window.showWarningMessage(
+              "ts-chef: Decode chain produced an empty result — nothing replaced.",
+            );
+            return;
+          }
+          if (!(await replaceTextEditSnapshot(target, result))) return;
+          log(`Hover decode chain applied (${data.steps.length} step(s))`);
+        } catch (error) {
+          log(`Hover decode chain error: ${error}`);
+          vscode.window.showErrorMessage(`ts-chef: ${error}`);
+        }
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tschef.replaceIntegerLiteral",
+      async (payload: HoverReplacementPayload | string) => {
+        try {
+          const data = parseCommandPayload<HoverReplacementPayload>(payload);
+          const target = await resolveHoverTarget(data.target);
+          if (!target) return;
+          if (!(await replaceTextEditSnapshot(target, data.replacement)))
+            return;
+          log(`Integer literal replaced with "${data.replacement}"`);
+        } catch (error) {
+          log(`Integer replacement error: ${error}`);
+          vscode.window.showErrorMessage(`ts-chef: ${error}`);
         }
       },
     ),
@@ -592,7 +802,7 @@ export function activate(context: vscode.ExtensionContext): void {
         `Save variable "${name}"`,
       );
       if (!scope) return;
-      varStore.set(scope, name, value, desc ?? undefined);
+      if (!varStore.set(scope, name, value, desc ?? undefined)) return;
       varTree.refresh();
       log(`Variable "${name}" set (${scope})`);
       vscode.window.showInformationMessage(
@@ -637,8 +847,7 @@ export function activate(context: vscode.ExtensionContext): void {
       );
       if (!choice) return;
       if (choice.label.includes("Delete")) {
-        varStore.delete(action.scope, action.name);
-        varTree.refresh();
+        if (varStore.delete(action.scope, action.name)) varTree.refresh();
       }
       if (choice.label.includes("Edit")) {
         const newVal = await vscode.window.showInputBox({
@@ -646,8 +855,7 @@ export function activate(context: vscode.ExtensionContext): void {
           prompt: "New value",
         });
         if (newVal !== undefined) {
-          varStore.set(action.scope, action.name, newVal);
-          varTree.refresh();
+          if (varStore.set(action.scope, action.name, newVal)) varTree.refresh();
         }
       }
       if (choice.label.includes("Copy")) {
@@ -661,9 +869,8 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand("tschef.runPipeline", async () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) return;
-      const rawText =
-        editor.document.getText(editor.selection) || editor.document.getText();
-      const text = resolveVars(rawText, varStore);
+      const target = capturePipelineResultTarget(editor);
+      const text = resolveVariableTemplates(target.value, varStore);
 
       const raw = await vscode.window.showInputBox({
         prompt: "Pipeline (e.g. From Base64 | To Hex)",
@@ -677,7 +884,13 @@ export function activate(context: vscode.ExtensionContext): void {
         log(
           `Pipeline ran: "${raw}", input ${text.length} chars → ${result.length} chars`,
         );
-        await presentPipelineResult(editor, result, "Result", resultRenderers);
+        await presentPipelineResult(
+          editor,
+          result,
+          "Result",
+          resultRenderers,
+          target,
+        );
       } catch (e) {
         log(`Pipeline error: ${e}`);
         vscode.window.showErrorMessage(`ts-chef pipeline error: ${e}`);
@@ -686,27 +899,77 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("tschef.openPipelineEditor", () => {
-      PipelinePanel.open(context, pipeStore);
-      log("Pipeline editor opened");
-    }),
+    vscode.commands.registerCommand(
+      "tschef.openPipelineEditor",
+      (value?: PipelineCommandValue) => {
+        const pipeline = resolvePipeline(value);
+        PipelinePanel.open(context, pipeStore, pipeline, varStore, "list");
+        log(
+          pipeline
+            ? `Pipeline editor opened with "${pipeline.name}"`
+            : "Pipeline editor opened",
+        );
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tschef.openPipelineGraph",
+      (value?: PipelineCommandValue) => {
+        const pipeline = resolvePipeline(value);
+        PipelinePanel.open(context, pipeStore, pipeline, varStore, "graph");
+        log(
+          pipeline
+            ? `Pipeline graph opened with "${pipeline.name}"`
+            : "Pipeline graph opened",
+        );
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tschef.openPipelineInEditor",
+      async (value?: PipelineCommandValue) => {
+        let pipeline = resolvePipeline(value);
+        if (!pipeline) {
+          const picked = await vscode.window.showQuickPick(
+            allPipelines().map((candidate) => ({
+              label: candidate.name,
+              description:
+                "scope" in candidate
+                  ? candidate.scope === "built-in"
+                    ? candidate.category
+                    : candidate.scope
+                  : "saved",
+              detail: candidate.description ?? candidate.raw,
+              pipeline: candidate,
+            })),
+            {
+              title: "Open Pipeline in Graph/List Editor",
+              placeHolder: "Select a built-in or saved pipeline…",
+              matchOnDescription: true,
+              matchOnDetail: true,
+            },
+          );
+          pipeline = picked?.pipeline;
+        }
+        if (!pipeline) return;
+        PipelinePanel.open(context, pipeStore, pipeline, varStore);
+        log(`Pipeline editor opened with "${pipeline.name}"`);
+      },
+    ),
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "tschef.runSavedPipeline",
-      async (name: string) => {
-        const pipeline = pipeStore.findByName(name);
+      async (value: PipelineCommandValue) => {
+        const pipeline = resolvePipeline(value);
         if (!pipeline) return;
+        const name = pipeline.name;
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
           vscode.window.showWarningMessage("ts-chef: No active editor.");
           return;
         }
-        const rawText =
-          editor.document.getText(editor.selection) ||
-          editor.document.getText();
-        const text = resolveVars(rawText, varStore);
+        const target = capturePipelineResultTarget(editor);
+        const text = resolveVariableTemplates(target.value, varStore);
         try {
           const result = await runPipeline(text, pipeline.steps);
           log(
@@ -717,6 +980,7 @@ export function activate(context: vscode.ExtensionContext): void {
             result,
             `Pipeline "${name}"`,
             resultRenderers,
+            target,
           );
         } catch (e) {
           log(`Saved pipeline "${name}" error: ${e}`);
@@ -733,7 +997,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(
       "tschef.runSavedPipelinePicker",
       async () => {
-        const pipelines = pipeStore.loadAll();
+        const pipelines = allPipelines();
         if (!pipelines.length) {
           vscode.window.showInformationMessage(
             "ts-chef: No saved pipelines. Save one in the Pipeline Editor first.",
@@ -743,9 +1007,9 @@ export function activate(context: vscode.ExtensionContext): void {
         const picked = await vscode.window.showQuickPick(
           pipelines.map((p) => ({
             label: p.name,
-            description: `${p.description ?? ""}  [${p.scope}]`,
+            description: `${p.description ?? ""}  [${"scope" in p ? p.scope : "saved"}]`,
             detail: p.raw,
-            name: p.name,
+            pipeline: p,
           })),
           {
             placeHolder: "Select a saved pipeline to run…",
@@ -754,7 +1018,10 @@ export function activate(context: vscode.ExtensionContext): void {
           },
         );
         if (!picked) return;
-        vscode.commands.executeCommand("tschef.runSavedPipeline", picked.name);
+        vscode.commands.executeCommand(
+          "tschef.runSavedPipeline",
+          picked.pipeline,
+        );
       },
     ),
   );
@@ -765,9 +1032,26 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand("tschef.deepAnalysis", async () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) return;
-      const text = editor.document.getText(editor.selection);
-      if (!text) {
+      if (editor.selection.isEmpty) {
         vscode.window.showWarningMessage("ts-chef: Select text to analyse.");
+        return;
+      }
+      const selectedCharacters = Math.abs(
+        editor.document.offsetAt(editor.selection.end) -
+          editor.document.offsetAt(editor.selection.start),
+      );
+      if (selectedCharacters > 256 * 1024) {
+        vscode.window.showWarningMessage(
+          "ts-chef: Deep Analysis is limited to 256 KiB. Select a smaller value.",
+        );
+        return;
+      }
+      const target = captureTextEditSnapshot(editor, editor.selection);
+      const text = target.value;
+      if (Buffer.byteLength(text, "utf-8") > 256 * 1024) {
+        vscode.window.showWarningMessage(
+          "ts-chef: Deep Analysis is limited to 256 KiB of UTF-8 data. Select a smaller value.",
+        );
         return;
       }
 
@@ -811,11 +1095,17 @@ export function activate(context: vscode.ExtensionContext): void {
           opName: s.opName,
           args: s.args,
         }));
-        const str = await runPipeline(trimmed, steps);
+        const str = await runPipeline(picked.chain.input ?? trimmed, steps);
         log(
           `Deep analysis applied "${picked.label}": ${trimmed.length} → ${str.length} chars`,
         );
-        await presentPipelineResult(editor, str, picked.label, resultRenderers);
+        await presentPipelineResult(
+          editor,
+          str,
+          picked.label,
+          resultRenderers,
+          target,
+        );
       } catch (e) {
         log(`Deep analysis error: ${e}`);
         vscode.window.showErrorMessage(`ts-chef deep analysis error: ${e}`);
@@ -848,13 +1138,16 @@ export function activate(context: vscode.ExtensionContext): void {
         }
         const argDefs = argDefsFor(opName);
         if (!argDefs) return;
+        const target = capturePipelineResultTarget(editor);
         try {
           const result = resultToString(
-            runOp(
+            await runOpAsync(
               opName,
-              selectionInput(editor),
+              resolveVariableTemplates(target.value, varStore),
               argDefs.map(resolveDefaultArg),
             ),
+            registry.find((entry) => entry.opName === opName)?.factory()
+              .outputType,
           );
           log(`applyOperation: "${opName}" applied`);
           await presentPipelineResult(
@@ -862,6 +1155,7 @@ export function activate(context: vscode.ExtensionContext): void {
             result,
             displayNameFor(opName),
             resultRenderers,
+            target,
           );
         } catch (e) {
           log(`applyOperation error: ${e}`);
@@ -875,10 +1169,20 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "tschef.loadRecipe",
-      async (arg: string | { pipeline?: { name: string } }) => {
-        const name =
-          typeof arg === "string" ? arg : (arg?.pipeline?.name ?? "");
-        const pipeline = name ? pipeStore.findByName(name) : undefined;
+      async (
+        arg:
+          | string
+          | Pipeline
+          | BuiltInPipeline
+          | { pipeline?: Pipeline | BuiltInPipeline },
+      ) => {
+        let direct: Pipeline | BuiltInPipeline | undefined;
+        if (typeof arg === "object" && arg !== null) {
+          direct = "steps" in arg ? arg : arg.pipeline;
+        }
+        const pipeline = resolvePipeline(
+          direct ?? (typeof arg === "string" ? arg : undefined),
+        );
         if (!pipeline) return;
         recipeView.loadRecipe(
           pipeline.steps.map((s) => ({ opName: s.opName, args: s.args })),
@@ -887,6 +1191,31 @@ export function activate(context: vscode.ExtensionContext): void {
         await vscode.commands.executeCommand("tschef.recipeView.focus");
       },
     ),
+    vscode.commands.registerCommand("tschef.browseRecipeLibrary", async () => {
+      const picked = await vscode.window.showQuickPick(
+        standardPipelines.map((pipeline) => ({
+          label: pipeline.name,
+          description: pipeline.category,
+          detail: pipeline.description,
+          pipeline,
+        })),
+        {
+          title: "ts-chef Standard Recipe Library",
+          placeHolder: "Search decoding, conversion, malware and IOC recipes…",
+          matchOnDescription: true,
+          matchOnDetail: true,
+        },
+      );
+      if (!picked) return;
+      recipeView.loadRecipe(
+        picked.pipeline.steps.map((step) => ({
+          opName: step.opName,
+          args: [...step.args],
+        })),
+        picked.pipeline.name,
+      );
+      await vscode.commands.executeCommand("tschef.recipeView.focus");
+    }),
   );
 
   context.subscriptions.push(
@@ -933,6 +1262,64 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
   );
 
+  // tschef.malwareTriage — bounded, offline static analysis. It deliberately
+  // does not execute payloads, resolve IOCs, start processes or access the net.
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tschef.malwareTriage", async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showWarningMessage("ts-chef: No active editor.");
+        return;
+      }
+
+      try {
+        let sample: string | Uint8Array;
+        if (!editor.selection.isEmpty) {
+          sample = editor.document.getText(editor.selection);
+        } else if (editor.document.uri.scheme === "file") {
+          const stat = await vscode.workspace.fs.stat(editor.document.uri);
+          if (stat.size > 16 * 1024 * 1024) {
+            vscode.window.showWarningMessage(
+              "ts-chef: Static triage accepts files up to 16 MiB. Select a smaller region to analyse it.",
+            );
+            return;
+          }
+          sample = await vscode.workspace.fs.readFile(editor.document.uri);
+          if (sample.byteLength > 16 * 1024 * 1024) {
+            vscode.window.showWarningMessage(
+              "ts-chef: Static triage accepts files up to 16 MiB. Select a smaller region to analyse it.",
+            );
+            return;
+          }
+        } else {
+          sample = editor.document.getText();
+        }
+
+        const report = await vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: "ts-chef: Static malware triage",
+            cancellable: false,
+          },
+          async () => {
+            // Let VS Code paint the progress notification before the bounded,
+            // synchronous scanners start.
+            await new Promise<void>((resolve) => setTimeout(resolve, 0));
+            return analyseMalwarePayload(sample);
+          },
+        );
+        await showInNewEditor(renderMalwareTriageMarkdown(report), "markdown");
+        log(
+          `Static malware triage: risk ${report.risk.level}/${report.risk.score}, ` +
+            `${report.indicators.length} suspicious indicator(s), ${report.iocs.length} IOC(s)`,
+        );
+      } catch (error) {
+        log(`Static malware triage error: ${error}`);
+        vscode.window.showErrorMessage(`ts-chef triage error: ${error}`);
+      }
+    }),
+  );
+
   // tschef.yaraScan — run YARA rules against the selection/document.
   context.subscriptions.push(
     vscode.commands.registerCommand("tschef.yaraScan", async () => {
@@ -941,26 +1328,46 @@ export function activate(context: vscode.ExtensionContext): void {
         vscode.window.showWarningMessage("ts-chef: No active editor.");
         return;
       }
-      const source = await vscode.window.showQuickPick(
+      const source = await vscode.window.showQuickPick<
+        vscode.QuickPickItem & { sourceKind: "file" | "inline" }
+      >(
         [
-          { label: "$(file) Load rules from a .yar file", kind: "file" as const },
-          { label: "$(edit) Type/paste rules", kind: "inline" as const },
+          {
+            label: "$(file) Load rules from a .yar file",
+            sourceKind: "file",
+          },
+          {
+            label: "$(edit) Type/paste rules",
+            sourceKind: "inline",
+          },
         ],
         { placeHolder: "YARA rules source" },
       );
       if (!source) return;
 
       let rules: string | undefined;
-      if (source.kind === "file") {
+      if (source.sourceKind === "file") {
         const picked = await vscode.window.showOpenDialog({
           canSelectMany: false,
           filters: { "YARA rules": ["yar", "yara", "rules", "txt"] },
           openLabel: "Use these rules",
         });
         if (!picked?.length) return;
-        rules = Buffer.from(
-          await vscode.workspace.fs.readFile(picked[0]),
-        ).toString("utf-8");
+        const stat = await vscode.workspace.fs.stat(picked[0]);
+        if (stat.size > MAX_YARA_RULE_BYTES) {
+          vscode.window.showWarningMessage(
+            "ts-chef: YARA rule files are limited to 2 MiB.",
+          );
+          return;
+        }
+        const ruleBytes = await vscode.workspace.fs.readFile(picked[0]);
+        if (ruleBytes.byteLength > MAX_YARA_RULE_BYTES) {
+          vscode.window.showWarningMessage(
+            "ts-chef: YARA rule files are limited to 2 MiB.",
+          );
+          return;
+        }
+        rules = Buffer.from(ruleBytes).toString("utf-8");
       } else {
         rules = await vscode.window.showInputBox({
           prompt: "YARA rule(s)",
@@ -968,19 +1375,67 @@ export function activate(context: vscode.ExtensionContext): void {
         });
       }
       if (!rules) return;
+      const ruleLimitError = yaraLimitError(0, rules);
+      if (ruleLimitError) {
+        vscode.window.showWarningMessage(`ts-chef: ${ruleLimitError}.`);
+        return;
+      }
 
       try {
+        let sample: string | ArrayBuffer;
+        if (!editor.selection.isEmpty) {
+          sample = editor.document.getText(editor.selection);
+        } else if (editor.document.uri.scheme === "file") {
+          const stat = await vscode.workspace.fs.stat(editor.document.uri);
+          if (stat.size > MAX_YARA_SAMPLE_BYTES) {
+            vscode.window.showWarningMessage(
+              "ts-chef: YARA scans are limited to files of 64 MiB.",
+            );
+            return;
+          }
+          const bytes = await vscode.workspace.fs.readFile(editor.document.uri);
+          if (bytes.byteLength > MAX_YARA_SAMPLE_BYTES) {
+            vscode.window.showWarningMessage(
+              "ts-chef: YARA scans are limited to files of 64 MiB.",
+            );
+            return;
+          }
+          const buffer = new ArrayBuffer(bytes.byteLength);
+          new Uint8Array(buffer).set(bytes);
+          sample = buffer;
+        } else {
+          sample = editorInput(editor);
+        }
+        const sampleByteLength =
+          typeof sample === "string"
+            ? Buffer.byteLength(sample, "utf-8")
+            : sample.byteLength;
+        const sampleLimitError = yaraLimitError(sampleByteLength, rules);
+        if (sampleLimitError) {
+          vscode.window.showWarningMessage(`ts-chef: ${sampleLimitError}.`);
+          return;
+        }
         // args: rules, showStrings, showLengths, showMeta, showCounts,
         //       showRuleWarnings, showConsole
-        const result = (await runOpAsync("YARARules", editorInput(editor), [
-          rules,
-          true,
-          false,
-          true,
-          true,
-          true,
-          false,
-        ])) as string;
+        const result = await vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: "ts-chef: Running bounded YARA scan",
+            cancellable: false,
+          },
+          async () => {
+            await new Promise<void>((resolve) => setTimeout(resolve, 0));
+            return (await runOpAsync("YARARules", sample, [
+              rules,
+              true,
+              false,
+              true,
+              true,
+              true,
+              false,
+            ])) as string;
+          },
+        );
         log(`YARA scan produced ${String(result).length} chars`);
         await showInNewEditor(
           String(result) || "(no matches)",
@@ -1097,7 +1552,13 @@ export function activate(context: vscode.ExtensionContext): void {
         return;
       }
       try {
-        const formatted = resultToString(runOp(choice.opName, text, choice.args));
+        const operation = registry.find(
+          (entry) => entry.opName === choice.opName,
+        );
+        const formatted = resultToString(
+          await runOpAsync(choice.opName, text, choice.args),
+          operation?.factory().outputType,
+        );
         log(`smartFormat: detected ${choice.label}`);
         await showInNewEditor(formatted, choice.languageId);
         vscode.window.setStatusBarMessage(

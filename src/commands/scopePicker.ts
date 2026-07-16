@@ -24,11 +24,19 @@ export async function pickScope(
   defaultScope: StorageScope,
   title: string,
 ): Promise<StorageScope | undefined> {
+  const hasWorkspace = Boolean(vscode.workspace.workspaceFolders?.length);
+  const effectiveDefault =
+    defaultScope === "workspace" && !hasWorkspace ? "global" : defaultScope;
   const other: StorageScope =
-    defaultScope === "global" ? "workspace" : "global";
-  const items = [defaultScope, other].map((scope) => ({
+    effectiveDefault === "global" ? "workspace" : "global";
+  const scopes: StorageScope[] = hasWorkspace
+    ? [effectiveDefault, other]
+    : ["global"];
+  const items = scopes.map((scope) => ({
     label:
-      scope === defaultScope ? `${LABELS[scope]} (default)` : LABELS[scope],
+      scope === effectiveDefault
+        ? `${LABELS[scope]} (default)`
+        : LABELS[scope],
     scope,
   }));
   const picked = await vscode.window.showQuickPick(items, {

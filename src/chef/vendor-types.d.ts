@@ -326,6 +326,12 @@ declare module "jsonata" {
 }
 
 declare module "yaml" {
+  export class Lexer {
+    lex(source: string, incomplete?: boolean): Generator<string, void>;
+  }
+  export namespace CST {
+    function tokenType(source: string): string | null;
+  }
   export function parse(
     str: string,
     options?: Record<string, unknown>,

@@ -90,6 +90,7 @@ class Dish {
       if (key === "ARRAYBUFFER") key = "ARRAY_BUFFER";
       if (key === "BIGNUMBER") key = "BIG_NUMBER";
       if (key === "LISTFILE") key = "LIST_FILE";
+      if (key === "OBJECT") key = "JSON";
       
       if (key in DISH_TYPES) {
         this.type = DISH_TYPES[key as keyof typeof DISH_TYPES];
@@ -115,6 +116,7 @@ class Dish {
       if (key === "ARRAYBUFFER") key = "ARRAY_BUFFER";
       if (key === "BIGNUMBER") key = "BIG_NUMBER";
       if (key === "LISTFILE") key = "LIST_FILE";
+      if (key === "OBJECT") key = "JSON";
       targetType = key in DISH_TYPES ? DISH_TYPES[key as keyof typeof DISH_TYPES] : this.type;
     } else {
       targetType = _type;
@@ -123,9 +125,32 @@ class Dish {
     // No coercion needed if already the right type
     if (this.type === targetType) return this.value;
 
+    // Coerce textual or byte data to structured JSON. Whether a numeric array
+    // represents JSON or bytes is determined by the Dish's source type.
+    if (targetType === DISH_TYPES.JSON) {
+      let text: string;
+      if (typeof this.value === "string") text = this.value;
+      else if (this.value instanceof ArrayBuffer)
+        text = new TextDecoder().decode(this.value);
+      else if (Array.isArray(this.value))
+        text = Buffer.from(this.value as number[]).toString("utf-8");
+      else if (this.value instanceof Uint8Array)
+        text = Buffer.from(this.value).toString("utf-8");
+      else return this.value;
+      try {
+        return JSON.parse(text) as unknown;
+      } catch (error) {
+        throw new TypeError(`Invalid JSON input: ${String(error)}`, {
+          cause: error,
+        });
+      }
+    }
+
     // Coerce to string
     if (targetType === DISH_TYPES.STRING) {
       if (typeof this.value === "string") return this.value;
+      if (this.type === DISH_TYPES.JSON)
+        return JSON.stringify(this.value, null, 2);
       if (this.value instanceof ArrayBuffer)
         return new TextDecoder().decode(this.value);
       if (Array.isArray(this.value))
@@ -170,6 +195,8 @@ class Dish {
     if (this.value instanceof ArrayBuffer) {
       return new TextDecoder().decode(this.value);
     }
+    if (this.type === DISH_TYPES.JSON)
+      return JSON.stringify(this.value, null, 2);
     return String(this.value);
   }
 

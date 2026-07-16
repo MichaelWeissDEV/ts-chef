@@ -33,4 +33,10 @@ describe("FromBinary", () => {
   test("No-delimiter binary string", () => {
     expect(out(op.run("0100000101000010", ["None", 8]))).toBe("AB");
   });
+
+  test("rejects invalid digits, oversized groups and partial bytes", () => {
+    expect(() => op.run("0100000x", ["Space", 8])).toThrow();
+    expect(() => op.run("111111111", ["Space", 8])).toThrow();
+    expect(() => op.run("010000010", ["None", 8])).toThrow();
+  });
 });

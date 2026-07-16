@@ -33,4 +33,10 @@ describe("FromHex", () => {
   test("Comma-delimited hex bytes", () => {
     expect(out(op.run("41,42,43", ["Comma"]))).toBe("ABC");
   });
+
+  test("rejects malformed and partial hexadecimal bytes", () => {
+    expect(() => op.run("4G 41", ["Space"])).toThrow();
+    expect(() => op.run("4 41", ["Space"])).toThrow();
+    expect(() => op.run("414", ["None"])).toThrow();
+  });
 });

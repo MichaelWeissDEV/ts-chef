@@ -8,7 +8,11 @@
  */
 
 import * as vscode from "vscode";
-import { replaceTarget } from "./pipelineResult";
+import { capturePipelineResultTarget } from "./pipelineResult";
+import {
+  replaceTextEditSnapshot,
+  type TextEditSnapshot,
+} from "./textEditSnapshot";
 
 /**
  * One pinned inline result. Each carries its own source `editor` and a frozen
@@ -17,9 +21,8 @@ import { replaceTarget } from "./pipelineResult";
  */
 type InlineResult = {
   id: number;
-  editor: vscode.TextEditor;
   uri: vscode.Uri;
-  targetRange: vscode.Range;
+  target: TextEditSnapshot;
   result: string;
 };
 type InlineAction = "replace" | "copy" | "close";
@@ -34,9 +37,8 @@ const MAX_PREVIEW = 80;
  * Wired into `presentPipelineResult` via the renderer map as the `inline` mode;
  * call {@link register} once during activation.
  *
- * Caveat (intentional): ranges are frozen — no edit-tracking — so edits above a
- * result can make Replace target the wrong span. The escape hatch is Close and
- * re-run; live range tracking is deferred to a later hardening pass.
+ * Replacements are guarded by the captured document version and source text,
+ * so a result can never be applied to a shifted range.
  */
 export class InlineResultController implements vscode.CodeLensProvider {
   private results: InlineResult[] = [];
@@ -56,12 +58,15 @@ export class InlineResultController implements vscode.CodeLensProvider {
   }
 
   /** Pin a new inline result at the target range of `editor`. */
-  show(editor: vscode.TextEditor, result: string): void {
+  show(
+    editor: vscode.TextEditor,
+    result: string,
+    target: TextEditSnapshot = capturePipelineResultTarget(editor),
+  ): void {
     this.results.push({
       id: this.seq++,
-      editor,
       uri: editor.document.uri,
-      targetRange: replaceTarget(editor),
+      target,
       result,
     });
     this._onDidChangeCodeLenses.fire();
@@ -72,7 +77,7 @@ export class InlineResultController implements vscode.CodeLensProvider {
     const lenses: vscode.CodeLens[] = [];
     for (const item of this.results) {
       if (item.uri.toString() !== uri) continue;
-      const line = item.targetRange.start.line;
+      const line = item.target.range.start.line;
       const range = new vscode.Range(line, 0, line, 0);
       const preview =
         item.result.replace(/\s+/g, " ").slice(0, MAX_PREVIEW) +
@@ -107,22 +112,8 @@ export class InlineResultController implements vscode.CodeLensProvider {
     if (!item) return;
 
     if (action === "replace") {
-      if (item.editor.document.isClosed) {
-        vscode.window.showWarningMessage(
-          "ts-chef: Cannot replace — the editor is no longer open.",
-        );
-        return;
-      }
-      try {
-        await item.editor.edit((eb) =>
-          eb.replace(item.targetRange, item.result),
-        );
+      if (await replaceTextEditSnapshot(item.target, item.result))
         this.remove(id);
-      } catch {
-        vscode.window.showWarningMessage(
-          "ts-chef: Could not replace — the editor is no longer available.",
-        );
-      }
       return;
     }
 

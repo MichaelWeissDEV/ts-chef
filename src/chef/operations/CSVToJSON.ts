@@ -62,7 +62,12 @@ export class CSVToJSON extends TypedOperation<string, AnyInput, string[]> {
 
     let json: string[][];
     try {
-      json = Utils.parseCSV(input, cellDelims.split(""), rowDelims.split(""));
+      // binaryShortString arguments store escaped control characters (for
+      // example the default "\\r\\n") in their printable form. Decode those
+      // escapes before handing the individual delimiters to the CSV parser.
+      const cells = Array.from(Utils.parseEscapedChars(cellDelims));
+      const rows = Array.from(Utils.parseEscapedChars(rowDelims));
+      json = Utils.parseCSV(input, cells, rows);
     } catch (err) {
       throw new OperationError("Unable to parse CSV: " + String(err));
     }

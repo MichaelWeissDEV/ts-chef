@@ -42,6 +42,16 @@ describe("CSVToJSON", () => {
     expect(op.run(input, [";", "|", "Array of arrays"])).toEqual(expected);
   });
 
+  test("decodes escaped CRLF delimiters used by the default argument", () => {
+    expect(
+      op.run("name,age\r\nAda,42", [
+        ",",
+        "\\r\\n",
+        "Array of dictionaries",
+      ]),
+    ).toEqual([{ name: "Ada", age: "42" }]);
+  });
+
   test("Empty input", () => {
     expect(op.run("", [",", "\n", "Array of arrays"])).toEqual([]);
   });

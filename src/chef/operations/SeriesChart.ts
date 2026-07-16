@@ -18,7 +18,7 @@ import {
 import { TypedOperation } from "../Operation";
 import Utils from "../Utils";
 
-const d3 = (d3temp as any).default ? (d3temp as any).default : d3temp;
+const d3 = d3temp;
 const nodom = (nodomtemp as any).default
   ? (nodomtemp as any).default
   : nodomtemp;

@@ -33,6 +33,7 @@ function makeEditor(
   const fake = {
     document: {
       uri: { toString: () => uri },
+      version: 1,
       isClosed: opts.isClosed ?? false,
       getText: () => "",
       positionAt: (offset: number) => new Position(0, offset),

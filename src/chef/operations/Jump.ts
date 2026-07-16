@@ -53,13 +53,19 @@ export class Jump extends TypedOperation<any, any, unknown[]> {
     const [label, maxJumps] = ings;
     const jmpIndex = getLabelIndex(label, state);
 
-    if (state.numJumps >= maxJumps || jmpIndex === -1) {
+    if (jmpIndex === -1) {
+      state.numJumps = 0;
+      return state;
+    }
+
+    const backwards = jmpIndex <= state.progress;
+    if (backwards && state.numJumps >= maxJumps) {
       state.numJumps = 0;
       return state;
     }
 
     state.progress = jmpIndex;
-    state.numJumps++;
+    state.numJumps = backwards ? state.numJumps + 1 : 0;
     return state;
   }
 }

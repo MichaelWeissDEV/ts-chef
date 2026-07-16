@@ -48,6 +48,34 @@ interface RecipeState {
   opList: OpListItem[];
   /** Optional offset for fork operations. */
   forkOffset?: number;
+  /** Backward jump count used to cap loops. */
+  numJumps: number;
+  /** Number of regex capture registers populated so far. */
+  numRegisters: number;
+  /** Compatibility hook used by Register; arguments are updated in-place. */
+  setRegisters: (offset: number, num: number, registers: string[]) => void;
+}
+
+export interface RecipeExecutionLimits {
+  /** Maximum size of any value after a step (characters/items/bytes). */
+  maxIntermediateSize?: number;
+}
+
+function intermediateSize(dish: Dish): number {
+  const value = dish.value;
+  if (value === null || value === undefined) return 0;
+  if (typeof value === "string") return value.length;
+  if (value instanceof ArrayBuffer) return value.byteLength;
+  if (ArrayBuffer.isView(value)) return value.byteLength;
+  if (dish.type === Dish.BYTE_ARRAY && Array.isArray(value)) return value.length;
+  if (typeof value === "object") {
+    try {
+      return JSON.stringify(value).length;
+    } catch {
+      return Number.POSITIVE_INFINITY;
+    }
+  }
+  return String(value).length;
 }
 
 /**
@@ -128,9 +156,20 @@ class Recipe {
     dish: Dish,
     startProgress = 0,
     state?: Partial<RecipeState>,
+    limits: RecipeExecutionLimits = {},
   ): Promise<number> {
     let progress = startProgress;
     const opList = this.opList;
+    const runtimeState: RecipeState = {
+      progress,
+      dish,
+      opList,
+      forkOffset: state?.forkOffset ?? 0,
+      numJumps: state?.numJumps ?? 0,
+      numRegisters: state?.numRegisters ?? 0,
+      setRegisters: state?.setRegisters ?? (() => undefined),
+      ...state,
+    };
 
     for (let i = progress; i < opList.length; i++) {
       const item = opList[i];
@@ -143,7 +182,11 @@ class Recipe {
         item.op = entry ? entry.factory() : undefined;
       }
       
-      if (!item.op) continue;
+      if (!item.op) {
+        throw Object.assign(new Error(`Unknown operation: "${item.name}"`), {
+          progress: i,
+        });
+      }
 
       const op = item.op;
       const isFlowControl = item.flowControl ?? op.flowControl;
@@ -152,19 +195,14 @@ class Recipe {
 
       try {
         if (isFlowControl) {
-          const currentState: RecipeState = {
-            progress: i,
-            dish,
-            opList,
-            forkOffset: state?.forkOffset ?? 0,
-            ...state,
-          };
+          runtimeState.progress = i;
           const result = await op.run(
-            currentState,
+            runtimeState,
             item.ingValues as unknown[],
           );
           if (result && typeof result === "object" && "progress" in result) {
-            i = (result as unknown as RecipeState).progress;
+            Object.assign(runtimeState, result);
+            i = runtimeState.progress;
           }
         } else {
           // Type-safe input normalization
@@ -180,6 +218,17 @@ class Recipe {
             item.ingValues as unknown[],
           );
           dish.set(output, outputType);
+        }
+        if (
+          limits.maxIntermediateSize !== undefined &&
+          intermediateSize(dish) > limits.maxIntermediateSize
+        ) {
+          throw Object.assign(
+            new Error(
+              `Pipeline intermediate output exceeds the live limit (${limits.maxIntermediateSize.toLocaleString()} characters/items/bytes).`,
+            ),
+            { code: "PIPELINE_SIZE_LIMIT" },
+          );
         }
         progress = i;
       } catch (err) {

@@ -8,6 +8,7 @@
  */
 
 import { Utils } from "../Utils";
+import { OperationError } from "../errors/OperationError";
 
 /**
  * Parses a delimited decimal string into an array of byte values.
@@ -17,16 +18,26 @@ import { Utils } from "../Utils";
  * @returns An array of numeric byte values parsed from the input.
  */
 export function fromDecimal(data: string, delim: string = "Auto"): number[] {
+  if (!data.trim()) return [];
   const delimStr = delim === "Auto" ? " " : Utils.charRep(delim);
-  const output: number[] = [];
-  let byteStr = data.split(delimStr);
-  if (byteStr[byteStr.length - 1] === "")
-    byteStr = byteStr.slice(0, byteStr.length - 1);
-
-  for (let i = 0; i < byteStr.length; i++) {
-    output[i] = parseInt(byteStr[i], 10);
-  }
-  return output;
+  return data
+    .split(delimStr)
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .map((value, index) => {
+      if (!/^[+-]?\d+$/.test(value)) {
+        throw new OperationError(
+          `Invalid decimal value "${value}" at token ${index + 1}`,
+        );
+      }
+      const parsed = Number(value);
+      if (!Number.isSafeInteger(parsed)) {
+        throw new OperationError(
+          `Decimal value "${value}" at token ${index + 1} is not a safe integer`,
+        );
+      }
+      return parsed;
+    });
 }
 
 /**

@@ -8,9 +8,36 @@
  */
 
 import { TypedOperation, AnyInput } from "../Operation";
-import gunzip from "zlibjs/bin/gunzip.min.js";
+import OperationError from "../errors/OperationError";
+import { gunzipSync } from "zlib";
 
-const Zlib = gunzip.Zlib;
+export const MAX_GUNZIP_OUTPUT_BYTES = 64 * 1024 * 1024;
+
+/** Node's zlib aborts before allocating output beyond maxOutputLength. */
+export function gunzipWithLimit(
+  input: ArrayBuffer,
+  maxOutputLength = MAX_GUNZIP_OUTPUT_BYTES,
+): ArrayBuffer {
+  const source = new Uint8Array(input);
+  if (source.byteLength > MAX_GUNZIP_OUTPUT_BYTES) {
+    throw new OperationError("Gunzip input exceeds the 64 MiB safety limit");
+  }
+  try {
+    const output = gunzipSync(source, { maxOutputLength });
+    return output.buffer.slice(
+      output.byteOffset,
+      output.byteOffset + output.byteLength,
+    ) as ArrayBuffer;
+  } catch (error) {
+    const limitLabel =
+      maxOutputLength >= 1024 * 1024
+        ? `${Math.floor(maxOutputLength / 1024 / 1024)} MiB`
+        : `${Math.floor(maxOutputLength / 1024)} KiB`;
+    throw new OperationError(
+      `Gunzip failed or exceeded the ${limitLabel} output limit: ${String(error)}`,
+    );
+  }
+}
 
 /**
  * Gunzip operation
@@ -25,7 +52,7 @@ export class Gunzip extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
     this.name = "Gunzip";
     this.module = "Compression";
     this.description =
-      "Decompresses data which has been compressed using the deflate algorithm with gzip headers.";
+      "Decompresses data which has been compressed using the deflate algorithm with gzip headers. Input and output are capped at 64 MiB for safe analysis of untrusted data.";
     this.infoURL = "https://wikipedia.org/wiki/Gzip";
     this.inputType = "ArrayBuffer";
     this.outputType = "ArrayBuffer";
@@ -45,8 +72,7 @@ export class Gunzip extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
    * @returns {File}
    */
   run(input: ArrayBuffer, _args: unknown[]): AnyInput {
-    const gzipObj = new Zlib.Gunzip(new Uint8Array(input));
-    return new Uint8Array(gzipObj.decompress()).buffer;
+    return gunzipWithLimit(input);
   }
 }
 

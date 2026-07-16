@@ -8,6 +8,7 @@
  */
 
 import {
+  capturePipelineResultTarget,
   presentPipelineResult,
   replaceTarget,
 } from "../src/commands/pipelineResult";
@@ -18,6 +19,7 @@ import {
   clipboardWrite,
   statusBarMessage,
   showInformationMessage,
+  showWarningMessage,
   Position,
   Selection,
 } from "./vscode-mock";
@@ -36,6 +38,9 @@ function makeEditor(
     : new Selection(new Position(0, 0), new Position(0, 3)); // isEmpty === false
   const fake = {
     document: {
+      uri: { toString: () => "file:///pipeline-result.txt" },
+      version: 1,
+      isClosed: false,
       getText: () => text,
       positionAt: (offset: number) => new Position(0, offset),
     },
@@ -125,7 +130,27 @@ describe("presentPipelineResult", () => {
     const renderer = jest.fn();
     const { editor } = makeEditor("x");
     await presentPipelineResult(editor, "NEW", "Result", { inline: renderer });
-    expect(renderer).toHaveBeenCalledWith(editor, "NEW");
+    expect(renderer).toHaveBeenCalledWith(
+      editor,
+      "NEW",
+      expect.objectContaining({ version: 1 }),
+    );
     expect(showInformationMessage).not.toHaveBeenCalled();
+  });
+
+  test("refuses to replace when the source version changed", async () => {
+    __setConfig("pipelineResultAction", "replace");
+    const { editor, replaceCalls } = makeEditor("old");
+    const target = capturePipelineResultTarget(editor);
+    (editor.document as unknown as { version: number }).version = 2;
+    await presentPipelineResult(
+      editor,
+      "NEW",
+      "Result",
+      undefined,
+      target,
+    );
+    expect(replaceCalls).toHaveLength(0);
+    expect(showWarningMessage).toHaveBeenCalled();
   });
 });

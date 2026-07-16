@@ -27,12 +27,21 @@
     "hex",
     "hash",
     "converter",
-    "crypto"
+    "crypto",
+    "malware-analysis",
+    "yara",
+    "pipeline"
   ],
   "activationEvents": [
     "onStartupFinished"
   ],
   "main": "./dist/extension.js",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "Workspace-scoped variables and pipelines are unavailable in Restricted Mode."
+    }
+  },
   "contributes": {
     "commands": [
       {
@@ -71,6 +80,16 @@
         "title": "tschef: Open Pipeline Editor"
       },
       {
+        "command": "tschef.openPipelineGraph",
+        "title": "tschef: Open Pipeline Graph",
+        "icon": "$(type-hierarchy)"
+      },
+      {
+        "command": "tschef.openPipelineInEditor",
+        "title": "tschef: Open Saved/Standard Pipeline in Editor",
+        "icon": "$(type-hierarchy-sub)"
+      },
+      {
         "command": "tschef.setVariable",
         "title": "tschef: Set Variable"
       },
@@ -98,6 +117,11 @@
         "title": "tschef: Deep Analysis of Selection"
       },
       {
+        "command": "tschef.malwareTriage",
+        "title": "tschef: Static Malware Triage",
+        "icon": "$(shield)"
+      },
+      {
         "command": "tschef.addVariable",
         "title": "tschef: Add Variable",
         "icon": "$(add)"
@@ -106,6 +130,11 @@
         "command": "tschef.loadRecipe",
         "title": "tschef: Load into Recipe",
         "icon": "$(list-flat)"
+      },
+      {
+        "command": "tschef.browseRecipeLibrary",
+        "title": "tschef: Browse Standard Recipe Library",
+        "icon": "$(library)"
       },
       {
         "command": "tschef.yaraScan",
@@ -194,11 +223,11 @@
     "viewsWelcome": [
       {
         "view": "tschef.pipelinesView",
-        "contents": "No saved pipelines yet.\nBuild a recipe in the Recipe pane and save it, or use the editor:\n[Open Pipeline Editor](command:tschef.openPipelineEditor)"
+        "contents": "No saved pipelines yet.\nBuild a recipe in the Recipe pane and save it, or use an editor:\n[Open Pipeline Editor](command:tschef.openPipelineEditor) · [Open Pipeline Graph](command:tschef.openPipelineGraph)"
       },
       {
         "view": "tschef.variablesView",
-        "contents": "No variables yet. Variables can be referenced in inputs as $name or {{name}}.\n[Add Variable](command:tschef.addVariable)"
+        "contents": "No variables yet. Variables can be referenced explicitly in inputs as {{name}}. Shell/PowerShell $name expressions are not changed.\n[Add Variable](command:tschef.addVariable)"
       },
       {
         "view": "tschef.patternsView",
@@ -215,6 +244,11 @@
         {
           "command": "tschef.deepAnalysis",
           "when": "editorHasSelection",
+          "group": "tschef"
+        },
+        {
+          "command": "tschef.malwareTriage",
+          "when": "editorTextFocus",
           "group": "tschef"
         },
         {
@@ -266,6 +300,21 @@
           "command": "tschef.runSavedPipelinePicker",
           "when": "view == tschef.pipelinesView",
           "group": "navigation"
+        },
+        {
+          "command": "tschef.openPipelineInEditor",
+          "when": "view == tschef.pipelinesView",
+          "group": "navigation@0"
+        },
+        {
+          "command": "tschef.openPipelineGraph",
+          "when": "view == tschef.pipelinesView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "tschef.browseRecipeLibrary",
+          "when": "view == tschef.pipelinesView || view == tschef.recipeView",
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [
@@ -273,6 +322,16 @@
           "command": "tschef.loadRecipe",
           "when": "view == tschef.pipelinesView && viewItem =~ /^pipeline-/",
           "group": "inline"
+        },
+        {
+          "command": "tschef.openPipelineInEditor",
+          "when": "view == tschef.pipelinesView && viewItem =~ /^pipeline-/",
+          "group": "inline@1"
+        },
+        {
+          "command": "tschef.openPipelineGraph",
+          "when": "view == tschef.pipelinesView && viewItem =~ /^pipeline-/",
+          "group": "inline@2"
         }
       ]
     },
@@ -284,11 +343,45 @@
           "default": true,
           "description": "Enable pattern highlighting in the editor"
         },
-        "tschef.confidenceThreshold": {
-          "type": "number",
-          "default": 0.9,
-          "description": "Minimum confidence (0–1) to show hover conversion options"
-        },
+      "tschef.confidenceThreshold": {
+        "type": "number",
+        "default": 0.65,
+        "description": "Minimum confidence (0–1) to show hover conversion options"
+      },
+      "tschef.hover.enabled": {
+        "type": "boolean",
+        "default": true,
+        "description": "Show instant ts-chef analysis when hovering encoded strings and integer literals."
+      },
+      "tschef.hover.onDemand": {
+        "type": "boolean",
+        "default": true,
+        "description": "Analyse the line under the cursor even when the document has not been scanned."
+      },
+      "tschef.hover.integerCalculator": {
+        "type": "boolean",
+        "default": true,
+        "description": "Show decimal, hexadecimal, binary, octal and two's-complement values for source-code integer literals."
+      },
+      "tschef.hover.decodeChains": {
+        "type": "boolean",
+        "default": true,
+        "description": "Show safe previews and one-click actions for detected multi-step decoding chains."
+      },
+      "tschef.hover.maxInputCharacters": {
+        "type": "number",
+        "default": 65536,
+        "minimum": 256,
+        "maximum": 1048576,
+        "description": "Maximum number of characters analysed by one instant hover."
+      },
+      "tschef.hover.maxPreviewCharacters": {
+        "type": "number",
+        "default": 320,
+        "minimum": 80,
+        "maximum": 4096,
+        "description": "Maximum decoded preview length shown in a hover."
+      },
         "tschef.autoScanOnSave": {
           "type": "boolean",
           "default": false,

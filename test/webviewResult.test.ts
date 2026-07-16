@@ -29,6 +29,8 @@ function makeEditor(opts: { isClosed?: boolean; failEdit?: boolean } = {}): {
   const replaceCalls: ReplaceCall[] = [];
   const fake = {
     document: {
+      uri: { toString: () => "file:///webview-result.txt" },
+      version: 1,
       isClosed: opts.isClosed ?? false,
       getText: () => "",
       positionAt: (offset: number) => new Position(0, offset),

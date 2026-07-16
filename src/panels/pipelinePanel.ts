@@ -1,716 +1,563 @@
 /**
- * @fileoverview pipelinePanel module for ts-chef extension
- * @package panels
- * @license Apache-2.0
- * @author Michael Weiss
- * @copyright 2024-2026 Michael Weiss
- * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
+ * Full-screen pipeline editor host. The webview owns presentation state while
+ * this class validates messages, resolves VS Code input/output endpoints and
+ * executes the existing linear recipe runner.
  */
 
 import * as vscode from "vscode";
 import {
   PipelineStore,
   Pipeline,
-  PipelineStep,
+  VariableStore,
   type StorageScope,
 } from "../storage/store";
-import { parsePipeline, runPipeline } from "../commands/runner";
+import { resolveVariableTemplates } from "../storage/variableResolution";
+import {
+  parsePipeline,
+  runPipeline,
+  resolveDefaultArg,
+} from "../commands/runner";
 import { pickScope } from "../commands/scopePicker";
 import { log } from "../logger";
 import registry from "../opsRegistry";
+import {
+  decodePipelinePanelMessage,
+  type PanelPipelineStep,
+  type PipelinePanelMessage,
+} from "./pipelineProtocol";
+import {
+  mergeParsedPanelSteps,
+  serialisePanelPipeline,
+  toPanelSteps,
+  toPipelineSteps,
+} from "./pipelinePanelModel";
+import {
+  assertPipelineOutputSize,
+  deliverPipelineOutput,
+  pipelinePreview,
+  readPipelineInput,
+} from "./pipelineIO";
+import { buildPipelineWebviewHtml } from "./pipelineWebview";
+import {
+  firstUnsafeLiveOperation,
+  isOperationSafeForLive,
+  MAX_LIVE_INPUT_CHARACTERS,
+  MAX_LIVE_OUTPUT_CHARACTERS,
+} from "./pipelineLivePolicy";
+import { PipelineRunCoordinator } from "./pipelineRunCoordinator";
+import type { ArgConfig } from "../chef/Operation";
+
+export type PipelineEditorMode = "list" | "graph";
+
+interface OperationDescriptor {
+  opName: string;
+  displayName: string;
+  module: string;
+  args: unknown[];
+  defaults: unknown[];
+  inputType: string;
+  outputType: string;
+  manualBake: boolean;
+  flowControl: boolean;
+  liveSafe: boolean;
+}
+
+let descriptorCache: OperationDescriptor[] | undefined;
+
+function panelDefaultArg(argument: ArgConfig): unknown {
+  if (
+    argument.type === "populateOption" ||
+    argument.type === "populateMultiOption"
+  ) {
+    const options = argument.value as Array<{ value: unknown }>;
+    const index =
+      typeof argument.defaultIndex === "number" ? argument.defaultIndex : 0;
+    return Array.isArray(options)
+      ? (options[index]?.value ?? options[0]?.value ?? "")
+      : "";
+  }
+  if (argument.type === "label") return "";
+  return resolveDefaultArg(argument);
+}
+
+function panelDefaults(arguments_: ArgConfig[]): unknown[] {
+  const defaults = arguments_.map(panelDefaultArg);
+  arguments_.forEach((argument, argumentIndex) => {
+    if (
+      argument.type !== "populateOption" &&
+      argument.type !== "populateMultiOption"
+    ) {
+      return;
+    }
+    const value = defaults[argumentIndex];
+    const targets = Array.isArray(argument.target)
+      ? argument.target
+      : [argument.target];
+    if (argument.type === "populateMultiOption" && Array.isArray(value)) {
+      targets.forEach((target, index) => {
+        if (typeof target === "number") defaults[target] = value[index];
+      });
+    } else if (typeof targets[0] === "number") {
+      defaults[targets[0]] = value;
+    }
+  });
+  return defaults;
+}
+
+function operationDescriptors(): OperationDescriptor[] {
+  if (descriptorCache) return descriptorCache;
+  descriptorCache = registry.map((entry) => {
+    const operation = entry.factory();
+    return {
+      opName: entry.opName,
+      displayName: entry.displayName,
+      module: entry.module || "Other",
+      args: operation.args,
+      defaults: panelDefaults(operation.args),
+      inputType: operation.inputType || "string",
+      outputType: operation.outputType || "string",
+      manualBake: operation.manualBake,
+      flowControl: operation.flowControl,
+      liveSafe: isOperationSafeForLive(entry.opName, operation.manualBake),
+    };
+  });
+  return descriptorCache;
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function errorProgress(error: unknown): number | undefined {
+  if (!error || typeof error !== "object") return undefined;
+  const progress = (error as { progress?: unknown }).progress;
+  return typeof progress === "number" && Number.isInteger(progress)
+    ? progress
+    : undefined;
+}
+
+function outputDetail(target: string): string {
+  switch (target) {
+    case "clipboard":
+      return "copied to clipboard";
+    case "replaceSelection":
+      return "written to editor";
+    case "newDocument":
+      return "opened in a new editor";
+    default:
+      return "preview ready";
+  }
+}
 
 /**
- * Full-featured webview panel for building, editing, and running pipelines visually.
- * Only one panel may be open at a time; subsequent calls to {@link open} reveal the
- * existing panel instead of creating a new one.
+ * Only one editor panel exists at a time. Opening a saved pipeline while the
+ * panel is already visible replaces its editor state instead of ignoring it.
  */
 export class PipelinePanel {
   private static current: PipelinePanel | undefined;
   private readonly panel: vscode.WebviewPanel;
+  private readonly descriptors = operationDescriptors();
+  private readonly knownOperations = new Set(
+    this.descriptors.map((operation) => operation.opName),
+  );
+  private readonly descriptorByName = new Map(
+    this.descriptors.map((operation) => [operation.opName, operation]),
+  );
+  private ready = false;
+  private initial: Pipeline | undefined;
+  private requestedMode: PipelineEditorMode | undefined;
+  private readonly runCoordinator = new PipelineRunCoordinator();
+  private lastTextEditor: vscode.TextEditor | undefined;
+  private readonly editorSubscription: vscode.Disposable;
 
   static open(
     context: vscode.ExtensionContext,
     store: PipelineStore,
     initial?: Pipeline,
+    variableStore?: VariableStore,
+    mode?: PipelineEditorMode,
   ): void {
     if (PipelinePanel.current) {
       PipelinePanel.current.panel.reveal();
+      if (initial) PipelinePanel.current.loadPipeline(initial);
+      if (mode) PipelinePanel.current.setMode(mode);
       return;
     }
+    // Creating/revealing a webview may move focus away from the source editor,
+    // so capture it before VS Code creates the panel.
+    const sourceEditor = vscode.window.activeTextEditor;
     const panel = vscode.window.createWebviewPanel(
       "tschef.pipelineEditor",
       "ts-chef Pipeline Editor",
       vscode.ViewColumn.Beside,
       { enableScripts: true, retainContextWhenHidden: true },
     );
-    PipelinePanel.current = new PipelinePanel(panel, store, context, initial);
+    // Keep the public signature stable; context is intentionally retained for
+    // callers even though this self-contained webview needs no local resources.
+    void context;
+    PipelinePanel.current = new PipelinePanel(
+      panel,
+      store,
+      initial,
+      sourceEditor,
+      variableStore,
+      mode,
+    );
   }
 
   private constructor(
     panel: vscode.WebviewPanel,
-    private store: PipelineStore,
-    private context: vscode.ExtensionContext,
+    private readonly store: PipelineStore,
     initial?: Pipeline,
+    sourceEditor?: vscode.TextEditor,
+    private readonly variableStore?: VariableStore,
+    requestedMode?: PipelineEditorMode,
   ) {
     this.panel = panel;
-    panel.webview.html = this.buildHtml(initial);
+    this.initial = initial;
+    this.requestedMode = requestedMode;
+    this.lastTextEditor = sourceEditor ?? vscode.window.activeTextEditor;
+    this.editorSubscription = vscode.window.onDidChangeActiveTextEditor(
+      (editor) => {
+        if (editor) this.lastTextEditor = editor;
+      },
+    );
+    panel.webview.html = buildPipelineWebviewHtml(
+      panel.webview.cspSource,
+      getNonce(),
+    );
     panel.onDidDispose(() => {
+      this.editorSubscription.dispose();
       PipelinePanel.current = undefined;
     });
-    panel.webview.onDidReceiveMessage((msg) => this.handleMessage(msg));
+    panel.webview.onDidReceiveMessage((raw) => {
+      void this.receiveMessage(raw).catch((error) => {
+        log(`Pipeline editor host error: ${errorMessage(error)}`);
+        this.post({ type: "protocolError", value: errorMessage(error) });
+      });
+    });
   }
 
-  private async handleMessage(msg: {
-    type: string;
-    [k: string]: unknown;
-  }): Promise<void> {
-    switch (msg.type) {
-      case "run": {
-        const input = msg.input as string;
-        try {
-          let result: string;
-          if (msg.steps) {
-            result = await runPipeline(input, msg.steps as PipelineStep[]);
-            log(
-              `Pipeline ran: ${(msg.steps as PipelineStep[]).length} step(s), input ${input.length} chars → ${result.length} chars`,
-            );
-          } else {
-            const steps = parsePipeline(msg.raw as string);
-            result = await runPipeline(input, steps);
-            log(
-              `Pipeline ran (text): "${msg.raw}", input ${input.length} chars → ${result.length} chars`,
-            );
-          }
-          this.panel.webview.postMessage({ type: "result", value: result });
-        } catch (e) {
-          log(`Pipeline error: ${e}`);
-          this.panel.webview.postMessage({ type: "error", value: String(e) });
+  private loadPipeline(pipeline: Pipeline): void {
+    this.runCoordinator.invalidate();
+    this.initial = pipeline;
+    if (this.ready) {
+      this.post({
+        type: "setPipeline",
+        pipeline: this.pipelinePayload(pipeline),
+      });
+    }
+  }
+
+  /** Switches the existing editor without creating a second webview or losing state. */
+  private setMode(mode: PipelineEditorMode): void {
+    this.requestedMode = mode;
+    if (this.ready) this.postRequestedMode({ type: "setMode", mode }, mode);
+  }
+
+  private pipelinePayload(pipeline?: Pipeline): {
+    name: string;
+    description: string;
+    raw: string;
+    steps: PanelPipelineStep[];
+  } {
+    const steps = toPanelSteps(pipeline?.steps ?? []);
+    return {
+      name: pipeline?.name ?? "",
+      description: pipeline?.description ?? "",
+      raw:
+        steps.length > 0
+          ? serialisePanelPipeline(
+              steps,
+              (opName) =>
+                this.descriptorByName.get(opName)?.displayName ?? opName,
+            )
+          : (pipeline?.raw ?? ""),
+      steps,
+    };
+  }
+
+  private post(message: unknown): void {
+    void this.panel.webview.postMessage(message);
+  }
+
+  /**
+   * A command-selected mode is a one-shot request. Once the webview accepted
+   * it, its persisted UI state becomes authoritative for later reloads.
+   */
+  private postRequestedMode(
+    message: unknown,
+    requestedMode: PipelineEditorMode | undefined,
+  ): void {
+    void this.panel.webview.postMessage(message).then(
+      (delivered) => {
+        if (delivered && this.requestedMode === requestedMode) {
+          this.requestedMode = undefined;
         }
-        break;
-      }
-      case "save": {
-        const name = (msg.name as string).trim();
-        if (!name) {
-          vscode.window.showWarningMessage("Pipeline name required.");
-          return;
-        }
-        try {
-          const steps = msg.steps
-            ? (msg.steps as PipelineStep[])
-            : parsePipeline(msg.raw as string);
-          const raw =
-            (msg.raw as string) || steps.map((s) => s.opName).join(" | ");
-          const defaultPipelineScope = vscode.workspace
-            .getConfiguration("tschef")
-            .get<StorageScope>("defaultPipelineScope", "global");
-          const scope = await pickScope(
-            defaultPipelineScope,
-            `Save pipeline "${name}"`,
-          );
-          if (!scope) return;
-          this.store.upsert(scope, {
-            name,
-            raw,
-            steps,
-            description: msg.description as string | undefined,
-          });
-          vscode.commands.executeCommand("tschef.refreshPipelines");
-          log(`Pipeline "${name}" saved (${steps.length} step(s), ${scope})`);
-          vscode.window.showInformationMessage(
-            `ts-chef: Pipeline "${name}" saved (${scope}).`,
-          );
-        } catch (e) {
-          vscode.window.showErrorMessage(`ts-chef parse error: ${e}`);
-        }
-        break;
-      }
-      case "getOps": {
-        const ops = registry.map((e) => {
-          const inst = e.factory();
-          return {
-            opName: e.opName,
-            displayName: e.displayName,
-            module: e.module,
-            args: inst.args,
-          };
+      },
+      () => undefined,
+    );
+  }
+
+  private async receiveMessage(raw: unknown): Promise<void> {
+    const decoded = decodePipelinePanelMessage(raw, this.knownOperations);
+    if (!decoded.ok) {
+      this.post({
+        type: "protocolError",
+        value: decoded.error,
+        requestId: decoded.requestId,
+      });
+      return;
+    }
+
+    const message = decoded.message;
+    switch (message.type) {
+      case "ready":
+        this.ready = true;
+        this.postRequestedMode(
+          {
+            type: "init",
+            ops: this.descriptors,
+            pipeline: this.pipelinePayload(this.initial),
+            limits: { liveInput: MAX_LIVE_INPUT_CHARACTERS },
+            mode: this.requestedMode,
+          },
+          this.requestedMode,
+        );
+        return;
+      case "invalidateRuns":
+        this.runCoordinator.invalidate();
+        return;
+      case "parseRaw":
+        this.runCoordinator.invalidate();
+        this.parseRaw(message);
+        return;
+      case "run":
+        await this.run(message);
+        return;
+      case "save":
+        await this.save(message);
+        return;
+    }
+  }
+
+  private parseRaw(
+    message: Extract<PipelinePanelMessage, { type: "parseRaw" }>,
+  ): void {
+    try {
+      const parsed = parsePipeline(message.raw);
+      const steps = mergeParsedPanelSteps(
+        message.raw,
+        parsed,
+        message.previousSteps,
+      );
+      this.post({ type: "parsed", requestId: message.requestId, steps });
+    } catch (error) {
+      this.post({
+        type: "parseError",
+        requestId: message.requestId,
+        value: errorMessage(error),
+      });
+    }
+  }
+
+  private liveBlockReason(
+    message: Extract<PipelinePanelMessage, { type: "run" }>,
+  ): string | undefined {
+    if (message.inputSource !== "manual")
+      return "Live preview only reads manual input.";
+    if (message.outputTarget !== "preview")
+      return "Live preview never performs output side effects.";
+    if (message.manualInput.length > MAX_LIVE_INPUT_CHARACTERS)
+      return `Manual input exceeds the live preview limit (${MAX_LIVE_INPUT_CHARACTERS.toLocaleString()} characters); use Run.`;
+    const unsafe = firstUnsafeLiveOperation(
+      message.steps,
+      (opName) => this.descriptorByName.get(opName)?.manualBake ?? true,
+    );
+    if (unsafe)
+      return `${this.descriptorByName.get(unsafe)?.displayName ?? unsafe} requires an explicit run.`;
+    return undefined;
+  }
+
+  private async run(
+    message: Extract<PipelinePanelMessage, { type: "run" }>,
+  ): Promise<void> {
+    const generation = this.runCoordinator.beginRun();
+    if (!message.explicit) {
+      const reason = this.liveBlockReason(message);
+      if (reason) {
+        this.post({
+          type: "liveBlocked",
+          requestId: message.requestId,
+          value: reason,
         });
-        this.panel.webview.postMessage({ type: "opsList", ops });
-        break;
-      }
-      case "runSelection": {
-        const editor = vscode.window.activeTextEditor;
-        const text =
-          editor?.document.getText(editor.selection) ??
-          editor?.document.getText() ??
-          "";
-        this.panel.webview.postMessage({ type: "inputLoaded", value: text });
-        break;
+        return;
       }
     }
-  }
 
-  private buildHtml(initial?: Pipeline): string {
-    const initialName = initial?.name ?? "";
-    const initialDesc = initial?.description ?? "";
-    const initialRaw = initial?.raw ?? "";
+    try {
+      const input = await readPipelineInput(
+        message.inputSource,
+        message.manualInput,
+        undefined,
+        this.lastTextEditor,
+      );
+      if (!this.runCoordinator.isCurrent(generation)) return;
+      const pipelineInput = this.variableStore
+        ? resolveVariableTemplates(input.text, this.variableStore)
+        : input.text;
 
-    // Build initial steps data: op names + stored args
-    const initialSteps = (initial?.steps ?? [])
-      .map((step) => {
-        const entry = registry.find((e) => e.opName === step.opName);
-        if (!entry) return null;
-        const inst = entry.factory();
-        return {
-          opName: step.opName,
-          displayName: entry.displayName,
-          args: step.args,
-          argDefs: inst.args,
-        };
-      })
-      .filter(Boolean);
+      const steps = toPipelineSteps(message.steps);
+      const result = await runPipeline(
+        pipelineInput,
+        steps,
+        message.explicit
+          ? undefined
+          : { maxIntermediateSize: MAX_LIVE_OUTPUT_CHARACTERS },
+      );
+      if (!this.runCoordinator.isCurrent(generation)) return;
 
-    const nonce = getNonce();
+      const inputPreview = pipelinePreview(pipelineInput);
+      const outputPreview = pipelinePreview(result);
 
-    return /* html */ `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${this.panel.webview.cspSource} https:; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}';">
-<title>ts-chef Pipeline Editor</title>
-<style nonce="${nonce}">
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--vscode-font-family); font-size: var(--vscode-font-size); color: var(--vscode-foreground); background: var(--vscode-editor-background); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+      // Preview is always sent before an optional side effect. If delivery
+      // fails, the transformed data remains available to the user.
+      this.post({
+        type: "result",
+        requestId: message.requestId,
+        preview: outputPreview.value,
+        totalLength: outputPreview.totalLength,
+        truncated: outputPreview.truncated,
+        inputValue: inputPreview.value,
+        inputLength: inputPreview.totalLength,
+        inputTruncated: inputPreview.truncated,
+        outputApplied: message.outputTarget === "preview",
+      });
+      log(
+        `Pipeline editor ran ${steps.length} step(s), ${pipelineInput.length} → ${result.length} chars`,
+      );
 
-  /* ── Header ── */
-  .hdr { padding: 6px 10px; background: var(--vscode-sideBar-background); border-bottom: 1px solid var(--vscode-panel-border); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; flex-shrink: 0; }
-  .hdr input { flex: 1; min-width: 100px; background: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border,#555); padding: 2px 6px; }
-  .btn { background: var(--vscode-button-background); color: var(--vscode-button-foreground); border: none; padding: 3px 9px; cursor: pointer; font-size: 12px; white-space: nowrap; }
-  .btn:hover { background: var(--vscode-button-hoverBackground); }
-  .btn-live { background: var(--vscode-badge-background); color: var(--vscode-badge-foreground); }
-  .btn-live.active { background: var(--vscode-terminal-ansiGreen,#4caf50); color: #fff; }
-  .btn-sec { background: var(--vscode-inputOption-activeBackground,#3c3c3c); color: var(--vscode-foreground); border: 1px solid var(--vscode-input-border,#555); }
-
-  /* ── Main ── */
-  .main { display: flex; flex: 1; overflow: hidden; min-height: 0; }
-
-  /* Left panel */
-  .panel-left { width: 200px; min-width: 160px; border-right: 1px solid var(--vscode-panel-border); display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0; }
-  .panel-left input { margin: 5px; background: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border,#555); padding: 2px 6px; }
-  .ops-list { flex: 1; overflow-y: auto; }
-  .op-group-hdr { padding: 2px 8px; font-size: 10px; opacity: 0.55; text-transform: uppercase; letter-spacing: 0.5px; }
-  .op-item { padding: 3px 10px; cursor: grab; user-select: none; font-size: 12px; }
-  .op-item:hover { background: var(--vscode-list-hoverBackground); }
-
-  /* Center panel */
-  .panel-center { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
-  .pipeline-zone { flex: 1; padding: 6px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; min-height: 80px; }
-  .pipeline-zone.dragover { outline: 2px dashed var(--vscode-focusBorder); outline-offset: -2px; }
-  .empty-hint { opacity: 0.4; font-size: 11px; padding: 6px; text-align: center; }
-
-  /* Step cards */
-  .step-card { border: 1px solid var(--vscode-panel-border); border-radius: 3px; background: var(--vscode-sideBar-background); }
-  .step-card.dragging { opacity: 0.4; }
-  .step-head { display: flex; align-items: center; gap: 5px; padding: 4px 6px; cursor: move; user-select: none; }
-  .step-num { font-size: 10px; opacity: 0.5; min-width: 14px; }
-  .step-drag { cursor: grab; opacity: 0.4; font-size: 13px; }
-  .step-name { flex: 1; font-size: 12px; font-weight: 500; }
-  .step-btn { background: none; border: none; cursor: pointer; opacity: 0.55; font-size: 12px; padding: 0 3px; color: var(--vscode-foreground); }
-  .step-btn:hover { opacity: 1; }
-  .step-arrow { font-size: 9px; }
-  .step-args { padding: 6px 10px 8px; border-top: 1px solid var(--vscode-panel-border); display: flex; flex-direction: column; gap: 5px; }
-  .arg-row { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-  .arg-label { font-size: 11px; opacity: 0.7; min-width: 70px; }
-  .arg-row input[type=text], .arg-row input[type=number] { flex: 1; min-width: 60px; background: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border,#555); padding: 2px 5px; font-size: 11px; }
-  .arg-row select { flex: 1; min-width: 60px; background: var(--vscode-dropdown-background); color: var(--vscode-dropdown-foreground); border: 1px solid var(--vscode-dropdown-border,#555); padding: 2px 4px; font-size: 11px; }
-  .arg-row input[type=checkbox] { cursor: pointer; }
-  .arrow-sep { text-align: center; font-size: 11px; opacity: 0.35; padding: 0 4px; flex-shrink: 0; }
-
-  /* Pipe text */
-  .pipe-text-row { border-top: 1px solid var(--vscode-panel-border); padding: 4px 6px; flex-shrink: 0; }
-  .pipe-text-row textarea { width: 100%; height: 44px; background: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border,#555); padding: 3px; font-family: monospace; font-size: 11px; resize: none; }
-
-  /* IO */
-  .io-zone { display: flex; border-top: 1px solid var(--vscode-panel-border); height: 180px; flex-shrink: 0; }
-  .io-pane { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-  .io-pane + .io-pane { border-left: 1px solid var(--vscode-panel-border); }
-  .io-hdr { padding: 2px 8px; font-size: 11px; background: var(--vscode-sideBar-background); border-bottom: 1px solid var(--vscode-panel-border); display: flex; justify-content: space-between; align-items: center; }
-  .io-pane textarea { flex: 1; background: var(--vscode-editor-background); color: var(--vscode-editor-foreground); border: none; padding: 5px; font-family: monospace; font-size: 11px; resize: none; }
-
-  .status-bar { padding: 2px 8px; font-size: 10px; opacity: 0.6; background: var(--vscode-statusBar-background,#007acc); color: var(--vscode-statusBar-foreground,#fff); flex-shrink: 0; display: flex; gap: 10px; }
-  .err { color: var(--vscode-errorForeground,#f48771); padding: 2px 8px; font-size: 11px; flex-shrink: 0; }
-</style>
-</head>
-<body>
-
-<div class="hdr">
-  <strong style="white-space:nowrap">ts-chef</strong>
-  <input id="pipeName" placeholder="Pipeline name…" value="${escHtmlAttr(initialName)}">
-  <input id="pipeDesc" placeholder="Description (optional)" value="${escHtmlAttr(initialDesc)}">
-  <button class="btn" onclick="savePipeline()">Save</button>
-  <button class="btn" onclick="runManual()">▶ Run</button>
-  <button class="btn btn-live" id="liveBtn" onclick="toggleLive()" title="Toggle live preview">⚡ Live</button>
-  <button class="btn btn-sec" onclick="loadSelection()">From Editor</button>
-</div>
-
-<div class="main">
-  <div class="panel-left">
-    <input id="opSearch" placeholder="Search operations…" oninput="filterOps(this.value)">
-    <div class="ops-list" id="opsList"></div>
-  </div>
-  <div class="panel-center">
-    <div class="pipeline-zone" id="pipelineZone"
-         ondragover="onZoneDragOver(event)"
-         ondragleave="onZoneDragLeave(event)"
-         ondrop="onZoneDrop(event)">
-      <div class="empty-hint" id="emptyHint">Drag operations here or type in the field below</div>
-    </div>
-    <div class="pipe-text-row">
-      <textarea id="pipeText" placeholder="From Base64 | To Hex | …" oninput="syncFromText()">${escHtml(initialRaw)}</textarea>
-    </div>
-  </div>
-</div>
-
-<div class="io-zone">
-  <div class="io-pane">
-    <div class="io-hdr">Input <button class="btn btn-sec" style="font-size:10px;padding:1px 5px" onclick="loadSelection()">From Editor</button></div>
-    <textarea id="inputArea" placeholder="Input here…" oninput="scheduleRun()"></textarea>
-  </div>
-  <div class="io-pane">
-    <div class="io-hdr">Output <span id="outputStats" style="font-size:10px;opacity:0.6"></span></div>
-    <textarea id="outputArea" readonly placeholder="Output will appear here…"></textarea>
-  </div>
-</div>
-
-<div class="err" id="errMsg"></div>
-<div class="status-bar"><span id="statusText">Ready</span></div>
-
-<script nonce="${nonce}">
-const vscode = acquireVsCodeApi();
-
-// ── State ──────────────────────────────────────────────────────────────────
-let allOps = [];             // { opName, displayName, module, args }
-let steps = [];              // { opName, displayName, argDefs, argValues, expanded }
-let liveMode = true;
-let debounceTimer = null;
-let dragFromOps = null;      // op being dragged from the ops list
-let dragStepIdx = null;      // step index being reordered
-
-// ── Init ───────────────────────────────────────────────────────────────────
-window.addEventListener('message', e => {
-  const msg = e.data;
-  if (msg.type === 'opsList') {
-    allOps = msg.ops;
-    renderOpsList(allOps);
-    // restore initial steps after ops are loaded
-    if (INITIAL_STEPS.length > 0) {
-      const opMap = {};
-      for (const op of allOps) opMap[op.opName] = op;
-      steps = INITIAL_STEPS.map(s => {
-        const op = opMap[s.opName];
-        if (!op) return null;
-        return { opName: s.opName, displayName: op.displayName, argDefs: op.args, argValues: s.args, expanded: false };
-      }).filter(Boolean);
-      renderSteps();
-      syncToText();
-    } else if (INITIAL_RAW) {
-      syncFromText();
-    }
-  }
-  if (msg.type === 'result') {
-    const out = msg.value;
-    document.getElementById('outputArea').value = out;
-    document.getElementById('outputStats').textContent = \`\${out.length} chars\`;
-    document.getElementById('errMsg').textContent = '';
-    setStatus('Done');
-  }
-  if (msg.type === 'error') {
-    document.getElementById('errMsg').textContent = msg.value;
-    setStatus('Error');
-  }
-  if (msg.type === 'inputLoaded') {
-    document.getElementById('inputArea').value = msg.value;
-    scheduleRun();
-  }
-});
-
-vscode.postMessage({ type: 'getOps' });
-updateLiveBtn();
-
-// ── Op list rendering ──────────────────────────────────────────────────────
-function renderOpsList(ops) {
-  const grouped = {};
-  for (const op of ops) {
-    if (!grouped[op.module]) grouped[op.module] = [];
-    grouped[op.module].push(op);
-  }
-  let html = '';
-  for (const [mod, list] of Object.entries(grouped).sort()) {
-    html += \`<div class="op-group-hdr">\${escHtml(mod)}</div>\`;
-    for (const op of list) {
-      html += \`<div class="op-item" draggable="true" data-op="\${op.opName}"
-        ondragstart="startOpDrag(event,'\${op.opName}')">\${escHtml(op.displayName)}</div>\`;
-    }
-  }
-  document.getElementById('opsList').innerHTML = html;
-}
-
-function filterOps(q) {
-  const filtered = q ? allOps.filter(o => o.displayName.toLowerCase().includes(q.toLowerCase()) || o.module.toLowerCase().includes(q.toLowerCase())) : allOps;
-  renderOpsList(filtered);
-}
-
-// ── Drag from ops list ─────────────────────────────────────────────────────
-function startOpDrag(e, opName) {
-  dragFromOps = opName;
-  dragStepIdx = null;
-  e.dataTransfer.effectAllowed = 'copy';
-}
-
-// ── Pipeline zone drag/drop ────────────────────────────────────────────────
-function onZoneDragOver(e) {
-  e.preventDefault();
-  document.getElementById('pipelineZone').classList.add('dragover');
-}
-function onZoneDragLeave(e) {
-  if (!e.currentTarget.contains(e.relatedTarget)) {
-    document.getElementById('pipelineZone').classList.remove('dragover');
-  }
-}
-function onZoneDrop(e) {
-  e.preventDefault();
-  document.getElementById('pipelineZone').classList.remove('dragover');
-  if (dragFromOps !== null) {
-    const op = allOps.find(o => o.opName === dragFromOps);
-    if (op) addStep(op);
-    dragFromOps = null;
-  }
-}
-
-// ── Step reorder drag ──────────────────────────────────────────────────────
-function startStepDrag(e, idx) {
-  dragStepIdx = idx;
-  dragFromOps = null;
-  e.dataTransfer.effectAllowed = 'move';
-  e.target.closest('.step-card').classList.add('dragging');
-}
-function onStepDragOver(e, idx) {
-  e.preventDefault();
-  if (dragStepIdx === null || dragStepIdx === idx) return;
-  const moved = steps.splice(dragStepIdx, 1)[0];
-  steps.splice(idx, 0, moved);
-  dragStepIdx = idx;
-  renderSteps();
-  syncToText();
-}
-function onStepDragEnd() {
-  dragStepIdx = null;
-  scheduleRun();
-}
-
-// ── Steps management ───────────────────────────────────────────────────────
-function addStep(op) {
-  steps.push({ opName: op.opName, displayName: op.displayName, argDefs: op.args, argValues: resolveDefaults(op.args), expanded: false });
-  renderSteps();
-  syncToText();
-  scheduleRun();
-}
-
-function removeStep(i) {
-  steps.splice(i, 1);
-  renderSteps();
-  syncToText();
-  scheduleRun();
-}
-
-function toggleExpand(i) {
-  steps[i].expanded = !steps[i].expanded;
-  renderSteps();
-}
-
-function resolveDefaults(argDefs) {
-  return argDefs.map(a => {
-    switch (a.type) {
-      case 'editableOption': case 'editableOptionShort': {
-        const opts = a.value;
-        if (!Array.isArray(opts)) return a.value;
-        const idx = typeof a.defaultIndex === 'number' ? a.defaultIndex : 0;
-        return opts[idx]?.value ?? opts[0]?.value ?? '';
+      try {
+        assertPipelineOutputSize(result);
+      } catch (error) {
+        this.post({
+          type: "outputError",
+          requestId: message.requestId,
+          value: errorMessage(error),
+        });
+        return;
       }
-      case 'option': {
-        const opts = a.value;
-        return Array.isArray(opts) ? (opts[0] ?? '') : a.value;
+
+      if (!message.explicit && result.length > MAX_LIVE_OUTPUT_CHARACTERS) {
+        this.post({
+          type: "liveBlocked",
+          requestId: message.requestId,
+          value: `Output exceeds the live preview limit (${MAX_LIVE_OUTPUT_CHARACTERS.toLocaleString()} characters); use Run.`,
+        });
+        return;
       }
-      case 'argSelector': {
-        const opts = a.value;
-        return Array.isArray(opts) ? (opts[0]?.name ?? '') : a.value;
+
+      if (!message.explicit || message.outputTarget === "preview") return;
+      if (!this.runCoordinator.isCurrent(generation)) return;
+      try {
+        const delivered = await this.runCoordinator.deliverIfCurrent(
+          generation,
+          () => deliverPipelineOutput(message.outputTarget, result, input),
+        );
+        if (!delivered || !this.runCoordinator.isCurrent(generation)) return;
+        this.post({
+          type: "outputApplied",
+          requestId: message.requestId,
+          detail: outputDetail(message.outputTarget),
+        });
+      } catch (error) {
+        if (!this.runCoordinator.isCurrent(generation)) return;
+        this.post({
+          type: "outputError",
+          requestId: message.requestId,
+          value: errorMessage(error),
+        });
       }
-      case 'toggleString':
-        return { string: typeof a.value === 'string' ? a.value : '', option: (a.toggleValues && a.toggleValues[0]) || 'Hex' };
-      default:
-        return a.value;
-    }
-  });
-}
-
-// ── Render ─────────────────────────────────────────────────────────────────
-function renderSteps() {
-  const zone = document.getElementById('pipelineZone');
-  document.getElementById('emptyHint').style.display = steps.length ? 'none' : '';
-  const cards = steps.map((s, i) => renderCard(s, i)).join(
-    '<div class="arrow-sep">▼</div>'
-  );
-  // keep the emptyHint div, replace the rest
-  zone.innerHTML = '<div class="empty-hint" id="emptyHint" style="' + (steps.length ? 'display:none' : '') + '">Drag operations here or type in the field below</div>' + cards;
-}
-
-function renderCard(s, i) {
-  const arrow = s.expanded ? '▲' : '▼';
-  const hasArgs = s.argDefs && s.argDefs.length > 0;
-  return \`<div class="step-card" draggable="true"
-    ondragstart="startStepDrag(event,\${i})"
-    ondragover="onStepDragOver(event,\${i})"
-    ondragend="onStepDragEnd()">
-    <div class="step-head">
-      <span class="step-num">\${i+1}</span>
-      <span class="step-name">\${escHtml(s.displayName)}</span>
-      \${hasArgs ? \`<button class="step-btn step-arrow" onclick="toggleExpand(\${i})" title="Edit parameters">\${arrow}</button>\` : ''}
-      <button class="step-btn" onclick="removeStep(\${i})" title="Remove">✕</button>
-    </div>
-    \${s.expanded && hasArgs ? renderArgEditors(s, i) : ''}
-  </div>\`;
-}
-
-function renderArgEditors(s, i) {
-  const rows = s.argDefs.map((a, ai) => renderArgRow(a, s.argValues[ai], i, ai)).join('');
-  return \`<div class="step-args" data-step="\${i}" onchange="onArgChange(event)" oninput="onArgInput(event)">\${rows}</div>\`;
-}
-
-function renderArgRow(argDef, val, si, ai) {
-  const label = \`<span class="arg-label">\${escHtml(argDef.name)}</span>\`;
-  let input = '';
-
-  switch (argDef.type) {
-    case 'boolean': {
-      const ck = val ? 'checked' : '';
-      input = \`<input type="checkbox" \${ck} data-arg="\${ai}" data-type="boolean">\`;
-      break;
-    }
-    case 'number': {
-      const min = argDef.min != null ? \`min="\${argDef.min}"\` : '';
-      const max = argDef.max != null ? \`max="\${argDef.max}"\` : '';
-      const step = argDef.step != null ? \`step="\${argDef.step}"\` : '';
-      input = \`<input type="number" value="\${escAttr(val)}" \${min} \${max} \${step} data-arg="\${ai}" data-type="number">\`;
-      break;
-    }
-    case 'option': {
-      const opts = argDef.value;
-      const selects = Array.isArray(opts)
-        ? opts.map(o => \`<option \${String(val) === String(o) ? 'selected' : ''}>\${escHtml(String(o))}</option>\`).join('')
-        : '';
-      input = \`<select data-arg="\${ai}" data-type="option">\${selects}</select>\`;
-      break;
-    }
-    case 'editableOption': case 'editableOptionShort': {
-      const opts = argDef.value;
-      const selects = Array.isArray(opts)
-        ? opts.map((o, oi) => {
-            const selected = JSON.stringify(o.value) === JSON.stringify(val);
-            return \`<option data-optidx="\${oi}" \${selected ? 'selected' : ''}>\${escHtml(String(o.name))}</option>\`;
-          }).join('')
-        : '';
-      input = \`<select data-arg="\${ai}" data-type="editableOption" data-argdef="\${si}_\${ai}">\${selects}</select>\`;
-      break;
-    }
-    case 'argSelector': {
-      const opts = argDef.value;
-      const selects = Array.isArray(opts)
-        ? opts.map(o => \`<option \${String(val) === String(o.name) ? 'selected' : ''}>\${escHtml(String(o.name))}</option>\`).join('')
-        : '';
-      input = \`<select data-arg="\${ai}" data-type="argSelector">\${selects}</select>\`;
-      break;
-    }
-    case 'toggleString': {
-      const strVal = (val && typeof val === 'object') ? (val.string ?? '') : (typeof val === 'string' ? val : '');
-      const encVal = (val && typeof val === 'object') ? (val.option ?? '') : '';
-      const encOpts = (argDef.toggleValues || ['Hex'])
-        .map(v => \`<option \${encVal === v ? 'selected' : ''}>\${escHtml(v)}</option>\`).join('');
-      input = \`<input type="text" value="\${escAttr(strVal)}" data-arg="\${ai}" data-type="toggleString" data-subfield="string" placeholder="\${escAttr(argDef.name)}">
-               <select data-arg="\${ai}" data-type="toggleString" data-subfield="option">\${encOpts}</select>\`;
-      break;
-    }
-    default: {
-      const strVal = typeof val === 'string' ? val : (val != null ? String(val) : '');
-      input = \`<input type="text" value="\${escAttr(strVal)}" data-arg="\${ai}" data-type="string">\`;
+    } catch (error) {
+      if (!this.runCoordinator.isCurrent(generation)) return;
+      if (
+        !message.explicit &&
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === "PIPELINE_SIZE_LIMIT"
+      ) {
+        this.post({
+          type: "liveBlocked",
+          requestId: message.requestId,
+          value: errorMessage(error),
+        });
+        return;
+      }
+      const progress = errorProgress(error);
+      this.post({
+        type: "error",
+        requestId: message.requestId,
+        value: errorMessage(error),
+        stepId:
+          progress !== undefined ? message.steps[progress]?.id : undefined,
+      });
+      log(`Pipeline editor run error: ${errorMessage(error)}`);
     }
   }
 
-  return \`<div class="arg-row">\${label}\${input}</div>\`;
-}
-
-// ── Arg change handling ────────────────────────────────────────────────────
-function onArgChange(e) { handleArgUpdate(e); }
-function onArgInput(e) {
-  const t = e.target;
-  if (t.tagName === 'INPUT' && t.type !== 'checkbox') handleArgUpdate(e);
-}
-
-function handleArgUpdate(e) {
-  const argsDiv = e.currentTarget;
-  const si = parseInt(argsDiv.dataset.step);
-  const target = e.target;
-  const ai = parseInt(target.dataset.arg);
-  if (isNaN(si) || isNaN(ai)) return;
-
-  const step = steps[si];
-  if (!step) return;
-  const argDef = step.argDefs[ai];
-  const type = target.dataset.type;
-
-  switch (type) {
-    case 'boolean':
-      step.argValues[ai] = target.checked;
-      break;
-    case 'number':
-      step.argValues[ai] = Number(target.value);
-      break;
-    case 'toggleString': {
-      const subfield = target.dataset.subfield;
-      const cur = step.argValues[ai];
-      const obj = (cur && typeof cur === 'object') ? { ...cur } : { string: '', option: (argDef.toggleValues && argDef.toggleValues[0]) || 'Hex' };
-      obj[subfield] = target.value;
-      step.argValues[ai] = obj;
-      break;
+  private async save(
+    message: Extract<PipelinePanelMessage, { type: "save" }>,
+  ): Promise<void> {
+    const name = message.name.trim();
+    if (!name) {
+      vscode.window.showWarningMessage("Pipeline name required.");
+      return;
     }
-    case 'editableOption': {
-      const selectedIdx = target.selectedIndex;
-      const opts = argDef.value;
-      step.argValues[ai] = Array.isArray(opts) ? (opts[selectedIdx]?.value ?? target.value) : target.value;
-      break;
+    const steps = toPipelineSteps(message.steps);
+    // Persist one canonical representation derived from the validated steps.
+    // Never trust a separately supplied raw string to describe different or
+    // stale steps than the pipeline that will actually execute.
+    const raw = serialisePanelPipeline(
+      message.steps,
+      (opName) => this.descriptorByName.get(opName)?.displayName ?? opName,
+    );
+    const defaultPipelineScope = vscode.workspace
+      .getConfiguration("tschef")
+      .get<StorageScope>("defaultPipelineScope", "global");
+    const scope = await pickScope(
+      defaultPipelineScope,
+      `Save pipeline "${name}"`,
+    );
+    if (!scope) return;
+    const saved = this.store.upsert(scope, {
+      name,
+      raw,
+      steps,
+      description: message.description.trim() || undefined,
+    });
+    if (!saved) {
+      this.post({
+        type: "saveFailed",
+        value: "Pipeline was not saved. Check the storage warning and choose an available scope.",
+      });
+      return;
     }
-    default:
-      step.argValues[ai] = target.value;
+    void vscode.commands.executeCommand("tschef.refreshPipelines");
+    this.post({ type: "saved", value: `${name} (${scope})` });
+    log(`Pipeline "${name}" saved (${steps.length} step(s), ${scope})`);
+    vscode.window.showInformationMessage(
+      `ts-chef: Pipeline "${name}" saved (${scope}).`,
+    );
   }
-
-  scheduleRun();
-}
-
-// ── Sync between blocks and textarea ──────────────────────────────────────
-function syncToText() {
-  document.getElementById('pipeText').value = steps.map(s => s.displayName || s.opName).join(' | ');
-}
-
-function syncFromText() {
-  const raw = document.getElementById('pipeText').value;
-  const parts = raw.split('|').map(s => s.trim()).filter(Boolean);
-  steps = parts.map(part => {
-    const opName = part.split('(')[0].trim();
-    const op = allOps.find(o => o.displayName.toLowerCase() === opName.toLowerCase() || o.opName.toLowerCase() === opName.toLowerCase());
-    if (!op) return null;
-    return { opName: op.opName, displayName: op.displayName, argDefs: op.args, argValues: resolveDefaults(op.args), expanded: false };
-  }).filter(Boolean);
-  renderSteps();
-  scheduleRun();
-}
-
-// ── Live preview ───────────────────────────────────────────────────────────
-function toggleLive() {
-  liveMode = !liveMode;
-  updateLiveBtn();
-  if (liveMode) scheduleRun();
-}
-
-function updateLiveBtn() {
-  const btn = document.getElementById('liveBtn');
-  if (liveMode) { btn.classList.add('active'); btn.title = 'Live preview ON — click to disable'; }
-  else { btn.classList.remove('active'); btn.title = 'Live preview OFF — click to enable'; }
-}
-
-function scheduleRun() {
-  if (!liveMode) return;
-  clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(runPipeline, 380);
-}
-
-function runManual() {
-  clearTimeout(debounceTimer);
-  runPipeline();
-}
-
-function runPipeline() {
-  const input = document.getElementById('inputArea').value;
-  document.getElementById('errMsg').textContent = '';
-  if (steps.length === 0) {
-    document.getElementById('outputArea').value = input;
-    document.getElementById('outputStats').textContent = \`\${input.length} chars\`;
-    return;
-  }
-  setStatus('Running…');
-  vscode.postMessage({
-    type: 'run',
-    input,
-    steps: steps.map(s => ({ opName: s.opName, args: s.argValues })),
-    raw: document.getElementById('pipeText').value,
-  });
-}
-
-// ── Save / Load ────────────────────────────────────────────────────────────
-function savePipeline() {
-  const raw = document.getElementById('pipeText').value.trim();
-  const name = document.getElementById('pipeName').value.trim();
-  const description = document.getElementById('pipeDesc').value.trim();
-  vscode.postMessage({
-    type: 'save',
-    raw,
-    name,
-    description,
-    steps: steps.map(s => ({ opName: s.opName, args: s.argValues })),
-  });
-}
-
-function loadSelection() {
-  vscode.postMessage({ type: 'runSelection' });
-}
-
-// ── Helpers ────────────────────────────────────────────────────────────────
-function setStatus(msg) {
-  document.getElementById('statusText').textContent = msg;
-}
-
-function escHtml(s) {
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function escAttr(s) {
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-}
-
-// ── Bootstrap ──────────────────────────────────────────────────────────────
-const INITIAL_STEPS = ${JSON.stringify(initialSteps)};
-const INITIAL_RAW   = ${JSON.stringify(initialRaw)};
-</script>
-</body>
-</html>`;
-  }
-}
-
-function escHtmlAttr(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function escHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function getNonce(): string {
-  let text = "";
-  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  const alphabet =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let nonce = "";
+  for (let index = 0; index < 32; index++) {
+    nonce += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
   }
-  return text;
+  return nonce;
 }

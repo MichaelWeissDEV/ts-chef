@@ -89,6 +89,8 @@ export function fromRadix(
   if (!input || !input.trim()) return [];
   if (radix < 2 || radix > 36)
     throw new OperationError("Base must be between 2 and 36");
+  if (!Number.isInteger(digitLen) || digitLen < 1)
+    throw new OperationError("Digit length must be a positive integer");
 
   const resolved = delimName === "Auto" ? detectDelim(input) : delimName;
   const delim = delimChar(resolved);
@@ -98,6 +100,11 @@ export function fromRadix(
   if (delim === "") {
     // "None" mode: strip all whitespace, then chunk into fixed-width slices
     const clean = input.replace(/\s+/g, "");
+    if (clean.length % digitLen !== 0) {
+      throw new OperationError(
+        `Input length ${clean.length} is not divisible by digit length ${digitLen}`,
+      );
+    }
     parts = [];
     for (let i = 0; i < clean.length; i += digitLen) {
       const chunk = clean.slice(i, i + digitLen);
@@ -111,13 +118,27 @@ export function fromRadix(
     .map((p) => p.trim())
     .filter((p) => p.length > 0)
     .map((p, idx) => {
+      const invalid = Array.from(p).find((character) => {
+        const value = parseInt(character, 36);
+        return !/^[0-9a-z]$/i.test(character) || value >= radix;
+      });
+      if (invalid !== undefined) {
+        throw new OperationError(
+          `Invalid digit "${invalid}" in "${p}" at token ${idx + 1} for base ${radix}`,
+        );
+      }
       const n = parseInt(p, radix);
       if (isNaN(n)) {
         throw new OperationError(
           `Invalid value "${p}" at token ${idx + 1} for base ${radix}`,
         );
       }
-      return n & 0xff; // clamp to byte range
+      if (n < 0 || n > 255) {
+        throw new OperationError(
+          `Value "${p}" at token ${idx + 1} is outside the byte range 0–255`,
+        );
+      }
+      return n;
     });
 }
 

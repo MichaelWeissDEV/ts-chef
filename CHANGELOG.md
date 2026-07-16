@@ -5,6 +5,31 @@ All notable changes to the **ts-chef** VS Code extension will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Instant, on-demand analysis hovers with bounded decoded previews, exact-range one-click replacement, safe multi-step decode suggestions, and complete long-token targeting.
+- Language-aware integer-literal hover calculator for decimal, hex, binary, octal, bit widths, and signed/unsigned two's-complement values.
+- Additive graph mode for the Pipeline Editor with drag-and-drop operation nodes, connected input/output endpoints, and manual/editor selection/document/clipboard I/O.
+- Separate collapsible Standard Pipelines and My Pipelines groups, plus a direct Open Pipeline Graph command and Pipelines-view button.
+- Searchable library of 28 built-in decoding, structured-data, IOC, and malware-analysis pipelines.
+- Bounded offline Static Malware Triage command with file signatures, byte statistics, IOCs, suspicious behavior indicators, embedded encoding previews, extracted strings, risk scoring, and defanged Markdown output.
+
+### Fixed
+- Preserve structured JSON between pipeline steps and present non-text binary output losslessly as hexadecimal instead of replacement characters.
+- Reject malformed binary, decimal, hexadecimal, and arbitrary-radix input instead of partially parsing or silently wrapping invalid bytes.
+- Prevent stale/ambiguous hover edits, cropped long-token replacements, URL-detector quadratic scans, and hover-triggered decompression bombs.
+- Await asynchronous operations consistently, make YARA initialization failures/timeouts visible, and scan file bytes rather than decoded editor text when appropriate.
+- Decode escaped CSV row delimiters correctly, preserve recipe arguments, initialize option defaults correctly, and fail unavailable operations explicitly rather than silently skipping them.
+- Make the Magic operation usable from recipes and both pipeline views, with bounded recursive decoding and literal-only cribs.
+
+### Security
+- Webview messages, sizes, operation names, arguments, run generations, and editor targets are validated in the extension host; the graph view uses a strict nonce CSP and no inline handlers.
+- Live pipeline preview uses a conservative deterministic-operation allowlist and cannot perform output side effects.
+- Editor replacements use immutable document/range snapshots and are refused when the source changes during asynchronous analysis.
+- YARA samples/rules/reports, malware triage, gzip/zlib output, deep analysis, and YAML parsing/alias expansion have explicit size, depth, and node limits.
+- Pipeline/variable stores validate their schema, reject symlinked workspace paths/files, write atomically, and do not load or write workspace-scoped data in Restricted Mode.
+
 ## [0.7.0] - 2026-07-09
 
 ### Added

@@ -8,13 +8,15 @@
  */
 
 import { TypedOperation, ArgConfig } from "../Operation";
+import Dish from "../Dish";
+import { getLabelIndex } from "../lib/FlowControl";
 
 /**
  * Conditional Jump operation
  *
  * @category Default
  */
-export class ConditionalJump extends TypedOperation<string, string, unknown[]> {
+export class ConditionalJump extends TypedOperation<any, any, unknown[]> {
   name = "Conditional Jump";
   module = "Default";
   description =
@@ -50,8 +52,39 @@ export class ConditionalJump extends TypedOperation<string, string, unknown[]> {
    * @param {any[]} _args
    * @returns {string}
    */
-  run(input: string, _args: unknown[]): string {
-    return input;
+  async run(state: {
+    progress: number;
+    dish: Dish;
+    opList: Array<{ name: string; ingValues: unknown[] }>;
+    numJumps: number;
+  }): Promise<typeof state> {
+    const [pattern, invert, label, maxJumps] = state.opList[
+      state.progress
+    ].ingValues as [string, boolean, string, number];
+    const input = String(await state.dish.get(Dish.STRING));
+    let matched: boolean;
+    try {
+      matched = new RegExp(pattern).test(input);
+    } catch (error) {
+      throw new TypeError(`Invalid conditional-jump regex: ${pattern}`, {
+        cause: error,
+      });
+    }
+    if (invert ? matched : !matched) return state;
+
+    const jumpIndex = getLabelIndex(label, state);
+    if (jumpIndex === -1) {
+      state.numJumps = 0;
+      return state;
+    }
+    const backwards = jumpIndex <= state.progress;
+    if (backwards && state.numJumps >= maxJumps) {
+      state.numJumps = 0;
+      return state;
+    }
+    state.progress = jumpIndex;
+    state.numJumps = backwards ? state.numJumps + 1 : 0;
+    return state;
   }
 }
 

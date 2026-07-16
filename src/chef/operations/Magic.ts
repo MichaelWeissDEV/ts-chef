@@ -1,220 +1,82 @@
 /**
- * @fileoverview Magic operation - Ported from GCHQ's CyberChef
+ * @fileoverview Magic operation - bounded automatic decoding suggestions
  * @package chef/operations
  * @license Apache-2.0
  * @author Michael Weiss
  * @copyright 2024-2026 Michael Weiss
- * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
+ * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original concept
  */
 
-import { TypedOperation, AnyInput } from "../Operation";
-import Utils from "../Utils";
-import Dish from "../Dish";
-import MagicLib, { MagicResult } from "../lib/Magic";
+import { TypedOperation } from "../Operation";
+import MagicLib, {
+  MAGIC_MAX_INTERMEDIATE_BYTES,
+  type MagicResult,
+} from "../lib/Magic";
 
 /**
- * Extended MagicResult with additional properties produced during speculative execution.
+ * Detects bounded decode chains and returns them as structured JSON. This is a
+ * normal data operation (not flow control), so it works in the operation
+ * picker, saved recipes and graph/list pipelines alike.
  */
-interface MagicOption extends MagicResult {
-  entropy: number;
-  matchesCrib?: boolean;
-  matchingOps: Array<{ op: string }>;
-  useful: boolean;
-}
-
-/**
- * Magic operation
- */
-export class Magic extends TypedOperation<AnyInput, Promise<AnyInput>, unknown[]> {
-  state!: {
-    progress: number;
-    dish: Dish;
-    opList: Array<{ ingValues: unknown[]; config?: unknown }>;
-    numJumps?: number;
-  };
-
-  /**
-   * Magic constructor
-   */
+export class Magic extends TypedOperation<string, MagicResult[], unknown[]> {
   constructor() {
     super();
 
     this.name = "Magic";
-    this.flowControl = true;
     this.module = "Default";
     this.description =
-      "The Magic operation attempts to detect various properties of the input data and suggests which operations could help to make more sense of it.<br><br><b>Options</b><br><u>Depth:</u> If an operation appears to match the data, it will be run and the result will be analysed further. This argument controls the maximum number of levels of recursion.<br><br><u>Intensive mode:</u> When this is turned on, various operations like XOR, bit rotates, and character encodings are brute-forced to attempt to detect valid data underneath. To improve performance, only the first 100 bytes of the data is brute-forced.<br><br><u>Extensive language support:</u> At each stage, the relative byte frequencies of the data will be compared to average frequencies for a number of languages. The default set consists of ~40 of the most commonly used languages on the Internet. The extensive list consists of 284 languages and can result in many languages matching the data if their byte frequencies are similar.<br><br>Optionally enter a regular expression to match a string you expect to find to filter results (crib).";
+      "Detects likely encoding and compression layers, safely evaluates bounded decode chains, and returns loadable operation recipes with decoded previews. Input, intermediate values, recursion, candidates, decompression output, and previews are hard-limited. The intensive-mode and language-support arguments remain for saved-recipe compatibility but brute force and language scoring are intentionally not performed.";
     this.infoURL =
       "https://github.com/gchq/CyberChef/wiki/Automatic-detection-of-encoded-data-using-CyberChef-Magic";
-    this.inputType = "ArrayBuffer";
-    this.outputType = "JSON";
-    this.presentType = "html";
+    this.inputType = "string";
+    this.outputType = "json";
+    this.presentType = "json";
     this.args = [
       {
         name: "Depth",
         type: "number",
         value: 3,
+        min: 1,
+        max: 3,
+        step: 1,
+        hint: "Maximum decode layers (hard-capped at 3).",
       },
       {
-        name: "Intensive mode",
+        name: "Intensive mode (compatibility only)",
         type: "boolean",
         value: false,
+        hint: "Retained for older recipes; unsafe brute force is not performed.",
       },
       {
-        name: "Extensive language support",
+        name: "Extensive language support (compatibility only)",
         type: "boolean",
         value: false,
+        hint: "Retained for older recipes; language scoring is not performed.",
       },
       {
-        name: "Crib (known plaintext string or regex)",
+        name: "Crib (literal text)",
         type: "string",
         value: "",
+        maxLength: 128,
+        hint: "Optional case-insensitive literal required in the bounded preview.",
       },
     ];
   }
 
-  /**
-   * @param {Object} state - The current state of the recipe.
-   * @returns {Object} The updated state of the recipe.
-   */
-  async run(input: AnyInput, _args: unknown[]): Promise<AnyInput> {
-    const state = input as {
-      progress: number;
-      dish: Dish;
-      opList: Array<{ ingValues: unknown[] }>;
-    };
-    const ings = state.opList[state.progress].ingValues,
-      [depth, intensive, extLang, crib] = ings,
-      dish = state.dish,
-      magic = new MagicLib(await dish.get(Dish.ARRAY_BUFFER) as Uint8Array),
-      cribRegex =
-        crib && (crib as string).length
-          ? new RegExp(crib as string, "i")
-          : null;
-    let options = await magic.speculativeExecution(
-      depth as number,
-      extLang as boolean,
-      crib as string,
-      [],
-      false,
-      cribRegex,
-    );
-
-    // Filter down to results which matched the crib
-    if (cribRegex) {
-      options = (options as MagicOption[]).filter(
-        (option) => option.matchesCrib,
-      );
-    }
-
-    // Record the current state for use when presenting
-    this.state = state;
-
-    dish.set(options, Dish.JSON);
-    return state;
-  }
-
-  /**
-   * Displays Magic results in HTML for web apps.
-   *
-   * @param {JSON} options
-   * @returns {string}
-   */
-  present(input: AnyInput, _args: unknown[]): string {
-    const options = input as MagicOption[];
-    const currentRecipeConfig = this.state.opList.map(
-      (op: { config?: unknown }) => op.config,
-    );
-
-    let output = `<table
-                class='table table-hover table-sm table-bordered'
-                style='table-layout: fixed;'>
-            <tr>
-                <th>Recipe (click to load)</th>
-                <th>Result snippet</th>
-                <th>Properties</th>
-            </tr>`;
-
-    /**
-     * Returns a CSS colour value based on an integer input.
-     *
-     * @param {number} val
-     * @returns {string}
-     */
-    function chooseColour(val: number): string {
-      if (val < 3) return "green";
-      if (val < 5) return "goldenrod";
-      return "red";
-    }
-
-    options.forEach((option) => {
-      // Construct recipe URL
-      // Replace this Magic op with the generated recipe
-      const recipeConfig = currentRecipeConfig
-          .slice(0, this.state.progress)
-          .concat(option.recipe)
-          .concat(currentRecipeConfig.slice(this.state.progress + 1)),
-        recipeURL =
-          "recipe=" +
-          Utils.encodeURIFragment(Utils.generatePrettyRecipe(recipeConfig));
-
-      let language = "",
-        fileType = "",
-        matchingOps = "",
-        useful = "";
-      const entropy = `<span data-toggle="tooltip" data-container="body" title="Shannon Entropy is measured from 0 to 8. High entropy suggests encrypted or compressed data. Normal text is usually around 3.5 to 5.">Entropy: <span style="color: ${chooseColour(option.entropy)}">${option.entropy.toFixed(2)}</span></span>`,
-        validUTF8 = option.isUTF8
-          ? "<span data-toggle='tooltip' data-container='body' title='The data could be a valid UTF8 string based on its encoding.'>Valid UTF8</span>\n"
-          : "";
-
-      if ((option.languageScores[0] as { probability?: number }).probability ?? 0 > 0) {
-        let likelyLangs = option.languageScores.filter(
-          (l: { lang: string; score: number; probability?: number }) =>
-            (l.probability ?? 0) > 0,
-        );
-        if (likelyLangs.length < 1) likelyLangs = [option.languageScores[0]];
-        language =
-          "<span data-toggle='tooltip' data-container='body' title='Based on a statistical comparison of the frequency of bytes in various languages. Ordered by likelihood.'>" +
-          "Possible languages:\n    " +
-          likelyLangs
-            .map(
-              (lang: { lang: string; score: number; probability?: number }) => {
-                return MagicLib.codeToLanguage(lang.lang);
-              },
-            )
-            .join("\n    ") +
-          "</span>\n";
-      }
-
-      if (option.fileType) {
-        fileType = `<span data-toggle="tooltip" data-container="body" title="Based on the presence of magic bytes.">File type: ${option.fileType.mime} (${option.fileType.extension})</span>\n`;
-      }
-
-      if (option.matchingOps.length) {
-        matchingOps = `Matching ops: ${[...new Set(option.matchingOps.map((op: { op: string }) => op.op))].join(", ")}\n`;
-      }
-
-      if (option.useful) {
-        useful =
-          "<span data-toggle='tooltip' data-container='body' title='This could be an operation that displays data in a useful way, such as rendering an image.'>Useful op detected</span>\n";
-      }
-
-      output += `<tr>
-                <td><a href="#${recipeURL}">${Utils.generatePrettyRecipe(option.recipe, true)}</a></td>
-                <td>${Utils.escapeHtml(Utils.escapeWhitespace(Utils.truncate(option.data, 99)))}</td>
-                <td>${language}${fileType}${matchingOps}${useful}${validUTF8}${entropy}</td>
-            </tr>`;
+  async run(input: string, args: unknown[]): Promise<MagicResult[]> {
+    const [depth = 3, intensive = false, extLang = false, crib = ""] = args;
+    const magic = new MagicLib(input, {
+      maxIntermediateBytes: MAGIC_MAX_INTERMEDIATE_BYTES,
     });
 
-    output +=
-      "</table><script type='application/javascript'>$('[data-toggle=\"tooltip\"]').tooltip()</script>";
-
-    if (!options.length) {
-      output =
-        "Nothing of interest could be detected about the input data.\nHave you tried modifying the operation arguments?";
-    }
-
-    return output;
+    return magic.speculativeExecution(
+      Number(depth),
+      Boolean(extLang),
+      crib as string,
+      [],
+      Boolean(intensive),
+      null,
+    );
   }
 }
 

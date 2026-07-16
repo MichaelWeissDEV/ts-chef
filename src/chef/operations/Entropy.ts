@@ -12,7 +12,7 @@ import * as nodomtemp from "nodom";
 
 import { TypedOperation, AnyInput } from "../Operation";
 
-const d3 = (d3temp as any).default ? (d3temp as any).default : d3temp;
+const d3 = d3temp;
 const nodom = (nodomtemp as any).default
   ? (nodomtemp as any).default
   : nodomtemp;

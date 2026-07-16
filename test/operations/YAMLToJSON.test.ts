@@ -7,7 +7,11 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { YAMLToJSON } from "../../src/chef/operations/YAMLToJSON";
+import {
+  MAX_YAML_INPUT_CHARACTERS,
+  MAX_YAML_NODES,
+  YAMLToJSON,
+} from "../../src/chef/operations/YAMLToJSON";
 
 describe("YAMLToJSON", () => {
   const op = new YAMLToJSON();
@@ -34,5 +38,67 @@ describe("YAMLToJSON", () => {
 
   test("Invalid YAML throws OperationError", () => {
     expect(() => op.run("{ invalid yaml :", [])).toThrow();
+  });
+
+  test("supports ordinary aliases without expanding them during validation", () => {
+    const result = op.run(
+      "base: &base [one, two]\ncopy: *base",
+      [],
+    ) as { base: string[]; copy: string[] };
+    expect(result.copy).toEqual(["one", "two"]);
+    expect(result.copy).toBe(result.base);
+  });
+
+  test("rejects an exponentially expanding alias graph", () => {
+    let bomb = "a: &a [x,x,x,x,x,x,x,x,x,x]\n";
+    for (let index = 1; index <= 7; index += 1) {
+      const name = String.fromCharCode(97 + index);
+      const previous = String.fromCharCode(96 + index);
+      bomb += `${name}: &${name} [${Array(10).fill(`*${previous}`).join(",")}]\n`;
+    }
+    expect(() => op.run(bomb, [])).toThrow(/safety limit/i);
+  });
+
+  test("rejects cyclic aliases", () => {
+    expect(() => op.run("root: &root\n  self: *root\n", [])).toThrow(
+      /cyclic yaml aliases/i,
+    );
+  });
+
+  test("rejects oversized YAML before parsing", () => {
+    expect(() => op.run("x".repeat(MAX_YAML_INPUT_CHARACTERS + 1), [])).toThrow(
+      /input exceeds/i,
+    );
+  });
+
+  test("rejects excessive parser nodes before building a huge object graph", () => {
+    const manyEmptyMappings = Array(MAX_YAML_NODES + 1).fill("- {}").join("\n");
+    expect(() => op.run(manyEmptyMappings, [])).toThrow(/node safety limit/i);
+  });
+
+  test("counts implicit empty sequence values omitted by parser events", () => {
+    const manyImplicitNulls = "-\n".repeat(MAX_YAML_NODES + 1);
+    expect(() => op.run(manyImplicitNulls, [])).toThrow(/node safety limit/i);
+  });
+
+  test("counts implicit empty sequence values with CR-only line endings", () => {
+    const manyImplicitNulls = "-\r".repeat(MAX_YAML_NODES + 1);
+    expect(() => op.run(manyImplicitNulls, [])).toThrow(/node safety limit/i);
+  });
+
+  test("does not count dash lines inside block scalars as sequence nodes", () => {
+    const result = op.run(
+      `text: |\n${"  -\n".repeat(MAX_YAML_NODES + 1)}`,
+      [],
+    ) as { text: string };
+    expect(result.text.startsWith("-\n-\n")).toBe(true);
+  });
+
+  test("does not count dash lines inside multiline quoted scalars", () => {
+    const result = op.run(
+      `text: "start\n${"-\n".repeat(MAX_YAML_NODES + 1)}end"\n`,
+      [],
+    ) as { text: string };
+    expect(result.text).toContain("start - -");
   });
 });
