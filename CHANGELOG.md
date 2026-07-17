@@ -8,14 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Instant, on-demand analysis hovers with bounded decoded previews, exact-range one-click replacement, safe multi-step decode suggestions, and complete long-token targeting.
 - Language-aware integer-literal hover calculator for decimal, hex, binary, octal, bit widths, and signed/unsigned two's-complement values.
 - Additive graph mode for the Pipeline Editor with drag-and-drop operation nodes, connected input/output endpoints, and manual/editor selection/document/clipboard I/O.
 - Separate collapsible Standard Pipelines and My Pipelines groups, plus a direct Open Pipeline Graph command and Pipelines-view button.
 - Searchable library of 28 built-in decoding, structured-data, IOC, and malware-analysis pipelines.
 - Bounded offline Static Malware Triage command with file signatures, byte statistics, IOCs, suspicious behavior indicators, embedded encoding previews, extracted strings, risk scoring, and defanged Markdown output.
+- First Implementation of Graph view
 
 ### Fixed
+
 - Preserve structured JSON between pipeline steps and present non-text binary output losslessly as hexadecimal instead of replacement characters.
 - Reject malformed binary, decimal, hexadecimal, and arbitrary-radix input instead of partially parsing or silently wrapping invalid bytes.
 - Prevent stale/ambiguous hover edits, cropped long-token replacements, URL-detector quadratic scans, and hover-triggered decompression bombs.
@@ -24,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Make the Magic operation usable from recipes and both pipeline views, with bounded recursive decoding and literal-only cribs.
 
 ### Security
+
 - Webview messages, sizes, operation names, arguments, run generations, and editor targets are validated in the extension host; the graph view uses a strict nonce CSP and no inline handlers.
 - Live pipeline preview uses a conservative deterministic-operation allowlist and cannot perform output side effects.
 - Editor replacements use immutable document/range snapshots and are refused when the source changes during asynchronous analysis.
@@ -33,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.7.0] - 2026-07-09
 
 ### Added
+
 - **YARA scan** (`tschef: YARA Scan Selection/Document`): run YARA rules — loaded from a `.yar` file or typed inline — against the selection or whole document; matches (with counts and metadata) open in a new editor.
 - **Export scan results** (`tschef: Export Scan Results`, button in the Found Patterns view): write all detected patterns to JSON or CSV via a save dialog, with file/line/column/label/confidence/operation/value columns.
 - **Follow Active Editor** for the Found Patterns view (eye toggle in the view title, setting `tschef.patterns.followActiveEditor`, on by default): the view now mirrors the active editor and shows that file's matches; switching editors switches the view. Turn it off (pin) to keep the current results while you move around. A workspace scan temporarily shows every file until you focus one again. Optional `tschef.patterns.autoScanOnFocus` scans a document the first time it becomes active.
@@ -42,11 +47,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `runOpAsync` runner helper so Promise-returning operations (e.g. YARA) produce their real output instead of `[object Promise]`.
 
 ### Fixed
+
 - Corrected the repository/bugs/homepage URLs in `package.json` and the Marketplace badge/install id in the README (the version badge pointed at a non-existent extension id).
 
 ## [0.6.0] - 2026-07-08
 
 ### Added
+
 - **Magic (recursive auto-decode)**: Deep Analysis now follows multi-step decode chains (e.g. `Base64 → Gunzip`, `Base64 → Base64`) up to 3 levels deep, sniffing gzip/zlib/LZ4 magic bytes after each step, and shows a decoded preview for every path before you apply it.
 - Deep Analysis shows string statistics (length, Shannon entropy, charset guess) and reports them even when nothing is detected.
 - **Workspace scan** (`tschef: Scan Workspace for Patterns`, button in the Found Patterns view): scans up to 300 text files (≤ 512 KB) with progress and cancellation; the Patterns view groups results per file.
@@ -62,10 +69,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Marketplace keywords for better discoverability.
 
 ### Fixed
+
 - Found Patterns view: group nodes never returned their children — matches were invisible below the group headers.
 - "Clear Scan Results" now clears all scanned documents, not just the active editor's.
 
 ### Changed
+
 - Recipe pane buttons renamed to "Apply to selection" and "Save as pipeline".
 - Pipelines/Variables trees show the scope as "Global · …" / "Workspace · …" instead of a trailing "[global]" tag (ported from the erfur fork).
 - Operations pane click handling moved from inline `onclick` attributes to event delegation with data attributes (hardening).
@@ -74,6 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.4.0] - 2026-06-19
 
 ### Added
+
 - Created type-safe pipeline framework using `TypedOperation` and `Pipeline_new`.
 - Implemented O(1) registry map lookup for high-performance operation resolve.
 - Integrated WebAssembly-based `hash-wasm` to replace native `argon2` module dependency for secure and platform-agnostic execution.
@@ -81,10 +91,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configured Jest mock objects for ES modules (`d3`, `geodesy`, `flat`, and `@li0ard/streebog`) in CommonJS-based test runtime.
 
 ### Fixed
+
 - Fixed critical async pipeline bugs: changed synchronous `runPipeline()` to `async/await` execution model.
 - Restructured `Pipeline_new` to break circular dependency with `runner.ts` using `opsCore.ts` helper module.
 - Resolved argument parser bug in `parsePipeline()` that caused issues when splitting strings containing pipeline delimiters inside parentheses.
 - Added debounce to decoration updates on editor text changes for smoother typing performance.
 
 ### Security
+
 - Replaced native cryptographic packages with secure pure-JS/WASM equivalents.
