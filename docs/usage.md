@@ -21,9 +21,9 @@ For complex multi-step transformations:
 1.  Open the command palette (`Ctrl+Shift+P` / `Cmd+Shift+P`).
 2.  Type **ts-chef: Open Pipeline Editor**.
 3.  Search for and add operations to your pipeline.
-4.  Switch between **List** and **Graph**. Both edit the same ordered pipeline.
-5.  Configure arguments, drag nodes to reorder them, and select an input source: manual text, editor selection/document, or clipboard.
-6.  Select preview, clipboard, editor replacement, or a new editor as output and click **Run**.
+4.  Use **List** for a classic ordered pipeline, or switch to **Graph** for a directed acyclic graph with explicit connections.
+5.  In Graph mode, freely position nodes, connect ports, fan one value into multiple branches, add named output nodes, and select which output to inspect. Saved pipelines retain the complete topology and layout; the selected connected output supplies the list-compatible primary path.
+6.  Configure arguments, select manual text, editor selection/document, or clipboard as input, then select preview, clipboard, editor replacement, or a new editor as output and click **Run**.
 
 Live preview is available only for bounded deterministic operations with manual input and preview-only output. Potentially expensive, random, networked, file-oriented, or analysis operations always require an explicit run.
 

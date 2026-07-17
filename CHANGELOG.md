@@ -7,15 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-07-17
+
 ### Added
 
 - Instant, on-demand analysis hovers with bounded decoded previews, exact-range one-click replacement, safe multi-step decode suggestions, and complete long-token targeting.
 - Language-aware integer-literal hover calculator for decimal, hex, binary, octal, bit widths, and signed/unsigned two's-complement values.
-- Additive graph mode for the Pipeline Editor with drag-and-drop operation nodes, connected input/output endpoints, and manual/editor selection/document/clipboard I/O.
+- Additive DAG graph mode for the Pipeline Editor with freely movable operation nodes, explicit connectors, fan-out branches within bounded graphs, multiple named output nodes, live node/data-flow status, output tabs, and graph persistence. Inputs support manual text, editor selection/document, and clipboard data; outputs support preview, clipboard, editor replacement, and new documents.
 - Separate collapsible Standard Pipelines and My Pipelines groups, plus a direct Open Pipeline Graph command and Pipelines-view button.
-- Searchable library of 28 built-in decoding, structured-data, IOC, and malware-analysis pipelines.
+- Searchable library of 28 built-in decoding, encoding, structured-data, IOC, and malware-analysis pipelines.
 - Bounded offline Static Malware Triage command with file signatures, byte statistics, IOCs, suspicious behavior indicators, embedded encoding previews, extracted strings, risk scoring, and defanged Markdown output.
-- First Implementation of Graph view
 
 ### Fixed
 

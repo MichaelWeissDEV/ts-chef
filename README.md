@@ -32,8 +32,8 @@ Use it to inspect encoded strings, build repeatable transformation pipelines, de
 - **Instant analysis hover** — detects encoded values without a prior scan, shows bounded decoded previews and string statistics, follows safe multi-step decode paths, and can replace exactly the hovered value with one click.
 - **Source-code integer calculator** — hover hexadecimal, binary, octal, or decimal literals in C/C++, Rust, Python, JavaScript/TypeScript, Go, and related languages to see every radix plus signed/unsigned two's-complement interpretations and one-click source replacements.
 - **Operations & Recipe panes** — a searchable, grouped operation list; add steps with `＋`, edit their arguments inline, then apply the recipe or save it as a reusable pipeline.
-- **List and graph pipeline editor** — open either the classic ordered editor or the graph directly from the Command Palette/Pipelines view. Drag operations into connected boxes, reorder nodes, and choose manual text, editor selection/document, or clipboard input plus preview, clipboard, editor replacement, or new-document output.
-- **Standard recipe library** — 28 bundled, searchable pipelines for common decoding, structured-data, IOC, PowerShell, payload, entropy, strings, and deobfuscation workflows.
+- **List and graph pipeline editor** — open either the classic ordered editor or a true DAG graph directly from the Command Palette/Pipelines view. Freely position operation boxes, connect explicit ports, branch one value into multiple paths, add named output nodes, watch node status during execution, and switch among output previews. Inputs can come from manual text, the editor selection/document, or the clipboard; results can go to the preview, clipboard, an editor replacement, or a new document.
+- **Standard recipe library** — 28 bundled, searchable pipelines for common decoding, encoding, structured-data, IOC, PowerShell, payload, entropy, strings, and deobfuscation workflows.
 - **Quick Convert** — apply a single operation to the current selection from a searchable picker.
 - **Deep Analysis (Magic)** — recursively identify encodings and follow multi-step decode chains (e.g. `Base64 → Gunzip`), with a decoded preview and string statistics (length, entropy, charset) before you commit.
 - **Pattern scanning** — detect Base64, hex, hashes, JWTs, UUIDs, URLs, and more in a document or across the whole workspace, with inline highlighting, hovers, and per-file grouping.
@@ -66,7 +66,7 @@ Open the **ts-chef** container in the Activity Bar to reach the Operations, Reci
 ### Instant hover analysis
 
 - Hover a Base64, Base64URL, hex, URL-encoded, escaped, token, hash, or similar value to see its likely type, confidence, statistics, and a bounded decoded preview. Choose **Decode here** to replace that exact occurrence.
-- Long Base64/hex tokens are previewed in bounded chunks while the action remains attached to the complete token (up to the safety limit), preventing partial middle-of-token replacements.
+- Long Base64/hex tokens keep preview work bounded while the action remains attached to the complete token (up to the safety limit), preventing partial middle-of-token replacements.
 - Hover integer literals such as `0xffu8`, `0b1111_0000`, `0755`, or `1_000_000` to see decimal, hex, binary, octal, bit width, two's-complement bits, and signed/unsigned interpretations.
 
 ### Analyze data
@@ -100,7 +100,7 @@ Example:
 From Base64 | To Hex(Uppercase=true) | URL Encode
 ```
 
-The Pipeline Editor also provides a **Graph** mode. Its graph is an additional visual representation of the same ordered pipeline, so switching modes never creates a second, divergent recipe. Use **Open Pipeline Graph** to enter that mode directly, or **Open Saved/Standard Pipeline in Editor** (including its Pipeline-tree action) to load any bundled or saved pipeline. Live preview only runs bounded, deterministic operations on manual input; networked, expensive, random, file-oriented, and malware-analysis operations require an explicit **Run**.
+The Pipeline Editor also provides a **Graph** mode. An ordered pipeline opens as a linear graph, which you can turn into a directed acyclic graph with freely positioned nodes, fan-out branches, and multiple named outputs. The selected output defines the primary ordered path while the complete graph topology and layout are stored with the saved pipeline. Node status updates during execution; once results arrive, use the output tabs to inspect each named result. **Open Pipeline Graph** enters this mode directly, while **Open Saved/Standard Pipeline in Editor** loads any bundled or saved pipeline. Live preview only runs bounded, deterministic operations on manual input; networked, expensive, random, file-oriented, and malware-analysis operations require an explicit **Run**.
 
 ## Settings
 
