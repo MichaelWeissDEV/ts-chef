@@ -29,6 +29,11 @@ import {
 } from "./storage/store";
 import { resolveVariableTemplates } from "./storage/variableResolution";
 import { PipelinePanel } from "./panels/pipelinePanel";
+import { runPipelineGraph } from "./panels/pipelineGraphRunner";
+import {
+  type PipelineGraph,
+  validatePipelineGraph,
+} from "./panels/pipelineGraphModel";
 import {
   runOpAsync,
   parsePipeline,
@@ -93,7 +98,11 @@ import type { ArgConfig, Operation } from "./chef/Operation";
 function resultToString(result: unknown, outputType?: string): string {
   const normalisedType = outputType?.toLowerCase().replace(/[^a-z]/g, "");
   if (normalisedType === "json" || normalisedType === "object") {
-    return JSON.stringify(result, null, 2);
+    try {
+      return JSON.stringify(result, null, 2) ?? "";
+    } catch {
+      return String(result ?? "");
+    }
   }
   let bytes: Buffer | undefined;
   if (result instanceof ArrayBuffer)
@@ -113,7 +122,71 @@ function resultToString(result: unknown, outputType?: string): string {
   }
   if (typeof result === "string") return result;
   if (result === null || result === undefined) return "";
-  return JSON.stringify(result, null, 2);
+  try {
+    return JSON.stringify(result, null, 2) ?? String(result);
+  } catch {
+    return String(result);
+  }
+}
+
+function graphOutputType(graph: PipelineGraph, path: readonly string[]): string {
+  for (let index = path.length - 1; index >= 0; index -= 1) {
+    const node = graph.nodes.find((candidate) => candidate.id === path[index]);
+    if (node?.type !== "operation") continue;
+    return registry.find((entry) => entry.opName === node.opName)?.factory()
+      .outputType ?? "string";
+  }
+  return "string";
+}
+
+function graphSupportsDirectExecution(graph: PipelineGraph): boolean {
+  const reachable = new Set(validatePipelineGraph(graph).reachableNodeIds);
+  return graph.nodes.every((node) => {
+    if (node.type !== "operation" || !reachable.has(node.id)) return true;
+    const entry = registry.find((candidate) => candidate.opName === node.opName);
+    return Boolean(entry && !entry.factory().flowControl);
+  });
+}
+
+async function runSavedGraph(
+  graph: PipelineGraph,
+  input: string,
+  activeOutputId?: string,
+): Promise<{ text: string; outputName: string } | undefined> {
+  const results = await runPipelineGraph(graph, input);
+  const values = [...results.values()];
+  if (values.length === 0) {
+    throw new Error("The graph has no output nodes.");
+  }
+  let selected =
+    values.find((result) => result.outputId === activeOutputId) ?? values[0];
+  if (values.length > 1) {
+    const picked = await vscode.window.showQuickPick(
+      values.map((result) => ({
+        label: result.error ? `$(error) ${result.name}` : `$(output) ${result.name}`,
+        description: result.error ? "failed" : "ready",
+        detail: result.error?.message ?? `${result.path.length} graph nodes`,
+        picked: result.outputId === selected.outputId,
+        result,
+      })),
+      {
+        title: "Choose Graph Output",
+        placeHolder: "Select the output to write back to the editor",
+        matchOnDescription: true,
+        matchOnDetail: true,
+      },
+    );
+    if (!picked) return undefined;
+    selected = picked.result;
+  }
+  if (selected.error) throw new Error(selected.error.message);
+  return {
+    text: resultToString(
+      selected.value,
+      graphOutputType(graph, selected.path),
+    ),
+    outputName: selected.name,
+  };
 }
 
 function parseCommandPayload<T>(payload: T | string): T {
@@ -971,14 +1044,24 @@ export function activate(context: vscode.ExtensionContext): void {
         const target = capturePipelineResultTarget(editor);
         const text = resolveVariableTemplates(target.value, varStore);
         try {
-          const result = await runPipeline(text, pipeline.steps);
+          const executeGraph =
+            pipeline.graph && graphSupportsDirectExecution(pipeline.graph);
+          const graphResult = executeGraph
+            ? await runSavedGraph(
+                pipeline.graph as PipelineGraph,
+                text,
+                pipeline.activeOutputId,
+              )
+            : undefined;
+          if (executeGraph && !graphResult) return;
+          const result = graphResult?.text ?? (await runPipeline(text, pipeline.steps));
           log(
-            `Ran saved pipeline "${name}": ${pipeline.steps.length} step(s), ${text.length} → ${result.length} chars`,
+            `Ran saved pipeline "${name}"${graphResult ? ` (${graphResult.outputName})` : ""}: ${pipeline.steps.length} primary step(s), ${text.length} → ${result.length} chars`,
           );
           await presentPipelineResult(
             editor,
             result,
-            `Pipeline "${name}"`,
+            `Pipeline "${name}"${graphResult ? ` — ${graphResult.outputName}` : ""}`,
             resultRenderers,
             target,
           );

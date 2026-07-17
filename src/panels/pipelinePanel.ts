@@ -14,6 +14,7 @@ import {
 import { resolveVariableTemplates } from "../storage/variableResolution";
 import {
   parsePipeline,
+  presentPipelineValue,
   runPipeline,
   resolveDefaultArg,
 } from "../commands/runner";
@@ -34,6 +35,8 @@ import {
 import {
   assertPipelineOutputSize,
   deliverPipelineOutput,
+  MAX_PIPELINE_INPUT_CHARACTERS,
+  MAX_PIPELINE_OUTPUT_CHARACTERS,
   pipelinePreview,
   readPipelineInput,
 } from "./pipelineIO";
@@ -46,6 +49,18 @@ import {
 } from "./pipelineLivePolicy";
 import { PipelineRunCoordinator } from "./pipelineRunCoordinator";
 import type { ArgConfig } from "../chef/Operation";
+import Dish from "../chef/Dish";
+import {
+  graphStepsForOutput,
+  linearPipelineToGraph,
+  type PipelineGraph,
+  validatePipelineGraph,
+} from "./pipelineGraphModel";
+import {
+  runPipelineGraph,
+  type PipelineGraphNodeEvent,
+  type PipelineGraphOutputResult,
+} from "./pipelineGraphRunner";
 
 export type PipelineEditorMode = "list" | "graph";
 
@@ -60,6 +75,7 @@ interface OperationDescriptor {
   manualBake: boolean;
   flowControl: boolean;
   liveSafe: boolean;
+  graphSupported: boolean;
 }
 
 let descriptorCache: OperationDescriptor[] | undefined;
@@ -119,6 +135,7 @@ function operationDescriptors(): OperationDescriptor[] {
       manualBake: operation.manualBake,
       flowControl: operation.flowControl,
       liveSafe: isOperationSafeForLive(entry.opName, operation.manualBake),
+      graphSupported: !operation.flowControl,
     };
   });
   return descriptorCache;
@@ -149,6 +166,127 @@ function outputDetail(target: string): string {
   }
 }
 
+const GRAPH_NODE_PREVIEW_CHARACTERS = 16 * 1024;
+const GRAPH_OUTPUT_PREVIEW_CHARACTERS = 256 * 1024;
+const GRAPH_TOTAL_PREVIEW_CHARACTERS = 2 * 1024 * 1024;
+
+interface GraphTextPreview {
+  value: string;
+  truncated: boolean;
+  totalLength: number;
+}
+
+function graphDishType(outputType: string | undefined): number {
+  switch (outputType?.toLowerCase().replace(/[^a-z]/g, "")) {
+    case "arraybuffer":
+      return Dish.ARRAY_BUFFER;
+    case "bytearray":
+      return Dish.BYTE_ARRAY;
+    case "json":
+    case "object":
+      return Dish.JSON;
+    case "number":
+      return Dish.NUMBER;
+    case "bignumber":
+    case "bigint":
+      return Dish.BIG_NUMBER;
+    case "html":
+      return Dish.HTML;
+    default:
+      return Dish.STRING;
+  }
+}
+
+export function presentGraphValue(value: unknown, outputType?: string): string {
+  return presentPipelineValue(value, graphDishType(outputType));
+}
+
+function boundedGraphPreview(
+  text: string,
+  maxCharacters: number,
+): GraphTextPreview {
+  if (text.length <= maxCharacters) {
+    return { value: text, truncated: false, totalLength: text.length };
+  }
+  if (maxCharacters <= 0) {
+    return { value: "", truncated: true, totalLength: text.length };
+  }
+  const marker = `\n\n… preview truncated (${text.length.toLocaleString()} characters total)`;
+  const contentLength = Math.max(0, maxCharacters - marker.length);
+  return {
+    value: text.slice(0, contentLength) + marker.slice(0, maxCharacters),
+    truncated: true,
+    totalLength: text.length,
+  };
+}
+
+export interface GraphOutputPayload {
+  id: string;
+  name: string;
+  preview: string;
+  totalLength: number;
+  truncated: boolean;
+  error?: string;
+}
+
+export function buildGraphOutputPayloads(
+  graph: PipelineGraph,
+  results: ReadonlyMap<string, PipelineGraphOutputResult>,
+  presentResult: (result: PipelineGraphOutputResult) => string,
+): GraphOutputPayload[] {
+  const outputNodes = graph.nodes.filter((node) => node.type === "output");
+  const previewCharacters = Math.max(
+    1,
+    Math.min(
+      GRAPH_OUTPUT_PREVIEW_CHARACTERS,
+      Math.floor(
+        GRAPH_TOTAL_PREVIEW_CHARACTERS / Math.max(1, outputNodes.length),
+      ),
+    ),
+  );
+  // Terminal fan-out aliases one source value intentionally. Cache the
+  // bounded presentation by source node so a 64 MiB buffer feeding hundreds
+  // of outputs is converted once, not hundreds of times.
+  const previewsBySource = new Map<string, GraphTextPreview>();
+  return outputNodes.map((node) => {
+    const result = results.get(node.id);
+    if (!result) {
+      return {
+        id: node.id,
+        name: node.name,
+        preview: "",
+        totalLength: 0,
+        truncated: false,
+        error: "Output did not produce a result.",
+      };
+    }
+    if (result.error) {
+      return {
+        id: result.outputId,
+        name: result.name,
+        preview: "",
+        totalLength: 0,
+        truncated: false,
+        error: result.error.message,
+      };
+    }
+    const sourceId = result.path.at(-2) ?? result.outputId;
+    let preview = previewsBySource.get(sourceId);
+    if (!preview) {
+      preview = boundedGraphPreview(presentResult(result), previewCharacters);
+      previewsBySource.set(sourceId, preview);
+    }
+    return {
+      id: result.outputId,
+      name: result.name,
+      preview: preview.value,
+      totalLength: preview.totalLength,
+      truncated: preview.truncated,
+    };
+  });
+}
+
+
 /**
  * Only one editor panel exists at a time. Opening a saved pipeline while the
  * panel is already visible replaces its editor state instead of ignoring it.
@@ -160,6 +298,11 @@ export class PipelinePanel {
   private readonly knownOperations = new Set(
     this.descriptors.map((operation) => operation.opName),
   );
+  private readonly knownGraphOperations = new Set(
+    this.descriptors
+      .filter((operation) => operation.graphSupported)
+      .map((operation) => operation.opName),
+  );
   private readonly descriptorByName = new Map(
     this.descriptors.map((operation) => [operation.opName, operation]),
   );
@@ -167,6 +310,7 @@ export class PipelinePanel {
   private initial: Pipeline | undefined;
   private requestedMode: PipelineEditorMode | undefined;
   private readonly runCoordinator = new PipelineRunCoordinator();
+  private graphAbortController: AbortController | undefined;
   private lastTextEditor: vscode.TextEditor | undefined;
   private readonly editorSubscription: vscode.Disposable;
 
@@ -227,6 +371,7 @@ export class PipelinePanel {
       getNonce(),
     );
     panel.onDidDispose(() => {
+      this.graphAbortController?.abort();
       this.editorSubscription.dispose();
       PipelinePanel.current = undefined;
     });
@@ -239,7 +384,7 @@ export class PipelinePanel {
   }
 
   private loadPipeline(pipeline: Pipeline): void {
-    this.runCoordinator.invalidate();
+    this.invalidateRuns();
     this.initial = pipeline;
     if (this.ready) {
       this.post({
@@ -260,8 +405,23 @@ export class PipelinePanel {
     description: string;
     raw: string;
     steps: PanelPipelineStep[];
+    graph: PipelineGraph;
+    activeOutputId?: string;
   } {
-    const steps = toPanelSteps(pipeline?.steps ?? []);
+    const graph = pipeline?.graph ?? linearPipelineToGraph(pipeline?.steps ?? []);
+    const graphOperations = graph.nodes.filter(
+      (node) => node.type === "operation",
+    );
+    const steps: PanelPipelineStep[] = pipeline?.graph
+      ? graphOperations.map((node) => ({
+          id: node.id,
+          opName: node.opName,
+          args: [...node.args],
+        }))
+      : toPanelSteps(pipeline?.steps ?? []).map((step, index) => ({
+          ...step,
+          id: graphOperations[index]?.id ?? step.id,
+        }));
     return {
       name: pipeline?.name ?? "",
       description: pipeline?.description ?? "",
@@ -274,7 +434,17 @@ export class PipelinePanel {
             )
           : (pipeline?.raw ?? ""),
       steps,
+      graph,
+      ...(pipeline?.activeOutputId
+        ? { activeOutputId: pipeline.activeOutputId }
+        : {}),
     };
+  }
+
+  private invalidateRuns(): void {
+    this.runCoordinator.invalidate();
+    this.graphAbortController?.abort();
+    this.graphAbortController = undefined;
   }
 
   private post(message: unknown): void {
@@ -300,7 +470,11 @@ export class PipelinePanel {
   }
 
   private async receiveMessage(raw: unknown): Promise<void> {
-    const decoded = decodePipelinePanelMessage(raw, this.knownOperations);
+    const decoded = decodePipelinePanelMessage(
+      raw,
+      this.knownOperations,
+      this.knownGraphOperations,
+    );
     if (!decoded.ok) {
       this.post({
         type: "protocolError",
@@ -326,14 +500,23 @@ export class PipelinePanel {
         );
         return;
       case "invalidateRuns":
-        this.runCoordinator.invalidate();
+        this.invalidateRuns();
+        return;
+      case "graphChanged":
+        // Validation already happened at the webview boundary. Position and
+        // topology changes only invalidate in-flight results; the graph itself
+        // is persisted on Save.
+        this.invalidateRuns();
         return;
       case "parseRaw":
-        this.runCoordinator.invalidate();
+        this.invalidateRuns();
         this.parseRaw(message);
         return;
       case "run":
         await this.run(message);
+        return;
+      case "runGraph":
+        await this.runGraph(message);
         return;
       case "save":
         await this.save(message);
@@ -379,9 +562,91 @@ export class PipelinePanel {
     return undefined;
   }
 
+  private graphLiveBlockReason(
+    message: Extract<PipelinePanelMessage, { type: "runGraph" }>,
+  ): string | undefined {
+    if (message.inputSource !== "manual")
+      return "Live preview only reads manual input.";
+    if (message.outputTarget !== "preview")
+      return "Live preview never performs output side effects.";
+    if (message.manualInput.length > MAX_LIVE_INPUT_CHARACTERS)
+      return `Manual input exceeds the live preview limit (${MAX_LIVE_INPUT_CHARACTERS.toLocaleString()} characters); use Run.`;
+    const reachable = new Set(
+      validatePipelineGraph(message.graph).reachableNodeIds,
+    );
+    const unsafe = message.graph.nodes.find(
+      (node) =>
+        node.type === "operation" &&
+        reachable.has(node.id) &&
+        !this.descriptorByName.get(node.opName)?.liveSafe,
+    );
+    if (unsafe?.type === "operation") {
+      return `${this.descriptorByName.get(unsafe.opName)?.displayName ?? unsafe.opName} requires an explicit run.`;
+    }
+    return undefined;
+  }
+
+  private graphValueText(
+    graph: PipelineGraph,
+    path: readonly string[],
+    value: unknown,
+  ): string {
+    for (let index = path.length - 1; index >= 0; index -= 1) {
+      const node = graph.nodes.find((candidate) => candidate.id === path[index]);
+      if (node?.type !== "operation") continue;
+      return presentGraphValue(
+        value,
+        this.descriptorByName.get(node.opName)?.outputType,
+      );
+    }
+    return presentGraphValue(value, "string");
+  }
+
+  private postGraphNodeEvent(
+    requestId: number,
+    generation: number,
+    graph: PipelineGraph,
+    event: PipelineGraphNodeEvent,
+  ): void {
+    if (!this.runCoordinator.isCurrent(generation)) return;
+    let preview: GraphTextPreview | undefined;
+    if (Object.prototype.hasOwnProperty.call(event, "value")) {
+      preview = boundedGraphPreview(
+        this.graphValueText(graph, event.path, event.value),
+        GRAPH_NODE_PREVIEW_CHARACTERS,
+      );
+    }
+    this.post({
+      type: "graphNodeResult",
+      requestId,
+      nodeId: event.nodeId,
+      status: event.status,
+      path: event.path,
+      ...(preview
+        ? {
+            preview: preview.value,
+            totalLength: preview.totalLength,
+            truncated: preview.truncated,
+          }
+        : {}),
+      ...(event.error ? { error: event.error.message } : {}),
+    });
+  }
+
+  private graphOutputPayloads(
+    graph: PipelineGraph,
+    results: ReadonlyMap<string, PipelineGraphOutputResult>,
+  ): GraphOutputPayload[] {
+    return buildGraphOutputPayloads(graph, results, (result) =>
+      this.graphValueText(graph, result.path, result.value),
+    );
+  }
+
   private async run(
     message: Extract<PipelinePanelMessage, { type: "run" }>,
   ): Promise<void> {
+    this.graphAbortController?.abort();
+    this.graphAbortController = undefined;
     const generation = this.runCoordinator.beginRun();
     if (!message.explicit) {
       const reason = this.liveBlockReason(message);
@@ -506,6 +771,154 @@ export class PipelinePanel {
     }
   }
 
+  private async runGraph(
+    message: Extract<PipelinePanelMessage, { type: "runGraph" }>,
+  ): Promise<void> {
+    this.graphAbortController?.abort();
+    const abortController = new AbortController();
+    this.graphAbortController = abortController;
+    const generation = this.runCoordinator.beginRun();
+    if (!message.explicit) {
+      const reason = this.graphLiveBlockReason(message);
+      if (reason) {
+        if (this.graphAbortController === abortController) {
+          this.graphAbortController = undefined;
+        }
+        this.post({
+          type: "liveBlocked",
+          requestId: message.requestId,
+          value: reason,
+        });
+        return;
+      }
+    }
+
+    try {
+      const input = await readPipelineInput(
+        message.inputSource,
+        message.manualInput,
+        undefined,
+        this.lastTextEditor,
+      );
+      if (!this.runCoordinator.isCurrent(generation)) return;
+      const pipelineInput = this.variableStore
+        ? resolveVariableTemplates(input.text, this.variableStore)
+        : input.text;
+      const results = await runPipelineGraph(message.graph, pipelineInput, {
+        live: !message.explicit,
+        allowedOperations: message.explicit
+          ? undefined
+          : (opName) => this.descriptorByName.get(opName)?.liveSafe === true,
+        maxInputSize: message.explicit
+          ? MAX_PIPELINE_INPUT_CHARACTERS * 4
+          : MAX_LIVE_INPUT_CHARACTERS * 4,
+        maxNodeOutputSize: message.explicit
+          ? MAX_PIPELINE_OUTPUT_CHARACTERS
+          : MAX_LIVE_OUTPUT_CHARACTERS,
+        maxTotalOutputSize: message.explicit
+          ? MAX_PIPELINE_OUTPUT_CHARACTERS
+          : MAX_LIVE_OUTPUT_CHARACTERS * 4,
+        signal: abortController.signal,
+        onNodeSettled: (event) =>
+          this.postGraphNodeEvent(
+            message.requestId,
+            generation,
+            message.graph,
+            event,
+          ),
+      });
+      if (!this.runCoordinator.isCurrent(generation)) return;
+
+      const inputPreview = pipelinePreview(pipelineInput);
+      const outputs = this.graphOutputPayloads(message.graph, results);
+      const failedNodeId = [...results.values()].find(
+        (result) => result.error,
+      )?.error?.nodeId;
+      this.post({
+        type: "graphResult",
+        requestId: message.requestId,
+        outputs,
+        inputValue: inputPreview.value,
+        inputLength: inputPreview.totalLength,
+        inputTruncated: inputPreview.truncated,
+        failedNodeId,
+        outputApplied: message.outputTarget === "preview",
+      });
+      log(
+        `Pipeline graph ran ${message.graph.nodes.length} node(s), ${pipelineInput.length} input characters, ${outputs.length} output(s)`,
+      );
+
+      if (!message.explicit || message.outputTarget === "preview") return;
+      if (!this.runCoordinator.isCurrent(generation)) return;
+      const selected =
+        (message.activeOutputId
+          ? results.get(message.activeOutputId)
+          : undefined) ??
+        [...results.values()].find((result) => !result.error);
+      if (!selected) {
+        this.post({
+          type: "outputError",
+          requestId: message.requestId,
+          value: "The graph has no connected output to deliver.",
+        });
+        return;
+      }
+      if (selected.error) {
+        this.post({
+          type: "outputError",
+          requestId: message.requestId,
+          value: selected.error.message,
+        });
+        return;
+      }
+      const result = this.graphValueText(
+        message.graph,
+        selected.path,
+        selected.value,
+      );
+      try {
+        assertPipelineOutputSize(result);
+        const delivered = await this.runCoordinator.deliverIfCurrent(
+          generation,
+          () => deliverPipelineOutput(message.outputTarget, result, input),
+        );
+        if (!delivered || !this.runCoordinator.isCurrent(generation)) return;
+        this.post({
+          type: "outputApplied",
+          requestId: message.requestId,
+          detail: `${selected.name}: ${outputDetail(message.outputTarget)}`,
+        });
+      } catch (error) {
+        if (!this.runCoordinator.isCurrent(generation)) return;
+        this.post({
+          type: "outputError",
+          requestId: message.requestId,
+          value: errorMessage(error),
+        });
+      }
+    } catch (error) {
+      if (!this.runCoordinator.isCurrent(generation)) return;
+      if (!message.explicit) {
+        this.post({
+          type: "liveBlocked",
+          requestId: message.requestId,
+          value: errorMessage(error),
+        });
+        return;
+      }
+      this.post({
+        type: "error",
+        requestId: message.requestId,
+        value: errorMessage(error),
+      });
+      log(`Pipeline graph run error: ${errorMessage(error)}`);
+    } finally {
+      if (this.graphAbortController === abortController) {
+        this.graphAbortController = undefined;
+      }
+    }
+  }
+
   private async save(
     message: Extract<PipelinePanelMessage, { type: "save" }>,
   ): Promise<void> {
@@ -514,12 +927,41 @@ export class PipelinePanel {
       vscode.window.showWarningMessage("Pipeline name required.");
       return;
     }
-    const steps = toPipelineSteps(message.steps);
+    let steps = toPipelineSteps(message.steps);
+    const graphReachable = message.graph
+      ? new Set(validatePipelineGraph(message.graph).reachableNodeIds)
+      : new Set<string>();
+    const persistGraph =
+      message.graph &&
+      message.graph.nodes.every(
+        (node) =>
+          node.type !== "operation" ||
+          !graphReachable.has(node.id) ||
+          this.knownGraphOperations.has(node.opName),
+      )
+        ? message.graph
+        : undefined;
+    if (message.graph) {
+      const outputIds = [
+        ...(message.activeOutputId ? [message.activeOutputId] : []),
+        ...message.graph.nodes
+          .filter((node) => node.type === "output")
+          .map((node) => node.id)
+          .filter((id) => id !== message.activeOutputId),
+      ];
+      for (const outputId of outputIds) {
+        const branchSteps = graphStepsForOutput(message.graph, outputId);
+        if (branchSteps !== undefined) {
+          steps = branchSteps;
+          break;
+        }
+      }
+    }
     // Persist one canonical representation derived from the validated steps.
     // Never trust a separately supplied raw string to describe different or
     // stale steps than the pipeline that will actually execute.
     const raw = serialisePanelPipeline(
-      message.steps,
+      toPanelSteps(steps),
       (opName) => this.descriptorByName.get(opName)?.displayName ?? opName,
     );
     const defaultPipelineScope = vscode.workspace
@@ -530,12 +972,17 @@ export class PipelinePanel {
       `Save pipeline "${name}"`,
     );
     if (!scope) return;
-    const saved = this.store.upsert(scope, {
+    const pipeline: Pipeline = {
       name,
       raw,
       steps,
       description: message.description.trim() || undefined,
-    });
+      ...(persistGraph ? { graph: persistGraph } : {}),
+      ...(persistGraph && message.activeOutputId
+        ? { activeOutputId: message.activeOutputId }
+        : {}),
+    };
+    const saved = this.store.upsert(scope, pipeline);
     if (!saved) {
       this.post({
         type: "saveFailed",
@@ -543,9 +990,12 @@ export class PipelinePanel {
       });
       return;
     }
+    this.initial = pipeline;
     void vscode.commands.executeCommand("tschef.refreshPipelines");
     this.post({ type: "saved", value: `${name} (${scope})` });
-    log(`Pipeline "${name}" saved (${steps.length} step(s), ${scope})`);
+    log(
+      `Pipeline "${name}" saved (${steps.length} primary step(s), ${persistGraph?.nodes.length ?? 0} graph node(s), ${scope})`,
+    );
     vscode.window.showInformationMessage(
       `ts-chef: Pipeline "${name}" saved (${scope}).`,
     );

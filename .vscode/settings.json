@@ -6,5 +6,6 @@
   },
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "cdt.debug.sourceHighlighting": false
 }

@@ -11,6 +11,10 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 import { randomBytes } from "crypto";
+import {
+  type PipelineGraph,
+  validatePipelineGraph,
+} from "../panels/pipelineGraphModel";
 
 const MAX_STORE_FILE_BYTES = 8 * 1024 * 1024;
 const MAX_STORE_ENTRIES = 2_000;
@@ -300,6 +304,10 @@ export interface Pipeline {
   description?: string;
   steps: PipelineStep[];
   raw: string; // original pipe syntax
+  /** Optional DAG representation. Legacy pipelines continue to use `steps`. */
+  graph?: PipelineGraph;
+  /** Last selected graph output, also used as the legacy primary branch. */
+  activeOutputId?: string;
 }
 
 export interface ScopedPipeline extends Pipeline {
@@ -388,10 +396,33 @@ function validatedPipeline(value: unknown): Pipeline | undefined {
     steps.push({ opName: step.opName, args: step.args });
   }
 
+  // A corrupt graph must never make a still-valid legacy pipeline unusable.
+  // Falling back to the canonical linear steps also provides a safe migration
+  // path for graph schema upgrades.
+  let graph: PipelineGraph | undefined;
+  if (candidate.graph !== undefined) {
+    try {
+      graph = validatePipelineGraph(candidate.graph).graph;
+    } catch {
+      graph = undefined;
+    }
+  }
+  const activeOutputId =
+    graph &&
+    typeof candidate.activeOutputId === "string" &&
+    graph.nodes.some(
+      (node) =>
+        node.type === "output" && node.id === candidate.activeOutputId,
+    )
+      ? candidate.activeOutputId
+      : undefined;
+
   return {
     name: candidate.name,
     raw: candidate.raw,
     steps,
+    ...(graph ? { graph } : {}),
+    ...(activeOutputId ? { activeOutputId } : {}),
     ...(typeof candidate.description === "string"
       ? { description: candidate.description }
       : {}),

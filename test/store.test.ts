@@ -139,6 +139,66 @@ describe("PipelineStore", () => {
     expect(all[0].raw).toBe("To Base64");
   });
 
+  test("round-trips a branched graph including positions and named outputs", () => {
+    const graphPipeline: Pipeline = {
+      ...pipe("branches", "To Hex"),
+      activeOutputId: "plain",
+      graph: {
+        version: 1,
+        nodes: [
+          { id: "input", type: "input", x: 12, y: 34 },
+          {
+            id: "hex",
+            type: "operation",
+            opName: "To Hex",
+            args: [],
+            x: 250,
+            y: 10,
+          },
+          { id: "plain", type: "output", name: "Original", x: 500, y: 100 },
+          { id: "encoded", type: "output", name: "Hex", x: 500, y: 10 },
+        ],
+        edges: [
+          { id: "input-hex", source: "input", target: "hex" },
+          { id: "hex-output", source: "hex", target: "encoded" },
+          { id: "input-output", source: "input", target: "plain" },
+        ],
+      },
+    };
+    const store = new PipelineStore(globalDir);
+
+    expect(store.upsert("global", graphPipeline)).toBe(true);
+    expect(store.load("global")[0].graph).toEqual(graphPipeline.graph);
+    expect(store.load("global")[0].activeOutputId).toBe("plain");
+  });
+
+  test("falls back to legacy steps when a stored graph is cyclic", () => {
+    const invalid = {
+      ...pipe("recoverable", "To Hex"),
+      graph: {
+        version: 1,
+        nodes: [
+          { id: "input", type: "input", x: 0, y: 0 },
+          { id: "a", type: "operation", opName: "A", args: [], x: 1, y: 0 },
+          { id: "b", type: "operation", opName: "B", args: [], x: 2, y: 0 },
+        ],
+        edges: [
+          { id: "ab", source: "a", target: "b" },
+          { id: "ba", source: "b", target: "a" },
+        ],
+      },
+    };
+    fs.writeFileSync(
+      path.join(globalDir, "pipelines.json"),
+      JSON.stringify([invalid]),
+    );
+
+    const loaded = new PipelineStore(globalDir).load("global");
+    expect(loaded).toHaveLength(1);
+    expect(loaded[0].steps).toEqual(invalid.steps);
+    expect(loaded[0].graph).toBeUndefined();
+  });
+
   test("findByName resolves with workspace overriding global", () => {
     __setWorkspaceFolder(wsDir);
     const store = new PipelineStore(globalDir);

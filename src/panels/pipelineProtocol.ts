@@ -4,6 +4,12 @@
  * allowed to reach the operation runner or persistent storage.
  */
 
+import {
+  type PipelineGraph,
+  PipelineGraphValidationError,
+  validatePipelineGraph,
+} from "./pipelineGraphModel";
+
 export const INPUT_SOURCES = [
   "manual",
   "selection",
@@ -40,6 +46,17 @@ export type PipelinePanelMessage =
       manualInput: string;
     }
   | {
+      type: "runGraph";
+      requestId: number;
+      explicit: boolean;
+      graph: PipelineGraph;
+      activeOutputId?: string;
+      inputSource: PipelineInputSource;
+      outputTarget: PipelineOutputTarget;
+      manualInput: string;
+    }
+  | { type: "graphChanged"; graph: PipelineGraph }
+  | {
       type: "parseRaw";
       requestId: number;
       raw: string;
@@ -51,6 +68,8 @@ export type PipelinePanelMessage =
       description: string;
       raw: string;
       steps: PanelPipelineStep[];
+      graph?: PipelineGraph;
+      activeOutputId?: string;
     };
 
 export type MessageDecodeResult =
@@ -195,6 +214,140 @@ function decodeRun(
   };
 }
 
+interface DecodedRunEndpoints {
+  requestId: number;
+  explicit: boolean;
+  inputSource: PipelineInputSource;
+  outputTarget: PipelineOutputTarget;
+  manualInput: string;
+}
+
+function decodeRunEndpoints(
+  value: Record<string, unknown>,
+  label: string,
+): DecodedRunEndpoints | MessageDecodeResult {
+  const requestId = requestIdFrom(value);
+  if (requestId === undefined)
+    return { ok: false, error: `${label} request has an invalid requestId` };
+  if (typeof value.explicit !== "boolean")
+    return {
+      ok: false,
+      error: `${label} request has no explicit flag`,
+      requestId,
+    };
+  if (
+    typeof value.inputSource !== "string" ||
+    !INPUT_SOURCES.includes(value.inputSource as PipelineInputSource)
+  ) {
+    return { ok: false, error: "unknown pipeline input source", requestId };
+  }
+  if (
+    typeof value.outputTarget !== "string" ||
+    !OUTPUT_TARGETS.includes(value.outputTarget as PipelineOutputTarget)
+  ) {
+    return { ok: false, error: "unknown pipeline output target", requestId };
+  }
+  if (
+    typeof value.manualInput !== "string" ||
+    value.manualInput.length > MAX_MANUAL_INPUT_LENGTH
+  ) {
+    return {
+      ok: false,
+      error: "manual input is invalid or too large",
+      requestId,
+    };
+  }
+  return {
+    requestId,
+    explicit: value.explicit,
+    inputSource: value.inputSource as PipelineInputSource,
+    outputTarget: value.outputTarget as PipelineOutputTarget,
+    manualInput: value.manualInput,
+  };
+}
+
+function decodeGraph(
+  value: unknown,
+  knownOperations: ReadonlySet<string>,
+): PipelineGraph | string {
+  try {
+    return validatePipelineGraph(value, {
+      isKnownOperation: (opName) => knownOperations.has(opName),
+    }).graph;
+  } catch (error) {
+    return error instanceof PipelineGraphValidationError
+      ? error.message
+      : "graph is invalid";
+  }
+}
+
+function decodeActiveOutputId(
+  value: unknown,
+  graph: PipelineGraph,
+): { ok: true; value?: string } | { ok: false } {
+  if (value === undefined || value === "") return { ok: true };
+  if (typeof value !== "string" || value.length > 128) return { ok: false };
+  const output = graph.nodes.find((node) => node.id === value);
+  return output?.type === "output"
+    ? { ok: true, value }
+    : { ok: false };
+}
+
+function decodeRunGraph(
+  value: Record<string, unknown>,
+  knownOperations: ReadonlySet<string>,
+  graphOperations: ReadonlySet<string>,
+): MessageDecodeResult {
+  const endpoints = decodeRunEndpoints(value, "graph run");
+  if ("ok" in endpoints) return endpoints;
+  const graph = decodeGraph(value.graph, knownOperations);
+  if (typeof graph === "string") {
+    return { ok: false, error: graph, requestId: endpoints.requestId };
+  }
+  const validated = validatePipelineGraph(graph);
+  const reachable = new Set(validated.reachableNodeIds);
+  const unsupported = graph.nodes.find(
+    (node) =>
+      node.type === "operation" &&
+      reachable.has(node.id) &&
+      !graphOperations.has(node.opName),
+  );
+  if (unsupported?.type === "operation") {
+    return {
+      ok: false,
+      error: `operation '${unsupported.opName}' is not supported in graph mode`,
+      requestId: endpoints.requestId,
+    };
+  }
+  const activeOutput = decodeActiveOutputId(value.activeOutputId, graph);
+  if (!activeOutput.ok) {
+    return {
+      ok: false,
+      error: "active graph output is invalid",
+      requestId: endpoints.requestId,
+    };
+  }
+  return {
+    ok: true,
+    message: {
+      type: "runGraph",
+      ...endpoints,
+      graph,
+      ...(activeOutput.value ? { activeOutputId: activeOutput.value } : {}),
+    },
+  };
+}
+
+function decodeGraphChanged(
+  value: Record<string, unknown>,
+  knownOperations: ReadonlySet<string>,
+): MessageDecodeResult {
+  const graph = decodeGraph(value.graph, knownOperations);
+  return typeof graph === "string"
+    ? { ok: false, error: graph }
+    : { ok: true, message: { type: "graphChanged", graph } };
+}
+
 function decodeParseRaw(
   value: Record<string, unknown>,
   knownOperations: ReadonlySet<string>,
@@ -241,6 +394,20 @@ function decodeSave(
     return { ok: false, error: "pipeline text is invalid or too large" };
   const steps = validatePanelSteps(value.steps, knownOperations);
   if (typeof steps === "string") return { ok: false, error: steps };
+  let graph: PipelineGraph | undefined;
+  let activeOutputId: string | undefined;
+  if (value.graph !== undefined) {
+    const decodedGraph = decodeGraph(value.graph, knownOperations);
+    if (typeof decodedGraph === "string")
+      return { ok: false, error: decodedGraph };
+    graph = decodedGraph;
+    const decodedOutput = decodeActiveOutputId(value.activeOutputId, graph);
+    if (!decodedOutput.ok)
+      return { ok: false, error: "active graph output is invalid" };
+    activeOutputId = decodedOutput.value;
+  } else if (value.activeOutputId !== undefined) {
+    return { ok: false, error: "active output requires a graph" };
+  }
   return {
     ok: true,
     message: {
@@ -249,6 +416,8 @@ function decodeSave(
       description: value.description,
       raw: value.raw,
       steps,
+      ...(graph ? { graph } : {}),
+      ...(activeOutputId ? { activeOutputId } : {}),
     },
   };
 }
@@ -256,6 +425,7 @@ function decodeSave(
 export function decodePipelinePanelMessage(
   value: unknown,
   knownOperations: ReadonlySet<string>,
+  graphOperations: ReadonlySet<string> = knownOperations,
 ): MessageDecodeResult {
   if (!isRecord(value) || typeof value.type !== "string")
     return { ok: false, error: "malformed pipeline editor message" };
@@ -266,6 +436,10 @@ export function decodePipelinePanelMessage(
       return { ok: true, message: { type: "invalidateRuns" } };
     case "run":
       return decodeRun(value, knownOperations);
+    case "runGraph":
+      return decodeRunGraph(value, knownOperations, graphOperations);
+    case "graphChanged":
+      return decodeGraphChanged(value, knownOperations);
     case "parseRaw":
       return decodeParseRaw(value, knownOperations);
     case "save":
