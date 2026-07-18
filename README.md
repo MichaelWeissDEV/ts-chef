@@ -139,7 +139,7 @@ Pipelines use operation display names separated by `|`:
 From Base64 | JSON Beautify
 ```
 
-Arguments use `key=value` pairs inside parentheses:
+Arguments use `key=value` pairs or positional indices inside parentheses:
 
 ```text
 From Base64 | To hex(Delimiter=Space) | SHA2
@@ -149,7 +149,9 @@ Pipe characters inside a quoted or parenthesized argument are preserved by the p
 
 ### Saved and bundled pipelines
 
-Saved pipelines can be run from the **Pipelines** view or through **`tschef: Run Saved Pipeline`**. The bundled catalog contains 28 searchable recipes for decoding, encoding, structured data, PowerShell, IOCs, payload inspection, entropy, string extraction, and deobfuscation.
+Saved pipelines can be run from the **Pipelines** view or through **`tschef: Run Saved Pipeline`**. The view keeps bundled **Standard Pipelines** and user-created **My Pipelines** in separate collapsible groups. The bundled catalog contains 28 searchable recipes for decoding, encoding, structured data, PowerShell, IOCs, payload inspection, entropy, string extraction, and deobfuscation.
+
+Use **`tschef: Browse Standard Recipe Library`** to load a bundled recipe into the Recipe pane, or **`tschef: Open Saved/Standard Pipeline in Editor`** to inspect and adapt it. **`tschef: Open Pipeline Graph`** starts the full editor directly in drag-and-drop graph mode.
 
 ## Named operations
 
@@ -168,14 +170,60 @@ The complete generated reference is available in [docs/operations.md](docs/opera
 
 ## Editor analysis tools
 
-- **Instant hover analysis** detects common encodings without requiring a prior document scan.
-- **Deep Analysis** recursively follows bounded decode candidates and shows previews before replacement.
-- **Pattern scanning** searches the active document or workspace and groups findings by file and type.
-- **Integer calculator** recognizes hexadecimal, binary, octal, and decimal source literals.
-- **Smart Format** auto-detects and formats JSON, XML/HTML, SQL, CSS, or JavaScript.
-- **Make Readable** reflows long encoded or delimiter-heavy lines without changing their data.
-- **YARA scanning** matches a selected value or document against explicitly provided rules.
-- **Static malware triage** produces a defanged Markdown report from bounded offline inspection.
+### Instant encoded-value hovers
+
+Hover a Base64, Base64URL, hexadecimal, URL-encoded, escaped, token, hash, or similar value to see its likely type, confidence, string statistics, and a bounded decoded preview without running a prior scan. **Decode here** replaces that exact occurrence.
+
+Long Base64 and hex tokens keep preview work bounded while the action remains associated with the complete token, up to the configured safety limit. This avoids accidentally replacing only the visible middle of a long value. When decode-chain previews are enabled, the hover can also follow safe, bounded multi-step candidates.
+
+### Source-code integer calculator
+
+The integer hover recognizes hexadecimal, binary, octal, and decimal literals in C/C++, Rust, Python, JavaScript/TypeScript, Go, and related languages. Literals such as `0xffu8`, `0b1111_0000`, `0755`, and `1_000_000` show:
+
+- decimal, hexadecimal, binary, and octal representations;
+- inferred bit width and two's-complement bits;
+- signed and unsigned interpretations;
+- one-click replacements in the selected source radix.
+
+### Deep Analysis and pattern scanning
+
+**`tschef: Deep Analysis of Selection`** recursively identifies encodings and follows bounded decode chains such as Base64 to Gunzip. Every candidate includes a decoded preview and statistics such as length, entropy, and character set before anything is applied.
+
+**Scan Document for Patterns** and **Scan Workspace for Patterns** find recognizable Base64, hex, hashes, JWTs, UUIDs, URLs, and other structured values. Results are grouped by file in **Found Patterns**, can be highlighted or hovered in the editor, and can be exported as JSON or CSV. The view follows the active editor by default; use the eye button in its title bar to pin the current result set.
+
+### Security-oriented inspection
+
+- **YARA scanning** runs rules from a `.yar` file or inline rules against the current selection or document.
+- **Static malware triage** performs bounded, offline inspection of selected text or the active binary file. It reports byte statistics and entropy, file signatures, defanged IOCs, suspicious script, LOLBin, persistence and injection patterns, embedded encoding candidates, and extracted ASCII or UTF-16 strings in a Markdown report.
+- **Entropy heatmap** optionally colors source lines and the minimap by Shannon entropy to reveal packed, encrypted, compressed, or encoded-looking regions.
+
+These tools support static investigation; they do not execute or fetch a payload, and their heuristic findings are not a substitute for a sandbox or a malware verdict.
+
+### Smart Format and Make Readable
+
+**`tschef: Smart Format (Auto-Detect & Beautify)`** detects JSON, XML/HTML, SQL, CSS, or JavaScript and opens a pretty-printed copy in a new editor. **Make Readable** reflows extremely long hex, Base64, or delimiter-heavy one-line blobs to the configured width without changing the underlying data.
+
+## Pipeline editor details
+
+The Pipeline Editor supports both an ordered **List** and a true directed acyclic **Graph**. An ordered pipeline initially appears as a linear graph, then can be expanded with freely positioned operation nodes, explicit ports, fan-out branches, and multiple named outputs.
+
+- The selected output defines the primary ordered path while the complete graph topology and layout remain stored with the saved pipeline.
+- Node status updates during execution, and output tabs expose every named result.
+- Inputs can come from manual text, the editor selection, the active document, or the clipboard.
+- Results can remain in preview, be copied, replace editor text, or open in a new document.
+- Live preview is limited to bounded, deterministic operations on manual input. Networked, expensive, random, file-oriented, and malware-analysis operations require an explicit **Run**.
+
+## Variables, scopes, and export
+
+Variables are referenced explicitly as `{{name}}` and can be saved globally or for the current workspace. Shell and PowerShell expressions such as `$name` remain verbatim instead of being treated as ts-chef variables. Pipelines have the same global or workspace storage scopes.
+
+Workspace-scoped variables and pipelines are unavailable while VS Code is in Restricted Mode. Pattern-scan results can be exported to JSON or CSV for follow-up analysis or reporting.
+
+## Installation and workspace views
+
+Install [ts-chef from the Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=MichaelWeiss.vscode-ts-chef), or search for `ts-chef` in the VS Code Extensions view. Visual Studio Code `1.85.0` or newer is required.
+
+Open the ts-chef chef icon in the Activity Bar to access **Operations**, **Recipe**, **Found Patterns**, **Variables**, and **Pipelines**. All extension commands are also available from the Command Palette under the `tschef:` prefix.
 
 ## Privacy and safety
 
@@ -184,6 +232,29 @@ The complete generated reference is available in [docs/operations.md](docs/opera
 - Networked, expensive, random, file-oriented, and malware-analysis operations require an explicit run in the Pipeline Editor.
 - Static malware triage never executes or fetches a payload.
 - Workspace-scoped variables and pipelines are disabled in VS Code Restricted Mode.
+
+## Settings
+
+The following settings are available under the `tschef.` namespace:
+
+| Setting | Default | Description |
+| --- | ---: | --- |
+| `tschef.highlightingEnabled` | `true` | Highlight detected patterns in the editor. |
+| `tschef.confidenceThreshold` | `0.65` | Minimum confidence for hover conversion options. |
+| `tschef.hover.enabled` | `true` | Enable instant encoded-string and integer-literal hovers. |
+| `tschef.hover.onDemand` | `true` | Analyze the line under the cursor without requiring a document scan. |
+| `tschef.hover.integerCalculator` | `true` | Show radix and two's-complement information for integer literals. |
+| `tschef.hover.decodeChains` | `true` | Offer bounded multi-step decode previews. |
+| `tschef.hover.maxInputCharacters` | `65536` | Maximum input characters analyzed for one hover preview. |
+| `tschef.hover.maxPreviewCharacters` | `320` | Maximum decoded characters shown in a hover preview. |
+| `tschef.autoScanOnSave` | `false` | Scan documents automatically when they are saved. |
+| `tschef.patterns.followActiveEditor` | `true` | Let Found Patterns follow the active editor; disable it to pin results. |
+| `tschef.patterns.autoScanOnFocus` | `false` | Scan a document the first time it becomes active while following. |
+| `tschef.entropyMap.enabled` | `false` | Color lines by Shannon entropy. |
+| `tschef.readableLineWidth` | `100` | Target width used by Make Readable. |
+| `tschef.pipelineResultAction` | `popup` | Present results as `popup`, `replace`, `copy`, `inline`, or `panel`. |
+| `tschef.defaultPipelineScope` | `global` | Default storage scope for a saved pipeline. |
+| `tschef.defaultVariableScope` | `global` | Default storage scope for a saved variable. |
 
 ## Commands worth knowing
 
@@ -196,11 +267,17 @@ The complete generated reference is available in [docs/operations.md](docs/opera
 | `tschef: Open Pipeline Graph` | Command Palette |
 | `tschef: Deep Analysis of Selection` | Editor context menu |
 | `tschef: Static Malware Triage` | Command Palette |
+| `tschef: Browse Standard Recipe Library` | Command Palette |
+| `tschef: Scan Document for Patterns` | Command Palette |
+| `tschef: Scan Workspace for Patterns` | Command Palette |
+| `tschef: YARA Scan Selection/Document` | Command Palette |
+| `tschef: Toggle Entropy Heatmap` | Command Palette |
 
 Every command is available from the Command Palette under the `tschef:` prefix.
 
 ## Documentation
 
+- [GitHub repository](https://github.com/MichaelWeissDEV/ts-chef)
 - [Usage guide](docs/usage.md)
 - [Operations reference](docs/operations.md)
 - [Contributing guide](docs/contributing.md)
@@ -212,11 +289,28 @@ Every command is available from the Command Palette under the `tschef:` prefix.
 git clone https://github.com/MichaelWeissDEV/ts-chef.git
 cd ts-chef
 npm install
-npm run build
-npm test
 ```
 
-The extension entry point is `src/extension.ts`; the operation engine lives in `src/chef/`, and the pipeline editor is in `src/panels/`.
+Common development commands:
+
+```bash
+npm run build     # bundle the extension with esbuild
+npm test          # run the Jest test suite
+npm run lint      # run ESLint
+npm run package   # build a .vsix package
+```
+
+Project layout:
+
+| Path | Purpose |
+| --- | --- |
+| `src/extension.ts` | VS Code extension entry point: commands, providers, and wiring. |
+| `src/chef/` | TypeScript operation engine. |
+| `src/chef/operations/` | Individual transformation operations. |
+| `src/providers/` | Sidebar, hover, scan, decoration, magic, entropy, and formatting providers. |
+| `src/commands/` | Pipeline runner and result presentation. |
+| `src/panels/` | List and graph Pipeline Editor webview. |
+| `test/` | Jest test suite. |
 
 ## License
 
