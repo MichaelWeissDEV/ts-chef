@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed MD6 and LM hashing, OpenPGP imports and keyring ordering, asynchronous jq execution, user-agent parsing, image decoding, and cross-realm ArrayBuffer/Promise handling in pipelines.
 - Replaced the x86 disassembly placeholder with the Capstone backend and packaged the required Capstone, jq, and Bzip2 WebAssembly runtime files.
 - Ensure OCR workers are terminated on success and failure, and reject unsupported OCR engine modes before worker creation.
+- Prevent extension activation from failing on bundled dependencies that resolve runtime worker files or require non-strict CommonJS execution.
 
 ## [0.8.0] - 2026-07-17
 

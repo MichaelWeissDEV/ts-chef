@@ -16,9 +16,14 @@ node_modules/**
 !node_modules/@alexaltea/capstone-js/package.json
 !node_modules/@alexaltea/capstone-js/dist/capstone.js
 !node_modules/@alexaltea/capstone-js/dist/capstone.wasm
+!node_modules/@blu3r4y/lzma/package.json
+!node_modules/@blu3r4y/lzma/index.js
+!node_modules/@blu3r4y/lzma/src/lzma_worker.js
 !node_modules/jq-web/package.json
 !node_modules/jq-web/jq.js
 !node_modules/jq-web/jq.wasm
+!node_modules/node-md6/package.json
+!node_modules/node-md6/md6.js
 
 # TypeScript config
 tsconfig*.json

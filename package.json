@@ -457,8 +457,9 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run build",
-    "compile": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --external:libbzip2-wasm --external:@alexaltea/capstone-js --external:jq-web --platform=node --format=cjs --sourcemap",
-    "build": "npm run compile",
+    "compile": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --external:libbzip2-wasm --external:@alexaltea/capstone-js --external:@blu3r4y/lzma --external:jq-web --external:node-md6 --platform=node --format=cjs --sourcemap --define:require.resolve=false",
+    "verify:bundle": "node scripts/verify-bundle.cjs",
+    "build": "npm run compile && npm run verify:bundle",
     "watch": "npm run compile -- --watch",
     "test": "jest",
     "test:watch": "jest --watch",
