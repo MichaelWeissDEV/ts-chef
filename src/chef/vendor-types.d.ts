@@ -14,6 +14,42 @@ declare module "crypto-api/src/crypto-api.mjs" {
   export default CryptoApi;
 }
 
+declare module "crypto-api" {
+  const CryptoApi: unknown;
+  export default CryptoApi;
+}
+
+declare module "@alexaltea/capstone-js" {
+  interface Instruction {
+    address: bigint;
+    bytes: number[];
+    mnemonic: string;
+    op_str: string;
+  }
+
+  interface CapstoneInstance {
+    disasm(bytes: number[], address: number): Instruction[];
+    close(): void;
+  }
+
+  interface CapstoneModule {
+    ARCH_ARM: number;
+    ARCH_ARM64: number;
+    ARCH_X86: number;
+    MODE_ARM: number;
+    MODE_THUMB: number;
+    MODE_MCLASS: number;
+    MODE_V8: number;
+    MODE_BIG_ENDIAN: number;
+    MODE_16: number;
+    MODE_32: number;
+    MODE_64: number;
+    Capstone: new (architecture: number, mode: number) => CapstoneInstance;
+  }
+
+  export default function createCapstone(): Promise<CapstoneModule>;
+}
+
 declare module "jsqr" {
   interface QRCode {
     data: string;
@@ -249,14 +285,6 @@ declare module "zlibjs/bin/rawinflate.min.js" {
   export default _default;
 }
 
-declare module "ntlm" {
-  export function lmhash(password: string): Buffer;
-  export function nthash(password: string): Buffer;
-  export function createMessage1(options: Record<string, unknown>): Buffer;
-  export function createMessage3(options: Record<string, unknown>): Buffer;
-  export function parseMessage2(buffer: Buffer): Record<string, unknown>;
-}
-
 declare module "lz4js" {
   export function compress(
     src: Uint8Array | Buffer,
@@ -409,13 +437,19 @@ declare module "otpauth" {
 }
 
 declare module "node-md6" {
-  function md6(
+  export function getHashOfText(
     input: string | Buffer,
     bits?: number,
     key?: string,
     levels?: number,
   ): string;
-  export = md6;
+
+  export function getRawHashOfText(
+    input: string | Buffer,
+    bits?: number,
+    key?: string,
+    levels?: number,
+  ): string;
 }
 
 declare module "tesseract.js" {
@@ -446,7 +480,7 @@ declare module "ua-parser-js" {
     device: { model?: string; type?: string; vendor?: string };
     cpu: { architecture?: string };
   }
-  class UAParser {
+  export class UAParser {
     constructor(ua?: string, extensions?: Record<string, unknown>);
     setUA(ua: string): UAParser;
     getResult(): UAParserResult;
@@ -456,14 +490,12 @@ declare module "ua-parser-js" {
     getEngine(): { name?: string; version?: string };
     getCPU(): { architecture?: string };
   }
-  export = UAParser;
 }
 
 declare module "es6-promisify" {
-  function promisify<T = unknown>(
+  export function promisify<T = unknown>(
     fn: (...args: unknown[]) => void,
   ): (...args: unknown[]) => Promise<T>;
-  export = promisify;
 }
 
 declare module "@alexaltea/capstone-js/dist/capstone.min.js" {

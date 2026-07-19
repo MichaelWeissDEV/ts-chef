@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, TypedOperation, OperationResult, PipelinedOperation, AnyInput, OperationWithArgs } from "./Operation";
+import { Operation, TypedOperation, PipelinedOperation, AnyInput, OperationWithArgs } from "./Operation";
 import { PipelineData, normaliseInput } from "./types";
 import type { PipelineStep } from "../storage/store";
 import { runOpCore, parsePipelineCore } from "./opsCore";
@@ -173,7 +173,7 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
       } else if (step.opName) {
         // Operation by name — runOpCore normalises internally
         const result = runOpCore(step.opName, current as AnyInput, step.args);
-        current = result instanceof Promise ? await result : result;
+        current = await Promise.resolve(result);
       }
     }
 
@@ -249,8 +249,8 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
           });
         } else if (step.opName) {
           const result = runOpCore(step.opName, current as AnyInput, step.args);
-          output = result instanceof Promise ? await result : result as PipelineData;
-          
+          output = await Promise.resolve(result);
+
           results.push({
             step: stepIndex,
             operation: operationName,

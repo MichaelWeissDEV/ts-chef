@@ -8,10 +8,10 @@
  */
 
 import { TypedOperation, AnyInput } from "../Operation";
-import kbpgp from "kbpgp";
+import kbpgp from "../lib/KbpgpCompat";
 import { getSubkeySize, ASP } from "../lib/PGP";
 import { cryptNotice } from "../lib/Crypt";
-import promisify from "es6-promisify";
+import { promisify } from "es6-promisify";
 
 /**
  * Generate PGP Key Pair operation

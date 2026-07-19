@@ -13,7 +13,7 @@ import Utils from "../Utils";
 import { isImage } from "../lib/FileType";
 import { runHash } from "../lib/Hash";
 import { toBase64 } from "../lib/Base64";
-import { Jimp } from "jimp";
+import { readJimpImage } from "../lib/JimpImage";
 
 /**
  * Randomize Colour Palette operation
@@ -53,13 +53,13 @@ export class RandomizeColourPalette extends TypedOperation<ArrayBuffer, Promise<
 
     const [seedArg] = args as [string];
     const seed = seedArg || Math.random().toString().substr(2),
-      parsedImage = await Jimp.read(input),
+      parsedImage = await readJimpImage(input),
       width = parsedImage.bitmap.width,
       height = parsedImage.bitmap.height;
 
     let rgbString, rgbHash, rgbHex;
 
-    parsedImage.scan(0, 0, width, height, (x, y, idx) => {
+    parsedImage.scan(0, 0, width, height, (x: number, y: number, idx: number) => {
       rgbString = parsedImage.bitmap.data.slice(idx, idx + 3).join(".");
       rgbHash = runHash("md5", Utils.strToArrayBuffer(seed + rgbString));
       rgbHex = rgbHash.substr(0, 6) + "ff";

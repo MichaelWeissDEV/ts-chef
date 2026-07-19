@@ -8,6 +8,7 @@
  */
 
 import { TypedOperation } from "../Operation";
+import OperationError from "../errors/OperationError";
 
 const ALPHABET_BITCOIN =
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -41,8 +42,13 @@ export class ToBase58 extends TypedOperation<ArrayBuffer, string, unknown[]> {
     let alphabet = (args[0] as string) || ALPHABET_BITCOIN;
     if (alphabet === "Bitcoin") alphabet = ALPHABET_BITCOIN;
     if (alphabet === "Ripple") alphabet = ALPHABET_RIPPLE;
+    if (alphabet.length !== 58 || new Set(alphabet).size !== 58)
+      throw new OperationError(
+        "Base58 alphabet must contain exactly 58 unique characters.",
+      );
 
     const bytes = Array.from(new Uint8Array(input));
+    if (bytes.length === 0) return "";
 
     let leading = 0;
     for (const b of bytes) {
@@ -64,13 +70,15 @@ export class ToBase58 extends TypedOperation<ArrayBuffer, string, unknown[]> {
       }
     }
 
-    return (
-      alphabet[0].repeat(leading) +
-      digits
-        .reverse()
-        .map((d) => alphabet[d])
-        .join("")
-    );
+    const encodedValue =
+      leading === bytes.length
+        ? ""
+        : digits
+            .reverse()
+            .map((d) => alphabet[d])
+            .join("");
+
+    return alphabet[0].repeat(leading) + encodedValue;
   }
 }
 

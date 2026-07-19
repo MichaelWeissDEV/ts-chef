@@ -11,6 +11,14 @@ dist/**/*.d.ts.map
 
 # Node modules — bundled by esbuild, not shipped separately
 node_modules/**
+!node_modules/libbzip2-wasm/package.json
+!node_modules/libbzip2-wasm/dist/libbzip2-wasm.js
+!node_modules/@alexaltea/capstone-js/package.json
+!node_modules/@alexaltea/capstone-js/dist/capstone.js
+!node_modules/@alexaltea/capstone-js/dist/capstone.wasm
+!node_modules/jq-web/package.json
+!node_modules/jq-web/jq.js
+!node_modules/jq-web/jq.wasm
 
 # TypeScript config
 tsconfig*.json

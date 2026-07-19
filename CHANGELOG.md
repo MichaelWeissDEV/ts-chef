@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-07-19
+
+### Added
+
+- Exposed all 479 implemented operations in the operation registry, including MD5/HMAC/HKDF, Argon2, Bzip2/LZMA, HOTP/TOTP, JA3/JA4/HASSH, PGP, GOST, Fernet, QR code, Protobuf, OCR, jq/JSONata/JPath, and ARM/x86 disassembly.
+- Added official cryptographic reference vectors, broad codec/compression round-trips, hash mutation checks, parser and fingerprint fixtures, damaged-input contracts, OpenPGP workflows, OCR lifecycle tests, and compile-time pipeline chaining tests.
+- Added a catalog invariant that prevents implemented operation source files from being omitted from the registry.
+
+### Fixed
+
+- Corrected Base58/Base62 handling of empty data, leading zero bytes, and invalid alphabets.
+- Fixed MD6 and LM hashing, OpenPGP imports and keyring ordering, asynchronous jq execution, user-agent parsing, image decoding, and cross-realm ArrayBuffer/Promise handling in pipelines.
+- Replaced the x86 disassembly placeholder with the Capstone backend and packaged the required Capstone, jq, and Bzip2 WebAssembly runtime files.
+- Ensure OCR workers are terminated on success and failure, and reject unsupported OCR engine modes before worker creation.
+
 ## [0.8.0] - 2026-07-17
 
 ### Added

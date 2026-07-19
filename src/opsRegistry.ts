@@ -432,6 +432,62 @@ import { YARARules } from "./chef/operations/YARARules";
 import { Zip } from "./chef/operations/Zip";
 import { ZlibDeflate } from "./chef/operations/ZlibDeflate";
 import { ZlibInflate } from "./chef/operations/ZlibInflate";
+import { Argon2 } from "./chef/operations/Argon2";
+import { Argon2Compare } from "./chef/operations/Argon2Compare";
+import { Bzip2Compress } from "./chef/operations/Bzip2Compress";
+import { Bzip2Decompress } from "./chef/operations/Bzip2Decompress";
+import { CSSSelector } from "./chef/operations/CSSSelector";
+import { DeriveHKDFKey } from "./chef/operations/DeriveHKDFKey";
+import { DisassembleARM } from "./chef/operations/DisassembleARM";
+import { DisassembleX86 } from "./chef/operations/DisassembleX86";
+import { FernetDecrypt } from "./chef/operations/FernetDecrypt";
+import { FernetEncrypt } from "./chef/operations/FernetEncrypt";
+import { FlaskSessionSign } from "./chef/operations/FlaskSessionSign";
+import { FlaskSessionVerify } from "./chef/operations/FlaskSessionVerify";
+import { GOSTDecrypt } from "./chef/operations/GOSTDecrypt";
+import { GOSTEncrypt } from "./chef/operations/GOSTEncrypt";
+import { GOSTKeyUnwrap } from "./chef/operations/GOSTKeyUnwrap";
+import { GOSTKeyWrap } from "./chef/operations/GOSTKeyWrap";
+import { GOSTSign } from "./chef/operations/GOSTSign";
+import { GOSTVerify } from "./chef/operations/GOSTVerify";
+import { GenerateAllHashes } from "./chef/operations/GenerateAllHashes";
+import { GenerateHOTP } from "./chef/operations/GenerateHOTP";
+import { GeneratePGPKeyPair } from "./chef/operations/GeneratePGPKeyPair";
+import { GenerateQRCode } from "./chef/operations/GenerateQRCode";
+import { GenerateTOTP } from "./chef/operations/GenerateTOTP";
+import { HAS160 } from "./chef/operations/HAS160";
+import { HASSHClientFingerprint } from "./chef/operations/HASSHClientFingerprint";
+import { HASSHServerFingerprint } from "./chef/operations/HASSHServerFingerprint";
+import { HMAC } from "./chef/operations/HMAC";
+import { JA3Fingerprint } from "./chef/operations/JA3Fingerprint";
+import { JA3SFingerprint } from "./chef/operations/JA3SFingerprint";
+import { JA4Fingerprint } from "./chef/operations/JA4Fingerprint";
+import { JA4ServerFingerprint } from "./chef/operations/JA4ServerFingerprint";
+import { JPathExpression } from "./chef/operations/JPathExpression";
+import { JavaScriptBeautify } from "./chef/operations/JavaScriptBeautify";
+import { JavaScriptMinify } from "./chef/operations/JavaScriptMinify";
+import { Jq } from "./chef/operations/Jq";
+import { JsonataQuery } from "./chef/operations/Jsonata";
+import { LZMACompress } from "./chef/operations/LZMACompress";
+import { LZMADecompress } from "./chef/operations/LZMADecompress";
+import { MD2 } from "./chef/operations/MD2";
+import { MD4 } from "./chef/operations/MD4";
+import { MD5 } from "./chef/operations/MD5";
+import { MD6 } from "./chef/operations/MD6";
+import { NTHash } from "./chef/operations/NTHash";
+import { OpticalCharacterRecognition } from "./chef/operations/OpticalCharacterRecognition";
+import { PGPDecrypt } from "./chef/operations/PGPDecrypt";
+import { PGPDecryptAndVerify } from "./chef/operations/PGPDecryptAndVerify";
+import { PGPEncrypt } from "./chef/operations/PGPEncrypt";
+import { PGPEncryptAndSign } from "./chef/operations/PGPEncryptAndSign";
+import { PGPVerify } from "./chef/operations/PGPVerify";
+import { ParseQRCode } from "./chef/operations/ParseQRCode";
+import { ParseUserAgent } from "./chef/operations/ParseUserAgent";
+import { ParseX509Certificate } from "./chef/operations/ParseX509Certificate";
+import { ProtobufDecode } from "./chef/operations/ProtobufDecode";
+import { ProtobufEncode } from "./chef/operations/ProtobufEncode";
+import { RIPEMD } from "./chef/operations/RIPEMD";
+import { RandomizeColourPalette } from "./chef/operations/RandomizeColourPalette";
 
 export interface OpMeta {
   opName: string;
@@ -2978,6 +3034,342 @@ const registry: OpMeta[] = [
     displayName: "Zlib inflate",
     module: "Compression",
     factory: () => new ZlibInflate(),
+  },
+  {
+    opName: "Argon2",
+    displayName: "Argon2",
+    module: "Crypto",
+    factory: () => new Argon2(),
+  },
+  {
+    opName: "Argon2Compare",
+    displayName: "Argon2 compare",
+    module: "Crypto",
+    factory: () => new Argon2Compare(),
+  },
+  {
+    opName: "Bzip2Compress",
+    displayName: "Bzip2 Compress",
+    module: "Compression",
+    factory: () => new Bzip2Compress(),
+  },
+  {
+    opName: "Bzip2Decompress",
+    displayName: "Bzip2 Decompress",
+    module: "Compression",
+    factory: () => new Bzip2Decompress(),
+  },
+  {
+    opName: "CSSSelector",
+    displayName: "CSS selector",
+    module: "Code",
+    factory: () => new CSSSelector(),
+  },
+  {
+    opName: "DeriveHKDFKey",
+    displayName: "Derive HKDF key",
+    module: "Crypto",
+    factory: () => new DeriveHKDFKey(),
+  },
+  {
+    opName: "DisassembleARM",
+    displayName: "Disassemble ARM",
+    module: "Shellcode",
+    factory: () => new DisassembleARM(),
+  },
+  {
+    opName: "DisassembleX86",
+    displayName: "Disassemble x86",
+    module: "Shellcode",
+    factory: () => new DisassembleX86(),
+  },
+  {
+    opName: "FernetDecrypt",
+    displayName: "Fernet Decrypt",
+    module: "Default",
+    factory: () => new FernetDecrypt(),
+  },
+  {
+    opName: "FernetEncrypt",
+    displayName: "Fernet Encrypt",
+    module: "Default",
+    factory: () => new FernetEncrypt(),
+  },
+  {
+    opName: "FlaskSessionSign",
+    displayName: "Flask Session Sign",
+    module: "Crypto",
+    factory: () => new FlaskSessionSign(),
+  },
+  {
+    opName: "FlaskSessionVerify",
+    displayName: "Flask Session Verify",
+    module: "Crypto",
+    factory: () => new FlaskSessionVerify(),
+  },
+  {
+    opName: "GOSTDecrypt",
+    displayName: "GOST Decrypt",
+    module: "Ciphers",
+    factory: () => new GOSTDecrypt(),
+  },
+  {
+    opName: "GOSTEncrypt",
+    displayName: "GOST Encrypt",
+    module: "Ciphers",
+    factory: () => new GOSTEncrypt(),
+  },
+  {
+    opName: "GOSTKeyUnwrap",
+    displayName: "GOST Key Unwrap",
+    module: "Ciphers",
+    factory: () => new GOSTKeyUnwrap(),
+  },
+  {
+    opName: "GOSTKeyWrap",
+    displayName: "GOST Key Wrap",
+    module: "Ciphers",
+    factory: () => new GOSTKeyWrap(),
+  },
+  {
+    opName: "GOSTSign",
+    displayName: "GOST Sign",
+    module: "Ciphers",
+    factory: () => new GOSTSign(),
+  },
+  {
+    opName: "GOSTVerify",
+    displayName: "GOST Verify",
+    module: "Ciphers",
+    factory: () => new GOSTVerify(),
+  },
+  {
+    opName: "GenerateAllHashes",
+    displayName: "Generate all hashes",
+    module: "Crypto",
+    factory: () => new GenerateAllHashes(),
+  },
+  {
+    opName: "GenerateHOTP",
+    displayName: "Generate HOTP",
+    module: "Default",
+    factory: () => new GenerateHOTP(),
+  },
+  {
+    opName: "GeneratePGPKeyPair",
+    displayName: "Generate PGP Key Pair",
+    module: "PGP",
+    factory: () => new GeneratePGPKeyPair(),
+  },
+  {
+    opName: "GenerateQRCode",
+    displayName: "Generate QR Code",
+    module: "Image",
+    factory: () => new GenerateQRCode(),
+  },
+  {
+    opName: "GenerateTOTP",
+    displayName: "Generate TOTP",
+    module: "Default",
+    factory: () => new GenerateTOTP(),
+  },
+  {
+    opName: "HAS160",
+    displayName: "HAS-160",
+    module: "Crypto",
+    factory: () => new HAS160(),
+  },
+  {
+    opName: "HASSHClientFingerprint",
+    displayName: "HASSH Client Fingerprint",
+    module: "Crypto",
+    factory: () => new HASSHClientFingerprint(),
+  },
+  {
+    opName: "HASSHServerFingerprint",
+    displayName: "HASSH Server Fingerprint",
+    module: "Crypto",
+    factory: () => new HASSHServerFingerprint(),
+  },
+  {
+    opName: "HMAC",
+    displayName: "HMAC",
+    module: "Crypto",
+    factory: () => new HMAC(),
+  },
+  {
+    opName: "JA3Fingerprint",
+    displayName: "JA3 Fingerprint",
+    module: "Crypto",
+    factory: () => new JA3Fingerprint(),
+  },
+  {
+    opName: "JA3SFingerprint",
+    displayName: "JA3S Fingerprint",
+    module: "Crypto",
+    factory: () => new JA3SFingerprint(),
+  },
+  {
+    opName: "JA4Fingerprint",
+    displayName: "JA4 Fingerprint",
+    module: "Crypto",
+    factory: () => new JA4Fingerprint(),
+  },
+  {
+    opName: "JA4ServerFingerprint",
+    displayName: "JA4Server Fingerprint",
+    module: "Crypto",
+    factory: () => new JA4ServerFingerprint(),
+  },
+  {
+    opName: "JPathExpression",
+    displayName: "JPath expression",
+    module: "Code",
+    factory: () => new JPathExpression(),
+  },
+  {
+    opName: "JavaScriptBeautify",
+    displayName: "JavaScript Beautify",
+    module: "Code",
+    factory: () => new JavaScriptBeautify(),
+  },
+  {
+    opName: "JavaScriptMinify",
+    displayName: "JavaScript Minify",
+    module: "Code",
+    factory: () => new JavaScriptMinify(),
+  },
+  {
+    opName: "Jq",
+    displayName: "Jq",
+    module: "Jq",
+    factory: () => new Jq(),
+  },
+  {
+    opName: "Jsonata",
+    displayName: "Jsonata Query",
+    module: "Code",
+    factory: () => new JsonataQuery(),
+  },
+  {
+    opName: "LZMACompress",
+    displayName: "LZMA Compress",
+    module: "Compression",
+    factory: () => new LZMACompress(),
+  },
+  {
+    opName: "LZMADecompress",
+    displayName: "LZMA Decompress",
+    module: "Compression",
+    factory: () => new LZMADecompress(),
+  },
+  {
+    opName: "MD2",
+    displayName: "MD2",
+    module: "Crypto",
+    factory: () => new MD2(),
+  },
+  {
+    opName: "MD4",
+    displayName: "MD4",
+    module: "Crypto",
+    factory: () => new MD4(),
+  },
+  {
+    opName: "MD5",
+    displayName: "MD5",
+    module: "Crypto",
+    factory: () => new MD5(),
+  },
+  {
+    opName: "MD6",
+    displayName: "MD6",
+    module: "Crypto",
+    factory: () => new MD6(),
+  },
+  {
+    opName: "NTHash",
+    displayName: "NT Hash",
+    module: "Crypto",
+    factory: () => new NTHash(),
+  },
+  {
+    opName: "OpticalCharacterRecognition",
+    displayName: "Optical Character Recognition",
+    module: "OCR",
+    factory: () => new OpticalCharacterRecognition(),
+  },
+  {
+    opName: "PGPDecrypt",
+    displayName: "PGP Decrypt",
+    module: "PGP",
+    factory: () => new PGPDecrypt(),
+  },
+  {
+    opName: "PGPDecryptAndVerify",
+    displayName: "PGP Decrypt and Verify",
+    module: "PGP",
+    factory: () => new PGPDecryptAndVerify(),
+  },
+  {
+    opName: "PGPEncrypt",
+    displayName: "PGP Encrypt",
+    module: "PGP",
+    factory: () => new PGPEncrypt(),
+  },
+  {
+    opName: "PGPEncryptAndSign",
+    displayName: "PGP Encrypt and Sign",
+    module: "PGP",
+    factory: () => new PGPEncryptAndSign(),
+  },
+  {
+    opName: "PGPVerify",
+    displayName: "PGP Verify",
+    module: "PGP",
+    factory: () => new PGPVerify(),
+  },
+  {
+    opName: "ParseQRCode",
+    displayName: "Parse QR Code",
+    module: "Image",
+    factory: () => new ParseQRCode(),
+  },
+  {
+    opName: "ParseUserAgent",
+    displayName: "Parse User Agent",
+    module: "UserAgent",
+    factory: () => new ParseUserAgent(),
+  },
+  {
+    opName: "ParseX509Certificate",
+    displayName: "Parse X.509 certificate",
+    module: "PublicKey",
+    factory: () => new ParseX509Certificate(),
+  },
+  {
+    opName: "ProtobufDecode",
+    displayName: "Protobuf Decode",
+    module: "Protobuf",
+    factory: () => new ProtobufDecode(),
+  },
+  {
+    opName: "ProtobufEncode",
+    displayName: "Protobuf Encode",
+    module: "Protobuf",
+    factory: () => new ProtobufEncode(),
+  },
+  {
+    opName: "RIPEMD",
+    displayName: "RIPEMD",
+    module: "Crypto",
+    factory: () => new RIPEMD(),
+  },
+  {
+    opName: "RandomizeColourPalette",
+    displayName: "Randomize Colour Palette",
+    module: "Image",
+    factory: () => new RandomizeColourPalette(),
   },
 ];
 

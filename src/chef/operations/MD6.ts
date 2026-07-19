@@ -9,7 +9,7 @@
 
 import { TypedOperation,  AnyInput  } from "../Operation";
 import OperationError from "../errors/OperationError";
-import NodeMD6 from "node-md6";
+import { getHashOfText } from "node-md6";
 
 /**
  * MD6 operation
@@ -59,7 +59,7 @@ export class MD6 extends TypedOperation<string, string, unknown[]> {
       throw new OperationError("Size must be between 0 and 512");
     if (levels < 0) throw new OperationError("Levels must be greater than 0");
 
-    return (NodeMD6 as any)(input, size, key, levels);
+    return getHashOfText(input, size, key, levels);
   }
 }
 

@@ -9,7 +9,7 @@
 
 import { TypedOperation, AnyInput } from "../Operation";
 import Utils from "../Utils";
-import CryptoApi from "crypto-api/src/crypto-api";
+import CryptoApi from "../lib/CryptoApiCompat";
 
 /**
  * HMAC operation

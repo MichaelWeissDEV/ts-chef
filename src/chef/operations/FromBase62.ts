@@ -39,14 +39,16 @@ export class FromBase62 extends TypedOperation<string, number[], unknown[]> {
     const alphabetStr = (args[0] as string) || BASE62_ALPHABET;
     const alphabet = Utils.expandAlphRange(alphabetStr).join("");
     const base = alphabet.length;
-    if (base < 2)
-      throw new OperationError("Alphabet must be at least 2 characters.");
+    if (base < 2 || new Set(alphabet).size !== base)
+      throw new OperationError(
+        "Base62 alphabet must contain at least 2 unique characters.",
+      );
 
     const map = new Map<string, number>();
     for (let i = 0; i < alphabet.length; i++) map.set(alphabet[i], i);
 
     const cleaned = input.trim();
-    if (!cleaned) throw new OperationError("Empty input.");
+    if (!cleaned) return [];
 
     let leading = 0;
     for (const ch of cleaned) {
@@ -54,8 +56,11 @@ export class FromBase62 extends TypedOperation<string, number[], unknown[]> {
       else break;
     }
 
+    const encodedValue = cleaned.slice(leading);
+    if (!encodedValue) return new Array(leading).fill(0);
+
     const result: number[] = [0];
-    for (const ch of cleaned) {
+    for (const ch of encodedValue) {
       const val = map.get(ch);
       if (val === undefined)
         throw new OperationError(`Invalid Base62 character: '${ch}'`);
@@ -72,12 +77,7 @@ export class FromBase62 extends TypedOperation<string, number[], unknown[]> {
     }
 
     result.reverse();
-    // Remove trailing zeros that were added by big-int math if not intended
-    // But for BaseX we keep them based on leading zeros count.
-
-    return new Array(leading)
-      .fill(0)
-      .concat(result.every((x) => x === 0) ? [] : result);
+    return new Array(leading).fill(0).concat(result);
   }
 }
 

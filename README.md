@@ -16,7 +16,7 @@
     <img src="https://img.shields.io/badge/VS_Code-Marketplace-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white" alt="Install ts-chef from the Visual Studio Marketplace" />
   </a>
   <a href="https://marketplace.visualstudio.com/items?itemName=MichaelWeiss.vscode-ts-chef">
-    <img src="https://img.shields.io/badge/version-0.8.0-2563eb?style=flat-square" alt="ts-chef version 0.8.0" />
+    <img src="https://img.shields.io/badge/version-0.8.1-2563eb?style=flat-square" alt="ts-chef version 0.8.1" />
   </a>
   <a href="https://marketplace.visualstudio.com/items?itemName=MichaelWeiss.vscode-ts-chef">
     <img src="https://img.shields.io/badge/VS_Code-1.85%2B-0e7490?style=flat-square&logo=visualstudiocode&logoColor=white" alt="Requires Visual Studio Code 1.85 or newer" />

@@ -9,7 +9,7 @@
 
 import { TypedOperation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
-import cs from "@alexaltea/capstone-js/dist/capstone.min.js";
+import { loadCapstone } from "../lib/Capstone";
 
 /**
  * Disassemble ARM operation
@@ -96,6 +96,8 @@ export class DisassembleARM extends TypedOperation<string, Promise<AnyInput>, un
         "Invalid hexadecimal input. Length must be even.",
       );
     }
+
+    const cs = await loadCapstone();
 
     // Convert hex string to byte array
     const bytes = [];

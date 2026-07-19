@@ -8,10 +8,10 @@
  */
 
 import { TypedOperation } from "../Operation";
-import kbpgp from "kbpgp";
+import kbpgp from "../lib/KbpgpCompat";
 import { ASP, importPrivateKey, importPublicKey } from "../lib/PGP";
 import OperationError from "../errors/OperationError";
-import promisify from "es6-promisify";
+import { promisify } from "es6-promisify";
 
 /**
  * PGP Decrypt and Verify operation
@@ -76,8 +76,11 @@ export class PGPDecryptAndVerify extends TypedOperation<string, Promise<string>,
       throw new OperationError("Enter the private key of the recipient.");
     const privKey = await importPrivateKey(privateKey, passphrase);
     const pubKey = await importPublicKey(publicKey);
-    keyring.add_key_manager(privKey);
     keyring.add_key_manager(pubKey);
+    // Add the private key last. kbpgp indexes managers by key ID, so for a
+    // self-signed/self-encrypted message a later public-only manager would
+    // otherwise replace the decrypt-capable manager.
+    keyring.add_key_manager(privKey);
 
     try {
       unboxedLiterals = await (promisify(kbpgp.unbox)({

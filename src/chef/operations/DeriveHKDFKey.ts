@@ -10,7 +10,7 @@
 import { TypedOperation, AnyInput } from "../Operation";
 import Utils from "../Utils";
 import OperationError from "../errors/OperationError";
-import CryptoApi from "crypto-api/src/crypto-api";
+import CryptoApi from "../lib/CryptoApiCompat";
 
 /**
  * Derive HKDF Key operation

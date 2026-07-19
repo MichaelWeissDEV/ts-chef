@@ -8,7 +8,7 @@
  */
 
 import Utils from "../Utils";
-import CryptoApi from "crypto-api/src/crypto-api.mjs";
+import CryptoApi from "./CryptoApiCompat";
 
 /**
  * Generic hash function.

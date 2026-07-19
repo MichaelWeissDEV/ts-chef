@@ -2,7 +2,7 @@
   "name": "vscode-ts-chef",
   "displayName": "ts-chef",
   "description": "CyberChef-style data transformations directly in VS Code",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "icon": "assets/logo.jpg",
   "publisher": "michaelweiss",
   "repository": {
@@ -343,45 +343,45 @@
           "default": true,
           "description": "Enable pattern highlighting in the editor"
         },
-      "tschef.confidenceThreshold": {
-        "type": "number",
-        "default": 0.65,
-        "description": "Minimum confidence (0–1) to show hover conversion options"
-      },
-      "tschef.hover.enabled": {
-        "type": "boolean",
-        "default": true,
-        "description": "Show instant ts-chef analysis when hovering encoded strings and integer literals."
-      },
-      "tschef.hover.onDemand": {
-        "type": "boolean",
-        "default": true,
-        "description": "Analyse the line under the cursor even when the document has not been scanned."
-      },
-      "tschef.hover.integerCalculator": {
-        "type": "boolean",
-        "default": true,
-        "description": "Show decimal, hexadecimal, binary, octal and two's-complement values for source-code integer literals."
-      },
-      "tschef.hover.decodeChains": {
-        "type": "boolean",
-        "default": true,
-        "description": "Show safe previews and one-click actions for detected multi-step decoding chains."
-      },
-      "tschef.hover.maxInputCharacters": {
-        "type": "number",
-        "default": 65536,
-        "minimum": 256,
-        "maximum": 1048576,
-        "description": "Maximum number of characters analysed by one instant hover."
-      },
-      "tschef.hover.maxPreviewCharacters": {
-        "type": "number",
-        "default": 320,
-        "minimum": 80,
-        "maximum": 4096,
-        "description": "Maximum decoded preview length shown in a hover."
-      },
+        "tschef.confidenceThreshold": {
+          "type": "number",
+          "default": 0.65,
+          "description": "Minimum confidence (0–1) to show hover conversion options"
+        },
+        "tschef.hover.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show instant ts-chef analysis when hovering encoded strings and integer literals."
+        },
+        "tschef.hover.onDemand": {
+          "type": "boolean",
+          "default": true,
+          "description": "Analyse the line under the cursor even when the document has not been scanned."
+        },
+        "tschef.hover.integerCalculator": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show decimal, hexadecimal, binary, octal and two's-complement values for source-code integer literals."
+        },
+        "tschef.hover.decodeChains": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show safe previews and one-click actions for detected multi-step decoding chains."
+        },
+        "tschef.hover.maxInputCharacters": {
+          "type": "number",
+          "default": 65536,
+          "minimum": 256,
+          "maximum": 1048576,
+          "description": "Maximum number of characters analysed by one instant hover."
+        },
+        "tschef.hover.maxPreviewCharacters": {
+          "type": "number",
+          "default": 320,
+          "minimum": 80,
+          "maximum": 4096,
+          "description": "Maximum decoded preview length shown in a hover."
+        },
         "tschef.autoScanOnSave": {
           "type": "boolean",
           "default": false,
@@ -457,7 +457,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run build",
-    "compile": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --external:libbzip2-wasm --platform=node --format=cjs --sourcemap",
+    "compile": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --external:libbzip2-wasm --external:@alexaltea/capstone-js --external:jq-web --platform=node --format=cjs --sourcemap",
     "build": "npm run compile",
     "watch": "npm run compile -- --watch",
     "test": "jest",
@@ -521,11 +521,14 @@
     "typescript-eslint": "^8.59.3"
   },
   "dependencies": {
+    "@alexaltea/capstone-js": "^5.0.9",
     "@astronautlabs/amf": "^0.0.6",
+    "@blu3r4y/lzma": "^2.3.3",
     "@li0ard/streebog": "^0.2.6",
     "@noble/hashes": "^2.2.0",
     "@types/cbor": "^5.0.1",
     "@types/flat": "^5.0.5",
+    "@wavesenterprise/crypto-gost-js": "^2.1.0-RC1",
     "@xmldom/xmldom": "^0.9.10",
     "amf": "^0.1.0",
     "avsc": "^5.7.9",
@@ -535,24 +538,32 @@
     "bson": "^7.2.0",
     "cbor": "^10.0.12",
     "codepage": "^1.15.0",
-    "crypto-api": "^0.8.5",
+    "crypto-api": "^0.7.5",
     "crypto-js": "^4.2.0",
     "ctph.js": "^0.0.5",
     "d3": "^7.9.0",
     "d3-hexbin": "^0.2.2",
+    "es6-promisify": "^7.0.0",
+    "escodegen": "^2.1.0",
+    "fernet": "^0.3.3",
     "flat": "^6.0.1",
     "geodesy": "^2.4.0",
     "hash-wasm": "^4.12.0",
     "highlight.js": "^11.11.1",
     "ieee754": "^1.2.1",
     "jimp": "^1.6.1",
+    "jq-web": "^0.6.2",
     "js-sha3": "^0.9.3",
     "js-yaml": "^4.1.1",
     "jsdom": "^22.1.0",
     "json5": "^2.2.3",
+    "jsonata": "^2.2.2",
+    "jsonpath-plus": "^10.4.0",
     "jsonwebtoken": "^9.0.3",
+    "jsqr": "^1.4.0",
     "jsrsasign": "^11.1.3",
     "jszip": "^3.10.1",
+    "kbpgp": "^2.1.17",
     "libbzip2-wasm": "^0.0.4",
     "libyara-wasm": "^1.2.1",
     "lz-string": "^1.5.0",
@@ -561,17 +572,23 @@
     "moment-timezone": "^0.6.2",
     "ngeohash": "^0.6.3",
     "node-forge": "^1.3.1",
+    "node-md6": "^0.1.0",
     "nodom": "^2.4.0",
     "notepack.io": "^3.0.1",
-    "ntlm": "^0.1.3",
     "nwmatcher": "^1.4.4",
+    "otpauth": "^9.5.1",
     "pako": "^2.1.0",
+    "protobufjs": "^8.7.1",
+    "qr-image": "^3.2.0",
     "reflect-metadata": "^0.2.2",
     "rison": "^0.1.1",
     "scryptsy": "^2.1.0",
     "sql-formatter": "^15.7.4",
     "ssdeep.js": "^0.0.3",
     "tar-stream": "^3.2.0",
+    "terser": "^5.49.0",
+    "tesseract.js": "^7.0.0",
+    "ua-parser-js": "^2.0.10",
     "uuid": "^11.1.1",
     "vkbeautify": "^0.99.3",
     "xpath": "^0.0.34",

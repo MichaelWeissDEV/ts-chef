@@ -9,6 +9,7 @@
 
 import { TypedOperation } from "../Operation";
 import { Utils } from "../Utils";
+import OperationError from "../errors/OperationError";
 
 const BASE62_ALPHABET =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -41,6 +42,11 @@ export class ToBase62 extends TypedOperation<ArrayBuffer, string, unknown[]> {
     const alphabet = Utils.expandAlphRange(alphabetStr).join("");
     const base = alphabet.length;
     const bytes = new Uint8Array(input);
+    if (base < 2 || new Set(alphabet).size !== base)
+      throw new OperationError(
+        "Base62 alphabet must contain at least 2 unique characters.",
+      );
+    if (bytes.length === 0) return "";
 
     let leading = 0;
     for (let i = 0; i < bytes.length; i++) {
@@ -62,12 +68,10 @@ export class ToBase62 extends TypedOperation<ArrayBuffer, string, unknown[]> {
       }
     }
 
-    let res = "";
-    for (let i = 0; i < leading; i++) res += alphabet[0];
-    for (let i = digits.length - 1; i >= 0; i--) res += alphabet[digits[i]];
-
-    // If all input was zeros, the above loop results in one extra alphabet[0] if not careful
-    // but for Base62/58 we usually want the leading zeros preserved.
+    let res = alphabet[0].repeat(leading);
+    if (leading < bytes.length) {
+      for (let i = digits.length - 1; i >= 0; i--) res += alphabet[digits[i]];
+    }
 
     return res;
   }

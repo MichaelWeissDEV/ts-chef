@@ -8,10 +8,10 @@
  */
 
 import { TypedOperation } from "../Operation";
-import kbpgp from "kbpgp";
+import kbpgp from "../lib/KbpgpCompat";
 import { ASP, importPrivateKey } from "../lib/PGP";
 import OperationError from "../errors/OperationError";
-import promisify from "es6-promisify";
+import { promisify } from "es6-promisify";
 
 /**
  * PGP Decrypt operation

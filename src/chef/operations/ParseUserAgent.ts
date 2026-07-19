@@ -8,7 +8,7 @@
  */
 
 import { TypedOperation, AnyInput } from "../Operation";
-import UAParser from "ua-parser-js";
+import { UAParser } from "ua-parser-js";
 
 /**
  * Parse User Agent operation

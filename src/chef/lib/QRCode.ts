@@ -10,7 +10,7 @@ import OperationError from "../errors/OperationError";
 import jsQR from "jsqr";
 import qr from "qr-image";
 import Utils from "../Utils";
-import { Jimp, JimpMime } from "jimp";
+import { readJimpImage } from "./JimpImage";
 
 /**
  * Parses a QR code image from an image
@@ -25,7 +25,7 @@ export async function parseQrCode(
 ): Promise<string> {
   let image: any;
   try {
-    image = await Jimp.read(input as any);
+    image = await readJimpImage(input);
   } catch (err) {
     throw new OperationError(`Error opening image. (${err})`);
   }
@@ -50,8 +50,6 @@ export async function parseQrCode(
     // Otherwise, make it fully opaque at its existing colour
     image.bitmap.data[idx + 3] = 0xff;
   });
-  image = await Jimp.read(await image.getBuffer(JimpMime.jpeg));
-
   const qrData = jsQR(
     new Uint8ClampedArray(image.bitmap.data),
     image.width,

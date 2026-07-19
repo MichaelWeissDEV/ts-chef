@@ -10,9 +10,9 @@
 import { TypedOperation } from "../Operation";
 import OperationError from "../errors/OperationError";
 
-import kbpgp from "kbpgp";
+import kbpgp from "../lib/KbpgpCompat";
 import { ASP, importPublicKey } from "../lib/PGP";
-import promisify from "es6-promisify";
+import { promisify } from "es6-promisify";
 
 /**
  * PGP Verify operation

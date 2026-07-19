@@ -14,7 +14,7 @@ import jq from "jq-web";
 /**
  * jq operation
  */
-export class Jq extends TypedOperation<AnyInput, AnyInput, unknown[]> {
+export class Jq extends TypedOperation<AnyInput, Promise<AnyInput>, unknown[]> {
   /**
    * Jq constructor
    */
@@ -47,12 +47,13 @@ export class Jq extends TypedOperation<AnyInput, AnyInput, unknown[]> {
    * @param {Object[]} args
    * @returns {string}
    */
-  run(input: AnyInput, args: unknown[]): AnyInput {
+  async run(input: AnyInput, args: unknown[]): Promise<AnyInput> {
     const [query, raw] = args as [string, boolean];
     let result;
 
     try {
-      result = jq.json(input, query);
+      const jqApi = await jq;
+      result = jqApi.json(input, query);
     } catch (err) {
       throw new OperationError(
         `Invalid jq expression: ${err instanceof Error ? err.message : String(err)}`,

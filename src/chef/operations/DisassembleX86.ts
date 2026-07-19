@@ -7,14 +7,14 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, AnyInput } from "../Operation";
-import * as disassemble from "../vendor/DisassembleX86-64";
+import { TypedOperation } from "../Operation";
 import OperationError from "../errors/OperationError";
+import { loadCapstone } from "../lib/Capstone";
 
 /**
  * Disassemble x86 operation
  */
-export class DisassembleX86 extends TypedOperation<string, AnyInput, unknown[]> {
+export class DisassembleX86 extends TypedOperation<string, Promise<string>, unknown[]> {
   /**
    * DisassembleX86 constructor
    */
@@ -77,7 +77,7 @@ export class DisassembleX86 extends TypedOperation<string, AnyInput, unknown[]> 
    *
    * @throws {OperationError} if invalid mode value
    */
-  run(input: string, args: unknown[]): AnyInput {
+  async run(input: string, args: unknown[]): Promise<string> {
     const [
       mode,
       compatibility,
@@ -87,56 +87,68 @@ export class DisassembleX86 extends TypedOperation<string, AnyInput, unknown[]> 
       showInstructionPos,
     ] = args as [string, string, number, number, boolean, boolean];
 
-    switch (mode) {
-      case "64":
-        disassemble.setBitMode(2);
-        break;
-      case "32":
-        disassemble.setBitMode(1);
-        break;
-      case "16":
-        disassemble.setBitMode(0);
-        break;
-      default:
-        throw new OperationError("Invalid mode value");
-    }
-
-    switch (compatibility) {
-      case "Full x86 architecture":
-        disassemble.CompatibilityMode(0);
-        break;
-      case "Knights Corner":
-        disassemble.CompatibilityMode(1);
-        break;
-      case "Larrabee":
-        disassemble.CompatibilityMode(2);
-        break;
-      case "Cyrix":
-        disassemble.CompatibilityMode(3);
-        break;
-      case "Geode":
-        disassemble.CompatibilityMode(4);
-        break;
-      case "Centaur":
-        disassemble.CompatibilityMode(5);
-        break;
-      case "X86/486":
-        disassemble.CompatibilityMode(6);
-        break;
-    }
-
-    disassemble.SetBasePosition(codeSegment + ":" + offset);
-    disassemble.setShowInstructionHex(showInstructionHex);
-    disassemble.setShowInstructionPos(showInstructionPos);
     const code = input.replace(/\s/g, "");
-    disassemble.LoadBinCode(code);
-    const output = disassemble.LDisassemble();
-    if (code && !output) {
+    if (!/^[0-9a-fA-F]*$/.test(code)) {
       throw new OperationError(
-        "The x86 disassembly backend is unavailable in this build",
+        "Invalid hexadecimal input. Please provide valid hex characters only.",
       );
     }
-    return output;
+    if (code.length % 2 !== 0) {
+      throw new OperationError("Invalid hexadecimal input. Length must be even.");
+    }
+    if (!code) return "";
+    if (compatibility !== "Full x86 architecture") {
+      throw new OperationError(
+        `Compatibility profile '${compatibility}' is not supported by the Capstone backend.`,
+      );
+    }
+
+    const cs = await loadCapstone();
+    const modes: Record<string, number> = {
+      "16": cs.MODE_16,
+      "32": cs.MODE_32,
+      "64": cs.MODE_64,
+    };
+    const capstoneMode = modes[mode];
+    if (capstoneMode === undefined) {
+      throw new OperationError("Invalid mode value");
+    }
+
+    const bytes = code.match(/.{2}/g)?.map((byte) => parseInt(byte, 16)) ?? [];
+    const startAddress = mode === "16" ? codeSegment * 16 + offset : offset;
+    let disassembler;
+    try {
+      disassembler = new cs.Capstone(cs.ARCH_X86, capstoneMode);
+      const instructions = disassembler.disasm(bytes, startAddress);
+      return instructions
+        .map((instruction) => {
+          const columns: string[] = [];
+          if (showInstructionPos) {
+            columns.push(`0x${instruction.address.toString(16).padStart(8, "0")}`);
+          }
+          if (showInstructionHex) {
+            columns.push(
+              instruction.bytes
+                .map((byte) => byte.toString(16).padStart(2, "0"))
+                .join("")
+                .padEnd(16, " "),
+            );
+          }
+          columns.push(
+            instruction.op_str
+              ? `${instruction.mnemonic} ${instruction.op_str}`
+              : instruction.mnemonic,
+          );
+          return columns.join("  ");
+        })
+        .join("\n");
+    } catch (error) {
+      throw new OperationError(
+        `x86 disassembly failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    } finally {
+      disassembler?.close();
+    }
   }
 }
 

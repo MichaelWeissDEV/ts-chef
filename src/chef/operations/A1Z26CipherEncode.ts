@@ -1,3 +1,11 @@
+/**
+ * @fileoverview A1Z26CipherEncode operation - Ported from GCHQ's CyberChef
+ * @package chef/operations
+ * @license Apache-2.0
+ * @author Michael Weiss
+ * @copyright 2024-2026 Michael Weiss
+ * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
+ */
 
 import { TypedOperation } from "../Operation";
 import { Utils } from "../Utils";
@@ -8,7 +16,11 @@ import { DELIM_OPTIONS } from "../lib/Delim";
  *
  * @category Ciphers
  */
-export class A1Z26CipherEncode extends TypedOperation<string, string, string[]> {
+export class A1Z26CipherEncode extends TypedOperation<
+  string,
+  string,
+  string[]
+> {
   /**
    * A1Z26CipherEncode constructor
    */

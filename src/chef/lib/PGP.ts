@@ -10,8 +10,8 @@
  */
 
 import OperationError from "../errors/OperationError";
-import kbpgp from "kbpgp";
-import promisify from "es6-promisify";
+import kbpgp from "./KbpgpCompat";
+import { promisify } from "es6-promisify";
 
 /**
  * Progress callback

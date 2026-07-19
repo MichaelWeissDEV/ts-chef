@@ -63,15 +63,15 @@ export class OpticalCharacterRecognition extends TypedOperation<ArrayBuffer, Pro
       );
     }
 
-    const assetDir = `${(global as any).docURL || ""}/assets/`;
     const oem = OEM_MODES.indexOf(oemChoice);
+    if (oem < 0) {
+      throw new OperationError(`Unsupported OCR engine mode: ${oemChoice}`);
+    }
 
+    let worker: Awaited<ReturnType<typeof createWorker>> | undefined;
     try {
       const image = `data:${type};base64,${toBase64(input)}`;
-      const worker = await createWorker("eng", oem, {
-        workerPath: `${assetDir}tesseract/worker.min.js`,
-        langPath: `${assetDir}tesseract/lang-data`,
-        corePath: `${assetDir}tesseract/tesseract-core.wasm.js`,
+      worker = await createWorker("eng", oem, {
         logger: () => {},
       });
       const result = await worker.recognize(image);
@@ -83,6 +83,8 @@ export class OpticalCharacterRecognition extends TypedOperation<ArrayBuffer, Pro
       }
     } catch (err) {
       throw new OperationError(`Error performing OCR on image. (${err})`);
+    } finally {
+      await worker?.terminate();
     }
   }
 }

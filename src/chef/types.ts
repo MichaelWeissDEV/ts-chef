@@ -78,6 +78,13 @@ export const INPUT_TYPES = {
   LIST_FILE: "list_file",
 } as const;
 
+function isArrayBufferAcrossRealms(value: unknown): value is ArrayBuffer {
+  return (
+    value instanceof ArrayBuffer ||
+    Object.prototype.toString.call(value) === "[object ArrayBuffer]"
+  );
+}
+
 /**
  * Type for input/output type strings.
  */
@@ -87,7 +94,7 @@ export type InputType = (typeof INPUT_TYPES)[keyof typeof INPUT_TYPES];
  * Type guard to check if a value is an ArrayBuffer
  */
 export function isArrayBuffer(value: PipelineData): value is ArrayBuffer {
-  return value instanceof ArrayBuffer;
+  return isArrayBufferAcrossRealms(value);
 }
 
 /**
@@ -157,7 +164,7 @@ export function isArray(value: PipelineData): value is Array<PipelineData> {
 export function toString(data: PipelineData): string {
   if (data === null || data === undefined) return "";
   if (typeof data === "string") return data;
-  if (data instanceof ArrayBuffer) {
+  if (isArrayBufferAcrossRealms(data)) {
     return new TextDecoder().decode(data);
   }
   if (ArrayBuffer.isView(data) && data instanceof Uint8Array) {
@@ -172,7 +179,7 @@ export function toString(data: PipelineData): string {
  */
 export function toUint8Array(data: PipelineData): Uint8Array {
   if (data instanceof Uint8Array) return data;
-  if (data instanceof ArrayBuffer) return new Uint8Array(data);
+  if (isArrayBufferAcrossRealms(data)) return new Uint8Array(data);
   if (typeof data === "string") {
     return new TextEncoder().encode(data);
   }
@@ -188,7 +195,7 @@ export function toUint8Array(data: PipelineData): Uint8Array {
  * Handles strings, Uint8Arrays, and other typed arrays.
  */
 export function toArrayBuffer(data: PipelineData): ArrayBuffer {
-  if (data instanceof ArrayBuffer) return data;
+  if (isArrayBufferAcrossRealms(data)) return data;
   // Funnel everything else through toUint8Array and copy into a freshly
   // allocated (non-shared) ArrayBuffer so the return type is guaranteed to be
   // a plain ArrayBuffer rather than ArrayBufferLike (e.g. SharedArrayBuffer).
@@ -227,7 +234,7 @@ export function normaliseInput(input: unknown, inputType: string): unknown {
   const textValue = (): string => {
     if (input === null || input === undefined) return "";
     if (typeof input === "string") return input;
-    if (input instanceof ArrayBuffer)
+    if (isArrayBufferAcrossRealms(input))
       return Buffer.from(new Uint8Array(input)).toString("utf-8");
     if (Buffer.isBuffer(input) || input instanceof Uint8Array)
       return Buffer.from(input).toString("utf-8");
@@ -237,7 +244,8 @@ export function normaliseInput(input: unknown, inputType: string): unknown {
     return String(input);
   };
   const byteValue = (): Buffer => {
-    if (input instanceof ArrayBuffer) return Buffer.from(new Uint8Array(input));
+    if (isArrayBufferAcrossRealms(input))
+      return Buffer.from(new Uint8Array(input));
     if (Buffer.isBuffer(input) || input instanceof Uint8Array)
       return Buffer.from(input);
     if (Array.isArray(input) && input.every((item) => typeof item === "number"))

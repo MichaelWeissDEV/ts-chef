@@ -1,9 +1,12 @@
 /**
- * @fileoverview index operation - Ported from GCHQ's CyberChef
- * @package chef/operations
+ * Public operation exports for the ts-chef engine.
+ *
+ * Ported in part from GCHQ's CyberChef.
+ * Copyright 2024-2026 Michael Weiss.
+ *
+ * @module chef/operations
  * @license Apache-2.0
  * @author Michael Weiss
- * @copyright 2024-2026 Michael Weiss
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 

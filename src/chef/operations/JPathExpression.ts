@@ -49,7 +49,8 @@ export class JPathExpression extends TypedOperation<string, string, unknown[]> {
    */
   run(input: string, args: unknown[]): string {
     const [query, delimiter] = args as [string, string];
-    let results, jsonObj;
+    let results: unknown[];
+    let jsonObj: null | boolean | number | string | object | unknown[];
 
     try {
       jsonObj = JSON.parse(input);
@@ -60,7 +61,7 @@ export class JPathExpression extends TypedOperation<string, string, unknown[]> {
     }
 
     try {
-      results = JSONPath({
+      results = JSONPath<unknown[]>({
         path: query,
         json: jsonObj,
       });

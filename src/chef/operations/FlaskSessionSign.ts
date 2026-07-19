@@ -8,7 +8,7 @@
  */
 
 import { TypedOperation, AnyInput } from "../Operation";
-import CryptoApi from "crypto-api/src/crypto-api";
+import CryptoApi from "../lib/CryptoApiCompat";
 import Utils from "../Utils";
 import { toBase64 } from "../lib/Base64";
 import OperationError from "../errors/OperationError";

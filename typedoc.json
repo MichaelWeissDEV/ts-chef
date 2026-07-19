@@ -4,5 +4,10 @@
   "hideGenerator": true,
   "name": "ts-chef API Documentation",
   "excludeExternals": true,
-  "readme": "docs/README.md"
+  "readme": "docs/README.md",
+  "excludeTags": ["@param"],
+  "validation": {
+    "notExported": false
+  },
+  "treatWarningsAsErrors": true
 }

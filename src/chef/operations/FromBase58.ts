@@ -41,6 +41,10 @@ export class FromBase58 extends TypedOperation<string, number[], unknown[]> {
     let alphabet = (args[0] as string) || ALPHABET_BITCOIN_B58;
     if (alphabet === "Bitcoin") alphabet = ALPHABET_BITCOIN_B58;
     if (alphabet === "Ripple") alphabet = ALPHABET_RIPPLE_B58;
+    if (alphabet.length !== 58 || new Set(alphabet).size !== 58)
+      throw new OperationError(
+        "Base58 alphabet must contain exactly 58 unique characters.",
+      );
 
     const removeNonAlpha = (args[1] as boolean) ?? true;
 
@@ -55,7 +59,7 @@ export class FromBase58 extends TypedOperation<string, number[], unknown[]> {
         .join("");
     }
 
-    if (!cleaned) throw new OperationError("No valid Base58 input found.");
+    if (!cleaned) return [];
 
     let leading = 0;
     for (const ch of cleaned) {
@@ -63,8 +67,11 @@ export class FromBase58 extends TypedOperation<string, number[], unknown[]> {
       else break;
     }
 
+    const encodedValue = cleaned.slice(leading);
+    if (!encodedValue) return new Array(leading).fill(0);
+
     const result: number[] = [0];
-    for (const ch of cleaned) {
+    for (const ch of encodedValue) {
       const val = map.get(ch);
       if (val === undefined)
         throw new OperationError(`Invalid Base58 character: '${ch}'`);
