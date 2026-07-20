@@ -48,6 +48,20 @@ function provider(
 }
 
 describe("PipelinesTreeProvider groups", () => {
+  test("does not materialise built-in pipelines until tree data is requested", () => {
+    const store = {
+      loadAll: jest.fn(() => []),
+    } as unknown as PipelineStore;
+    const loadBuiltIns = jest.fn(() => [standardPipeline()]);
+    const tree = new PipelinesTreeProvider(store, loadBuiltIns);
+
+    expect(loadBuiltIns).not.toHaveBeenCalled();
+    const [standardRoot] = tree.getChildren();
+    expect(loadBuiltIns).toHaveBeenCalledTimes(1);
+    expect(tree.getChildren(standardRoot)).toHaveLength(1);
+    expect(loadBuiltIns).toHaveBeenCalledTimes(2);
+  });
+
   test("shows standard and personal pipelines as separate expanded roots", () => {
     const tree = provider([
       personalPipeline("Workspace decoder", "workspace"),

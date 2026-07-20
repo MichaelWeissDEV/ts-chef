@@ -6,24 +6,28 @@
 "use strict";
 
 const Module = require("module");
+const fs = require("fs");
 const path = require("path");
 
 let vscodeValue;
-vscodeValue = new Proxy(function vscodeApiValue() {
-  return vscodeValue;
-}, {
-  get(_target, property) {
-    if (property === Symbol.toPrimitive) return () => 0;
-    if (property === "then") return undefined;
+vscodeValue = new Proxy(
+  function vscodeApiValue() {
     return vscodeValue;
   },
-  construct() {
-    return vscodeValue;
+  {
+    get(_target, property) {
+      if (property === Symbol.toPrimitive) return () => 0;
+      if (property === "then") return undefined;
+      return vscodeValue;
+    },
+    construct() {
+      return vscodeValue;
+    },
+    apply() {
+      return vscodeValue;
+    },
   },
-  apply() {
-    return vscodeValue;
-  },
-});
+);
 
 const vscodeNames = [
   "window",
@@ -59,6 +63,14 @@ const projectRoot = path.resolve(__dirname, "..");
 const bundlePath = process.argv[2]
   ? path.resolve(process.argv[2])
   : path.join(projectRoot, "dist", "extension.js");
+const maxMainBundleBytes = 3 * 1024 * 1024;
+const mainBundleBytes = fs.statSync(bundlePath).size;
+if (mainBundleBytes > maxMainBundleBytes) {
+  throw new Error(
+    `Production entry bundle is ${(mainBundleBytes / 1024 / 1024).toFixed(1)} MiB; ` +
+      `the metadata-only budget is ${maxMainBundleBytes / 1024 / 1024} MiB.`,
+  );
+}
 const originalLoad = Module._load;
 
 try {
@@ -74,4 +86,6 @@ try {
   Module._load = originalLoad;
 }
 
-console.log("Production bundle activation import verified.");
+console.log(
+  `Production bundle activation import verified (${(mainBundleBytes / 1024 / 1024).toFixed(1)} MiB).`,
+);

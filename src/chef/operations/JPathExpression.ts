@@ -61,10 +61,10 @@ export class JPathExpression extends TypedOperation<string, string, unknown[]> {
     }
 
     try {
-      results = JSONPath<unknown[]>({
+      results = JSONPath({
         path: query,
         json: jsonObj,
-      });
+      }) as unknown[];
     } catch (err) {
       throw new OperationError(
         `Invalid JPath expression: ${err instanceof Error ? err.message : String(err)}`,

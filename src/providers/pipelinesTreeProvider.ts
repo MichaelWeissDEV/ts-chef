@@ -12,6 +12,9 @@ import { PipelineStore, ScopedPipeline } from "../storage/store";
 import type { BuiltInPipeline } from "../recipes/standardRecipes";
 
 type AvailablePipeline = ScopedPipeline | BuiltInPipeline;
+type BuiltInPipelineSource =
+  | readonly BuiltInPipeline[]
+  | (() => readonly BuiltInPipeline[]);
 
 type PipelineGroupKind = "standard" | "personal";
 
@@ -25,9 +28,7 @@ export class PipelineGroupNode extends vscode.TreeItem {
       vscode.TreeItemCollapsibleState.Expanded,
     );
     this.description =
-      kind === "personal" && count === 0
-        ? "No saved pipelines"
-        : `${count}`;
+      kind === "personal" && count === 0 ? "No saved pipelines" : `${count}`;
     this.tooltip =
       kind === "standard"
         ? `${count} bundled, ready-to-use pipeline${count === 1 ? "" : "s"}`
@@ -89,16 +90,20 @@ export type PipelineTreeNode =
  * user-created global/workspace pipelines are kept in separate root groups.
  * Clicking an actual pipeline runs it against the active selection.
  */
-export class PipelinesTreeProvider
-  implements vscode.TreeDataProvider<PipelineTreeNode>
-{
+export class PipelinesTreeProvider implements vscode.TreeDataProvider<PipelineTreeNode> {
   private _onDidChangeTreeData = new vscode.EventEmitter<void>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
   constructor(
     private store: PipelineStore,
-    private readonly builtIns: readonly BuiltInPipeline[] = [],
+    private readonly builtInSource: BuiltInPipelineSource = [],
   ) {}
+
+  private builtIns(): readonly BuiltInPipeline[] {
+    return typeof this.builtInSource === "function"
+      ? this.builtInSource()
+      : this.builtInSource;
+  }
 
   refresh(): void {
     this._onDidChangeTreeData.fire();
@@ -110,15 +115,16 @@ export class PipelinesTreeProvider
   getChildren(element?: PipelineTreeNode): PipelineTreeNode[] {
     if (!element) {
       const personalCount = this.store.loadAll().length;
+      const builtIns = this.builtIns();
       return [
-        new PipelineGroupNode("standard", this.builtIns.length),
+        new PipelineGroupNode("standard", builtIns.length),
         new PipelineGroupNode("personal", personalCount),
       ];
     }
 
     if (!(element instanceof PipelineGroupNode)) return [];
     if (element.kind === "standard") {
-      return this.builtIns.map((pipeline) => new PipelineNode(pipeline));
+      return this.builtIns().map((pipeline) => new PipelineNode(pipeline));
     }
 
     const personalPipelines = this.store.loadAll();

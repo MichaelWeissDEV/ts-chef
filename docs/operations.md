@@ -28,4 +28,4 @@
 
 ---
 
-For a full list of all 480+ operations, please refer to the generated API Documentation (available as a ZIP in each release).
+For the full list of all 479 operations, please refer to the generated API Documentation (available as a ZIP in each release).

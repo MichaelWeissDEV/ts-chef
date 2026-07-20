@@ -47,4 +47,8 @@ Stored global/workspace variables use the explicit `{{name}}` syntax in operatio
 
 Workspace-scoped variables and pipelines are not loaded or written while VS Code is in Restricted Mode. Store files are schema-validated, bounded, written atomically, and are not loaded or overwritten through repository-controlled symbolic links.
 
+## Keyboard Shortcuts and History
+
+No keys are occupied by default. Configure named operations, inline pipelines, saved pipelines, or history navigation under `tschef.shortcuts`, then bind the generated `tschef.shortcut.<id>` command. The session-only history can repeat the last action, cycle backward/forward, or apply an exact 1-based offset without recording repetitions again. See [Keyboard Shortcuts and Operation History](shortcuts.md).
+
 You can use the **Register** operation to save intermediate results into variables (e.g., `$R0`, `$R1`). These can then be passed as arguments into subsequent operations in the same pipeline.

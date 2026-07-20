@@ -1,0 +1,16 @@
+{
+  "Default": 16,
+  "Crypto": 4,
+  "Ciphers": 4,
+  "Image": 4,
+  "Compression": 3,
+  "Code": 3,
+  "Regex": 2,
+  "Encodings": 2,
+  "PublicKey": 2,
+  "Hashing": 2,
+  "Bletchley": 2,
+  "Serialise": 2,
+  "PGP": 2,
+  "Charts": 2
+}

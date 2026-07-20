@@ -158,6 +158,34 @@
       {
         "command": "tschef.makeReadable",
         "title": "tschef: Make Readable (Reflow Long Lines)"
+      },
+      {
+        "command": "tschef.runShortcut",
+        "title": "tschef: Run Registered Shortcut"
+      },
+      {
+        "command": "tschef.configureShortcuts",
+        "title": "tschef: Configure Keyboard Shortcuts"
+      },
+      {
+        "command": "tschef.repeatLastOperation",
+        "title": "tschef: Repeat Last Operation"
+      },
+      {
+        "command": "tschef.cycleOperationHistoryBack",
+        "title": "tschef: Apply Previous Operation in History"
+      },
+      {
+        "command": "tschef.cycleOperationHistoryForward",
+        "title": "tschef: Apply Next Operation in History"
+      },
+      {
+        "command": "tschef.repeatOperationFromHistory",
+        "title": "tschef: Repeat Operation from History..."
+      },
+      {
+        "command": "tschef.clearOperationHistory",
+        "title": "tschef: Clear Operation History"
       }
     ],
     "viewsContainers": {
@@ -200,26 +228,6 @@
         }
       ]
     },
-    "keybindings": [
-      {
-        "command": "tschef.quickConvert",
-        "key": "ctrl+alt+c",
-        "mac": "ctrl+cmd+c",
-        "when": "editorTextFocus && editorHasSelection"
-      },
-      {
-        "command": "tschef.runSavedPipelinePicker",
-        "key": "ctrl+alt+r",
-        "mac": "ctrl+cmd+r",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "tschef.smartFormat",
-        "key": "ctrl+alt+f",
-        "mac": "ctrl+cmd+f",
-        "when": "editorTextFocus"
-      }
-    ],
     "viewsWelcome": [
       {
         "view": "tschef.pipelinesView",
@@ -451,16 +459,40 @@
           ],
           "default": "global",
           "description": "Default scope pre-selected when saving a variable"
+        },
+        "tschef.shortcuts": {
+          "type": "object",
+          "default": {},
+          "maxProperties": 1000,
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256000
+          },
+          "markdownDescription": "Named operation/pipeline/history shortcuts. Each key registers `tschef.shortcut.<id>` dynamically. Values accept pipe syntax (`From Base64 | JSON Beautify`), `pipeline:<saved name>`, or `history:last`, `history:previous`, `history:next`, `history:<1-based offset>`. No keyboard shortcut is assigned automatically."
+        },
+        "tschef.shortcutHistorySize": {
+          "type": "number",
+          "default": 100,
+          "minimum": 1,
+          "maximum": 10000,
+          "description": "Maximum number of operations and pipelines retained in the in-memory session history. History is never persisted, so argument secrets are not written to disk."
         }
       }
     }
   },
   "scripts": {
     "vscode:prepublish": "npm run build",
-    "compile": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --external:libbzip2-wasm --external:@alexaltea/capstone-js --external:@blu3r4y/lzma --external:jq-web --external:node-md6 --platform=node --format=cjs --sourcemap --define:require.resolve=false",
-    "verify:bundle": "node scripts/verify-bundle.cjs",
+    "compile": "npm run compile:extension && npm run compile:operations",
+    "compile:extension": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --external:libbzip2-wasm --external:@alexaltea/capstone-js --external:@blu3r4y/lzma --external:jq-web --external:node-md6 --platform=node --format=cjs --sourcemap --define:require.resolve=false",
+    "compile:operations": "node scripts/build-operation-chunks.cjs",
+    "verify:bundle": "node scripts/verify-bundle.cjs && node scripts/verify-operation-chunks.cjs",
     "build": "npm run compile && npm run verify:bundle",
-    "watch": "npm run compile -- --watch",
+    "bench:bundle": "npm run build && node --expose-gc scripts/benchmark-bundle.cjs",
+    "watch": "npm run compile:operations && npm run compile:extension -- --watch",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

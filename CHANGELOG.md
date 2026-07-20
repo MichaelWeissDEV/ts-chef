@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added an open-ended keyboard shortcut registry for operations, inline pipelines, saved pipelines, and history navigation, plus direct repeat/cycle/history-picker commands. No keys are assigned by default.
+- Added a bounded, session-only operation history with exact 1-based recall and stable backward/forward cycling across Quick Convert, hover, recipes, pipelines, sidebar operations, and registered shortcuts.
+- Added generated lazy operation chunks and a metadata-only startup registry, retaining all 479 operations while loading implementation families on demand.
+- Added shortcut/history tests, lazy-loading and packaging contracts, all-factory production validation, a bundle-size regression budget, and reproducible cold-start benchmarking.
+
+### Changed
+
+- Cache Quick Convert metadata after first use and resolve internal/display operation names in O(1).
+- Lazily load bundled standard-pipeline definitions and split common and dependency-heavy operation paths into 72 bounded chunks.
+- Removed extension-provided default keybindings so users retain full control of their keyboard layout.
+
 ## [0.8.1] - 2026-07-19
 
 ### Added

@@ -86,14 +86,17 @@ function defaultScope(
     .getConfiguration("tschef")
     .get<StorageScope>(key, "global");
 }
-import {
-  magicAnalyse,
-  stringStats,
-  type MagicChain,
-} from "./providers/magic";
+import { magicAnalyse, stringStats, type MagicChain } from "./providers/magic";
 import { initOutputChannel, log } from "./logger";
 import registry from "./opsRegistry";
 import type { ArgConfig, Operation } from "./chef/Operation";
+import {
+  ActionHistory,
+  describeHistoryAction,
+  parseShortcutRegistry,
+  type HistoryAction,
+  type ShortcutBinding,
+} from "./commands/shortcutRegistry";
 
 function resultToString(result: unknown, outputType?: string): string {
   const normalisedType = outputType?.toLowerCase().replace(/[^a-z]/g, "");
@@ -113,7 +116,8 @@ function resultToString(result: unknown, outputType?: string): string {
     (normalisedType === "bytearray" || normalisedType === "arraybuffer") &&
     Array.isArray(result) &&
     result.every(
-      (item) => Number.isInteger(item) && Number(item) >= 0 && Number(item) <= 255,
+      (item) =>
+        Number.isInteger(item) && Number(item) >= 0 && Number(item) <= 255,
     )
   )
     bytes = Buffer.from(result as number[]);
@@ -129,12 +133,17 @@ function resultToString(result: unknown, outputType?: string): string {
   }
 }
 
-function graphOutputType(graph: PipelineGraph, path: readonly string[]): string {
+function graphOutputType(
+  graph: PipelineGraph,
+  path: readonly string[],
+): string {
   for (let index = path.length - 1; index >= 0; index -= 1) {
     const node = graph.nodes.find((candidate) => candidate.id === path[index]);
     if (node?.type !== "operation") continue;
-    return registry.find((entry) => entry.opName === node.opName)?.factory()
-      .outputType ?? "string";
+    return (
+      registry.find((entry) => entry.opName === node.opName)?.factory()
+        .outputType ?? "string"
+    );
   }
   return "string";
 }
@@ -143,7 +152,9 @@ function graphSupportsDirectExecution(graph: PipelineGraph): boolean {
   const reachable = new Set(validatePipelineGraph(graph).reachableNodeIds);
   return graph.nodes.every((node) => {
     if (node.type !== "operation" || !reachable.has(node.id)) return true;
-    const entry = registry.find((candidate) => candidate.opName === node.opName);
+    const entry = registry.find(
+      (candidate) => candidate.opName === node.opName,
+    );
     return Boolean(entry && !entry.factory().flowControl);
   });
 }
@@ -163,7 +174,9 @@ async function runSavedGraph(
   if (values.length > 1) {
     const picked = await vscode.window.showQuickPick(
       values.map((result) => ({
-        label: result.error ? `$(error) ${result.name}` : `$(output) ${result.name}`,
+        label: result.error
+          ? `$(error) ${result.name}`
+          : `$(output) ${result.name}`,
         description: result.error ? "failed" : "ready",
         detail: result.error?.message ?? `${result.path.length} graph nodes`,
         picked: result.outputId === selected.outputId,
@@ -181,10 +194,7 @@ async function runSavedGraph(
   }
   if (selected.error) throw new Error(selected.error.message);
   return {
-    text: resultToString(
-      selected.value,
-      graphOutputType(graph, selected.path),
-    ),
+    text: resultToString(selected.value, graphOutputType(graph, selected.path)),
     outputName: selected.name,
   };
 }
@@ -227,7 +237,12 @@ async function promptForArgs(opInstance: Operation): Promise<unknown[] | null> {
   return result;
 }
 
+let opPickItemsCache:
+  | (vscode.QuickPickItem & { opName?: string })[]
+  | undefined;
+
 function buildOpPickItems(): (vscode.QuickPickItem & { opName?: string })[] {
+  if (opPickItemsCache) return opPickItemsCache;
   const byModule = new Map<string, typeof registry>();
   for (const e of registry) {
     const mod = e.module || "Other";
@@ -253,7 +268,8 @@ function buildOpPickItems(): (vscode.QuickPickItem & { opName?: string })[] {
       });
     }
   }
-  return items;
+  opPickItemsCache = items;
+  return opPickItemsCache;
 }
 
 /**
@@ -274,10 +290,20 @@ export function activate(context: vscode.ExtensionContext): void {
   const globalDir = context.globalStorageUri.fsPath;
   const varStore = new VariableStore(globalDir);
   const pipeStore = new PipelineStore(globalDir);
-  const standardPipelines = loadStandardRecipes();
+  let standardPipelineCache: BuiltInPipeline[] | undefined;
+  const standardPipelines = (): BuiltInPipeline[] =>
+    (standardPipelineCache ??= loadStandardRecipes());
+  const historyCapacity = vscode.workspace
+    .getConfiguration("tschef")
+    .get<number>("shortcutHistorySize", 100);
+  const actionHistory = new ActionHistory(
+    Number.isFinite(historyCapacity)
+      ? Math.max(1, Math.min(10_000, Math.trunc(historyCapacity)))
+      : 100,
+  );
 
   const allPipelines = (): Array<Pipeline | BuiltInPipeline> => [
-    ...standardPipelines,
+    ...standardPipelines(),
     ...pipeStore.loadAll(),
   ];
   type PipelineCommandValue =
@@ -297,7 +323,7 @@ export function activate(context: vscode.ExtensionContext): void {
     } else {
       resolved =
         pipeStore.findByName(value) ??
-        standardPipelines.find(
+        standardPipelines().find(
           (pipeline) => pipeline.id === value || pipeline.name === value,
         );
     }
@@ -367,7 +393,7 @@ export function activate(context: vscode.ExtensionContext): void {
   };
 
   // Lazily instantiate operations only when their arg defs are first needed,
-  // so the ~479 ops aren't all constructed at startup.
+  // so the 479 ops aren't all constructed at startup.
   const argDefsCache = new Map<string, ArgConfig[]>();
   const argDefsFor = (opName: string): ArgConfig[] | undefined => {
     const cached = argDefsCache.get(opName);
@@ -380,6 +406,61 @@ export function activate(context: vscode.ExtensionContext): void {
   };
   const displayNameFor = (opName: string): string =>
     registry.find((e) => e.opName === opName)?.displayName ?? opName;
+
+  const operationAction = (
+    opName: string,
+    args: unknown[],
+    label = displayNameFor(opName),
+  ): HistoryAction => ({ kind: "operation", opName, args, label });
+
+  const pipelineAction = (
+    steps: Pipeline["steps"],
+    label: string,
+  ): HistoryAction =>
+    steps.length === 1
+      ? operationAction(steps[0].opName, steps[0].args, label)
+      : { kind: "pipeline", steps, label };
+
+  /** Repeat an action against the current selection/document without re-recording it. */
+  async function applyHistoryAction(action: HistoryAction): Promise<boolean> {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showWarningMessage("ts-chef: No active editor.");
+      return false;
+    }
+    const target = capturePipelineResultTarget(editor);
+    const input = resolveVariableTemplates(target.value, varStore);
+    try {
+      let result: string;
+      if (action.kind === "operation") {
+        const meta = registry.find((entry) => entry.opName === action.opName);
+        if (!meta) throw new Error(`Unknown operation: ${action.opName}`);
+        result = resultToString(
+          await runOpAsync(action.opName, input, action.args),
+          meta.factory().outputType,
+        );
+      } else {
+        result = await runPipeline(input, action.steps);
+      }
+      if (result === "" && target.value !== "") {
+        vscode.window.showWarningMessage(
+          `ts-chef: "${action.label}" produced an empty result — nothing replaced.`,
+        );
+        return false;
+      }
+      if (!(await replaceTextEditSnapshot(target, result))) return false;
+      log(`Shortcut/history action applied: "${action.label}"`);
+      vscode.window.setStatusBarMessage(
+        `ts-chef: Applied "${describeHistoryAction(action)}"`,
+        3000,
+      );
+      return true;
+    } catch (error) {
+      log(`Shortcut/history action error: ${error}`);
+      vscode.window.showErrorMessage(`ts-chef: ${error}`);
+      return false;
+    }
+  }
 
   // ---- Operations + Recipe sidebars (WebviewViews) ----
   const recipeView = new RecipeViewProvider({
@@ -461,6 +542,7 @@ export function activate(context: vscode.ExtensionContext): void {
         resultRenderers,
         target,
       );
+      actionHistory.record(pipelineAction(steps, "Recipe"));
     } catch (e) {
       log(`Recipe error: ${e}`);
       vscode.window.showErrorMessage(`ts-chef recipe error: ${e}`);
@@ -546,6 +628,235 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   // ---- Commands ----
+
+  let shortcutBindings: ShortcutBinding[] = [];
+  const dynamicShortcutCommands = new Map<string, vscode.Disposable>();
+
+  const historyActionFor = (
+    target: ShortcutBinding["target"],
+  ): HistoryAction | undefined => {
+    switch (target.kind) {
+      case "history-last":
+        return actionHistory.last();
+      case "history-previous":
+        return actionHistory.previous();
+      case "history-next":
+        return actionHistory.next();
+      case "history-offset":
+        return actionHistory.at(target.offset);
+      default:
+        return undefined;
+    }
+  };
+
+  async function executeShortcut(binding: ShortcutBinding): Promise<void> {
+    const target = binding.target;
+    if (
+      target.kind === "history-last" ||
+      target.kind === "history-previous" ||
+      target.kind === "history-next" ||
+      target.kind === "history-offset"
+    ) {
+      const action = historyActionFor(target);
+      if (!action) {
+        vscode.window.showInformationMessage(
+          "ts-chef: The operation history is empty or does not reach that far back.",
+        );
+        return;
+      }
+      await applyHistoryAction(action);
+      return;
+    }
+
+    let action: HistoryAction;
+    if (target.kind === "saved-pipeline") {
+      const pipeline = resolvePipeline(target.name);
+      if (!pipeline) {
+        vscode.window.showWarningMessage(
+          `ts-chef: Saved pipeline "${target.name}" was not found.`,
+        );
+        return;
+      }
+      action = pipelineAction(pipeline.steps, pipeline.name);
+    } else {
+      try {
+        const steps = parsePipeline(target.expression);
+        if (steps.length === 0) throw new Error("Pipeline is empty");
+        action = pipelineAction(steps, binding.id);
+      } catch (error) {
+        vscode.window.showErrorMessage(
+          `ts-chef shortcut "${binding.id}": ${error}`,
+        );
+        return;
+      }
+    }
+
+    if (await applyHistoryAction(action)) actionHistory.record(action);
+  }
+
+  function syncShortcutCommands(showProblems = false): void {
+    for (const disposable of dynamicShortcutCommands.values()) {
+      disposable.dispose();
+    }
+    dynamicShortcutCommands.clear();
+
+    const raw = vscode.workspace
+      .getConfiguration("tschef")
+      .get<Record<string, unknown>>("shortcuts", {});
+    const parsed = parseShortcutRegistry(raw);
+    shortcutBindings = parsed.bindings;
+    for (const binding of shortcutBindings) {
+      dynamicShortcutCommands.set(
+        binding.command,
+        vscode.commands.registerCommand(binding.command, () =>
+          executeShortcut(binding),
+        ),
+      );
+    }
+    if (parsed.issues.length > 0) {
+      log(`Shortcut registry: ${parsed.issues.join("; ")}`);
+      if (showProblems) {
+        vscode.window.showWarningMessage(
+          `ts-chef: ${parsed.issues.length} shortcut registry entr${parsed.issues.length === 1 ? "y was" : "ies were"} ignored. See the ts-chef output for details.`,
+        );
+      }
+    }
+    log(`Shortcut registry loaded: ${shortcutBindings.length} command(s)`);
+  }
+
+  syncShortcutCommands();
+  context.subscriptions.push(
+    {
+      dispose: () => dynamicShortcutCommands.forEach((item) => item.dispose()),
+    },
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration("tschef.shortcuts")) {
+        syncShortcutCommands(true);
+      }
+    }),
+    vscode.commands.registerCommand(
+      "tschef.runShortcut",
+      async (requested?: string | { id?: string }) => {
+        const id = typeof requested === "string" ? requested : requested?.id;
+        let binding = id
+          ? shortcutBindings.find((candidate) => candidate.id === id)
+          : undefined;
+        if (!binding) {
+          if (shortcutBindings.length === 0) {
+            vscode.window.showInformationMessage(
+              "ts-chef: No shortcut registry entries are configured.",
+            );
+            return;
+          }
+          const picked = await vscode.window.showQuickPick(
+            shortcutBindings.map((candidate) => ({
+              label: candidate.id,
+              description: candidate.expression,
+              detail: candidate.command,
+              binding: candidate,
+            })),
+            {
+              title: "Run Registered ts-chef Shortcut",
+              placeHolder: "Choose an operation, pipeline, or history action…",
+              matchOnDescription: true,
+              matchOnDetail: true,
+            },
+          );
+          binding = picked?.binding;
+        }
+        if (binding) await executeShortcut(binding);
+      },
+    ),
+    vscode.commands.registerCommand("tschef.repeatLastOperation", async () => {
+      const action = actionHistory.last();
+      if (!action) {
+        vscode.window.showInformationMessage(
+          "ts-chef: No operation has been run in this session yet.",
+        );
+        return;
+      }
+      await applyHistoryAction(action);
+    }),
+    vscode.commands.registerCommand(
+      "tschef.cycleOperationHistoryBack",
+      async () => {
+        const action = actionHistory.previous();
+        if (!action) {
+          vscode.window.showInformationMessage(
+            "ts-chef: No operation has been run in this session yet.",
+          );
+          return;
+        }
+        await applyHistoryAction(action);
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tschef.cycleOperationHistoryForward",
+      async () => {
+        const action = actionHistory.next();
+        if (!action) {
+          vscode.window.showInformationMessage(
+            "ts-chef: No operation has been run in this session yet.",
+          );
+          return;
+        }
+        await applyHistoryAction(action);
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tschef.repeatOperationFromHistory",
+      async () => {
+        const actions = actionHistory.all();
+        if (actions.length === 0) {
+          vscode.window.showInformationMessage(
+            "ts-chef: No operation has been run in this session yet.",
+          );
+          return;
+        }
+        const picked = await vscode.window.showQuickPick(
+          actions.map((action, index) => ({
+            label: `${index + 1}. ${describeHistoryAction(action)}`,
+            description:
+              action.kind === "operation"
+                ? action.opName
+                : action.steps
+                    .map((step) => displayNameFor(step.opName))
+                    .join(" | "),
+            action,
+          })),
+          {
+            title: "Repeat Operation from Session History",
+            placeHolder: "1 is the most recently executed action",
+            matchOnDescription: true,
+          },
+        );
+        if (picked) await applyHistoryAction(picked.action);
+      },
+    ),
+    vscode.commands.registerCommand("tschef.clearOperationHistory", () => {
+      actionHistory.clear();
+      vscode.window.setStatusBarMessage(
+        "ts-chef: Operation history cleared",
+        2500,
+      );
+    }),
+    vscode.commands.registerCommand("tschef.configureShortcuts", async () => {
+      const choice = await vscode.window.showInformationMessage(
+        "Add entries under tschef.shortcuts, then bind tschef.shortcut.<id> in Keyboard Shortcuts JSON. ts-chef never occupies keys by default.",
+        "Open Settings JSON",
+        "Open Keyboard Shortcuts JSON",
+      );
+      if (choice === "Open Settings JSON") {
+        await vscode.commands.executeCommand(
+          "workbench.action.openSettingsJson",
+        );
+      } else if (choice === "Open Keyboard Shortcuts JSON") {
+        await vscode.commands.executeCommand(
+          "workbench.action.openGlobalKeybindingsFile",
+        );
+      }
+    }),
+  );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("tschef.scanDocument", () => {
@@ -737,6 +1048,9 @@ export function activate(context: vscode.ExtensionContext): void {
           return;
         }
         if (!(await replaceTextEditSnapshot(target, str))) return;
+        actionHistory.record(
+          operationAction(picked.opName, args, picked.label),
+        );
         log(`quickConvert: "${picked.label}" applied`);
         vscode.window.setStatusBarMessage(
           `ts-chef: Applied "${picked.label}"`,
@@ -760,7 +1074,8 @@ export function activate(context: vscode.ExtensionContext): void {
       ) => {
         try {
           const data = parseCommandPayload<
-            HoverOperationPayload | { opName: string; value: string; args: unknown[] }
+            | HoverOperationPayload
+            | { opName: string; value: string; args: unknown[] }
           >(payload);
           let target: TextEditSnapshot;
           if ("target" in data) {
@@ -806,6 +1121,7 @@ export function activate(context: vscode.ExtensionContext): void {
             return;
           }
           if (!(await replaceTextEditSnapshot(target, str))) return;
+          actionHistory.record(operationAction(data.opName, data.args));
           log(`applyConversion: "${data.opName}" applied`);
         } catch (e) {
           log(`applyConversion error: ${e}`);
@@ -831,6 +1147,9 @@ export function activate(context: vscode.ExtensionContext): void {
             return;
           }
           if (!(await replaceTextEditSnapshot(target, result))) return;
+          actionHistory.record(
+            pipelineAction(data.steps, "Hover decode chain"),
+          );
           log(`Hover decode chain applied (${data.steps.length} step(s))`);
         } catch (error) {
           log(`Hover decode chain error: ${error}`);
@@ -928,7 +1247,8 @@ export function activate(context: vscode.ExtensionContext): void {
           prompt: "New value",
         });
         if (newVal !== undefined) {
-          if (varStore.set(action.scope, action.name, newVal)) varTree.refresh();
+          if (varStore.set(action.scope, action.name, newVal))
+            varTree.refresh();
         }
       }
       if (choice.label.includes("Copy")) {
@@ -964,6 +1284,7 @@ export function activate(context: vscode.ExtensionContext): void {
           resultRenderers,
           target,
         );
+        actionHistory.record(pipelineAction(steps, raw));
       } catch (e) {
         log(`Pipeline error: ${e}`);
         vscode.window.showErrorMessage(`ts-chef pipeline error: ${e}`);
@@ -1054,7 +1375,8 @@ export function activate(context: vscode.ExtensionContext): void {
               )
             : undefined;
           if (executeGraph && !graphResult) return;
-          const result = graphResult?.text ?? (await runPipeline(text, pipeline.steps));
+          const result =
+            graphResult?.text ?? (await runPipeline(text, pipeline.steps));
           log(
             `Ran saved pipeline "${name}"${graphResult ? ` (${graphResult.outputName})` : ""}: ${pipeline.steps.length} primary step(s), ${text.length} → ${result.length} chars`,
           );
@@ -1065,6 +1387,7 @@ export function activate(context: vscode.ExtensionContext): void {
             resultRenderers,
             target,
           );
+          actionHistory.record(pipelineAction(pipeline.steps, name));
         } catch (e) {
           log(`Saved pipeline "${name}" error: ${e}`);
           vscode.window.showErrorMessage(
@@ -1221,13 +1544,14 @@ export function activate(context: vscode.ExtensionContext): void {
         }
         const argDefs = argDefsFor(opName);
         if (!argDefs) return;
+        const args = argDefs.map(resolveDefaultArg);
         const target = capturePipelineResultTarget(editor);
         try {
           const result = resultToString(
             await runOpAsync(
               opName,
               resolveVariableTemplates(target.value, varStore),
-              argDefs.map(resolveDefaultArg),
+              args,
             ),
             registry.find((entry) => entry.opName === opName)?.factory()
               .outputType,
@@ -1240,6 +1564,7 @@ export function activate(context: vscode.ExtensionContext): void {
             resultRenderers,
             target,
           );
+          actionHistory.record(operationAction(opName, args));
         } catch (e) {
           log(`applyOperation error: ${e}`);
           vscode.window.showErrorMessage(`ts-chef: ${e}`);
@@ -1276,7 +1601,7 @@ export function activate(context: vscode.ExtensionContext): void {
     ),
     vscode.commands.registerCommand("tschef.browseRecipeLibrary", async () => {
       const picked = await vscode.window.showQuickPick(
-        standardPipelines.map((pipeline) => ({
+        standardPipelines().map((pipeline) => ({
           label: pipeline.name,
           description: pipeline.category,
           detail: pipeline.description,
@@ -1454,7 +1779,7 @@ export function activate(context: vscode.ExtensionContext): void {
       } else {
         rules = await vscode.window.showInputBox({
           prompt: "YARA rule(s)",
-          placeHolder: "rule demo { strings: $a = \"foo\" condition: $a }",
+          placeHolder: 'rule demo { strings: $a = "foo" condition: $a }',
         });
       }
       if (!rules) return;
@@ -1520,10 +1845,7 @@ export function activate(context: vscode.ExtensionContext): void {
           },
         );
         log(`YARA scan produced ${String(result).length} chars`);
-        await showInNewEditor(
-          String(result) || "(no matches)",
-          "plaintext",
-        );
+        await showInNewEditor(String(result) || "(no matches)", "plaintext");
       } catch (e) {
         log(`YARA scan error: ${e}`);
         vscode.window.showErrorMessage(`ts-chef YARA error: ${e}`);
@@ -1606,7 +1928,10 @@ export function activate(context: vscode.ExtensionContext): void {
         saveLabel: "Export scan results",
       });
       if (!target) return;
-      await vscode.workspace.fs.writeFile(target, Buffer.from(content, "utf-8"));
+      await vscode.workspace.fs.writeFile(
+        target,
+        Buffer.from(content, "utf-8"),
+      );
       log(`Exported ${rows.length} scan result(s) as ${format}`);
       vscode.window.showInformationMessage(
         `ts-chef: Exported ${rows.length} result(s) to ${target.fsPath}.`,
@@ -1694,3 +2019,10 @@ export function activate(context: vscode.ExtensionContext): void {
 
 /** Called by VS Code when the extension is deactivated; disposables are handled via subscriptions. */
 export function deactivate(): void {}
+
+// Build diagnostics used by the production-bundle verifier. They do not load
+// operation implementations and are intentionally absent from the VS Code UI.
+export {
+  findOp as findOperationForDiagnostics,
+  loadedOperationChunkIds,
+} from "./opsRegistry";

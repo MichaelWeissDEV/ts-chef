@@ -5,9 +5,9 @@
  * @license Apache-2.0
  */
 
-import registry from '../opsRegistry';
-import type { AnyInput } from './Operation';
-import { normaliseInput } from './types';
+import { findOp } from "../opsRegistry";
+import type { AnyInput } from "./Operation";
+import { normaliseInput } from "./types";
 
 /**
  * Run a single named operation on input with given args.
@@ -16,13 +16,9 @@ import { normaliseInput } from './types';
 export function runOpCore(
   opName: string,
   input: AnyInput,
-  args: unknown[]
+  args: unknown[],
 ): AnyInput | Promise<AnyInput> {
-  const entry = registry.find(
-    (e) =>
-      e.opName === opName ||
-      e.displayName.toLowerCase() === opName.toLowerCase()
-  );
+  const entry = findOp(opName);
   if (!entry) throw new Error(`Unknown operation: ${opName}`);
   const op = entry.factory();
   const normalised = normaliseInput(input, op.inputType);
@@ -33,16 +29,18 @@ export function runOpCore(
  * Parse a simple pipe string into step descriptors.
  * Handles | inside parentheses by tracking depth.
  */
-export function parsePipelineCore(raw: string): Array<{ opName: string; args: unknown[] }> {
+export function parsePipelineCore(
+  raw: string,
+): Array<{ opName: string; args: unknown[] }> {
   const parts: string[] = [];
   let depth = 0;
-  let current = '';
+  let current = "";
   for (const ch of raw) {
-    if (ch === '(') depth++;
-    else if (ch === ')') depth--;
-    if (ch === '|' && depth === 0) {
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    if (ch === "|" && depth === 0) {
       parts.push(current.trim());
-      current = '';
+      current = "";
     } else {
       current += ch;
     }
@@ -50,18 +48,14 @@ export function parsePipelineCore(raw: string): Array<{ opName: string; args: un
   if (current.trim()) parts.push(current.trim());
 
   return parts.filter(Boolean).map((part) => {
-    const parenIdx = part.indexOf('(');
+    const parenIdx = part.indexOf("(");
     if (parenIdx === -1) {
-      const entry = registry.find(
-        (e) => e.opName === part.trim() || e.displayName.toLowerCase() === part.trim().toLowerCase()
-      );
+      const entry = findOp(part.trim());
       if (!entry) throw new Error(`Unknown operation: "${part.trim()}"`);
       return { opName: entry.opName, args: [] };
     }
     const name = part.slice(0, parenIdx).trim();
-    const entry = registry.find(
-      (e) => e.opName === name || e.displayName.toLowerCase() === name.toLowerCase()
-    );
+    const entry = findOp(name);
     if (!entry) throw new Error(`Unknown operation: "${name}"`);
     return { opName: entry.opName, args: [] };
   });

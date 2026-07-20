@@ -10,7 +10,7 @@
 import Dish from "./Dish";
 import { Operation, AnyInput } from "./Operation";
 import { PipelineData, normalizeInput, InputType } from "./types";
-import registry from "../opsRegistry";
+import { findOp } from "../opsRegistry";
 
 /**
  * Represents a single operation entry in a recipe's internal list.
@@ -67,7 +67,8 @@ function intermediateSize(dish: Dish): number {
   if (typeof value === "string") return value.length;
   if (value instanceof ArrayBuffer) return value.byteLength;
   if (ArrayBuffer.isView(value)) return value.byteLength;
-  if (dish.type === Dish.BYTE_ARRAY && Array.isArray(value)) return value.length;
+  if (dish.type === Dish.BYTE_ARRAY && Array.isArray(value))
+    return value.length;
   if (typeof value === "object") {
     try {
       return JSON.stringify(value).length;
@@ -103,9 +104,7 @@ class Recipe {
   ) {
     if (recipeConfig) {
       recipeConfig.forEach((c) => {
-        const entry = registry.find(
-          (e) => e.opName === c.op || e.displayName.toLowerCase() === c.op.toLowerCase()
-        );
+        const entry = findOp(c.op);
         const op = entry ? entry.factory() : undefined;
         this.opList.push({
           name: c.op,
@@ -127,11 +126,9 @@ class Recipe {
    * @param ops - The operation items to add.
    */
   addOperations(ops: OpListItem[]): void {
-    ops.forEach(op => {
+    ops.forEach((op) => {
       if (!op.op) {
-        const entry = registry.find(
-          (e) => e.opName === op.name || e.displayName.toLowerCase() === op.name.toLowerCase()
-        );
+        const entry = findOp(op.name);
         op.op = entry ? entry.factory() : undefined;
       }
       if (op.op) {
@@ -174,14 +171,12 @@ class Recipe {
     for (let i = progress; i < opList.length; i++) {
       const item = opList[i];
       if (item.disabled) continue;
-      
+
       if (!item.op) {
-        const entry = registry.find(
-          (e) => e.opName === item.name || e.displayName.toLowerCase() === item.name.toLowerCase()
-        );
+        const entry = findOp(item.name);
         item.op = entry ? entry.factory() : undefined;
       }
-      
+
       if (!item.op) {
         throw Object.assign(new Error(`Unknown operation: "${item.name}"`), {
           progress: i,
@@ -208,10 +203,7 @@ class Recipe {
           // Type-safe input normalization
           const rawInput = await dish.get(inputType);
           const input = inputType
-            ? normalizeInput(
-                rawInput as PipelineData,
-                inputType as InputType,
-              )
+            ? normalizeInput(rawInput as PipelineData, inputType as InputType)
             : rawInput;
           const output = await op.run(
             input as AnyInput,

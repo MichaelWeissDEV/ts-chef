@@ -37,11 +37,12 @@
 
 `ts-chef` is a TypeScript-powered VS Code extension for CyberChef-style data transformations and analysis. It keeps the operation catalog, recipe builder, saved pipelines, encoded-value inspection, and security-oriented tooling in the same workspace as the data you are investigating.
 
-- **423 registered operations** for encodings, ciphers, hashes, compression, structured data, images, text, and binary formats.
+- **479 registered operations** for encodings, ciphers, hashes, compression, structured data, images, text, and binary formats.
 - **Visual list and graph editors** for reusable linear recipes, branches, and named outputs.
 - **Fast editor workflows** through Quick Convert, hover previews, exact-value replacement, and saved pipelines.
 - **28 bundled recipes** for common decoding, PowerShell, IOC, entropy, payload, and structured-data tasks.
 - **Local core transformations** with no account required. Operations that inherently require network access only run when explicitly selected.
+- **Lazy operation chunks** keep all 479 operations searchable while loading implementation code only when it is first used.
 
 ## A visual tour
 
@@ -110,7 +111,7 @@ The optional entropy heatmap adds line-level Shannon entropy coloring. It can he
 ## Start working with ts-chef
 
 1. Install **ts-chef** and open its chef icon in the Activity Bar.
-2. Select a value and run **`tschef: Quick Convert Selection`** (`Ctrl+Alt+C` / `Ctrl+Cmd+C`) for a one-off operation.
+2. Select a value and run **`tschef: Quick Convert Selection`** for a one-off operation.
 3. For repeated work, add operations to **Recipe** or open the full Pipeline Editor.
 4. Preview the result, replace the selection, copy it, or open it in a new editor.
 
@@ -153,9 +154,36 @@ Saved pipelines can be run from the **Pipelines** view or through **`tschef: Run
 
 Use **`tschef: Browse Standard Recipe Library`** to load a bundled recipe into the Recipe pane, or **`tschef: Open Saved/Standard Pipeline in Editor`** to inspect and adapt it. **`tschef: Open Pipeline Graph`** starts the full editor directly in drag-and-drop graph mode.
 
+### Keyboard shortcut registry and operation history
+
+ts-chef deliberately occupies **no keys by default**. Add any number of named entries to `tschef.shortcuts`; each entry becomes a command named `tschef.shortcut.<id>` that can be bound in VS Code's Keyboard Shortcuts JSON.
+
+```jsonc
+// settings.json
+"tschef.shortcuts": {
+  "encode-base64": "To Base64",
+  "decode-json": "From Base64 | JSON Beautify",
+  "daily-decrypt": "pipeline:Daily decrypt",
+  "again": "history:last",
+  "older": "history:previous",
+  "three-back": "history:3"
+}
+```
+
+```jsonc
+// keybindings.json
+{
+  "key": "ctrl+alt+b",
+  "command": "tschef.shortcut.encode-base64",
+  "when": "editorTextFocus"
+}
+```
+
+Single operations, complete pipe expressions, and saved pipelines can all be registered. `Repeat Last Operation`, backward/forward cycling, and a searchable history picker are also normal commands, so they can be bound directly. History is bounded and session-only: arguments such as cipher keys are not silently persisted. Replaying an entry does not add a duplicate, so cycling remains stable. See the [shortcut and history guide](docs/shortcuts.md) for the full syntax.
+
 ## Named operations
 
-The registry currently contains 423 operations. Search by the displayed operation name in the Operations view or Pipeline Editor.
+The registry currently contains 479 operations. Search by the displayed operation name in the Operations view or Pipeline Editor. Search and activation use lightweight metadata; implementation chunks are loaded and cached only when an operation is run or its arguments are opened.
 
 | Area | Example operation names |
 | --- | --- |
@@ -255,14 +283,21 @@ The following settings are available under the `tschef.` namespace:
 | `tschef.pipelineResultAction` | `popup` | Present results as `popup`, `replace`, `copy`, `inline`, or `panel`. |
 | `tschef.defaultPipelineScope` | `global` | Default storage scope for a saved pipeline. |
 | `tschef.defaultVariableScope` | `global` | Default storage scope for a saved variable. |
+| `tschef.shortcuts` | `{}` | Named operation, pipeline, saved-pipeline, and history command registry. |
+| `tschef.shortcutHistorySize` | `100` | Maximum session-only operation history entries. |
 
 ## Commands worth knowing
 
-| Command | Default shortcut |
+| Command | Suggested access |
 | --- | --- |
-| `tschef: Quick Convert Selection` | `Ctrl+Alt+C` / `Ctrl+Cmd+C` |
-| `tschef: Run Saved Pipeline` | `Ctrl+Alt+R` / `Ctrl+Cmd+R` |
-| `tschef: Smart Format (Auto-Detect & Beautify)` | `Ctrl+Alt+F` / `Ctrl+Cmd+F` |
+| `tschef: Quick Convert Selection` | Command Palette / assign your own key |
+| `tschef: Run Saved Pipeline` | Command Palette / assign your own key |
+| `tschef: Smart Format (Auto-Detect & Beautify)` | Command Palette / assign your own key |
+| `tschef: Run Registered Shortcut` | Registry picker |
+| `tschef: Repeat Last Operation` | Command Palette / assign your own key |
+| `tschef: Apply Previous Operation in History` | Command Palette / assign your own key |
+| `tschef: Apply Next Operation in History` | Command Palette / assign your own key |
+| `tschef: Repeat Operation from History...` | Searchable session history |
 | `tschef: Open Pipeline Editor` | Command Palette |
 | `tschef: Open Pipeline Graph` | Command Palette |
 | `tschef: Deep Analysis of Selection` | Editor context menu |
@@ -279,6 +314,8 @@ Every command is available from the Command Palette under the `tschef:` prefix.
 
 - [GitHub repository](https://github.com/MichaelWeissDEV/ts-chef)
 - [Usage guide](docs/usage.md)
+- [Keyboard shortcuts and operation history](docs/shortcuts.md)
+- [Performance architecture](docs/performance.md)
 - [Operations reference](docs/operations.md)
 - [Contributing guide](docs/contributing.md)
 - [Changelog](CHANGELOG.md)
@@ -294,9 +331,10 @@ npm install
 Common development commands:
 
 ```bash
-npm run build     # bundle the extension with esbuild
+npm run build     # build the small entry bundle and lazy operation chunks
 npm test          # run the Jest test suite
 npm run lint      # run ESLint
+npm run bench:bundle # measure cold import and representative first loads
 npm run package   # build a .vsix package
 ```
 

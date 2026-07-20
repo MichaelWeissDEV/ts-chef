@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import registry, { findOp } from "../opsRegistry";
+import { findOp } from "../opsRegistry";
 import type { Operation, AnyInput, ArgConfig } from "../chef/Operation";
 import type { PipelineStep } from "../storage/store";
 import { resolveDefaultArg } from "./argDefaults";
@@ -30,7 +30,9 @@ export function readableUtf8(bytes: Uint8Array): string | undefined {
   const characters = Array.from(text);
   const printable = characters.filter((character) => {
     const code = character.codePointAt(0) ?? 0;
-    return code === 9 || code === 10 || code === 13 || (code >= 32 && code !== 127);
+    return (
+      code === 9 || code === 10 || code === 13 || (code >= 32 && code !== 127)
+    );
   }).length;
   return printable / Math.max(1, characters.length) >= 0.75 ? text : undefined;
 }
@@ -44,14 +46,14 @@ export function presentPipelineValue(value: unknown, dishType: number): string {
   if (value === null || value === undefined) return "";
   if (typeof value === "string") return value;
   if (dishType === Dish.JSON) return JSON.stringify(value, null, 2);
-  if (value instanceof ArrayBuffer)
-    return presentBytes(new Uint8Array(value));
+  if (value instanceof ArrayBuffer) return presentBytes(new Uint8Array(value));
   if (value instanceof Uint8Array) return presentBytes(value);
   if (
     dishType === Dish.BYTE_ARRAY &&
     Array.isArray(value) &&
     value.every(
-      (item) => Number.isInteger(item) && Number(item) >= 0 && Number(item) <= 255,
+      (item) =>
+        Number.isInteger(item) && Number(item) >= 0 && Number(item) <= 255,
     )
   )
     return presentBytes(Uint8Array.from(value as number[]));
@@ -90,11 +92,7 @@ export function runOp(
   input: AnyInput,
   args: unknown[],
 ): AnyInput {
-  const entry = registry.find(
-    (e) =>
-      e.opName === opName ||
-      e.displayName.toLowerCase() === opName.toLowerCase(),
-  );
+  const entry = findOp(opName);
   if (!entry) throw new Error(`Unknown operation: ${opName}`);
   const op = entry.factory();
   const normalised = normaliseInput(input, op.inputType);
@@ -111,11 +109,7 @@ export async function runOpAsync(
   input: AnyInput,
   args: unknown[],
 ): Promise<AnyInput> {
-  const entry = registry.find(
-    (e) =>
-      e.opName === opName ||
-      e.displayName.toLowerCase() === opName.toLowerCase(),
-  );
+  const entry = findOp(opName);
   if (!entry) throw new Error(`Unknown operation: ${opName}`);
   const op = entry.factory();
   const normalised = normaliseInput(input, op.inputType);
@@ -192,7 +186,9 @@ function parseStep(part: string): PipelineStep {
   }
 
   if (!part.endsWith(")"))
-    throw new Error(`Unexpected text after arguments in pipeline step: "${part}"`);
+    throw new Error(
+      `Unexpected text after arguments in pipeline step: "${part}"`,
+    );
   const name = part.slice(0, parenIdx).trim();
   const argsStr = part.slice(parenIdx + 1, part.lastIndexOf(")")).trim();
   const op = resolveOp(name);
@@ -227,7 +223,9 @@ function parseStep(part: string): PipelineStep {
       throw new Error(`Unknown argument "${key}" for operation "${name}"`);
     }
     if (assigned.has(argumentIndex))
-      throw new Error(`Argument "${key}" is assigned more than once in "${name}"`);
+      throw new Error(
+        `Argument "${key}" is assigned more than once in "${name}"`,
+      );
     assigned.add(argumentIndex);
     finalArgs[argumentIndex] = castArg(value, opDef.args[argumentIndex]);
   }
@@ -267,7 +265,8 @@ function splitArgumentAssignments(value: string): string[] {
         throw new Error("Pipeline argument has unbalanced delimiters");
     }
     if (character === "," && stack.length === 0) {
-      if (!current.trim()) throw new Error("Pipeline contains an empty argument");
+      if (!current.trim())
+        throw new Error("Pipeline contains an empty argument");
       result.push(current.trim());
       current = "";
     } else {
@@ -275,8 +274,10 @@ function splitArgumentAssignments(value: string): string[] {
     }
   }
   if (quote) throw new Error("Pipeline argument has an unterminated quote");
-  if (stack.length) throw new Error("Pipeline argument has unbalanced delimiters");
-  if (!current.trim()) throw new Error("Pipeline contains a trailing empty argument");
+  if (stack.length)
+    throw new Error("Pipeline argument has unbalanced delimiters");
+  if (!current.trim())
+    throw new Error("Pipeline contains a trailing empty argument");
   result.push(current.trim());
   return result;
 }
@@ -297,8 +298,10 @@ function topLevelEquals(value: string): number {
       continue;
     }
     if (character === '"' || character === "'") quote = character;
-    else if (character === "(" || character === "[" || character === "{") depth++;
-    else if (character === ")" || character === "]" || character === "}") depth--;
+    else if (character === "(" || character === "[" || character === "{")
+      depth++;
+    else if (character === ")" || character === "]" || character === "}")
+      depth--;
     else if (character === "=" && depth === 0) return index;
   }
   return -1;
@@ -330,9 +333,7 @@ function decodeArgumentValue(value: string): string {
 }
 
 function resolveOp(name: string) {
-  const op =
-    findOp(name) ??
-    registry.find((e) => e.opName.toLowerCase() === name.toLowerCase());
+  const op = findOp(name);
   if (!op) throw new Error(`Unknown operation: "${name}"`);
   return op;
 }
