@@ -19,7 +19,11 @@ import OperationError from "../errors/OperationError";
 /**
  * Parse X.509 certificate operation
  */
-export class ParseX509Certificate extends TypedOperation<string, string, unknown[]> {
+export class ParseX509Certificate extends TypedOperation<
+  string,
+  string,
+  unknown[]
+> {
   /**
    * ParseX509Certificate constructor
    */
@@ -60,7 +64,7 @@ export class ParseX509Certificate extends TypedOperation<string, string, unknown
       return "No input";
     }
 
-    const cert = new (r as any).X509(),
+    const cert = new r.X509(),
       [inputFormat] = args as [string];
 
     let undefinedInputFormat = false;
@@ -98,7 +102,7 @@ export class ParseX509Certificate extends TypedOperation<string, string, unknown
       sn = cert.getSerialNumberHex(),
       issuer = cert.getIssuer(),
       subject = cert.getSubject(),
-      pk = cert.getPublicKey() as any,
+      pk = cert.getPublicKey(),
       pkFields: { key: string; value: string }[] = [],
       sig = cert.getSignatureValueHex();
 

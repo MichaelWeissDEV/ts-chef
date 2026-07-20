@@ -9,7 +9,7 @@
 
 import { TypedOperation, ArgConfig, AnyInput } from "../Operation";
 import { OperationError } from "../errors/OperationError";
-import { ColossusComputer } from "../lib/Colossus";
+import { ColossusComputer, type QBusSwitches } from "../lib/Colossus";
 import { SWITCHES, VALID_ITA2, ROTOR_SIZES } from "../lib/Lorenz";
 
 /**
@@ -472,34 +472,34 @@ export class Colossus extends TypedOperation<string, AnyInput, unknown[]> {
         "Switch Total Motor can only be set to blank, . or x",
       );
 
-    const qbusswitches = {
+    const qbusswitches: QBusSwitches = {
       condition: [
         {
-          Qswitches: [args[9], args[10], args[11], args[12], args[13]],
-          Negate: args[14],
-          Counter: args[15],
+          Qswitches: args.slice(9, 14) as string[],
+          Negate: args[14] as boolean,
+          Counter: args[15] as string,
         },
         {
-          Qswitches: [args[16], args[17], args[18], args[19], args[20]],
-          Negate: args[21],
-          Counter: args[22],
+          Qswitches: args.slice(16, 21) as string[],
+          Negate: args[21] as boolean,
+          Counter: args[22] as string,
         },
         {
-          Qswitches: [args[23], args[24], args[25], args[26], args[27]],
-          Negate: args[28],
-          Counter: args[29],
+          Qswitches: args.slice(23, 28) as string[],
+          Negate: args[28] as boolean,
+          Counter: args[29] as string,
         },
       ],
-      condNegateAll: args[30],
+      condNegateAll: args[30] as boolean,
       addition: [
         {
-          Qswitches: [args[32], args[33], args[34], args[35], args[36]],
-          Equals: args[37],
-          C1: args[38],
+          Qswitches: args.slice(32, 37) as string[],
+          Equals: args[37] as string,
+          C1: args[38] as boolean,
         },
       ],
-      addNegateAll: args[39],
-      totalMotor: args[40],
+      addNegateAll: args[39] as boolean,
+      totalMotor: args[40] as string,
     };
 
     const settotal = parseInt(args[42] as string, 10);
@@ -537,19 +537,19 @@ export class Colossus extends TypedOperation<string, AnyInput, unknown[]> {
       }
     }
 
-    const starts = {
-      X1: args[45],
-      X2: args[46],
-      X3: args[47],
-      X4: args[48],
-      X5: args[49],
-      M61: args[50],
-      M37: args[51],
-      S1: args[52],
-      S2: args[53],
-      S3: args[54],
-      S4: args[55],
-      S5: args[56],
+    const starts: Record<string, number> = {
+      X1: args[45] as number,
+      X2: args[46] as number,
+      X3: args[47] as number,
+      X4: args[48] as number,
+      X5: args[49] as number,
+      M61: args[50] as number,
+      M37: args[51] as number,
+      S1: args[52] as number,
+      S2: args[53] as number,
+      S3: args[54] as number,
+      S4: args[55] as number,
+      S5: args[56] as number,
     };
 
     const colossus = new ColossusComputer(

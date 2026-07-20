@@ -10,8 +10,8 @@ describe("pipeline graph webview", () => {
       { id: "op-1", opName: "Reverse", args: [] },
     ],
   ) {
-    const posted: Array<Record<string, any>> = [];
-    const states: Array<Record<string, any>> = [];
+    const posted: Array<Record<string, unknown>> = [];
+    const states: Array<Record<string, unknown>> = [];
     const dom = new JSDOM(html, {
       runScripts: "dangerously",
       beforeParse(window) {
@@ -19,8 +19,9 @@ describe("pipeline graph webview", () => {
         Object.defineProperty(window, "acquireVsCodeApi", {
           value: () => ({
             getState: () => ({}),
-            setState: (state: Record<string, any>) => states.push(state),
-            postMessage: (message: Record<string, any>) => posted.push(message),
+            setState: (state: Record<string, unknown>) => states.push(state),
+            postMessage: (message: Record<string, unknown>) =>
+              posted.push(message),
           }),
         });
       },
@@ -106,7 +107,8 @@ describe("pipeline graph webview", () => {
         Object.defineProperty(window, "acquireVsCodeApi", {
           value: () => ({
             getState: () => ({ mode: "list" }),
-            setState: (state: Record<string, unknown>) => savedStates.push(state),
+            setState: (state: Record<string, unknown>) =>
+              savedStates.push(state),
             postMessage: () => undefined,
           }),
         });
@@ -175,12 +177,12 @@ describe("pipeline graph webview", () => {
 
   test("invalidates parse responses on every edit and parses an immutable snapshot", () => {
     expect(html).toContain("function invalidateParseRequests()");
-    expect(html).toContain("invalidateParseRequests();\n    pipelineTextReady = false");
+    expect(html).toContain(
+      "invalidateParseRequests();\n    pipelineTextReady = false",
+    );
     expect(html).toContain("const requestId = latestParseRequest");
     expect(html).toContain("const raw = pipeText.value");
-    expect(html).toContain(
-      "requestParse(requestId, raw, previousSteps)",
-    );
+    expect(html).toContain("requestParse(requestId, raw, previousSteps)");
     expect(html).toContain("if (requestId !== latestParseRequest) return");
   });
 
@@ -240,9 +242,9 @@ describe("pipeline graph webview", () => {
       pipelineText.value = "Reverse";
       pipelineText.dispatchEvent(new dom.window.Event("input"));
       jest.advanceTimersByTime(420);
-      const firstRequest = posted.filter(
-        (message) => message.type === "parseRaw",
-      ).at(-1);
+      const firstRequest = posted
+        .filter((message) => message.type === "parseRaw")
+        .at(-1);
       expect(firstRequest?.raw).toBe("Reverse");
 
       pipelineText.value = "To Hex";
@@ -259,9 +261,9 @@ describe("pipeline graph webview", () => {
       expect(pipelineText.value).toBe("To Hex");
 
       jest.advanceTimersByTime(420);
-      const secondRequest = posted.filter(
-        (message) => message.type === "parseRaw",
-      ).at(-1);
+      const secondRequest = posted
+        .filter((message) => message.type === "parseRaw")
+        .at(-1);
       expect(secondRequest?.requestId).not.toBe(firstRequest?.requestId);
       expect(secondRequest?.raw).toBe("To Hex");
     } finally {
@@ -299,7 +301,9 @@ describe("pipeline graph webview", () => {
         }),
       );
 
-      const change = posted.filter((message) => message.type === "graphChanged").at(-1);
+      const change = posted
+        .filter((message) => message.type === "graphChanged")
+        .at(-1);
       const moved = change?.graph.nodes.find(
         (node: Record<string, unknown>) => node.id === "op-1",
       );
@@ -320,8 +324,14 @@ describe("pipeline graph webview", () => {
     };
     const { dom, posted } = openGraph(singleOutputGraph);
     try {
-      (dom.window.document.getElementById("addOutputButton") as HTMLButtonElement).click();
-      const added = posted.filter((message) => message.type === "graphChanged").at(-1);
+      (
+        dom.window.document.getElementById(
+          "addOutputButton",
+        ) as HTMLButtonElement
+      ).click();
+      const added = posted
+        .filter((message) => message.type === "graphChanged")
+        .at(-1);
       const newOutput = added?.graph.nodes.find(
         (node: Record<string, unknown>) =>
           node.type === "output" && node.id !== "out-a",
@@ -339,9 +349,9 @@ describe("pipeline graph webview", () => {
         ) as HTMLButtonElement
       ).click();
 
-      const connected = posted.filter(
-        (message) => message.type === "graphChanged",
-      ).at(-1)?.graph;
+      const connected = posted
+        .filter((message) => message.type === "graphChanged")
+        .at(-1)?.graph;
       expect(
         connected.edges.filter(
           (edge: Record<string, unknown>) => edge.source === "op-1",
@@ -382,7 +392,9 @@ describe("pipeline graph webview", () => {
         },
       });
       dom.window.document.getElementById("graphScroll")?.dispatchEvent(drop);
-      const change = posted.filter((message) => message.type === "graphChanged").at(-1);
+      const change = posted
+        .filter((message) => message.type === "graphChanged")
+        .at(-1);
       expect(
         change?.graph.nodes.filter(
           (node: Record<string, unknown>) => node.type === "operation",
@@ -391,7 +403,9 @@ describe("pipeline graph webview", () => {
       expect(change?.graph.nodes).toContainEqual(
         expect.objectContaining({ type: "operation", x: 320, y: 165 }),
       );
-      expect(dom.window.document.querySelectorAll(".step-card")).toHaveLength(2);
+      expect(dom.window.document.querySelectorAll(".step-card")).toHaveLength(
+        2,
+      );
       expect(change?.graph.edges).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ source: "op-1", target: "out-a" }),
@@ -408,11 +422,17 @@ describe("pipeline graph webview", () => {
       { id: "legacy-step-id", opName: "Reverse", args: [] },
     ]);
     try {
-      expect(dom.window.document.querySelectorAll(".step-card")).toHaveLength(1);
+      expect(dom.window.document.querySelectorAll(".step-card")).toHaveLength(
+        1,
+      );
       expect(
-        dom.window.document.querySelectorAll('.graph-node[data-node-id="op-1"]'),
+        dom.window.document.querySelectorAll(
+          '.graph-node[data-node-id="op-1"]',
+        ),
       ).toHaveLength(1);
-      (dom.window.document.getElementById("saveButton") as HTMLButtonElement).click();
+      (
+        dom.window.document.getElementById("saveButton") as HTMLButtonElement
+      ).click();
       const save = posted.filter((message) => message.type === "save").at(-1);
       expect(save?.steps).toEqual([
         expect.objectContaining({ id: "op-1", opName: "Reverse" }),
@@ -434,8 +454,12 @@ describe("pipeline graph webview", () => {
         "inputArea",
       ) as HTMLTextAreaElement;
       input.value = "sample";
-      (dom.window.document.getElementById("runButton") as HTMLButtonElement).click();
-      const request = posted.filter((message) => message.type === "runGraph").at(-1);
+      (
+        dom.window.document.getElementById("runButton") as HTMLButtonElement
+      ).click();
+      const request = posted
+        .filter((message) => message.type === "runGraph")
+        .at(-1);
       expect(request).toMatchObject({
         explicit: true,
         activeOutputId: "out-a",
@@ -470,10 +494,15 @@ describe("pipeline graph webview", () => {
         }),
       );
 
-      expect(dom.window.document.querySelectorAll(".output-tab")).toHaveLength(2);
+      expect(dom.window.document.querySelectorAll(".output-tab")).toHaveLength(
+        2,
+      );
       expect(
-        (dom.window.document.getElementById("outputArea") as HTMLTextAreaElement)
-          .value,
+        (
+          dom.window.document.getElementById(
+            "outputArea",
+          ) as HTMLTextAreaElement
+        ).value,
       ).toBe("first");
       (
         dom.window.document.querySelector(
@@ -481,8 +510,11 @@ describe("pipeline graph webview", () => {
         ) as HTMLButtonElement
       ).click();
       expect(
-        (dom.window.document.getElementById("outputArea") as HTMLTextAreaElement)
-          .value,
+        (
+          dom.window.document.getElementById(
+            "outputArea",
+          ) as HTMLTextAreaElement
+        ).value,
       ).toBe("second");
     } finally {
       dom.window.close();
@@ -492,8 +524,12 @@ describe("pipeline graph webview", () => {
   test("renders incremental per-node live status from graphNodeResult", () => {
     const { dom, posted } = openGraph(branchingGraph);
     try {
-      (dom.window.document.getElementById("runButton") as HTMLButtonElement).click();
-      const request = posted.filter((message) => message.type === "runGraph").at(-1);
+      (
+        dom.window.document.getElementById("runButton") as HTMLButtonElement
+      ).click();
+      const request = posted
+        .filter((message) => message.type === "runGraph")
+        .at(-1);
       dom.window.dispatchEvent(
         new dom.window.MessageEvent("message", {
           data: {
@@ -535,12 +571,18 @@ describe("pipeline graph webview", () => {
   test("cancels an explicit run when another output is selected mid-flight", () => {
     const { dom, posted } = openGraph(branchingGraph);
     try {
-      (dom.window.document.getElementById("runButton") as HTMLButtonElement).click();
-      const run = posted.filter((message) => message.type === "runGraph").at(-1);
+      (
+        dom.window.document.getElementById("runButton") as HTMLButtonElement
+      ).click();
+      const run = posted
+        .filter((message) => message.type === "runGraph")
+        .at(-1);
       expect(run?.activeOutputId).toBe("out-a");
 
       const viewButtons = Array.from(
-        dom.window.document.querySelectorAll('button[data-action="view-output"]'),
+        dom.window.document.querySelectorAll(
+          'button[data-action="view-output"]',
+        ),
       ) as HTMLButtonElement[];
       const outputB = viewButtons.find(
         (button) => button.dataset.stepId === "out-b",
@@ -563,9 +605,15 @@ describe("pipeline graph webview", () => {
         "outputTarget",
       ) as HTMLSelectElement;
       outputTarget.value = "clipboard";
-      outputTarget.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
-      (dom.window.document.getElementById("runButton") as HTMLButtonElement).click();
-      const run = posted.filter((message) => message.type === "runGraph").at(-1);
+      outputTarget.dispatchEvent(
+        new dom.window.Event("change", { bubbles: true }),
+      );
+      (
+        dom.window.document.getElementById("runButton") as HTMLButtonElement
+      ).click();
+      const run = posted
+        .filter((message) => message.type === "runGraph")
+        .at(-1);
       expect(run?.outputTarget).toBe("clipboard");
       dom.window.dispatchEvent(
         new dom.window.MessageEvent("message", {
@@ -603,16 +651,16 @@ describe("pipeline graph webview", () => {
       const edge = dom.window.document.querySelector(
         '[data-edge-id="e3"]',
       ) as SVGElement;
-      edge.dispatchEvent(
-        new dom.window.MouseEvent("click", { bubbles: true }),
-      );
+      edge.dispatchEvent(new dom.window.MouseEvent("click", { bubbles: true }));
       dom.window.dispatchEvent(
         new dom.window.KeyboardEvent("keydown", {
           bubbles: true,
           key: "Delete",
         }),
       );
-      const change = posted.filter((message) => message.type === "graphChanged").at(-1);
+      const change = posted
+        .filter((message) => message.type === "graphChanged")
+        .at(-1);
       expect(change?.graph.edges).not.toContainEqual(
         expect.objectContaining({ id: "e3" }),
       );

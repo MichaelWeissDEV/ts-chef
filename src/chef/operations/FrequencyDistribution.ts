@@ -14,7 +14,11 @@ import OperationError from "../errors/OperationError";
 /**
  * Frequency distribution operation
  */
-export class FrequencyDistribution extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
+export class FrequencyDistribution extends TypedOperation<
+  ArrayBuffer,
+  AnyInput,
+  unknown[]
+> {
   /**
    * FrequencyDistribution constructor
    */
@@ -83,7 +87,15 @@ export class FrequencyDistribution extends TypedOperation<ArrayBuffer, AnyInput,
    * @param {json} freq
    * @returns {html}
    */
-  present(freq: any, args: unknown[]) {
+  present(
+    freq: {
+      dataLength: number;
+      percentages: number[];
+      distribution: number[];
+      bytesRepresented: number;
+    },
+    args: unknown[],
+  ) {
     const [showZeroes, showAscii] = args;
 
     // Print

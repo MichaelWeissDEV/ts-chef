@@ -91,7 +91,7 @@ export class TypexMachine extends Enigma.EnigmaBase {
     plugboard: Plugboard,
     keyboard: string,
   ) {
-    super(rotors, reflector, plugboard as any);
+    super(rotors, reflector, plugboard);
     if (rotors.length !== 5) {
       throw new OperationError("Typex must have 5 rotors");
     }
@@ -246,8 +246,9 @@ export class Plugboard extends Enigma.Rotor {
     });
     try {
       super(transformedWiring, "", "A", "A");
-    } catch (err: any) {
-      throw new OperationError(err.message.replace("Rotor", "Plugboard"));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new OperationError(message.replace("Rotor", "Plugboard"));
     }
   }
 

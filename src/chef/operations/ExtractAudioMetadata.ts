@@ -23,10 +23,56 @@ import {
   parseWmaAsf,
 } from "../lib/AudioParsers";
 
+type DisplayRecord = Record<string, unknown>;
+
+interface AudioReportView {
+  artifact?: {
+    filename?: unknown;
+    byte_length?: number;
+    container?: { type?: unknown; mime?: unknown; brand?: unknown };
+  };
+  detections?: {
+    metadata_systems?: unknown[];
+    provenance_systems?: unknown[];
+  };
+  tags?: {
+    common?: DisplayRecord;
+    raw?: {
+      id3v2?: { frames?: DisplayRecord[] };
+      id3v1?: DisplayRecord;
+      apev2?: { items?: DisplayRecord[] };
+      vorbis_comments?: { vendor?: unknown; comments?: DisplayRecord[] };
+      riff?: {
+        info?: DisplayRecord;
+        bext?: DisplayRecord;
+        chunks?: DisplayRecord[];
+      };
+      flac?: { blocks?: DisplayRecord[] };
+      mp4?: { top_level_atoms?: DisplayRecord[] };
+      aiff?: { chunks?: DisplayRecord[] };
+      aac?: DisplayRecord;
+      ac3?: DisplayRecord;
+      asf?: {
+        content_description?: DisplayRecord;
+        extended_content?: DisplayRecord[];
+      };
+    };
+  };
+  embedded?: DisplayRecord[];
+  provenance?: {
+    c2pa?: { present?: boolean; embedding?: DisplayRecord[] };
+  };
+  errors?: DisplayRecord[];
+}
+
 /**
  * Extract Audio Metadata operation.
  */
-export class ExtractAudioMetadata extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
+export class ExtractAudioMetadata extends TypedOperation<
+  ArrayBuffer,
+  AnyInput,
+  unknown[]
+> {
   /** Creates the Extract Audio Metadata operation. */
   constructor() {
     super();
@@ -95,8 +141,11 @@ export class ExtractAudioMetadata extends TypedOperation<ArrayBuffer, AnyInput, 
             "Unknown/unsupported container (best-effort scan not implemented).",
         });
       }
-    } catch (e: any) {
-      report.errors.push({ stage: "parse", message: String(e?.message || e) });
+    } catch (error: unknown) {
+      report.errors.push({
+        stage: "parse",
+        message: error instanceof Error ? error.message : String(error),
+      });
     }
 
     return report;
@@ -104,34 +153,37 @@ export class ExtractAudioMetadata extends TypedOperation<ArrayBuffer, AnyInput, 
 
   /** Renders the extracted metadata as an HTML table. */
   present(data: AnyInput): string {
-    const d = data as any;
+    const d = data as AudioReportView;
     if (!d || typeof d !== "object") return JSON.stringify(d, null, 4);
 
     const esc = Utils.escapeHtml;
     let html = `<table class="table table-hover table-sm table-bordered table-nonfluid">\n`;
 
-    const row = (k: string, v: any) =>
+    const row = (k: string, v: unknown) =>
       `<tr><td>${esc(String(k))}</td><td>${esc(String(v ?? ""))}</td></tr>\n`;
     const section = (title: string) =>
       `<tr><th colspan="2" style="background:#e9ecef;text-align:center">${esc(title)}</th></tr>\n`;
-    const objRows = (obj: any, filter = (v: any) => v !== null) => {
+    const objRows = (
+      obj: DisplayRecord,
+      filter: (value: unknown) => boolean = (value) => value !== null,
+    ) => {
       for (const [k, v] of Object.entries(obj)) {
         if (filter(v)) html += row(k, v);
       }
     };
     const objSection = (
-      obj: any,
+      obj: DisplayRecord | undefined,
       title: string,
-      filter?: (v: any) => boolean,
+      filter?: (value: unknown) => boolean,
     ) => {
       if (!obj) return;
       html += section(title);
       objRows(obj, filter);
     };
     const listSection = (
-      arr: any[] | undefined,
+      arr: DisplayRecord[] | undefined,
       title: string,
-      fmt: (item: any) => string,
+      fmt: (item: DisplayRecord) => string,
     ) => {
       if (!arr?.length) return;
       html += section(title);
@@ -170,62 +222,69 @@ export class ExtractAudioMetadata extends TypedOperation<ArrayBuffer, AnyInput, 
       html += row("(none)", "No common tags found");
     }
 
-    listSection(d.tags?.raw?.id3v2?.frames, "ID3v2 Frames", (f: any) => {
+    listSection(d.tags?.raw?.id3v2?.frames, "ID3v2 Frames", (f) => {
       const val =
         typeof f.decoded === "object"
           ? JSON.stringify(f.decoded)
           : (f.decoded ?? `(${f.size} bytes)`);
-      return row(f.id + (f.description ? ` \u2014 ${f.description}` : ""), val);
+      return row(
+        String(f.id) +
+          (f.description ? ` \u2014 ${String(f.description)}` : ""),
+        val,
+      );
     });
-    objSection(d.tags?.raw?.id3v1, "ID3v1", (v: any) => !!v);
-    listSection(d.tags?.raw?.apev2?.items, "APEv2 Tags", (i: any) =>
-      row(i.key, i.value),
+    objSection(d.tags?.raw?.id3v1, "ID3v1", (value) => !!value);
+    listSection(d.tags?.raw?.apev2?.items, "APEv2 Tags", (i) =>
+      row(String(i.key), i.value),
     );
 
     if (d.tags?.raw?.vorbis_comments?.comments?.length) {
       html += section("Vorbis Comments");
       html += row("Vendor", d.tags.raw.vorbis_comments.vendor);
       for (const c of d.tags.raw.vorbis_comments.comments)
-        html += row(c.key, c.value);
+        html += row(String(c.key), c.value);
     }
 
     objSection(d.tags?.raw?.riff?.info, "RIFF INFO", () => true);
     objSection(d.tags?.raw?.riff?.bext, "BWF bext");
-    listSection(d.tags?.raw?.riff?.chunks, "RIFF Chunks", (c: any) =>
-      row(c.id, `${c.size} bytes @ offset ${c.offset}`),
+    listSection(d.tags?.raw?.riff?.chunks, "RIFF Chunks", (c) =>
+      row(String(c.id), `${String(c.size)} bytes @ offset ${String(c.offset)}`),
     );
-    listSection(d.tags?.raw?.flac?.blocks, "FLAC Metadata Blocks", (b: any) =>
-      row(b.type, `${b.length} bytes`),
+    listSection(d.tags?.raw?.flac?.blocks, "FLAC Metadata Blocks", (b) =>
+      row(String(b.type), `${String(b.length)} bytes`),
     );
 
     if (d.tags?.raw?.mp4?.top_level_atoms?.length) {
       html += section("MP4 Top-Level Atoms");
       const atoms = d.tags.raw.mp4.top_level_atoms;
       for (const a of atoms.slice(0, 50))
-        html += row(a.type, `${a.size} bytes @ offset ${a.offset}`);
+        html += row(
+          String(a.type),
+          `${String(a.size)} bytes @ offset ${String(a.offset)}`,
+        );
       if (atoms.length > 50)
         html += row("...", `${atoms.length - 50} more atoms`);
     }
 
-    listSection(d.tags?.raw?.aiff?.chunks, "AIFF Chunks", (c: any) =>
-      row(c.id, c.value),
+    listSection(d.tags?.raw?.aiff?.chunks, "AIFF Chunks", (c) =>
+      row(String(c.id), c.value),
     );
     objSection(d.tags?.raw?.aac, "AAC ADTS");
     objSection(d.tags?.raw?.ac3, "AC3 (Dolby Digital)");
     objSection(
       d.tags?.raw?.asf?.content_description,
       "ASF Content Description",
-      (v: any) => !!v,
+      (value) => !!value,
     );
     listSection(
       d.tags?.raw?.asf?.extended_content,
       "ASF Extended Content",
-      (item: any) => row(item.name, item.value),
+      (item) => row(String(item.name), item.value),
     );
-    listSection(d.embedded, "Embedded Objects", (e: any) =>
+    listSection(d.embedded, "Embedded Objects", (e) =>
       row(
-        e.id,
-        `${e.content_type || "unknown"} \u2014 ${(e.byte_length ?? 0).toLocaleString()} bytes`,
+        String(e.id),
+        `${String(e.content_type || "unknown")} \u2014 ${Number(e.byte_length ?? 0).toLocaleString()} bytes`,
       ),
     );
 
@@ -235,11 +294,11 @@ export class ExtractAudioMetadata extends TypedOperation<ArrayBuffer, AnyInput, 
       for (const emb of d.provenance.c2pa.embedding || [])
         html += row(
           "Carrier",
-          `${emb.carrier} \u2014 ${(emb.byte_length ?? 0).toLocaleString()} bytes`,
+          `${String(emb.carrier)} \u2014 ${Number(emb.byte_length ?? 0).toLocaleString()} bytes`,
         );
     }
 
-    listSection(d.errors, "Errors", (e: any) => row(e.stage, e.message));
+    listSection(d.errors, "Errors", (e) => row(String(e.stage), e.message));
 
     html += "</table>";
     return html;

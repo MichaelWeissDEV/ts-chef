@@ -435,8 +435,7 @@ export class BlowfishAlgorithm {
       box.p[i++] = res.left;
       box.p[i++] = res.right;
     }
-    for (let i = 0; i < 4; i++) {
-      const s = (box as any)["s" + i] as number[];
+    for (const s of [box.s0, box.s1, box.s2, box.s3]) {
       for (let j = 0, l = s.length; j < l; ) {
         eb(res, box);
         s[j++] = res.left;

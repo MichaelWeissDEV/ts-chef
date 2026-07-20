@@ -10,6 +10,12 @@
 import { TypedOperation } from "../Operation";
 import OperationError from "../errors/OperationError";
 
+interface WheelSetting {
+  X: Record<number, number[]>;
+  S: Record<number, number[]>;
+  M: Record<number, number[]>;
+}
+
 /**
  * Lorenz operation
  */
@@ -321,7 +327,7 @@ export class Lorenz extends TypedOperation<string, string, unknown[]> {
       throw new OperationError("Χ5 start must be between 1 and 23");
 
     // Initialise chosen wheel pattern
-    let chosenSetting: any;
+    let chosenSetting: WheelSetting;
     if (pattern === "Custom") {
       const re = new RegExp("^[.xX]*$");
       if (lugs1.length !== 43 || !re.test(lugs1))
@@ -372,7 +378,9 @@ export class Lorenz extends TypedOperation<string, string, unknown[]> {
         throw new OperationError(
           "Χ5 custom lugs must be 23 long and can only include . or x",
         );
-      chosenSetting = JSON.parse(JSON.stringify(INIT_PATTERNS["No Pattern"]));
+      chosenSetting = JSON.parse(
+        JSON.stringify(INIT_PATTERNS["No Pattern"]),
+      ) as WheelSetting;
       chosenSetting.S[1] = this.readLugs(lugs1);
       chosenSetting.S[2] = this.readLugs(lugs2);
       chosenSetting.S[3] = this.readLugs(lugs3);
@@ -386,7 +394,7 @@ export class Lorenz extends TypedOperation<string, string, unknown[]> {
       chosenSetting.X[4] = this.readLugs(lugx4);
       chosenSetting.X[5] = this.readLugs(lugx5);
     } else {
-      chosenSetting = (INIT_PATTERNS as any)[pattern];
+      chosenSetting = INIT_PATTERNS[pattern];
     }
     const chiSettings: Record<number, number[]> = chosenSetting.X; // Pin settings for Chi links (X)
     const psiSettings: Record<number, number[]> = chosenSetting.S; // Pin settings for Psi links (S)
@@ -426,7 +434,7 @@ export class Lorenz extends TypedOperation<string, string, unknown[]> {
         psiSettings[5][s5 - 1],
       ];
 
-      if (typeof (ITA2_TABLE as any)[letter] === "undefined") {
+      if (typeof ITA2_TABLE[letter] === "undefined") {
         return "";
       }
 
@@ -436,9 +444,7 @@ export class Lorenz extends TypedOperation<string, string, unknown[]> {
       const xorSum: number[] = [];
       for (let i = 0; i <= 4; i++) {
         xorSum[i] =
-          parseInt((ITA2_TABLE as any)[letter][i], 10) ^
-          thisPsi[i] ^
-          thisChi[i];
+          parseInt(ITA2_TABLE[letter][i], 10) ^ thisPsi[i] ^ thisChi[i];
       }
       const resultStr = xorSum.join("");
 
@@ -468,7 +474,7 @@ export class Lorenz extends TypedOperation<string, string, unknown[]> {
       p5[2] = p5[1];
       p5[1] = p5[0];
       if (mode === "Send") {
-        p5[0] = parseInt((ITA2_TABLE as any)[letter][4], 10);
+        p5[0] = parseInt(ITA2_TABLE[letter][4], 10);
       } else {
         p5[0] = xorSum[4];
       }
@@ -553,11 +559,11 @@ export class Lorenz extends TypedOperation<string, string, unknown[]> {
     this.REVERSE_FIGSHIFT_TABLE = {};
 
     for (const letter in ITA2_TABLE) {
-      const code = (ITA2_TABLE as any)[letter];
+      const code = ITA2_TABLE[letter];
       this.REVERSE_ITA2_TABLE[code] = letter;
     }
     for (const letter in figShiftArr) {
-      const ltr = (figShiftArr as any)[letter];
+      const ltr = figShiftArr[letter];
       this.REVERSE_FIGSHIFT_TABLE[ltr] = letter;
     }
   }
@@ -602,7 +608,7 @@ export class Lorenz extends TypedOperation<string, string, unknown[]> {
         if (!figShifted && figShiftedChars.indexOf(letter) !== -1) {
           // in letters mode and next char needs to be figure shifted
           figShifted = true;
-          result += "55" + (figShiftArr as any)[letter];
+          result += "55" + figShiftArr[letter];
         } else if (figShifted) {
           // in figures mode and next char needs to be letter shifted
           if (letter === "\n") {
@@ -613,7 +619,7 @@ export class Lorenz extends TypedOperation<string, string, unknown[]> {
             figShifted = false;
             result += "88" + letter;
           } else {
-            result += (figShiftArr as any)[letter];
+            result += figShiftArr[letter];
           }
         } else {
           if (letter === "\n") {
@@ -671,7 +677,7 @@ export class Lorenz extends TypedOperation<string, string, unknown[]> {
   }
 }
 
-const ITA2_TABLE = {
+const ITA2_TABLE: Record<string, string> = {
   A: "11000",
   B: "10011",
   C: "01110",
@@ -714,7 +720,7 @@ const validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890+-'()/:=?,. \n\r";
 const validITA2 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ34589+-./";
 const figShiftedChars = "1234567890+-'()/:=?,.";
 
-const figShiftArr = {
+const figShiftArr: Record<string, string> = {
   "1": "Q",
   "2": "W",
   "3": "E",
@@ -746,7 +752,7 @@ const figShiftArr = {
   "\r": "4",
 };
 
-const INIT_PATTERNS = {
+const INIT_PATTERNS: Record<string, WheelSetting> = {
   "No Pattern": {
     X: {
       1: [

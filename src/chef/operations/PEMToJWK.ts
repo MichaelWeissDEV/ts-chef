@@ -8,7 +8,7 @@
  */
 
 import r from "jsrsasign";
-import { TypedOperation, AnyInput } from "../Operation";
+import { TypedOperation } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 /**

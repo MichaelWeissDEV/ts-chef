@@ -8,7 +8,7 @@
  */
 
 import { TypedOperation } from "../Operation";
-import kbpgp from "../lib/KbpgpCompat";
+import kbpgp, { type UnboxedLiterals } from "../lib/KbpgpCompat";
 import { ASP, importPrivateKey, importPublicKey } from "../lib/PGP";
 import OperationError from "../errors/OperationError";
 import { promisify } from "es6-promisify";
@@ -16,7 +16,11 @@ import { promisify } from "es6-promisify";
 /**
  * PGP Decrypt and Verify operation
  */
-export class PGPDecryptAndVerify extends TypedOperation<string, Promise<string>, unknown[]> {
+export class PGPDecryptAndVerify extends TypedOperation<
+  string,
+  Promise<string>,
+  unknown[]
+> {
   /**
    * PGPDecryptAndVerify constructor
    */
@@ -87,7 +91,7 @@ export class PGPDecryptAndVerify extends TypedOperation<string, Promise<string>,
         armored: signedMessage,
         keyfetch: keyring,
         asp: ASP,
-      }) as Promise<any>);
+      }) as Promise<UnboxedLiterals>);
       const ds = unboxedLiterals[0].get_data_signer();
       if (ds) {
         const km = ds.get_key_manager();

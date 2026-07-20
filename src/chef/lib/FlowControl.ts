@@ -9,7 +9,6 @@
 
 interface OperationState {
   opList: Array<{ name: string; ingValues: unknown[] }>;
-  [key: string]: unknown;
 }
 
 /**

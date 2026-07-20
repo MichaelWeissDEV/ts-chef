@@ -13,9 +13,19 @@ import * as nodomtemp from "nodom";
 import { TypedOperation, AnyInput } from "../Operation";
 
 const d3 = d3temp;
-const nodom = (nodomtemp as any).default
-  ? (nodomtemp as any).default
-  : nodomtemp;
+const nodomModule = nodomtemp as typeof nodomtemp & {
+  default?: typeof nodomtemp;
+};
+const nodom = nodomModule.default ?? nodomtemp;
+
+interface ChartMargins {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
+type SvgSelection = d3.Selection<SVGSVGElement, unknown, null, undefined>;
 
 /**
  * Entropy operation
@@ -89,7 +99,10 @@ export class Entropy extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
    * @param {Uint8Array} inputBytes
    * @returns {any}
    */
-  calculateScanningEntropy(inputBytes: Uint8Array): AnyInput {
+  calculateScanningEntropy(inputBytes: Uint8Array): {
+    entropyData: number[];
+    binWidth: number;
+  } {
     const entropyData: number[] = [];
     const binWidth = inputBytes.length < 256 ? 8 : 256;
 
@@ -115,20 +128,20 @@ export class Entropy extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
    * @param {string} yTitle
    */
   createAxes(
-    svg: any,
-    xScale: any,
-    yScale: any,
+    svg: SvgSelection,
+    xScale: d3.AxisScale<number>,
+    yScale: d3.AxisScale<number>,
     svgHeight: number,
     svgWidth: number,
-    margins: any,
+    margins: ChartMargins,
     title: string,
     xTitle: string,
     yTitle: string,
   ): void {
     // Axes
-    const yAxis = d3.axisLeft().scale(yScale);
+    const yAxis = d3.axisLeft(yScale);
 
-    const xAxis = d3.axisBottom().scale(xScale);
+    const xAxis = d3.axisBottom(xScale);
 
     svg
       .append("g")
@@ -205,7 +218,7 @@ export class Entropy extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
     const svgElement = document.createElement("svg");
 
     const svg = d3
-      .select(svgElement)
+      .select(svgElement as unknown as SVGSVGElement)
       .attr("width", "100%")
       .attr("height", "100%")
       .attr("viewBox", `0 0 ${svgWidth} ${svgHeight}`);
@@ -222,9 +235,9 @@ export class Entropy extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
       .range([margins.left, svgWidth - margins.right]);
 
     const line = d3
-      .line()
-      .x((_: any, i: number) => xScale(i))
-      .y((d: any) => yScale(d))
+      .line<number>()
+      .x((_value, i) => xScale(i))
+      .y((value) => yScale(value))
       .curve(d3.curveMonotoneX);
 
     svg
@@ -246,7 +259,7 @@ export class Entropy extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
       "Byte Frequency",
     );
 
-    return (svg.node() as any).outerHTML;
+    return svg.node()?.outerHTML ?? "";
   }
 
   /**
@@ -265,7 +278,7 @@ export class Entropy extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
     const document = new nodom.Document();
     const svgElement = document.createElement("svg");
     const svg = d3
-      .select(svgElement)
+      .select(svgElement as unknown as SVGSVGElement)
       .attr("width", "100%")
       .attr("height", "100%")
       .attr("viewBox", `0 0 ${svgWidth} ${svgHeight}`);
@@ -289,7 +302,7 @@ export class Entropy extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
       .data(byteFrequency)
       .enter()
       .append("rect")
-      .attr("x", (_: any, i: number) => xScale(i) + binWidth)
+      .attr("x", (_value, i) => xScale(i) + binWidth)
       .attr("y", (dataPoint: number) => yScale(dataPoint))
       .attr("width", binWidth)
       .attr(
@@ -310,7 +323,7 @@ export class Entropy extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
       "Byte Frequency",
     );
 
-    return (svg.node() as any).outerHTML;
+    return svg.node()?.outerHTML ?? "";
   }
 
   /**
@@ -328,7 +341,7 @@ export class Entropy extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
     const document = new nodom.Document();
     const svgElement = document.createElement("svg");
     const svg = d3
-      .select(svgElement)
+      .select(svgElement as unknown as SVGSVGElement)
       .attr("width", "100%")
       .attr("height", "100%")
       .attr("viewBox", `0 0 ${svgWidth} ${svgHeight}`);
@@ -345,9 +358,9 @@ export class Entropy extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
       .range([margins.left, svgWidth - margins.right]);
 
     const line = d3
-      .line()
-      .x((_: any, i: number) => xScale(i))
-      .y((d: any) => yScale(d))
+      .line<number>()
+      .x((_value, i) => xScale(i))
+      .y((value) => yScale(value))
       .curve(d3.curveMonotoneX);
 
     if (entropyData.length > 0) {
@@ -368,7 +381,7 @@ export class Entropy extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
       "Entropy",
     );
 
-    return (svg.node() as any).outerHTML;
+    return svg.node()?.outerHTML ?? "";
   }
 
   /**
@@ -394,14 +407,14 @@ export class Entropy extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
     const document = new nodom.Document();
     const svgElement = document.createElement("svg");
     const svg = d3
-      .select(svgElement)
+      .select(svgElement as unknown as SVGSVGElement)
       .attr("width", "100%")
       .attr("height", "100%")
       .attr("viewBox", `0 0 ${svgWidth} ${svgHeight}`);
 
     const maxEntropy = d3.max(entropyData, (d: number) => d) ?? 0;
     const greyScale = d3
-      .scaleLinear()
+      .scaleLinear<string>()
       .domain([0, maxEntropy])
       .range(["#000000", "#FFFFFF"])
       .interpolate(d3.interpolateRgb);
@@ -411,13 +424,13 @@ export class Entropy extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
       .data(nodes)
       .enter()
       .append("rect")
-      .attr("x", (d: any) => d.x * cellSize)
-      .attr("y", (d: any) => d.y * cellSize)
+      .attr("x", (node) => node.x * cellSize)
+      .attr("y", (node) => node.y * cellSize)
       .attr("width", cellSize)
       .attr("height", cellSize)
-      .style("fill", (d: any) => greyScale(d.entropy));
+      .style("fill", (node) => greyScale(node.entropy));
 
-    return (svg.node() as any).outerHTML;
+    return svg.node()?.outerHTML ?? "";
   }
 
   /**
@@ -493,21 +506,21 @@ export class Entropy extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
    * @param {any[]} args
    * @returns {string}
    */
-  present(entropyData: any, args: unknown[]): string {
+  present(entropyData: number | number[], args: unknown[]): string {
     const [visualizationType] = args as [string];
 
     switch (visualizationType) {
       case "Histogram (Bar)":
-        return this.createByteFrequencyBarHistogram(entropyData);
+        return this.createByteFrequencyBarHistogram(entropyData as number[]);
       case "Histogram (Line)":
-        return this.createByteFrequencyLineHistogram(entropyData);
+        return this.createByteFrequencyLineHistogram(entropyData as number[]);
       case "Curve":
-        return this.createEntropyCurve(entropyData);
+        return this.createEntropyCurve(entropyData as number[]);
       case "Image":
-        return this.createEntropyImage(entropyData);
+        return this.createEntropyImage(entropyData as number[]);
       case "Shannon scale":
       default:
-        return this.createShannonEntropyVisualization(entropyData);
+        return this.createShannonEntropyVisualization(entropyData as number);
     }
   }
 }

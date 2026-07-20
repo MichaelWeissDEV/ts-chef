@@ -16,7 +16,11 @@ import { promisify } from "es6-promisify";
 /**
  * PGP Decrypt operation
  */
-export class PGPDecrypt extends TypedOperation<string, Promise<string>, unknown[]> {
+export class PGPDecrypt extends TypedOperation<
+  string,
+  Promise<string>,
+  unknown[]
+> {
   /**
    * PGPDecrypt constructor
    */
@@ -63,7 +67,7 @@ export class PGPDecrypt extends TypedOperation<string, Promise<string>, unknown[
     const encryptedMessage = input,
       [privateKey, passphrase] = args as [string, string],
       keyring = new kbpgp.keyring.KeyRing();
-    let plaintextMessage: any;
+    let plaintextMessage: unknown;
 
     if (!privateKey)
       throw new OperationError("Enter the private key of the recipient.");
@@ -83,7 +87,7 @@ export class PGPDecrypt extends TypedOperation<string, Promise<string>, unknown[
       );
     }
 
-    return plaintextMessage.toString();
+    return String(plaintextMessage);
   }
 }
 

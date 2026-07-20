@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, AnyInput } from "../Operation";
+import { TypedOperation, AnyInput, type ArgConfig } from "../Operation";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 import { scanForFileTypes, extractFile } from "../lib/FileType";
@@ -16,7 +16,11 @@ import { FILE_SIGNATURES } from "../lib/FileSignatures";
 /**
  * Extract Files operation
  */
-export class ExtractFiles extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
+export class ExtractFiles extends TypedOperation<
+  ArrayBuffer,
+  AnyInput,
+  unknown[]
+> {
   /**
    * ExtractFiles constructor
    */
@@ -31,7 +35,7 @@ export class ExtractFiles extends TypedOperation<ArrayBuffer, AnyInput, unknown[
     });
 
     // Flatten categories and remove duplicates
-    const flattenedExts: string[] = [].concat(...(supportedExts as any));
+    const flattenedExts = supportedExts.flat();
     const uniqueExts = [...new Set(flattenedExts)];
 
     this.name = "Extract Files";
@@ -46,16 +50,16 @@ export class ExtractFiles extends TypedOperation<ArrayBuffer, AnyInput, unknown[
     this.inputType = "ArrayBuffer";
     this.outputType = "List<File>";
     this.presentType = "html";
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.args = (
-      Object.keys(FILE_SIGNATURES).map((cat) => {
+    const categoryArgs: ArgConfig[] = Object.keys(FILE_SIGNATURES).map(
+      (cat) => {
         return {
           name: cat,
           type: "boolean",
           value: cat === "Miscellaneous" ? false : true,
         };
-      }) as any[]
-    ).concat([
+      },
+    );
+    this.args = categoryArgs.concat([
       {
         name: "Ignore failed extractions",
         type: "boolean",
@@ -89,7 +93,7 @@ export class ExtractFiles extends TypedOperation<ArrayBuffer, AnyInput, unknown[
     const detectedFiles = scanForFileTypes(bytes, categories);
 
     // Extract each file that we support
-    const files: any[] = [];
+    const files: File[] = [];
     const errors: string[] = [];
     detectedFiles.forEach((detectedFile) => {
       try {
@@ -99,15 +103,16 @@ export class ExtractFiles extends TypedOperation<ArrayBuffer, AnyInput, unknown[
           detectedFile.offset,
         );
         if (file.size >= minSize) files.push(file);
-      } catch (err: any) {
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
         if (
           !ignoreFailedExtractions &&
-          err.message.indexOf("No extraction algorithm available") < 0
+          message.indexOf("No extraction algorithm available") < 0
         ) {
           errors.push(
             `Error while attempting to extract ${detectedFile.fileDetails.name} ` +
               `at offset ${detectedFile.offset}:\n` +
-              `${err.message}`,
+              message,
           );
         }
       }
@@ -126,8 +131,11 @@ export class ExtractFiles extends TypedOperation<ArrayBuffer, AnyInput, unknown[
    * @param {File[]} files
    * @returns {html}
    */
-  async present(files: unknown[]) {
-    return await (Utils as any).displayFilesAsHTML(files);
+  async present(files: File[]) {
+    const presenter = Utils as unknown as {
+      displayFilesAsHTML(files: File[]): Promise<string>;
+    };
+    return await presenter.displayFilesAsHTML(files);
   }
 }
 

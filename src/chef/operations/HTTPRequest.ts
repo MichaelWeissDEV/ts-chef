@@ -106,7 +106,7 @@ export class HTTPRequest extends TypedOperation<string, AnyInput, unknown[]> {
       headers.set(split[0].trim(), split[1].trim());
     });
 
-    const config: any = {
+    const config: RequestInit = {
       method: method,
       headers: headers,
       mode: modeLookup[mode],

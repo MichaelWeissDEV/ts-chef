@@ -9,6 +9,7 @@
 
 import { TypedOperation, AnyInput } from "../Operation";
 import kbpgp from "../lib/KbpgpCompat";
+import type { GeneratedPgpKeyManager } from "../lib/KbpgpCompat";
 import { getSubkeySize, ASP } from "../lib/PGP";
 import { cryptNotice } from "../lib/Crypt";
 import { promisify } from "es6-promisify";
@@ -16,7 +17,11 @@ import { promisify } from "es6-promisify";
 /**
  * Generate PGP Key Pair operation
  */
-export class GeneratePGPKeyPair extends TypedOperation<string, Promise<AnyInput>, unknown[]> {
+export class GeneratePGPKeyPair extends TypedOperation<
+  string,
+  Promise<AnyInput>,
+  unknown[]
+> {
   /**
    * GeneratePGPKeyPair constructor
    */
@@ -107,22 +112,22 @@ export class GeneratePGPKeyPair extends TypedOperation<string, Promise<AnyInput>
     };
 
     try {
-      const unsignedKey: any = await promisify(kbpgp.KeyManager.generate)(
+      const unsignedKey = (await promisify(kbpgp.KeyManager.generate)(
         keyGenerationOptions,
-      );
+      )) as GeneratedPgpKeyManager;
       await promisify(unsignedKey.sign.bind(unsignedKey))({});
 
       const signedKey = unsignedKey,
-        privateKeyExportOptions: any = {};
+        privateKeyExportOptions: Record<string, string> = {};
 
       if (password) privateKeyExportOptions.passphrase = password;
-      const privateKey: any = await promisify(
+      const privateKey = (await promisify(
         signedKey.export_pgp_private.bind(signedKey),
-      )(privateKeyExportOptions);
-      const publicKey: any = await promisify(
+      )(privateKeyExportOptions)) as unknown;
+      const publicKey = (await promisify(
         signedKey.export_pgp_public.bind(signedKey),
-      )({});
-      return privateKey + "\n" + publicKey.trim();
+      )({})) as unknown;
+      return String(privateKey) + "\n" + String(publicKey).trim();
     } catch (err) {
       throw new Error(`Error whilst generating key pair: ${err}`, {
         cause: err,

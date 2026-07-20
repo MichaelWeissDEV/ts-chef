@@ -11,10 +11,28 @@ import { TypedOperation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { Utils } from "../Utils";
 
+interface ID3Frame {
+  Size: string;
+  Description: string;
+  Data: string;
+}
+
+interface ID3Result {
+  Type: string;
+  Version: string;
+  Flags: string;
+  Size?: string;
+  Tags: Record<string, ID3Frame>;
+}
+
 /**
  * Extract ID3 operation
  */
-export class ExtractID3 extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
+export class ExtractID3 extends TypedOperation<
+  ArrayBuffer,
+  AnyInput,
+  unknown[]
+> {
   /**
    * ExtractID3 constructor
    */
@@ -47,12 +65,13 @@ export class ExtractID3 extends TypedOperation<ArrayBuffer, AnyInput, unknown[]>
       if (input[0] !== 0x49 || input[1] !== 0x44 || input[2] !== 0x33)
         throw new OperationError("No valid ID3 header.");
 
-      const header: any = {
+      const header: ID3Result = {
         Type: "ID3",
         // Tag version
         Version: input[3].toString() + "." + input[4].toString(),
         // Header version
         Flags: input[5].toString(),
+        Tags: {},
       };
 
       input = input.slice(6);
@@ -82,19 +101,20 @@ export class ExtractID3 extends TypedOperation<ArrayBuffer, AnyInput, unknown[]>
      * @param {string} id
      * @returns {[any, number]}
      */
-    const readFrame = (id: string): [any, number] => {
-      const frame: any = {};
-
+    const readFrame = (id: string): [ID3Frame, number] => {
       // Size of frame
       const size = readSize(4);
-      frame.Size = size.toString();
-      frame.Description = (FRAME_DESCRIPTIONS as any)[id];
+      const description = FRAME_DESCRIPTIONS[id];
       input = input.slice(2);
 
       // Read data from frame
       let data = "";
       for (let i = 0; i < size; i++) data += String.fromCharCode(input[i]);
-      frame.Data = data;
+      const frame: ID3Frame = {
+        Size: size.toString(),
+        Description: description,
+        Data: data,
+      };
 
       // Move to next Frame
       input = input.slice(size);
@@ -107,7 +127,7 @@ export class ExtractID3 extends TypedOperation<ArrayBuffer, AnyInput, unknown[]>
     const headerTagSize = readSize(4);
     result.Size = headerTagSize.toString();
 
-    const tags: any = {};
+    const tags: Record<string, ID3Frame> = {};
     let pos = 10;
 
     // While the current element is in the header
@@ -159,8 +179,7 @@ export class ExtractID3 extends TypedOperation<ArrayBuffer, AnyInput, unknown[]>
     if (!data || !Object.prototype.hasOwnProperty.call(data, "Tags"))
       return JSON.stringify(data, null, 4);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const tagged = data as Record<string, any>;
+    const tagged = data as ID3Result;
     let output = `<table class="table table-hover table-sm table-bordered table-nonfluid">
             <tr><th>Tag</th><th>Description</th><th>Data</th></tr>`;
 

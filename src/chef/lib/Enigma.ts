@@ -205,7 +205,7 @@ export class Reflector extends PairMapBase {
     for (const x of Object.keys(this.map)) {
       optMap[Number(x)] = this.map[Number(x)];
     }
-    this.map = optMap as any; // Allow array mapping
+    this.map = optMap; // Use the array as an optimized numeric mapping
   }
 
   transform(c: number): number {
@@ -222,6 +222,11 @@ export class Plugboard extends PairMapBase {
   }
 }
 
+interface CharacterTransformer {
+  transform(c: number): number;
+  revTransform(c: number): number;
+}
+
 /**
  * Base class implementing the Enigma cipher mechanism: rotor stepping and symmetric letter encryption/decryption.
  */
@@ -229,9 +234,13 @@ export class EnigmaBase {
   rotors: Rotor[];
   rotorsRev: Rotor[];
   reflector: Reflector;
-  plugboard: Plugboard;
+  plugboard: CharacterTransformer;
 
-  constructor(rotors: Rotor[], reflector: Reflector, plugboard: Plugboard) {
+  constructor(
+    rotors: Rotor[],
+    reflector: Reflector,
+    plugboard: CharacterTransformer,
+  ) {
     this.rotors = rotors;
     this.rotorsRev = [...rotors].reverse();
     this.reflector = reflector;

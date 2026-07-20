@@ -7,7 +7,7 @@
  */
 
 // Local imports needed for this module's own code (type aliases and createTypedOperation factory)
-import type { ArgConfig, HighlightPos, HighlightResult, AnyInput, OperationResult } from "../Operation";
+import type { ArgConfig, HighlightPos, HighlightResult } from "../Operation";
 import { TypedOperation } from "../Operation";
 import type { PipelineData, InputType } from "../types";
 
@@ -37,7 +37,8 @@ export {
 /**
  * Type-safe pipeline building functions
  */
-export { Pipeline, PipelineBuilder, PipelineStepResult, pipe } from "../Pipeline";
+export { Pipeline, PipelineBuilder, pipe } from "../Pipeline";
+export type { PipelineStepResult } from "../Pipeline";
 
 /**
  * Helper types for common operation signatures
@@ -47,13 +48,22 @@ export { Pipeline, PipelineBuilder, PipelineStepResult, pipe } from "../Pipeline
 export type StringOperation = TypedOperation<string, string, unknown[]>;
 
 /** String to number array operation */
-export type StringToBytesOperation = TypedOperation<string, number[], unknown[]>;
+export type StringToBytesOperation = TypedOperation<
+  string,
+  number[],
+  unknown[]
+>;
 
 /** Bytes to String operation */
-export type BytesToStringOperation = TypedOperation<number[] | Uint8Array, string, unknown[]>;
+export type BytesToStringOperation = TypedOperation<
+  number[] | Uint8Array,
+  string,
+  unknown[]
+>;
 
 /** Generic transformation operation */
-export type TransformOperation<T extends PipelineData = PipelineData> = TypedOperation<T, T, unknown[]>;
+export type TransformOperation<T extends PipelineData = PipelineData> =
+  TypedOperation<T, T, unknown[]>;
 
 /**
  * Helper to create a typed operation class
@@ -68,7 +78,11 @@ export type TransformOperation<T extends PipelineData = PipelineData> = TypedOpe
  *   run: (input: string) => input.length,
  * });
  */
-export function createTypedOperation<TInput, TOutput, TArgs extends unknown[]>(config: {
+export function createTypedOperation<
+  TInput,
+  TOutput,
+  TArgs extends unknown[],
+>(config: {
   name: string;
   module?: string;
   description?: string;
@@ -81,12 +95,15 @@ export function createTypedOperation<TInput, TOutput, TArgs extends unknown[]>(c
   args?: ArgConfig[];
   checks?: Array<{ pattern: string; flags: string; args: unknown[] }>;
   run: (input: TInput, args: TArgs) => TOutput | Promise<TOutput>;
-  present?: (data: TOutput, args: TArgs) => PipelineData;
+  present?: (data: Awaited<TOutput>, args: TArgs) => PipelineData;
   highlight?: (pos: HighlightPos, args: TArgs) => HighlightResult;
   highlightReverse?: (pos: HighlightPos, args: TArgs) => HighlightResult;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-}): new (...args: any[]) => TypedOperation<TInput, TOutput, TArgs> {
-  return class TypedOperationImpl extends TypedOperation<TInput, TOutput, TArgs> {
+}): new () => TypedOperation<TInput, TOutput, TArgs> {
+  return class TypedOperationImpl extends TypedOperation<
+    TInput,
+    TOutput,
+    TArgs
+  > {
     constructor() {
       super();
       this.name = config.name;
@@ -108,7 +125,7 @@ export function createTypedOperation<TInput, TOutput, TArgs extends unknown[]>(c
 
     present(data: Awaited<TOutput>, args: TArgs): PipelineData {
       if (config.present) {
-        return config.present(data as any, args);
+        return config.present(data, args);
       }
       return super.present(data, args);
     }
@@ -130,5 +147,5 @@ export function createTypedOperation<TInput, TOutput, TArgs extends unknown[]>(c
 }
 
 // Re-export InputType from types
-export { InputType, INPUT_TYPES, PipelineData } from "../types";
-
+export { INPUT_TYPES } from "../types";
+export type { InputType, PipelineData } from "../types";

@@ -10,10 +10,16 @@
 import { TypedOperation } from "../Operation";
 import { getLabelIndex } from "../lib/FlowControl";
 
+interface JumpState {
+  progress: number;
+  opList: Array<{ name: string; ingValues: [string, number] }>;
+  numJumps: number;
+}
+
 /**
  * Jump operation
  */
-export class Jump extends TypedOperation<any, any, unknown[]> {
+export class Jump extends TypedOperation<JumpState, JumpState, unknown[]> {
   /**
    * Jump constructor
    */
@@ -48,7 +54,7 @@ export class Jump extends TypedOperation<any, any, unknown[]> {
    * @param {number} state.numJumps - The number of jumps taken so far.
    * @returns {Object} The updated state of the recipe.
    */
-  run(state: any) {
+  run(state: JumpState): JumpState {
     const ings = state.opList[state.progress].ingValues;
     const [label, maxJumps] = ings;
     const jmpIndex = getLabelIndex(label, state);

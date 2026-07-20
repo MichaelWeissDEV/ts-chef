@@ -12,10 +12,29 @@ import { toHexFast } from "../lib/Hex";
 import { objToTable } from "../lib/Protocol";
 import Stream from "../lib/Stream";
 
+type ParsedObject = Record<string, unknown>;
+
+interface ParsedList<T = string> {
+  length?: number;
+  truncated?: boolean;
+  values?: T[];
+}
+
+interface ParsedExtension {
+  type?: string;
+  length?: number;
+  truncated?: boolean;
+  value?: string;
+}
+
 /**
  * Parse TLS record operation.
  */
-export class ParseTLSRecord extends TypedOperation<ArrayBuffer, AnyInput, unknown[]> {
+export class ParseTLSRecord extends TypedOperation<
+  ArrayBuffer,
+  AnyInput,
+  unknown[]
+> {
   private _handshakeParser: HandshakeParser;
   private _contentTypes: Record<number, string>;
 
@@ -36,8 +55,7 @@ export class ParseTLSRecord extends TypedOperation<ArrayBuffer, AnyInput, unknow
     this._handshakeParser = new HandshakeParser();
     this._contentTypes = {};
 
-    for (const key in ContentType) {
-      const val = (ContentType as any)[key];
+    for (const [key, val] of Object.entries(ContentType)) {
       this._contentTypes[val] = key.toString().toLocaleLowerCase();
     }
   }
@@ -50,7 +68,7 @@ export class ParseTLSRecord extends TypedOperation<ArrayBuffer, AnyInput, unknow
   run(input: ArrayBuffer, _args: unknown[]): AnyInput {
     const s = new Stream(new Uint8Array(input));
 
-    const output: any[] = [];
+    const output: ParsedObject[] = [];
 
     while (s.hasMore()) {
       const record = this._readRecord(s);
@@ -68,7 +86,7 @@ export class ParseTLSRecord extends TypedOperation<ArrayBuffer, AnyInput, unknow
    * @param {Stream} input - Stream, containing a raw TLS Record.
    * @returns {Object|null} Object representation of TLS Record.
    */
-  _readRecord(input: Stream): any {
+  _readRecord(input: Stream): ParsedObject | null {
     const RECORD_HEADER_LEN = 5;
 
     if (input.position + RECORD_HEADER_LEN > input.length) {
@@ -99,7 +117,7 @@ export class ParseTLSRecord extends TypedOperation<ArrayBuffer, AnyInput, unknow
       return this._handshakeParser.parse(new Stream(content), recordHeader);
     }
 
-    const record: any = { ...recordHeader };
+    const record: ParsedObject = { ...recordHeader };
     record.value = "0x" + toHexFast(content);
 
     return record;
@@ -112,7 +130,9 @@ export class ParseTLSRecord extends TypedOperation<ArrayBuffer, AnyInput, unknow
    * @returns {string} HTML representation of TLS Records contained within data.
    */
   present(data: AnyInput, _args: unknown[]): AnyInput {
-    return (data as any[]).map((r) => objToTable(r)).join("\n\n");
+    return Array.isArray(data)
+      ? data.map((record) => objToTable(record)).join("\n\n")
+      : objToTable(data);
   }
 }
 
@@ -185,8 +205,7 @@ class HandshakeParser {
     this._certificateVerifyParser = new CertificateVerifyParser();
     this._handshakeTypes = {};
 
-    for (const key in HandshakeType) {
-      const val = (HandshakeType as any)[key];
+    for (const [key, val] of Object.entries(HandshakeType)) {
       this._handshakeTypes[val] = key.toString().toLowerCase();
     }
   }
@@ -198,8 +217,8 @@ class HandshakeParser {
    * @param {RecordHeader} recordHeader - TLS Record header.
    * @returns {Object} Object representation of Handshake.
    */
-  parse(input: Stream, recordHeader: RecordHeader): any {
-    const output: any = { ...recordHeader };
+  parse(input: Stream, recordHeader: RecordHeader): ParsedObject {
+    const output: ParsedObject = { ...recordHeader };
 
     if (!input.hasMore()) {
       return output;
@@ -306,8 +325,8 @@ class ClientHelloParser {
    * @param {Stream} input - Stream, containing a raw ClientHello message.
    * @returns {Object} Object representation of ClientHello.
    */
-  parse(input: Stream): any {
-    const output: any = {};
+  parse(input: Stream): ParsedObject {
+    const output: ParsedObject = {};
 
     output.clientVersion = this._readClientVersion(input);
     output.random = this._readRandom(input);
@@ -360,10 +379,8 @@ class ClientHelloParser {
    * @param {Stream} input - Stream, containing a raw ClientHello message, with position before cipher_suites length field.
    * @returns {Object} Object represention of cipher_suites field.
    */
-  _readCipherSuites(input: Stream): any {
-    const output: any = {};
-
-    output.length = input.readInt(2)!;
+  _readCipherSuites(input: Stream): ParsedList {
+    const output: ParsedList = { length: input.readInt(2)! };
     if (!output.length) {
       return {};
     }
@@ -393,10 +410,8 @@ class ClientHelloParser {
    * @param {Stream} input - Stream, containing a raw ClientHello message, with position before compression_methods length field.
    * @returns {Object} Object representation of compression_methods field.
    */
-  _readCompressionMethods(input: Stream): any {
-    const output: any = {};
-
-    output.length = input.readInt(1)!;
+  _readCompressionMethods(input: Stream): ParsedList {
+    const output: ParsedList = { length: input.readInt(1)! };
     if (!output.length) {
       return {};
     }
@@ -426,10 +441,8 @@ class ClientHelloParser {
    * @param {Stream} input - Stream, containing a raw ClientHello message, with position before extensions length field.
    * @returns {Object} Object representations of extensions field.
    */
-  _readExtensions(input: Stream): any {
-    const output: any = {};
-
-    output.length = input.readInt(2)!;
+  _readExtensions(input: Stream): ParsedList<ParsedExtension> {
+    const output: ParsedList<ParsedExtension> = { length: input.readInt(2)! };
     if (!output.length) {
       return {};
     }
@@ -466,8 +479,8 @@ class ServerHelloParser {
    * @param {Stream} input - Stream, containing a raw ServerHello message.
    * @return {Object} Object representation of ServerHello.
    */
-  parse(input: Stream): any {
-    const output: any = {};
+  parse(input: Stream): ParsedObject {
+    const output: ParsedObject = {};
 
     output.serverVersion = this._readServerVersion(input);
     output.random = this._readRandom(input);
@@ -540,10 +553,8 @@ class ServerHelloParser {
    * @param {Stream} input - Stream, containing a raw ServerHello message, with position before extensions length field.
    * @returns {Object} Object representation of extensions field.
    */
-  _readExtensions(input: Stream): any {
-    const output: any = {};
-
-    output.length = input.readInt(2)!;
+  _readExtensions(input: Stream): ParsedList<ParsedExtension> {
+    const output: ParsedList<ParsedExtension> = { length: input.readInt(2)! };
     if (!output.length) {
       return {};
     }
@@ -571,8 +582,8 @@ class ExtensionsParser {
    * @param {Stream} input - Stream, containing multiple raw Extensions, with position before first extension length field.
    * @returns {Object[]} Array of Object representations of Extensions contained within input.
    */
-  parse(input: Stream): any[] {
-    const output: any[] = [];
+  parse(input: Stream): ParsedExtension[] {
+    const output: ParsedExtension[] = [];
 
     while (input.hasMore()) {
       const extension = this._readExtension(input);
@@ -590,8 +601,8 @@ class ExtensionsParser {
    * @param {Stream} input - Stream, containing a list of Extensions, with position before the length field of the next Extension.
    * @returns {Object|null} Object representation of Extension.
    */
-  _readExtension(input: Stream): any {
-    const output: any = {};
+  _readExtension(input: Stream): ParsedExtension | null {
+    const output: ParsedExtension = {};
 
     if (input.position + 4 > input.length) {
       input.moveTo(input.length);
@@ -627,7 +638,7 @@ class NewSessionTicketParser {
    * @param {Stream} input - Stream, containing a raw NewSessionTicket message.
    * @returns {Object} Object representation of NewSessionTicket.
    */
-  parse(input: Stream): any {
+  parse(input: Stream): { ticketLifetimeHint: string; ticket: string } {
     return {
       ticketLifetimeHint: this._readTicketLifetimeHint(input),
       ticket: this._readTicket(input),
@@ -670,8 +681,8 @@ class CertificateParser {
    * @param {Stream} input - Stream, containing a raw Certificate message.
    * @returns {Object} Object representation of Certificate.
    */
-  parse(input: Stream): any {
-    const output: any = {};
+  parse(input: Stream): ParsedObject {
+    const output: ParsedObject = {};
 
     output.certificateList = this._readCertificateList(input);
 
@@ -684,8 +695,8 @@ class CertificateParser {
    * @param {Stream} input - Stream, containing a raw Certificate message, with position before certificate_list length field.
    * @returns {any} Object, containing a hex representation of values within the certificate_list field.
    */
-  _readCertificateList(input: Stream): any {
-    const output: any = {};
+  _readCertificateList(input: Stream): ParsedList {
+    const output: ParsedList = {};
 
     if (input.position + 3 > input.length) {
       input.moveTo(input.length);
@@ -737,8 +748,8 @@ class CertificateRequestParser {
    * @param {Stream} input - Stream, containing a raw CertificateRequest message.
    * @return {Object} Object representation of CertificateRequest.
    */
-  parse(input: Stream): any {
-    const output: any = {};
+  parse(input: Stream): ParsedObject {
+    const output: ParsedObject = {};
 
     output.certificateTypes = this._readCertificateTypes(input);
     output.supportedSignatureAlgorithms =
@@ -758,10 +769,8 @@ class CertificateRequestParser {
    * @param {Stream} input - Stream, containing a raw CertificateRequest message, with position before certificate_types length field.
    * @return {any} Object, containing a hex representation of values within the certificate_types field.
    */
-  _readCertificateTypes(input: Stream): any {
-    const output: any = {};
-
-    output.length = input.readInt(1)!;
+  _readCertificateTypes(input: Stream): ParsedList {
+    const output: ParsedList = { length: input.readInt(1)! };
     if (!output.length) {
       return {};
     }
@@ -791,10 +800,8 @@ class CertificateRequestParser {
    * @param {Stream} input - Stream, containing a raw CertificateRequest message, with position before supported_signature_algorithms length field.
    * @returns {any} Object, containing a hex representation of values within the supported_signature_algorithms field.
    */
-  _readSupportedSignatureAlgorithms(input: Stream): any {
-    const output: any = {};
-
-    output.length = input.readInt(2)!;
+  _readSupportedSignatureAlgorithms(input: Stream): ParsedList {
+    const output: ParsedList = { length: input.readInt(2)! };
     if (!output.length) {
       return {};
     }
@@ -824,10 +831,8 @@ class CertificateRequestParser {
    * @param {Stream} input - Stream, containing a raw CertificateRequest message, with position before certificate_authorities length field.
    * @returns {any} Object, containing a hex representation of values within the certificate_authorities field.
    */
-  _readCertificateAuthorities(input: Stream): any {
-    const output: any = {};
-
-    output.length = input.readInt(2)!;
+  _readCertificateAuthorities(input: Stream): ParsedList {
+    const output: ParsedList = { length: input.readInt(2)! };
     if (!output.length) {
       return {};
     }
@@ -874,7 +879,11 @@ class CertificateVerifyParser {
    * @param {Stream} input - Stream, containing a raw CertificateVerify message.
    * @returns {Object} Object representation of CertificateVerify.
    */
-  parse(input: Stream): any {
+  parse(input: Stream): {
+    algorithmHash: string;
+    algorithmSignature: string;
+    signature: string;
+  } {
     return {
       algorithmHash: this._readAlgorithmHash(input),
       algorithmSignature: this._readAlgorithmSignature(input),

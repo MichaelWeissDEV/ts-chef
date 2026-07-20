@@ -74,7 +74,7 @@ export class DateTimeDelta extends TypedOperation<string, string, unknown[]> {
    */
   run(input: string, args: unknown[]): string {
     const [
-      arg0,
+      ,
       arg1,
       arg2,
       daysDelta,

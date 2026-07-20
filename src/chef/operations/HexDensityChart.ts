@@ -10,6 +10,7 @@
 import * as d3temp from "d3";
 import * as d3hexbintemp from "d3-hexbin";
 import * as nodomtemp from "nodom";
+import type { HexbinBin } from "d3-hexbin";
 import {
   getScatterValues,
   RECORD_DELIMITER_OPTIONS,
@@ -21,12 +22,21 @@ import { TypedOperation } from "../Operation";
 import Utils from "../Utils";
 
 const d3 = d3temp;
-const d3hexbin = (d3hexbintemp as any).default
-  ? (d3hexbintemp as any).default
-  : d3hexbintemp;
-const nodom = (nodomtemp as any).default
-  ? (nodomtemp as any).default
-  : nodomtemp;
+const d3HexbinModule = d3hexbintemp as typeof d3hexbintemp & {
+  default?: typeof d3hexbintemp;
+};
+const d3hexbin = d3HexbinModule.default ?? d3hexbintemp;
+const nodomModule = nodomtemp as typeof nodomtemp & {
+  default?: typeof nodomtemp;
+};
+const nodom = nodomModule.default ?? nodomtemp;
+
+type Point = [number, number];
+type HexBin = HexbinBin<Point>;
+interface HexCenter {
+  x: number;
+  y: number;
+}
 
 /**
  * Hex Density chart operation
@@ -155,9 +165,9 @@ export class HexDensityChart extends TypedOperation<string, string, unknown[]> {
     }
 
     const document = new nodom.Document();
-    let svg: any = document.createElement("svg");
-    svg = d3
-      .select(svg)
+    const svgElement = document.createElement("svg");
+    const svg = d3
+      .select(svgElement as unknown as SVGSVGElement)
       .attr("width", "100%")
       .attr("height", "100%")
       .attr("viewBox", `0 0 ${dimension} ${dimension}`);
@@ -175,7 +185,7 @@ export class HexDensityChart extends TypedOperation<string, string, unknown[]> {
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     const hexbin = d3hexbin
-      .hexbin()
+      .hexbin<Point>()
       .radius(packRadius)
       .extent([
         [0, 0],
@@ -183,12 +193,20 @@ export class HexDensityChart extends TypedOperation<string, string, unknown[]> {
       ]);
 
     const hexPoints = hexbin(values),
-      maxCount = Math.max(...hexPoints.map((b: any) => b.length));
+      maxCount = Math.max(...hexPoints.map((bin) => bin.length));
 
-    const xExtent = d3.extent(hexPoints, (d: any) => d.x) as [number, number],
-      yExtent = d3.extent(hexPoints, (d: any) => d.y) as [number, number];
+    const measuredXExtent = d3.extent(hexPoints, (bin) => bin.x),
+      measuredYExtent = d3.extent(hexPoints, (bin) => bin.y),
+      xExtent: [number, number] = [
+        measuredXExtent[0] ?? 0,
+        measuredXExtent[1] ?? width,
+      ],
+      yExtent: [number, number] = [
+        measuredYExtent[0] ?? 0,
+        measuredYExtent[1] ?? height,
+      ];
 
-    if (xExtent[0] !== undefined) {
+    if (hexPoints.length > 0) {
       xExtent[0] -= 2 * packRadius;
       xExtent[1] += 3 * packRadius;
       yExtent[0] -= 2 * packRadius;
@@ -217,19 +235,19 @@ export class HexDensityChart extends TypedOperation<string, string, unknown[]> {
         .data(this.getEmptyHexagons(hexPoints, packRadius))
         .enter()
         .append("path")
-        .attr("d", (d: any) => {
-          return `M${xAxis(d.x)},${yAxis(d.y)} ${hexbin.hexagon(drawRadius)}`;
+        .attr("d", (center) => {
+          return `M${xAxis(center.x)},${yAxis(center.y)} ${hexbin.hexagon(drawRadius)}`;
         })
         .attr("fill", () => colour(0))
         .attr("stroke", drawEdges ? "black" : "none")
         .attr("stroke-width", drawEdges ? "0.5" : "none")
         .append("title")
-        .text((d: any) => {
+        .text((center) => {
           const count = 0,
             perc = 0,
             tooltip = `Count: ${count}\n
                                 Percentage: ${perc.toFixed(2)}%\n
-                                Center: ${d.x.toFixed(2)}, ${d.y.toFixed(2)}\n
+                                Center: ${center.x.toFixed(2)}, ${center.y.toFixed(2)}\n
                         `.replace(/\s{2,}/g, "\n");
           return tooltip;
         });
@@ -243,22 +261,22 @@ export class HexDensityChart extends TypedOperation<string, string, unknown[]> {
       .data(hexPoints)
       .enter()
       .append("path")
-      .attr("d", (d: any) => {
-        return `M${xAxis(d.x)},${yAxis(d.y)} ${hexbin.hexagon(drawRadius)}`;
+      .attr("d", (bin) => {
+        return `M${xAxis(bin.x)},${yAxis(bin.y)} ${hexbin.hexagon(drawRadius)}`;
       })
-      .attr("fill", (d: any) => colour(d.length))
+      .attr("fill", (bin) => colour(bin.length))
       .attr("stroke", drawEdges ? "black" : "none")
       .attr("stroke-width", drawEdges ? "0.5" : "none")
       .append("title")
-      .text((d: any) => {
-        const count = d.length,
-          perc = (100.0 * d.length) / values.length,
-          CX = d.x,
-          CY = d.y,
-          xMin = Math.min(...d.map((p: any) => p[0])),
-          xMax = Math.max(...d.map((p: any) => p[0])),
-          yMin = Math.min(...d.map((p: any) => p[1])),
-          yMax = Math.max(...d.map((p: any) => p[1])),
+      .text((bin) => {
+        const count = bin.length,
+          perc = (100.0 * bin.length) / values.length,
+          CX = bin.x,
+          CY = bin.y,
+          xMin = Math.min(...bin.map((point) => point[0])),
+          xMax = Math.max(...bin.map((point) => point[0])),
+          yMin = Math.min(...bin.map((point) => point[1])),
+          yMax = Math.max(...bin.map((point) => point[1])),
           tooltip = `Count: ${count}\n
                                Percentage: ${perc.toFixed(2)}%\n
                                Center: ${CX.toFixed(2)}, ${CY.toFixed(2)}\n
@@ -297,7 +315,7 @@ export class HexDensityChart extends TypedOperation<string, string, unknown[]> {
       .style("text-anchor", "middle")
       .text(xLabel);
 
-    return (svg.node() as HTMLElement).outerHTML;
+    return svg.node()?.outerHTML ?? "";
   }
 
   /**
@@ -307,12 +325,12 @@ export class HexDensityChart extends TypedOperation<string, string, unknown[]> {
    * @param {number} radius
    * @returns {Object[]}
    */
-  getEmptyHexagons(centres: any[], radius: number): any[] {
-    const emptyCentres: any[] = [],
+  getEmptyHexagons(centres: HexBin[], radius: number): HexCenter[] {
+    const emptyCentres: HexCenter[] = [],
       boundingRect = [
-        d3.extent(centres, (d: any) => d.x),
-        d3.extent(centres, (d: any) => d.y),
-      ] as [[number, number], [number, number]],
+        d3.extent(centres, (bin) => bin.x),
+        d3.extent(centres, (bin) => bin.y),
+      ],
       hexagonCenterToEdge = Math.cos((2 * Math.PI) / 12) * radius,
       hexagonEdgeLength = Math.sin((2 * Math.PI) / 12) * radius;
     let indent = false;

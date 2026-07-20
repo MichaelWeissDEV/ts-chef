@@ -10,13 +10,20 @@
  */
 
 import OperationError from "../errors/OperationError";
-import kbpgp from "./KbpgpCompat";
+import kbpgp, { type PgpKeyManager } from "./KbpgpCompat";
 import { promisify } from "es6-promisify";
+
+// pgp-utils 1.x accidentally passes its `delay` method itself to setTimeout,
+// producing NaN timeout warnings on modern Node.js. Patch the shared prototype
+// because kbpgp also creates internal ASP instances during encryption.
+kbpgp.ASP.prototype.delay = (callback) => {
+  setTimeout(() => callback(null), 2);
+};
 
 /**
  * Progress callback
  */
-export const ASP = kbpgp.ASP({
+export const ASP = new kbpgp.ASP({
   progress_hook: (info: { what: string }) => {
     // Status updates disabled in VS Code extension context
     void info;
@@ -50,17 +57,17 @@ export function getSubkeySize(keySize: number): number {
 export async function importPrivateKey(
   privateKey: string,
   passphrase?: string,
-): Promise<unknown> {
+): Promise<PgpKeyManager> {
   try {
-    const key = await promisify(kbpgp.KeyManager.import_from_armored_pgp)({
+    const key = (await promisify(kbpgp.KeyManager.import_from_armored_pgp)({
       armored: privateKey,
       opts: {
         no_check_keys: true,
       },
-    });
-    if ((key as any).is_pgp_locked()) {
+    })) as PgpKeyManager;
+    if (key.is_pgp_locked()) {
       if (passphrase) {
-        await promisify((key as any).unlock_pgp.bind(key))({
+        await promisify(key.unlock_pgp.bind(key))({
           passphrase,
         });
       } else {

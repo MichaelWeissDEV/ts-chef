@@ -31,6 +31,45 @@ const NO_CHANGE = [
   "Universal Transverse Mercator",
 ];
 
+interface LatLonCoordinate {
+  lat: number;
+  lon: number;
+}
+
+interface CoordinateConversion {
+  degrees: number;
+  string: string;
+  minutes?: number;
+  seconds?: number;
+}
+
+interface MgrsCoordinate {
+  toString(precision: number): string;
+}
+
+interface UtmCoordinate {
+  toLatLonE(): LatLonCoordinate;
+  toMgrs(): MgrsCoordinate;
+  toString(precision: number): string;
+}
+
+interface OsGridCoordinate {
+  toString(precision?: number): string;
+}
+
+const MgrsLatLon = LatLonMgrs as unknown as new (
+  lat: number,
+  lon: number,
+) => { toUtm(): UtmCoordinate };
+const OsGridLatLon = LatLonOs as unknown as new (
+  lat: number,
+  lon: number,
+) => { toOsGrid(): OsGridCoordinate };
+const UtmLatLon = LatLonUtm as unknown as new (
+  lat: number,
+  lon: number,
+) => { toUtm(): UtmCoordinate };
+
 /**
  * Converts geographic coordinates from one format to another.
  *
@@ -58,18 +97,14 @@ export function convertCoordinates(
 ): string {
   let isPair = false,
     split: string[] = [],
-    latlon: any,
+    latlon: LatLonCoordinate,
     convLat: string | undefined,
     convLon: string | undefined,
     conv: string,
-    hash: any,
-    utm: any,
-    mgrs: any,
-    osng: any,
     splitLat: number[],
     splitLong: number[],
-    lat: any,
-    lon: any;
+    lat: CoordinateConversion,
+    lon: CoordinateConversion;
 
   if (precision < 0) {
     precision = 0;
@@ -120,25 +155,35 @@ export function convertCoordinates(
   }
 
   switch (inFormat) {
-    case "Geohash":
-      hash = geohash.decode(input.replace(/[^A-Za-z0-9]/g, ""));
+    case "Geohash": {
+      const hash = geohash.decode(input.replace(/[^A-Za-z0-9]/g, ""));
       latlon = new LatLonEllipsoidal(hash.latitude, hash.longitude);
       break;
-    case "Military Grid Reference System":
-      utm = Mgrs.parse(input.replace(/[^A-Za-z0-9]/g, "")).toUtm();
-      latlon = utm.toLatLonE();
+    }
+    case "Military Grid Reference System": {
+      const parsedMgrsUtm = Mgrs.parse(
+        input.replace(/[^A-Za-z0-9]/g, ""),
+      ).toUtm();
+      latlon = (
+        parsedMgrsUtm as unknown as Pick<UtmCoordinate, "toLatLonE">
+      ).toLatLonE();
       break;
-    case "Ordnance Survey National Grid":
-      osng = OsGridRef.parse(input.replace(/[^A-Za-z0-9]/g, ""));
-      latlon = osng.toLatLon();
+    }
+    case "Ordnance Survey National Grid": {
+      const osng = OsGridRef.parse(input.replace(/[^A-Za-z0-9]/g, ""));
+      latlon = osng.toLatLon() as unknown as LatLonCoordinate;
       break;
-    case "Universal Transverse Mercator":
+    }
+    case "Universal Transverse Mercator": {
       if (/^[\d]{2}[A-Za-z]/.test(input)) {
         input = input.slice(0, 2) + " " + input.slice(2);
       }
-      utm = Utm.parse(input);
-      latlon = utm.toLatLonE();
+      const parsedUtm = Utm.parse(input);
+      latlon = (
+        parsedUtm as unknown as Pick<UtmCoordinate, "toLatLonE">
+      ).toLatLonE();
       break;
+    }
     case "Degrees Minutes Seconds":
       if (isPair) {
         splitLat = splitInput(split[0]);
@@ -249,9 +294,9 @@ export function convertCoordinates(
     case "Geohash":
       convLat = geohash.encode(latlon.lat, latlon.lon, precision);
       break;
-    case "Military Grid Reference System":
-      utm = new (LatLonMgrs as any)(latlon.lat, latlon.lon).toUtm();
-      mgrs = utm.toMgrs();
+    case "Military Grid Reference System": {
+      const mgrsUtm = new MgrsLatLon(latlon.lat, latlon.lon).toUtm();
+      const mgrs = mgrsUtm.toMgrs();
       if (precision % 2 !== 0) {
         precision = precision + 1;
       }
@@ -260,8 +305,9 @@ export function convertCoordinates(
       }
       convLat = mgrs.toString(precision);
       break;
-    case "Ordnance Survey National Grid":
-      osng = new (LatLonOs as any)(latlon.lat, latlon.lon).toOsGrid();
+    }
+    case "Ordnance Survey National Grid": {
+      const osng = new OsGridLatLon(latlon.lat, latlon.lon).toOsGrid();
       if (osng.toString() === "") {
         throw new OperationError(
           "Could not convert co-ordinates to OS National Grid. Are the co-ordinates in range?",
@@ -275,10 +321,12 @@ export function convertCoordinates(
       }
       convLat = osng.toString(precision);
       break;
-    case "Universal Transverse Mercator":
-      utm = new (LatLonUtm as any)(latlon.lat, latlon.lon).toUtm();
-      convLat = utm.toString(precision);
+    }
+    case "Universal Transverse Mercator": {
+      const convertedUtm = new UtmLatLon(latlon.lat, latlon.lon).toUtm();
+      convLat = convertedUtm.toString(precision);
       break;
+    }
   }
 
   if (convLat === undefined) {
@@ -441,8 +489,8 @@ export function findDirs(input: string, delim: string): string[] {
     }
   }
 
-  let lat: any = upperInput,
-    long: any,
+  let lat = upperInput,
+    long: string | undefined,
     latDir = "",
     longDir = "";
   if (!delim.includes("Direction")) {
@@ -468,13 +516,13 @@ export function findDirs(input: string, delim: string): string[] {
   }
 
   if (lat) {
-    lat = parseFloat(lat);
-    latDir = lat < 0 ? "S" : "N";
+    const latValue = parseFloat(lat);
+    latDir = latValue < 0 ? "S" : "N";
   }
 
   if (long) {
-    long = parseFloat(long);
-    longDir = long < 0 ? "W" : "E";
+    const longValue = parseFloat(long);
+    longDir = longValue < 0 ? "W" : "E";
   }
 
   return [latDir, longDir];

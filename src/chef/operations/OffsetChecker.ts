@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, AnyInput } from "../Operation";
+import { TypedOperation } from "../Operation";
 import Utils from "../Utils";
 import OperationError from "../errors/OperationError";
 

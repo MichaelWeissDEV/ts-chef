@@ -13,7 +13,11 @@ import OperationError from "../errors/OperationError";
 /**
  * PHP Serialize operation
  */
-export class PHPSerialize extends TypedOperation<AnyInput, AnyInput, unknown[]> {
+export class PHPSerialize extends TypedOperation<
+  AnyInput,
+  AnyInput,
+  unknown[]
+> {
   /**
    * PHPSerialize constructor
    */
@@ -42,7 +46,7 @@ export class PHPSerialize extends TypedOperation<AnyInput, AnyInput, unknown[]> 
      * @param {number} value
      * @returns {boolean}
      */
-    function isInteger(value: any) {
+    function isInteger(value: unknown): boolean {
       return (
         typeof value === "number" && parseInt(value.toString(), 10) === value
       );
@@ -53,7 +57,7 @@ export class PHPSerialize extends TypedOperation<AnyInput, AnyInput, unknown[]> 
      * @param {string | number | boolean} content
      * @returns {string}
      */
-    function serializeBasicTypes(content: any) {
+    function serializeBasicTypes(content: string | number | boolean) {
       const basicTypes = {
         string: "s",
         integer: "i",
@@ -90,13 +94,17 @@ export class PHPSerialize extends TypedOperation<AnyInput, AnyInput, unknown[]> 
      * @param {*} object
      * @returns {string}
      */
-    function serialize(object: any): string {
+    function serialize(object: unknown): string {
       /* Null */
       if (object == null) {
         return `N;`;
       }
 
-      if (typeof object !== "object") {
+      if (
+        typeof object === "string" ||
+        typeof object === "number" ||
+        typeof object === "boolean"
+      ) {
         /* Basic types */
         return `${serializeBasicTypes(object)};`;
       } else if (object instanceof Array) {
@@ -114,10 +122,11 @@ export class PHPSerialize extends TypedOperation<AnyInput, AnyInput, unknown[]> 
          * Note: the output cannot be guaranteed to be in the same order as the input
          */
         const serializedElements = [];
-        const keys = Object.keys(object);
+        const record = object as Record<string, unknown>;
+        const keys = Object.keys(record);
 
         for (const key of keys) {
-          serializedElements.push(`${serialize(key)}${serialize(object[key])}`);
+          serializedElements.push(`${serialize(key)}${serialize(record[key])}`);
         }
 
         return `a:${keys.length}:{${serializedElements.join("")}}`;

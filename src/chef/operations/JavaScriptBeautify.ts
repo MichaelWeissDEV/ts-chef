@@ -15,7 +15,11 @@ import * as esprima from "esprima";
 /**
  * JavaScript Beautify operation
  */
-export class JavaScriptBeautify extends TypedOperation<string, string, unknown[]> {
+export class JavaScriptBeautify extends TypedOperation<
+  string,
+  string,
+  unknown[]
+> {
   /**
    * JavaScriptBeautify constructor
    */
@@ -93,9 +97,10 @@ export class JavaScriptBeautify extends TypedOperation<string, string, unknown[]
         AST,
         options as Parameters<typeof escodegen.generate>[1],
       );
-    } catch (e: any) {
+    } catch (e) {
       // Leave original error so the user can see the detail
-      throw new OperationError("Unable to parse JavaScript.<br>" + e.message);
+      const message = e instanceof Error ? e.message : String(e);
+      throw new OperationError("Unable to parse JavaScript.<br>" + message);
     }
     return result;
   }

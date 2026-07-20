@@ -79,13 +79,16 @@ export class RSAVerify extends TypedOperation<string, string, unknown[]> {
       // Compare signed message digest and generated message digest
       const result = pubKey.verify(md.digest().bytes(), input);
       return result ? "Verified OK" : "Verification Failure";
-    } catch (err: any) {
-      if (err && err.message === "Encrypted message length is invalid.") {
+    } catch (err) {
+      const rsaError = err as Error & { length?: number; expected?: number };
+      if (rsaError.message === "Encrypted message length is invalid.") {
         throw new OperationError(
-          `Signature length (${err.length}) does not match expected length based on key (${err.expected}).`,
+          `Signature length (${rsaError.length}) does not match expected length based on key (${rsaError.expected}).`,
         );
       }
-      throw new OperationError(err);
+      throw new OperationError(
+        err instanceof Error ? err.message : String(err),
+      );
     }
   }
 }

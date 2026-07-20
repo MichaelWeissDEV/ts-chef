@@ -13,7 +13,11 @@ import OperationError from "../errors/OperationError";
 /**
  * PHP Deserialize operation
  */
-export class PHPDeserialize extends TypedOperation<string, AnyInput, unknown[]> {
+export class PHPDeserialize extends TypedOperation<
+  string,
+  AnyInput,
+  unknown[]
+> {
   /**
    * PHPDeserialize constructor
    */
@@ -47,7 +51,7 @@ export class PHPDeserialize extends TypedOperation<string, AnyInput, unknown[]> 
      * Recursive method for deserializing.
      * @returns {*}
      */
-    function handleInput(): any {
+    function handleInput(): string | boolean {
       /**
        * Read `length` characters from the input, shifting them out the input.
        * @param length
@@ -102,23 +106,24 @@ export class PHPDeserialize extends TypedOperation<string, AnyInput, unknown[]> 
        * Helper function to handle deserialized arrays.
        * @returns {Array}
        */
-      function handleArray(): any[] {
+      function handleArray(): Array<string | boolean> {
         const items = parseInt(readUntil(":"), 10) * 2;
         expect("{");
         const result = [];
         let isKey = true;
-        let lastItem = null;
+        let lastItem: string | boolean | null = null;
         for (let idx = 0; idx < items; idx++) {
           const item = handleInput();
           if (isKey) {
             lastItem = item;
             isKey = false;
           } else {
-            const numberCheck = lastItem.match(/[0-9]+/);
+            const key = String(lastItem);
+            const numberCheck = key.match(/[0-9]+/);
             if (
               args[0] &&
               numberCheck &&
-              numberCheck[0].length === lastItem.length
+              numberCheck[0].length === key.length
             ) {
               result.push('"' + lastItem + '": ' + item);
             } else {

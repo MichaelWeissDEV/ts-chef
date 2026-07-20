@@ -29,7 +29,7 @@ export class XPathExpression extends TypedOperation<string, string, unknown[]> {
   }
 
   run(input: string, args: unknown[]): string {
-    const [query, delimiter] = args;
+    const [query, delimiter] = args as [string, string];
 
     let doc;
     try {
@@ -43,11 +43,12 @@ export class XPathExpression extends TypedOperation<string, string, unknown[]> {
       nodes = xpath
         .parse(query)
         .select({ node: doc, allowAnyNamespaceForNoPrefix: true });
-    } catch (err: any) {
-      throw new OperationError(`Invalid XPath. Details:\n${err.message}.`);
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new OperationError(`Invalid XPath. Details:\n${detail}.`);
     }
 
-    const nodeToString = function (node: any): string {
+    const nodeToString = function (node: Node): string {
       return node.textContent || node.nodeValue || "";
     };
 

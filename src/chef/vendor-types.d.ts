@@ -10,7 +10,7 @@
 // Ambient module declarations for npm packages without @types
 
 declare module "crypto-api/src/crypto-api.mjs" {
-  const CryptoApi: any;
+  const CryptoApi: unknown;
   export default CryptoApi;
 }
 
@@ -88,79 +88,6 @@ declare module "qr-image" {
     options?: QRImageOptions,
   ): { size: number; path: string };
   export function matrix(text: string, ec_level?: string): boolean[][];
-}
-
-declare module "protobufjs" {
-  export interface ParseResult {
-    root: Root;
-    package?: string;
-    imports?: string[];
-    weakImports?: string[];
-    syntax?: string;
-  }
-  export class Root {
-    static fromDescriptor(descriptor: unknown): Root;
-    lookup(path: string): unknown;
-    lookupType(path: string): Type;
-    nestedArray: Array<Type | Enum | Namespace | unknown>;
-    nested: Record<string, Root | Type | Enum | Namespace | unknown>;
-    add(obj: unknown): Root;
-  }
-  export class Namespace extends Root {
-    name: string;
-  }
-  export class Type extends Namespace {
-    name: string;
-    fields: Record<string, Field>;
-    fieldsArray: Field[];
-    decode(data: Uint8Array | number[]): Message;
-    encode(message: Record<string, unknown>): Writer;
-    fromObject(obj: Record<string, unknown>): Message;
-    toObject(msg: Message, opts?: unknown): Record<string, unknown>;
-  }
-  export class Enum extends Namespace {
-    name: string;
-    values: Record<string, number>;
-  }
-  export class Field {
-    constructor(
-      name: string,
-      id: number,
-      type: string,
-      rule?: string,
-      extend?: string,
-      options?: Record<string, unknown>,
-    );
-    name: string;
-    id: number;
-    type: string;
-    rule?: string;
-    resolve(): Field;
-  }
-  export class Writer {
-    finish(): Uint8Array;
-  }
-  export class Message {
-    toJSON(): Record<string, unknown>;
-    [key: string]: unknown;
-  }
-  export function parse(
-    protoSource: string,
-    root?: Root,
-    options?: unknown,
-  ): ParseResult;
-  export function load(
-    filename: string,
-    callback: (err: Error | null, root: Root) => void,
-  ): void;
-  export function loadSync(filename: string): Root;
-  export namespace util {
-    const base64: {
-      decode(str: string, buffer: Uint8Array, offset: number): number;
-      encode(buffer: Uint8Array | number[], start: number, end: number): string;
-      length(str: string): number;
-    };
-  }
 }
 
 declare module "jsesc" {
@@ -611,7 +538,7 @@ declare module "terser" {
     keep_fnames?: boolean;
   }
   interface MinifyOutput {
-    [x: string]: any;
+    [x: string]: unknown;
     code?: string;
     map?: string;
     decoded_map?: unknown;

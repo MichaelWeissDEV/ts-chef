@@ -210,15 +210,15 @@ export function extractFile(
   bytes: Uint8Array,
   fileDetail: FileSignature,
   offset: number,
-): any {
+): File {
   if (fileDetail.extractor) {
     const fileData = fileDetail.extractor(bytes, offset);
     const ext = fileDetail.extension.split(",")[0];
-    return {
-      data: fileData,
-      fileName: `extracted_at_0x${offset.toString(16)}.${ext}`,
-      type: fileDetail.mime,
-    };
+    return new File(
+      [Uint8Array.from(fileData)],
+      `extracted_at_0x${offset.toString(16)}.${ext}`,
+      { type: fileDetail.mime },
+    );
   }
 
   throw new Error(

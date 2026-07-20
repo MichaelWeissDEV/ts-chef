@@ -8,11 +8,11 @@
  */
 
 declare module "*.fnt" {
-  const content: any;
+  const content: unknown;
   export default content;
 }
 
 declare module "*.png" {
-  const content: any;
+  const content: unknown;
   export default content;
 }

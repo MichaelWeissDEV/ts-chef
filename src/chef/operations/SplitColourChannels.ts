@@ -16,7 +16,11 @@ import { Jimp, JimpMime } from "jimp";
 /**
  * Split Colour Channels operation
  */
-export class SplitColourChannels extends TypedOperation<AnyInput, Promise<AnyInput>, unknown[]> {
+export class SplitColourChannels extends TypedOperation<
+  AnyInput,
+  Promise<AnyInput>,
+  unknown[]
+> {
   /**
    * SplitColourChannels constructor
    */
@@ -106,7 +110,10 @@ export class SplitColourChannels extends TypedOperation<AnyInput, Promise<AnyInp
    * @returns {html}
    */
   async present(files: File[]) {
-    return await (Utils as any).displayFilesAsHTML(files);
+    const presenter = Utils as unknown as {
+      displayFilesAsHTML(files: File[]): Promise<string>;
+    };
+    return await presenter.displayFilesAsHTML(files);
   }
 }
 

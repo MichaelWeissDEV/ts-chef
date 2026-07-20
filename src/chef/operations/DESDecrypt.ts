@@ -139,7 +139,8 @@ Make sure you have specified the type correctly (e.g. Hex vs UTF8).`,
 
     /* Allow for a "no padding" mode */
     if (noPadding) {
-      (decipher.mode as any).unpad = function () {
+      const mode = decipher.mode as unknown as { unpad(): boolean };
+      mode.unpad = function () {
         return true;
       };
     }

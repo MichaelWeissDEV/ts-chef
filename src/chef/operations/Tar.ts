@@ -60,7 +60,7 @@ export class Tar extends TypedOperation<ArrayBuffer, File, unknown[]> {
         }
 
         for (let i = 0; i < bytes.length; i++) {
-          let b: any = (bytes as any)[i];
+          let b = bytes[i];
           if (typeof b === "string") {
             b = b.charCodeAt(0);
           }

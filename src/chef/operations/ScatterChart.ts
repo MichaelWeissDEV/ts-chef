@@ -21,9 +21,10 @@ import { TypedOperation } from "../Operation";
 import { Utils } from "../Utils";
 
 const d3 = d3temp;
-const nodom = (nodomtemp as any).default
-  ? (nodomtemp as any).default
-  : nodomtemp;
+const nodomModule = nodomtemp as typeof nodomtemp & {
+  default?: typeof nodomtemp;
+};
+const nodom = nodomModule.default ?? nodomtemp;
 
 /**
  * Scatter chart operation
@@ -120,15 +121,21 @@ export class ScatterChart extends TypedOperation<string, string, unknown[]> {
     let xLabel = xLabelRaw,
       yLabel = yLabelRaw;
 
-    const dataFunction = colourInInput
-      ? getScatterValuesWithColour
-      : getScatterValues;
-    const { headings, values } = dataFunction(
-      input,
-      recordDelimiter,
-      fieldDelimiter,
-      columnHeadingsAreIncluded,
-    );
+    const parsed = colourInInput
+      ? getScatterValuesWithColour(
+          input,
+          recordDelimiter,
+          fieldDelimiter,
+          columnHeadingsAreIncluded,
+        )
+      : getScatterValues(
+          input,
+          recordDelimiter,
+          fieldDelimiter,
+          columnHeadingsAreIncluded,
+        );
+    const headings = parsed.headings;
+    const values: Array<[number, number, string?]> = parsed.values;
 
     if (headings) {
       xLabel = headings.x;
@@ -136,9 +143,9 @@ export class ScatterChart extends TypedOperation<string, string, unknown[]> {
     }
 
     const document = new nodom.Document();
-    let svg = document.createElement("svg");
-    svg = d3
-      .select(svg)
+    const svgElement = document.createElement("svg");
+    const svg = d3
+      .select(svgElement as unknown as SVGSVGElement)
       .attr("width", "100%")
       .attr("height", "100%")
       .attr("viewBox", `0 0 ${dimension} ${dimension}`);
@@ -155,9 +162,9 @@ export class ScatterChart extends TypedOperation<string, string, unknown[]> {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    const xExtent: [any, any] = d3.extent(values, (d: any[]) => d[0]),
+    const xExtent = d3.extent(values, (point) => point[0]),
       xDelta = (xExtent[1] || 0) - (xExtent[0] || 0),
-      yExtent: [any, any] = d3.extent(values, (d: any[]) => d[1]),
+      yExtent = d3.extent(values, (point) => point[1]),
       yDelta = (yExtent[1] || 0) - (yExtent[0] || 0),
       xAxis = d3
         .scaleLinear()
@@ -189,18 +196,18 @@ export class ScatterChart extends TypedOperation<string, string, unknown[]> {
       .data(values)
       .enter()
       .append("circle")
-      .attr("cx", (d: any[]) => xAxis(d[0]))
-      .attr("cy", (d: any[]) => yAxis(d[1]))
-      .attr("r", (_d: any[]) => radius)
-      .attr("fill", (d: any[]) => {
-        return colourInInput ? d[2] : fillColour;
+      .attr("cx", (point) => xAxis(point[0]))
+      .attr("cy", (point) => yAxis(point[1]))
+      .attr("r", radius)
+      .attr("fill", (point) => {
+        return colourInInput ? (point[2] ?? fillColour) : fillColour;
       })
       .attr("stroke", "rgba(0, 0, 0, 0.5)")
       .attr("stroke-width", "0.5")
       .append("title")
-      .text((d: any[]) => {
-        const x = d[0],
-          y = d[1],
+      .text((point) => {
+        const x = point[0],
+          y = point[1],
           tooltip = `X: ${x}\n
                                Y: ${y}\n
                     `.replace(/\s{2,}/g, "\n");
@@ -234,7 +241,7 @@ export class ScatterChart extends TypedOperation<string, string, unknown[]> {
       .style("text-anchor", "middle")
       .text(xLabel);
 
-    return (svg as any)._groups[0][0].outerHTML;
+    return svg.node()?.outerHTML ?? "";
   }
 }
 

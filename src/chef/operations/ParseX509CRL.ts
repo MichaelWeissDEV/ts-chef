@@ -15,6 +15,40 @@ import { formatDnObj } from "../lib/PublicKey";
 import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 
+interface HexParameter {
+  hex: string;
+}
+
+interface GeneralName {
+  ip?: string;
+  dns?: string;
+  uri?: string;
+  rfc822?: string;
+  dn?: { str: string };
+  other?: { oid: string; value: Record<string, { str: string }> };
+}
+
+interface DistributionPoint {
+  dpname: { full: GeneralName[] };
+}
+
+interface CRLExtension {
+  extname: string;
+  kid?: HexParameter;
+  issuer?: { str: string };
+  sn?: HexParameter;
+  array?: GeneralName[] | DistributionPoint[];
+  num?: HexParameter;
+  code?: number;
+  extn?: { oid: string; gentime: { str: string } };
+}
+
+interface RevokedCertificate {
+  sn: HexParameter;
+  date: string;
+  ext?: CRLExtension[];
+}
+
 /**
  * Parse X.509 CRL operation
  */
@@ -88,7 +122,7 @@ export class ParseX509CRL extends TypedOperation<string, string, unknown[]> {
     if (undefinedInputFormat)
       throw new OperationError("Undefined input format");
 
-    const crl = new (r as any).X509CRL(input);
+    const crl = new r.X509CRL(input);
 
     let out = `Certificate Revocation List (CRL):
     Version: ${crl.getVersion() === null ? "1 (0x0)" : "2 (0x1)"}
@@ -148,7 +182,7 @@ function generalizedDateTimeToUTC(datetime: string): string {
  * @returns {string} Formatted string detailing CRL extensions.
  */
 function formatCRLExtensions(
-  extensions: any[] | undefined,
+  extensions: CRLExtension[] | undefined,
   indent: number,
 ): string {
   if (!Array.isArray(extensions) || extensions.length === 0) {
@@ -182,25 +216,25 @@ function formatCRLExtensions(
     switch (ext.extname) {
       case "authorityKeyIdentifier":
         out += `X509v3 Authority Key Identifier:\n`;
-        if (Object.prototype.hasOwnProperty.call(ext, "kid")) {
+        if (ext.kid) {
           out += `\tkeyid:${colonDelimitedHexFormatString(ext.kid.hex.toUpperCase())}\n`;
         }
-        if (Object.prototype.hasOwnProperty.call(ext, "issuer")) {
+        if (ext.issuer) {
           out += `\tDirName:${ext.issuer.str}\n`;
         }
-        if (Object.prototype.hasOwnProperty.call(ext, "sn")) {
+        if (ext.sn) {
           out += `\tserial:${colonDelimitedHexFormatString(ext.sn.hex.toUpperCase())}\n`;
         }
         break;
       case "cRLDistributionPoints":
         out += `X509v3 CRL Distribution Points:\n`;
-        (ext.array as any[]).forEach((distPoint) => {
+        (ext.array as DistributionPoint[]).forEach((distPoint) => {
           const fullName = `Full Name:\n${formatGeneralNames(distPoint.dpname.full, 4)}`;
           out += indentString(fullName, 4) + "\n";
         });
         break;
       case "cRLNumber":
-        if (!Object.prototype.hasOwnProperty.call(ext, "num")) {
+        if (!ext.num) {
           throw new OperationError(
             `'cRLNumber' CRL entry extension missing 'num' key: ${ext}`,
           );
@@ -208,7 +242,7 @@ function formatCRLExtensions(
         out += `X509v3 CRL Number:\n\t${ext.num.hex.toUpperCase()}\n`;
         break;
       case "issuerAltName":
-        out += `X509v3 Issuer Alternative Name:\n${formatGeneralNames(ext.array, 4)}\n`;
+        out += `X509v3 Issuer Alternative Name:\n${formatGeneralNames((ext.array ?? []) as GeneralName[], 4)}\n`;
         break;
       default:
         out += `${ext.extname}:\n`;
@@ -226,7 +260,7 @@ function formatCRLExtensions(
  * @param {number} indent
  * @returns {string} Multi-line formatted string describing all supported general name types.
  */
-function formatGeneralNames(names: any[], indent: number): string {
+function formatGeneralNames(names: GeneralName[], indent: number): string {
   let out = ``;
 
   names.forEach((name) => {
@@ -234,22 +268,22 @@ function formatGeneralNames(names: any[], indent: number): string {
 
     switch (key) {
       case "ip":
-        out += `IP:${name.ip}\n`;
+        out += `IP:${name.ip ?? ""}\n`;
         break;
       case "dns":
-        out += `DNS:${name.dns}\n`;
+        out += `DNS:${name.dns ?? ""}\n`;
         break;
       case "uri":
-        out += `URI:${name.uri}\n`;
+        out += `URI:${name.uri ?? ""}\n`;
         break;
       case "rfc822":
-        out += `EMAIL:${name.rfc822}\n`;
+        out += `EMAIL:${name.rfc822 ?? ""}\n`;
         break;
       case "dn":
-        out += `DIR:${name.dn.str}\n`;
+        out += `DIR:${name.dn?.str ?? ""}\n`;
         break;
       case "other":
-        out += `OtherName:${name.other.oid}::${(Object.values(name.other.value)[0] as { str: string }).str}\n`;
+        out += `OtherName:${name.other?.oid ?? ""}::${Object.values(name.other?.value ?? {})[0]?.str ?? ""}\n`;
         break;
       default:
         out += `${key}: unsupported general name type\n`;
@@ -280,7 +314,7 @@ function colonDelimitedHexFormatString(hexString: string): string {
  * @returns {string} Multi-line formatted string output of revoked certificates array
  */
 function formatRevokedCertificates(
-  revokedCertificates: any[] | null,
+  revokedCertificates: RevokedCertificate[] | null,
   indent: number,
 ): string {
   if (!Array.isArray(revokedCertificates) || revokedCertificates.length === 0) {
@@ -318,7 +352,7 @@ function formatRevokedCertificates(
  * @param {any[]} exts
  * @returns {string} Formatted multi-line string describing CRL entry extensions.
  */
-function formatCRLEntryExtensions(exts: any[]): string {
+function formatCRLEntryExtensions(exts: CRLExtension[]): string {
   let out = ``;
 
   const crlReasonCodeToReasonMessage: Record<number, string> = {
@@ -348,7 +382,7 @@ function formatCRLEntryExtensions(exts: any[]): string {
     }
     switch (ext.extname) {
       case "cRLReason":
-        if (!Object.prototype.hasOwnProperty.call(ext, "code")) {
+        if (ext.code === undefined) {
           throw new OperationError(
             `'cRLReason' CRL entry extension missing 'code' key: ${ext}`,
           );
@@ -357,9 +391,12 @@ function formatCRLEntryExtensions(exts: any[]): string {
     ${Object.prototype.hasOwnProperty.call(crlReasonCodeToReasonMessage, ext.code) ? crlReasonCodeToReasonMessage[ext.code] : `invalid reason code: ${ext.code}`}\n`;
         break;
       case "2.5.29.23": // Hold instruction
+        if (!ext.extn)
+          throw new OperationError("Missing hold instruction data");
         out += `Hold Instruction Code:\n\t${Object.prototype.hasOwnProperty.call(holdInstructionOIDToName, ext.extn.oid) ? holdInstructionOIDToName[ext.extn.oid] : `${ext.extn.oid}: unknown hold instruction OID`}\n`;
         break;
       case "2.5.29.24": // Invalidity Date
+        if (!ext.extn) throw new OperationError("Missing invalidity date data");
         out += `Invalidity Date:\n\t${generalizedDateTimeToUTC(ext.extn.gentime.str)}\n`;
         break;
       default:

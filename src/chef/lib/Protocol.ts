@@ -13,7 +13,8 @@ import { toHexFast } from "./Hex";
 /**
  * Recursively displays a JSON object as an HTML table
  */
-export function objToTable(obj: any, nested: boolean = false): string {
+export function objToTable(obj: unknown, nested: boolean = false): string {
+  if (typeof obj !== "object" || obj === null) return String(obj);
   let html = `<table
         class='table table-sm table-nonfluid ${nested ? "mb-0 table-borderless" : "table-bordered"}'
         style='table-layout: fixed; ${nested ? "margin: -1px !important;" : ""}'>`;
@@ -23,13 +24,13 @@ export function objToTable(obj: any, nested: boolean = false): string {
             <th>Value</th>
         </tr>`;
 
-  for (const key in obj) {
-    if (typeof obj[key] === "function") continue;
+  for (const [key, value] of Object.entries(obj)) {
+    if (typeof value === "function") continue;
 
     html += `<tr><td style='word-wrap: break-word'>${key}</td>`;
-    if (typeof obj[key] === "object" && obj[key] !== null)
-      html += `<td style='padding: 0'>${objToTable(obj[key], true)}</td>`;
-    else html += `<td>${obj[key]}</td>`;
+    if (typeof value === "object" && value !== null)
+      html += `<td style='padding: 0'>${objToTable(value, true)}</td>`;
+    else html += `<td>${String(value)}</td>`;
     html += "</tr>";
   }
   html += "</table>";

@@ -17,7 +17,30 @@ export interface TLSRecord {
   contentType: TLSField<number>;
   version: TLSField<number>;
   length: TLSField<number>;
-  handshake: TLSField<any>;
+  handshake: TLSField<TLSHandshake>;
+}
+
+export interface TLSExtension {
+  type: TLSField<string>;
+  length: TLSField<number>;
+  value: TLSField<Uint8Array>;
+}
+
+export interface TLSHandshake {
+  handshakeType: TLSField<number>;
+  handshakeLength: TLSField<number>;
+  helloVersion: TLSField<number>;
+  random: TLSField<Uint8Array>;
+  sessionIDLength: TLSField<number>;
+  sessionID: TLSField<Uint8Array>;
+  cipherSuitesLength: TLSField<number>;
+  cipherSuites: TLSField<Array<TLSField<string>>>;
+  compressionMethodsLength: TLSField<number>;
+  compressionMethods: TLSField<Array<TLSField<number>>>;
+  cipherSuite: TLSField<string>;
+  compressionMethod: TLSField<number>;
+  extensionsLength: TLSField<number>;
+  extensions: TLSField<TLSExtension[]>;
 }
 
 /**
@@ -36,7 +59,7 @@ export interface TLSField<T> {
 export function parseTLSRecord(bytes: Uint8Array): TLSRecord {
   const s = new Stream(bytes);
   const b = s.clone();
-  const r: any = {};
+  const r = {} as TLSRecord;
 
   // Content type
   r.contentType = {
@@ -74,16 +97,16 @@ export function parseTLSRecord(bytes: Uint8Array): TLSRecord {
     value: parseHandshake(s.getBytes(r.length.value)!),
   };
 
-  return r as TLSRecord;
+  return r;
 }
 
 /**
  * Parse a TLS Handshake
  */
-export function parseHandshake(bytes: Uint8Array): any {
+export function parseHandshake(bytes: Uint8Array): TLSHandshake {
   const s = new Stream(bytes);
   const b = s.clone();
-  const h: any = {};
+  const h = {} as TLSHandshake;
 
   // Handshake type
   h.handshakeType = {
@@ -100,10 +123,10 @@ export function parseHandshake(bytes: Uint8Array): any {
     data: b.getBytes(3)!,
     value: s.readInt(3)!,
   };
-  if (s.length !== h.handshakeLength.value + 4)
+  if (s.length !== Number(h.handshakeLength.value) + 4)
     throw new OperationError("Not enough data in Handshake message.");
 
-  switch (h.handshakeType.value) {
+  switch (Number(h.handshakeType.value)) {
     case 0x01:
       h.handshakeType.description = "Client Hello";
       parseClientHello(s, b, h);
@@ -122,7 +145,7 @@ export function parseHandshake(bytes: Uint8Array): any {
 /**
  * Parse a TLS Client Hello
  */
-function parseClientHello(s: Stream, b: Stream, h: any): any {
+function parseClientHello(s: Stream, b: Stream, h: TLSHandshake): TLSHandshake {
   // Hello version
   h.helloVersion = {
     description: "Client Hello Version",
@@ -150,9 +173,9 @@ function parseClientHello(s: Stream, b: Stream, h: any): any {
   // Session ID
   h.sessionID = {
     description: "Session ID",
-    length: h.sessionIDLength.value,
-    data: b.getBytes(h.sessionIDLength.value)!,
-    value: s.getBytes(h.sessionIDLength.value)!,
+    length: Number(h.sessionIDLength.value),
+    data: b.getBytes(Number(h.sessionIDLength.value))!,
+    value: s.getBytes(Number(h.sessionIDLength.value))!,
   };
 
   // Cipher Suites Length
@@ -166,9 +189,9 @@ function parseClientHello(s: Stream, b: Stream, h: any): any {
   // Cipher Suites
   h.cipherSuites = {
     description: "Cipher Suites",
-    length: h.cipherSuitesLength.value,
-    data: b.getBytes(h.cipherSuitesLength.value)!,
-    value: parseCipherSuites(s.getBytes(h.cipherSuitesLength.value)!),
+    length: Number(h.cipherSuitesLength.value),
+    data: b.getBytes(Number(h.cipherSuitesLength.value))!,
+    value: parseCipherSuites(s.getBytes(Number(h.cipherSuitesLength.value))!),
   };
 
   // Compression Methods Length
@@ -182,10 +205,10 @@ function parseClientHello(s: Stream, b: Stream, h: any): any {
   // Compression Methods
   h.compressionMethods = {
     description: "Compression Methods",
-    length: h.compressionMethodsLength.value,
-    data: b.getBytes(h.compressionMethodsLength.value)!,
+    length: Number(h.compressionMethodsLength.value),
+    data: b.getBytes(Number(h.compressionMethodsLength.value))!,
     value: parseCompressionMethods(
-      s.getBytes(h.compressionMethodsLength.value)!,
+      s.getBytes(Number(h.compressionMethodsLength.value))!,
     ),
   };
 
@@ -200,9 +223,9 @@ function parseClientHello(s: Stream, b: Stream, h: any): any {
   // Extensions
   h.extensions = {
     description: "Extensions",
-    length: h.extensionsLength.value,
-    data: b.getBytes(h.extensionsLength.value)!,
-    value: parseExtensions(s.getBytes(h.extensionsLength.value)!),
+    length: Number(h.extensionsLength.value),
+    data: b.getBytes(Number(h.extensionsLength.value))!,
+    value: parseExtensions(s.getBytes(Number(h.extensionsLength.value))!),
   };
 
   return h;
@@ -211,7 +234,7 @@ function parseClientHello(s: Stream, b: Stream, h: any): any {
 /**
  * Parse a TLS Server Hello
  */
-function parseServerHello(s: Stream, b: Stream, h: any): void {
+function parseServerHello(s: Stream, b: Stream, h: TLSHandshake): void {
   // Hello version
   h.helloVersion = {
     description: "Server Hello Version",
@@ -239,9 +262,9 @@ function parseServerHello(s: Stream, b: Stream, h: any): void {
   // Session ID
   h.sessionID = {
     description: "Session ID",
-    length: h.sessionIDLength.value,
-    data: b.getBytes(h.sessionIDLength.value)!,
-    value: s.getBytes(h.sessionIDLength.value)!,
+    length: Number(h.sessionIDLength.value),
+    data: b.getBytes(Number(h.sessionIDLength.value))!,
+    value: s.getBytes(Number(h.sessionIDLength.value))!,
   };
 
   // Cipher Suite
@@ -271,19 +294,19 @@ function parseServerHello(s: Stream, b: Stream, h: any): void {
   // Extensions
   h.extensions = {
     description: "Extensions",
-    length: h.extensionsLength.value,
-    data: b.getBytes(h.extensionsLength.value)!,
-    value: parseExtensions(s.getBytes(h.extensionsLength.value)!),
+    length: Number(h.extensionsLength.value),
+    data: b.getBytes(Number(h.extensionsLength.value))!,
+    value: parseExtensions(s.getBytes(Number(h.extensionsLength.value))!),
   };
 }
 
 /**
  * Parse Cipher Suites
  */
-function parseCipherSuites(bytes: Uint8Array): any[] {
+function parseCipherSuites(bytes: Uint8Array): Array<TLSField<string>> {
   const s = new Stream(bytes);
   const b = s.clone();
-  const cs: any[] = [];
+  const cs: Array<TLSField<string>> = [];
 
   while (s.hasMore()) {
     cs.push({
@@ -299,10 +322,10 @@ function parseCipherSuites(bytes: Uint8Array): any[] {
 /**
  * Parse Compression Methods
  */
-function parseCompressionMethods(bytes: Uint8Array): any[] {
+function parseCompressionMethods(bytes: Uint8Array): Array<TLSField<number>> {
   const s = new Stream(bytes);
   const b = s.clone();
-  const cm: any[] = [];
+  const cm: Array<TLSField<number>> = [];
 
   while (s.hasMore()) {
     cm.push({
@@ -318,13 +341,13 @@ function parseCompressionMethods(bytes: Uint8Array): any[] {
 /**
  * Parse Extensions
  */
-function parseExtensions(bytes: Uint8Array): any[] {
+function parseExtensions(bytes: Uint8Array): TLSExtension[] {
   const s = new Stream(bytes);
   const b = s.clone();
 
-  const exts: any[] = [];
+  const exts: TLSExtension[] = [];
   while (s.hasMore()) {
-    const ext: any = {};
+    const ext = {} as TLSExtension;
 
     // Type
     ext.type = {
@@ -345,9 +368,9 @@ function parseExtensions(bytes: Uint8Array): any[] {
     // Value
     ext.value = {
       description: "Extension Value",
-      length: ext.length.value,
-      data: b.getBytes(ext.length.value)!,
-      value: s.getBytes(ext.length.value)!,
+      length: Number(ext.length.value),
+      data: b.getBytes(Number(ext.length.value))!,
+      value: s.getBytes(Number(ext.length.value))!,
     };
 
     exts.push(ext);

@@ -7,7 +7,9 @@
 import OperationError from "../errors/OperationError";
 
 const letters = "_abcdefghijklmnopqrstuvwxyz.0123456789,-+*/:?!'()";
-const tiles: any[] = [];
+type Position = [number, number];
+type Tile = [string, Position];
+const tiles: Tile[] = [];
 
 /**
  * Initialises the tiles with values and positions.
@@ -29,9 +31,9 @@ export function initTiles() {
 function rotateDown(key: string, col: number, n: number) {
   const lines = [];
   for (let i = 0; i < 7; i++) lines.push(key.slice(i * 7, (i + 1) * 7));
-  const lefts: any[] = [];
-  let mids: any[] = [];
-  const rights: any[] = [];
+  const lefts: string[] = [];
+  let mids: string[] = [];
+  const rights: string[] = [];
   lines.forEach((element) => {
     lefts.push(element.slice(0, col));
     mids.push(element.charAt(col));
@@ -69,7 +71,7 @@ function rotateRight(key: string, row: number, n: number) {
  * @param {string} letter
  * @returns {any}
  */
-function findIx(letter: string) {
+function findIx(letter: string): Position {
   for (let i = 0; i < tiles.length; i++)
     if (tiles[i][0] === letter) return tiles[i][1];
   throw new OperationError("Letter " + letter + " is not included in LS47");
@@ -99,9 +101,9 @@ export function deriveKey(password: string) {
  */
 function checkKey(key: string) {
   if (key.length !== letters.length) throw new OperationError("Wrong key size");
-  const counts: any = {};
+  const counts: Record<string, number> = {};
   for (let i = 0; i < letters.length; i++) counts[letters.charAt(i)] = 0;
-  for (const elem of letters) {
+  for (const elem of key) {
     if (letters.indexOf(elem) === -1)
       throw new OperationError("Letter " + elem + " not in LS47");
     counts[elem]++;
@@ -117,7 +119,7 @@ function checkKey(key: string) {
  * @param {string} letter
  * @returns {any}
  */
-function findPos(key: string, letter: string) {
+function findPos(key: string, letter: string): Position {
   const index = key.indexOf(letter);
   if (index >= 0 && index < 49) return [Math.floor(index / 7), index % 7];
   throw new OperationError("Letter " + letter + " is not in the key");
@@ -130,7 +132,7 @@ function findPos(key: string, letter: string) {
  * @param {any} coord
  * @returns {string}
  */
-function findAtPos(key: string, coord: any) {
+function findAtPos(key: string, coord: Position): string {
   return key.charAt(coord[1] + coord[0] * 7);
 }
 
@@ -141,7 +143,7 @@ function findAtPos(key: string, coord: any) {
  * @param {any} b
  * @returns {any}
  */
-function addPos(a: any, b: any) {
+function addPos(a: Position, b: Position): Position {
   return [(a[0] + b[0]) % 7, (a[1] + b[1]) % 7];
 }
 
@@ -152,7 +154,7 @@ function addPos(a: any, b: any) {
  * @param {any} b
  * @returns {any}
  */
-function subPos(a: any, b: any) {
+function subPos(a: Position, b: Position): Position {
   const asub = a[0] - b[0];
   const bsub = a[1] - b[1];
   return [asub - Math.floor(asub / 7) * 7, bsub - Math.floor(bsub / 7) * 7];
@@ -167,7 +169,7 @@ function subPos(a: any, b: any) {
  */
 function encrypt(key: string, plaintext: string) {
   checkKey(key);
-  let mp = [0, 0];
+  let mp: Position = [0, 0];
   let ciphertext = "";
   for (const p of plaintext) {
     const pp = findPos(key, p);
@@ -192,7 +194,7 @@ function encrypt(key: string, plaintext: string) {
  */
 function decrypt(key: string, ciphertext: string) {
   checkKey(key);
-  let mp = [0, 0];
+  let mp: Position = [0, 0];
   let plaintext = "";
   for (const c of ciphertext) {
     let cp = findPos(key, c);

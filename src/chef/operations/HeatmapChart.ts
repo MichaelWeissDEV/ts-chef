@@ -21,9 +21,20 @@ import OperationError from "../errors/OperationError";
 import Utils from "../Utils";
 
 const d3 = d3temp;
-const nodom = (nodomtemp as any).default
-  ? (nodomtemp as any).default
-  : nodomtemp;
+const nodomModule = nodomtemp as typeof nodomtemp & {
+  default?: typeof nodomtemp;
+};
+const nodom = nodomModule.default ?? nodomtemp;
+
+interface HeatmapPoint {
+  x: number;
+  y: number;
+}
+
+interface HeatmapBin extends Array<HeatmapPoint> {
+  x: number;
+  y: number;
+}
 
 /**
  * Heatmap chart operation
@@ -154,9 +165,9 @@ export class HeatmapChart extends TypedOperation<string, string, unknown[]> {
     }
 
     const document = new nodom.Document();
-    let svg: any = document.createElement("svg");
-    svg = d3
-      .select(svg)
+    const svgElement = document.createElement("svg");
+    const svg = d3
+      .select(svgElement as unknown as SVGSVGElement)
       .attr("width", "100%")
       .attr("height", "100%")
       .attr("viewBox", `0 0 ${dimension} ${dimension}`);
@@ -215,20 +226,20 @@ export class HeatmapChart extends TypedOperation<string, string, unknown[]> {
       .enter()
       .append("g")
       .selectAll("rect")
-      .data((d: any) => d)
+      .data((row) => row)
       .enter()
       .append("rect")
-      .attr("x", (d: any) => binWidth * d.x)
-      .attr("y", (d: any) => height - binHeight * (d.y + 1))
+      .attr("x", (bin) => binWidth * bin.x)
+      .attr("y", (bin) => height - binHeight * (bin.y + 1))
       .attr("width", binWidth)
       .attr("height", binHeight)
-      .attr("fill", (d: any) => colour(d.length))
+      .attr("fill", (bin) => colour(bin.length))
       .attr("stroke", drawEdges ? "rgba(0, 0, 0, 0.5)" : "none")
       .attr("stroke-width", drawEdges ? "0.5" : "none")
       .append("title")
-      .text((d: any) => {
-        const count = d.length,
-          perc = (100.0 * d.length) / values.length,
+      .text((bin) => {
+        const count = bin.length,
+          perc = (100.0 * bin.length) / values.length,
           tooltip = `Count: ${count}\n
                                Percentage: ${perc.toFixed(2)}%\n
                     `.replace(/\s{2,}/g, "\n");
@@ -262,7 +273,7 @@ export class HeatmapChart extends TypedOperation<string, string, unknown[]> {
       .style("text-anchor", "middle")
       .text(xLabel);
 
-    return (svg.node() as HTMLElement).outerHTML;
+    return svg.node()?.outerHTML ?? "";
   }
 
   /**
@@ -273,19 +284,20 @@ export class HeatmapChart extends TypedOperation<string, string, unknown[]> {
    * @param {number} hBins number of horizontal bins
    * @returns {Object[]} a list of bins (each bin is an Array) with x y coordinates, filled with the points
    */
-  getHeatmapPacking(values: number[][], vBins: number, hBins: number): any[][] {
-    const xBounds = d3.extent(values, (d: number[]) => d[0]) as [
-        number,
-        number,
-      ],
-      yBounds = d3.extent(values, (d: number[]) => d[1]) as [number, number],
-      bins: any[][] = [];
+  getHeatmapPacking(
+    values: Array<[number, number]>,
+    vBins: number,
+    hBins: number,
+  ): HeatmapBin[][] {
+    const xBounds = d3.extent(values, (point) => point[0]),
+      yBounds = d3.extent(values, (point) => point[1]),
+      bins: HeatmapBin[][] = [];
 
-    if (xBounds[0] === xBounds[1])
+    if (xBounds[0] === undefined || xBounds[0] === xBounds[1])
       throw new OperationError(
         "Cannot pack points. There is no difference between the minimum and maximum X coordinate.",
       );
-    if (yBounds[0] === yBounds[1])
+    if (yBounds[0] === undefined || yBounds[0] === yBounds[1])
       throw new OperationError(
         "Cannot pack points. There is no difference between the minimum and maximum Y coordinate.",
       );
@@ -293,7 +305,7 @@ export class HeatmapChart extends TypedOperation<string, string, unknown[]> {
     for (let y = 0; y < vBins; y++) {
       bins.push([]);
       for (let x = 0; x < hBins; x++) {
-        const item: any = [];
+        const item = [] as unknown as HeatmapBin;
         item.y = y;
         item.x = x;
 

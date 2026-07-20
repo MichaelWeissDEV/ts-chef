@@ -85,7 +85,7 @@ export function getScatterValues(
   recordDelimiter: string,
   fieldDelimiter: string,
   columnHeadingsAreIncluded: boolean,
-): { headings?: { x: string; y: string }; values: number[][] } {
+): { headings?: { x: string; y: string }; values: Array<[number, number]> } {
   const { headings, values } = getValues(
     input,
     recordDelimiter,
@@ -99,7 +99,7 @@ export function getScatterValues(
     typedHeadings = { x: headings[0], y: headings[1] };
   }
 
-  const typedValues = values.map((row) => {
+  const typedValues: Array<[number, number]> = values.map((row) => {
     const x = parseFloat(row[0]),
       y = parseFloat(row[1]);
 
@@ -129,7 +129,10 @@ export function getScatterValuesWithColour(
   recordDelimiter: string,
   fieldDelimiter: string,
   columnHeadingsAreIncluded: boolean,
-): { headings?: { x: string; y: string }; values: (number | string)[][] } {
+): {
+  headings?: { x: string; y: string };
+  values: Array<[number, number, string]>;
+} {
   const { headings, values } = getValues(
     input,
     recordDelimiter,
@@ -143,7 +146,7 @@ export function getScatterValuesWithColour(
     typedHeadings = { x: headings[0], y: headings[1] };
   }
 
-  const typedValues = values.map((row) => {
+  const typedValues: Array<[number, number, string]> = values.map((row) => {
     const x = parseFloat(row[0]),
       y = parseFloat(row[1]),
       colour = row[2];

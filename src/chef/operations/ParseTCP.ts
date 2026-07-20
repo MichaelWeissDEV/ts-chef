@@ -16,6 +16,32 @@ import { Utils } from "../Utils";
 import OperationError from "../errors/OperationError";
 import BigNumber from "bignumber.js";
 
+interface TCPOption {
+  Kind: number;
+  Length?: number;
+  Value?: unknown;
+}
+
+interface TCPPacket {
+  "Source port": number | undefined;
+  "Destination port": number | undefined;
+  "Sequence number": string;
+  "Acknowledgement number": number | undefined;
+  "Data offset": number | string;
+  Flags: Record<string, string | number | undefined>;
+  "Window size": number | string | undefined;
+  Checksum: string;
+  "Urgent pointer": string;
+  Options?: Record<string, TCPOption>;
+  Data?: string;
+}
+
+interface TCPOptionDefinition {
+  name: string;
+  length: boolean;
+  parser?: (data: Uint8Array) => unknown;
+}
+
 /**
  * Parse TCP operation
  */
@@ -65,46 +91,49 @@ export class ParseTCP extends TypedOperation<string, AnyInput, unknown[]> {
     }
 
     // Parse Header
-    const TCPPacket: { [key: string]: any } = {
-      "Source port": s.readInt(2),
-      "Destination port": s.readInt(2),
-      "Sequence number": bytesToLargeNumber(s.getBytes(4)!),
-      "Acknowledgement number": s.readInt(4),
-      "Data offset": s.readBits(4),
-      Flags: {
-        Reserved: toBinary(s.readBits(3)!, "", 3),
-        NS: s.readBits(1),
-        CWR: s.readBits(1),
-        ECE: s.readBits(1),
-        URG: s.readBits(1),
-        ACK: s.readBits(1),
-        PSH: s.readBits(1),
-        RST: s.readBits(1),
-        SYN: s.readBits(1),
-        FIN: s.readBits(1),
-      },
-      "Window size": s.readInt(2),
+    const sourcePort = s.readInt(2);
+    const destinationPort = s.readInt(2);
+    const sequenceNumber = bytesToLargeNumber(s.getBytes(4)!);
+    const acknowledgementNumber = s.readInt(4);
+    const dataOffset = s.readBits(4)!;
+    const flags = {
+      Reserved: toBinary(s.readBits(3)!, "", 3),
+      NS: s.readBits(1),
+      CWR: s.readBits(1),
+      ECE: s.readBits(1),
+      URG: s.readBits(1),
+      ACK: s.readBits(1),
+      PSH: s.readBits(1),
+      RST: s.readBits(1),
+      SYN: s.readBits(1),
+      FIN: s.readBits(1),
+    };
+    const windowSize = s.readInt(2);
+    const TCPPacket: TCPPacket = {
+      "Source port": sourcePort,
+      "Destination port": destinationPort,
+      "Sequence number": sequenceNumber,
+      "Acknowledgement number": acknowledgementNumber,
+      "Data offset": dataOffset,
+      Flags: flags,
+      "Window size": windowSize,
       Checksum: "0x" + toHexFast(s.getBytes(2)!),
       "Urgent pointer": "0x" + toHexFast(s.getBytes(2)!),
     };
 
     // Parse options if present
     let windowScaleShift = 0;
-    if (TCPPacket["Data offset"] > 5) {
-      let remainingLength = TCPPacket["Data offset"] * 4 - 20;
+    if (dataOffset > 5) {
+      let remainingLength = dataOffset * 4 - 20;
 
-      const options: { [key: string]: any } = {};
+      const options: Record<string, TCPOption> = {};
       while (remainingLength > 0) {
         const kind = s.readInt(1)!;
-        const option: { [key: string]: any } = {
+        const option: TCPOption = {
           Kind: kind,
         };
 
-        let opt: {
-          name: string;
-          length: boolean;
-          parser?: (data: Uint8Array) => any;
-        } = { name: "Reserved", length: true };
+        let opt: TCPOptionDefinition = { name: "Reserved", length: true };
         if (
           Object.prototype.hasOwnProperty.call(TCP_OPTION_KIND_LOOKUP, kind)
         ) {
@@ -115,7 +144,7 @@ export class ParseTCP extends TypedOperation<string, AnyInput, unknown[]> {
         if (opt.length) {
           option.Length = s.readInt(1);
 
-          if (option.Length > 2) {
+          if (option.Length !== undefined && option.Length > 2) {
             if (opt.parser) {
               option.Value = opt.parser(s.getBytes(option.Length - 2)!);
             } else {
@@ -131,7 +160,10 @@ export class ParseTCP extends TypedOperation<string, AnyInput, unknown[]> {
               option.Value &&
               typeof option.Value === "object"
             ) {
-              windowScaleShift = (option.Value as any)["Shift count"];
+              const shiftCount = (option.Value as Record<string, unknown>)[
+                "Shift count"
+              ];
+              if (typeof shiftCount === "number") windowScaleShift = shiftCount;
             }
           }
         }
@@ -148,13 +180,11 @@ export class ParseTCP extends TypedOperation<string, AnyInput, unknown[]> {
     }
 
     // Improve values
-    const dataOffset = TCPPacket["Data offset"];
     TCPPacket["Data offset"] = `${dataOffset} (${dataOffset * 4} bytes)`;
-    const trueWndSize = new BigNumber(TCPPacket["Window size"]).multipliedBy(
+    const trueWndSize = new BigNumber(windowSize ?? 0).multipliedBy(
       new BigNumber(2).pow(new BigNumber(windowScaleShift)),
     );
-    TCPPacket["Window size"] =
-      `${TCPPacket["Window size"]} (Scaled: ${trueWndSize})`;
+    TCPPacket["Window size"] = `${windowSize} (Scaled: ${trueWndSize})`;
 
     return TCPPacket;
   }
@@ -171,10 +201,7 @@ export class ParseTCP extends TypedOperation<string, AnyInput, unknown[]> {
 
 // Taken from https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml
 // on 2022-05-30
-const TCP_OPTION_KIND_LOOKUP: Record<
-  number,
-  { name: string; length: boolean; parser?: (data: Uint8Array) => any }
-> = {
+const TCP_OPTION_KIND_LOOKUP: Record<number, TCPOptionDefinition> = {
   0: { name: "End of Option List", length: false },
   1: { name: "No-Operation", length: false },
   2: { name: "Maximum Segment Size", length: true },
@@ -262,7 +289,7 @@ function tcpAlternateChecksumParser(data: Uint8Array): string {
  * @param {Uint8Array} data
  * @returns {any}
  */
-function tcpTimestampParser(data: Uint8Array): any {
+function tcpTimestampParser(data: Uint8Array): string | Record<string, string> {
   const s = new Stream(data);
 
   if (s.length !== 8)
@@ -282,7 +309,7 @@ function tcpTimestampParser(data: Uint8Array): any {
  * @param {Uint8Array} data
  * @returns {any}
  */
-function windowScaleParser(data: Uint8Array): any {
+function windowScaleParser(data: Uint8Array): string | Record<string, number> {
   if (data.length !== 1)
     return `Error: Window Scale should be one byte long (received 0x${toHexFast(data)})`;
 

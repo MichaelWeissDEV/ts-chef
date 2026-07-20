@@ -13,7 +13,11 @@ import { OperationError } from "../errors/OperationError";
 /**
  * DNS over HTTPS operation
  */
-export class DNSOverHTTPS extends TypedOperation<string, Promise<AnyInput>, unknown[]> {
+export class DNSOverHTTPS extends TypedOperation<
+  string,
+  Promise<AnyInput>,
+  unknown[]
+> {
   /**
    * DNSOverHTTPS constructor
    */
@@ -105,9 +109,9 @@ export class DNSOverHTTPS extends TypedOperation<string, Promise<AnyInput>, unkn
     let url: URL;
     try {
       url = new URL(resolver);
-    } catch (error: any) {
+    } catch (error) {
       throw new OperationError(
-        error.toString() +
+        String(error) +
           "\n\nThis error could be caused by one of the following:\n" +
           " - An invalid Resolver URL\n",
       );
@@ -124,14 +128,14 @@ export class DNSOverHTTPS extends TypedOperation<string, Promise<AnyInput>, unkn
       const response = await fetch(url.toString(), {
         headers: { accept: "application/dns-json" },
       });
-      const data = await response.json();
+      const data = (await response.json()) as DNSResponse;
       if (justAnswer) {
         return extractData(data.Answer);
       }
       return data;
-    } catch (e: any) {
+    } catch (e) {
       throw new OperationError(
-        `Error making request to ${url.toString()}\n${e.toString()}`,
+        `Error making request to ${url.toString()}\n${String(e)}`,
       );
     }
   }
@@ -144,12 +148,20 @@ export class DNSOverHTTPS extends TypedOperation<string, Promise<AnyInput>, unkn
  * @param {any} data
  * @returns {any[]}
  */
-function extractData(data: any): any[] {
+interface DNSAnswer {
+  data: unknown;
+}
+
+interface DNSResponse extends Record<string, unknown> {
+  Answer?: DNSAnswer[];
+}
+
+function extractData(data: DNSAnswer[] | undefined): unknown[] {
   if (typeof data === "undefined") {
     return [];
   } else {
-    const dataValues: any[] = [];
-    data.forEach((element: any) => {
+    const dataValues: unknown[] = [];
+    data.forEach((element) => {
       dataValues.push(element.data);
     });
     return dataValues;

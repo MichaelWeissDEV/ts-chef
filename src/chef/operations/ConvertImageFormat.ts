@@ -12,11 +12,16 @@ import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { toBase64 } from "../lib/Base64";
 import { Jimp, JimpMime, PNGFilterType } from "jimp";
+import type { SupportedJimpMime } from "../lib/JimpImage";
 
 /**
  * Convert Image Format operation
  */
-export class ConvertImageFormat extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer>, unknown[]> {
+export class ConvertImageFormat extends TypedOperation<
+  ArrayBuffer,
+  Promise<ArrayBuffer>,
+  unknown[]
+> {
   /**
    * ConvertImageFormat constructor
    */
@@ -71,14 +76,14 @@ export class ConvertImageFormat extends TypedOperation<ArrayBuffer, Promise<Arra
       string,
       number,
     ];
-    const formatMap: Record<string, string> = {
+    const formatMap: Record<string, SupportedJimpMime> = {
       JPEG: JimpMime.jpeg,
       PNG: JimpMime.png,
       BMP: JimpMime.bmp,
       TIFF: JimpMime.tiff,
     };
 
-    const pngFilterMap: Record<string, number> = {
+    const pngFilterMap: Record<string, PNGFilterType> = {
       Auto: PNGFilterType.AUTO,
       None: PNGFilterType.NONE,
       Sub: PNGFilterType.SUB,
@@ -102,18 +107,18 @@ export class ConvertImageFormat extends TypedOperation<ArrayBuffer, Promise<Arra
       let buffer;
       switch (mime) {
         case JimpMime.jpeg:
-          buffer = await image.getBuffer(mime as any, {
+          buffer = await image.getBuffer(mime, {
             quality: jpegQuality,
           });
           break;
         case JimpMime.png:
-          buffer = await image.getBuffer(mime as any, {
-            filterType: pngFilterMap[pngFilterType] as any,
+          buffer = await image.getBuffer(mime, {
+            filterType: pngFilterMap[pngFilterType],
             deflateLevel: pngDeflateLevel,
           });
           break;
         default:
-          buffer = await image.getBuffer(mime as any);
+          buffer = await image.getBuffer(mime);
           break;
       }
 

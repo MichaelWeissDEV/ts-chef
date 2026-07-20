@@ -203,16 +203,22 @@ export interface OperationResult<T = PipelineData, E = Error> {
  * Abstract typed operation base class.
  * This provides strong typing for input, output, and arguments.
  */
-export abstract class TypedOperation<TInput = any, TOutput = any, TArgs extends unknown[] = any[]> extends Operation {
+export abstract class TypedOperation<
+  TInput = PipelineData,
+  TOutput = PipelineData,
+  TArgs extends unknown[] = unknown[],
+> extends Operation {
   abstract run(input: TInput, args: TArgs): TOutput | Promise<TOutput>;
 
   // @ts-expect-error TS2416 – intentional narrowing: TOutput ⊂ AnyInput
-  present(data: Awaited<TOutput>, args: TArgs): PipelineData {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return data as any;
+  present(data: Awaited<TOutput>, _args: TArgs): PipelineData {
+    return data as unknown as PipelineData;
   }
 
-  async runWithResult(input: TInput, args: TArgs): Promise<OperationResult<TOutput, Error>> {
+  async runWithResult(
+    input: TInput,
+    args: TArgs,
+  ): Promise<OperationResult<TOutput, Error>> {
     const startTime = Date.now();
     try {
       const result = await Promise.resolve(this.run(input, args));
@@ -235,23 +241,27 @@ export abstract class TypedOperation<TInput = any, TOutput = any, TArgs extends 
     }
   }
 
-  highlight(pos: HighlightPos, args: TArgs): HighlightResult {
+  highlight(_pos: HighlightPos, _args: TArgs): HighlightResult {
     return false;
   }
 
-  highlightReverse(pos: HighlightPos, args: TArgs): HighlightResult {
+  highlightReverse(_pos: HighlightPos, _args: TArgs): HighlightResult {
     return false;
   }
 
   withArgs(...args: TArgs): OperationWithArgs<TInput, TOutput, TArgs> {
-    return new OperationWithArgs(this as any, args);
+    return new OperationWithArgs(this, args);
   }
 }
 
 /**
  * Operation with pre-configured arguments.
  */
-export class OperationWithArgs<TInput = any, TOutput = any, TArgs extends unknown[] = any[]> {
+export class OperationWithArgs<
+  TInput = PipelineData,
+  TOutput = PipelineData,
+  TArgs extends unknown[] = unknown[],
+> {
   readonly operation: TypedOperation<TInput, TOutput, TArgs>;
   readonly args: TArgs;
 
@@ -268,11 +278,18 @@ export class OperationWithArgs<TInput = any, TOutput = any, TArgs extends unknow
     return this.operation.runWithResult(input, this.args);
   }
 
-  pipe<U = any, NextArgs extends unknown[] = any[]>(nextOp: any): PipelinedOperation<TInput, U> {
+  pipe<U = PipelineData, NextArgs extends unknown[] = unknown[]>(
+    nextOp:
+      | TypedOperation<TOutput, U, NextArgs>
+      | OperationWithArgs<TOutput, U, NextArgs>,
+  ): PipelinedOperation<TInput, U> {
     return new PipelinedOperation([this, nextOp]);
   }
 
-  pipeWithArgs<U = any, NextArgs extends unknown[] = any[]>(nextOp: TypedOperation<TOutput, U, NextArgs>, ...nextArgs: NextArgs): PipelinedOperation<TInput, U> {
+  pipeWithArgs<U = PipelineData, NextArgs extends unknown[] = unknown[]>(
+    nextOp: TypedOperation<TOutput, U, NextArgs>,
+    ...nextArgs: NextArgs
+  ): PipelinedOperation<TInput, U> {
     return new PipelinedOperation([this, nextOp.withArgs(...nextArgs)]);
   }
 }
@@ -280,13 +297,44 @@ export class OperationWithArgs<TInput = any, TOutput = any, TArgs extends unknow
 /**
  * A pipelined operation that chains multiple operations together.
  */
-export class PipelinedOperation<TInput = any, TOutput = any> {
-  readonly parts: Array<OperationWithArgs | TypedOperation>;
-  readonly operations: TypedOperation[];
+interface PipelineOperationLike {
+  readonly name: string;
+  readonly inputType: string;
+  readonly run: unknown;
+}
 
-  constructor(parts: Array<OperationWithArgs | TypedOperation>, readonly _inputType?: TInput) {
+interface ConfiguredPipelineOperation {
+  readonly operation: PipelineOperationLike;
+  readonly args: unknown[];
+}
+
+type PipelineOperationPart =
+  | PipelineOperationLike
+  | ConfiguredPipelineOperation;
+
+function runPipelineOperation(
+  operation: PipelineOperationLike,
+  input: unknown,
+  args: unknown[],
+): unknown {
+  if (typeof operation.run !== "function") {
+    throw new TypeError(`Operation "${operation.name}" is not executable.`);
+  }
+  return operation.run.call(operation, input, args) as unknown;
+}
+
+export class PipelinedOperation<TInput = PipelineData, TOutput = PipelineData> {
+  readonly parts: PipelineOperationPart[];
+  readonly operations: PipelineOperationLike[];
+
+  constructor(
+    parts: PipelineOperationPart[],
+    readonly _inputType?: TInput,
+  ) {
     this.parts = parts;
-    this.operations = parts.filter((p: any): p is TypedOperation => p instanceof TypedOperation);
+    this.operations = parts.filter(
+      (part): part is PipelineOperationLike => !("operation" in part),
+    );
   }
 
   get length(): number {
@@ -294,38 +342,54 @@ export class PipelinedOperation<TInput = any, TOutput = any> {
   }
 
   get operationNames(): string[] {
-    return this.parts.map(p => 
-      p instanceof OperationWithArgs ? p.operation.name : (p as any).name
+    return this.parts.map((part) =>
+      "operation" in part ? part.operation.name : part.name,
     );
   }
 
   async run(input: TInput): Promise<TOutput> {
-    let current: any = input;
+    let current: PipelineData = input as unknown as PipelineData;
 
     for (const part of this.parts) {
-      if (part instanceof OperationWithArgs) {
-        const opInputType = (part.operation as any).inputType ?? "string";
+      if ("operation" in part) {
+        const opInputType = part.operation.inputType ?? "string";
         const normalised = normaliseInput(current, opInputType);
-        current = await Promise.resolve(part.operation.run(normalised as any, part.args));
+        current = (await Promise.resolve(
+          runPipelineOperation(part.operation, normalised, part.args),
+        )) as PipelineData;
       } else {
-        const typedPart = part as any;
-        const opInputType = typedPart.inputType ?? "string";
+        const opInputType = part.inputType ?? "string";
         const normalised = normaliseInput(current, opInputType);
-        current = await typedPart.run(normalised, []);
+        current = (await runPipelineOperation(
+          part,
+          normalised,
+          [],
+        )) as PipelineData;
       }
     }
 
     return current as TOutput;
   }
 
-  pipe<U = any>(nextOp: TypedOperation<TOutput, U, any[]> | OperationWithArgs<TOutput, U, any[]>): PipelinedOperation<TInput, U> {
+  pipe<U = PipelineData, NextArgs extends unknown[] = unknown[]>(
+    nextOp:
+      | TypedOperation<TOutput, U, NextArgs>
+      | OperationWithArgs<TOutput, U, NextArgs>,
+  ): PipelinedOperation<TInput, U> {
     return new PipelinedOperation([...this.parts, nextOp], this._inputType);
   }
 
-  pipeWithArgs<U = any, NextArgs extends unknown[] = any[]>(nextOp: TypedOperation<TOutput, U, NextArgs>, ...nextArgs: NextArgs): PipelinedOperation<TInput, U> {
-    return new PipelinedOperation([...this.parts, nextOp.withArgs(...nextArgs)], this._inputType);
+  pipeWithArgs<U = PipelineData, NextArgs extends unknown[] = unknown[]>(
+    nextOp: TypedOperation<TOutput, U, NextArgs>,
+    ...nextArgs: NextArgs
+  ): PipelinedOperation<TInput, U> {
+    return new PipelinedOperation(
+      [...this.parts, nextOp.withArgs(...nextArgs)],
+      this._inputType,
+    );
   }
 }
 
-export { INPUT_TYPES, PipelineData, InputType };
+export { INPUT_TYPES };
+export type { PipelineData, InputType };
 export default Operation;

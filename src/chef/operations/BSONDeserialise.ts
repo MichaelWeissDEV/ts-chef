@@ -48,7 +48,7 @@ export class BSONDeserialise extends TypedOperation<ArrayBuffer, string, unknown
       const data = bson.deserialize(Buffer.from(input));
       return JSON.stringify(data, null, 2);
     } catch (err) {
-      throw new OperationError((err as any).toString());
+      throw new OperationError(String(err));
     }
   }
 }

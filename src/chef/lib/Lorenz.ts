@@ -69,7 +69,10 @@ export const ROTOR_SIZES: Record<string, number> = {
   X5: 23,
 };
 
-export const INIT_PATTERNS: Record<string, any> = {
+export const INIT_PATTERNS: Record<
+  string,
+  Record<string, Record<number, number[]>>
+> = {
   "No Pattern": {
     X: {
       1: new Array(41).fill(0),

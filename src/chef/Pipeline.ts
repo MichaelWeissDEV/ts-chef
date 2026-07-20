@@ -7,7 +7,13 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { Operation, TypedOperation, PipelinedOperation, AnyInput, OperationWithArgs } from "./Operation";
+import {
+  Operation,
+  TypedOperation,
+  PipelinedOperation,
+  AnyInput,
+  OperationWithArgs,
+} from "./Operation";
 import { PipelineData, normaliseInput } from "./types";
 import type { PipelineStep } from "../storage/store";
 import { runOpCore, parsePipelineCore } from "./opsCore";
@@ -15,10 +21,12 @@ import { runOpCore, parsePipelineCore } from "./opsCore";
 /**
  * Extended pipeline step that can contain either operation names or operation instances
  */
-export type ExtendedPipelineStep = PipelineStep | {
-  op: Operation;
-  args: unknown[];
-};
+export type ExtendedPipelineStep =
+  | PipelineStep
+  | {
+      op: Operation;
+      args: unknown[];
+    };
 
 /**
  * Result of executing a pipeline step
@@ -67,7 +75,9 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
   }>;
 
   // Constructor is public to allow PipelineBuilder to create instances
-  constructor(steps: Array<{ opName?: string; op?: Operation; args: unknown[] }> = []) {
+  constructor(
+    steps: Array<{ opName?: string; op?: Operation; args: unknown[] }> = [],
+  ) {
     this.steps = steps;
   }
 
@@ -94,8 +104,13 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
    * @param op - The first operation instance
    * @param args - Optional arguments for the first operation
    */
-  static fromOperation<T, U, A extends unknown[]>(op: TypedOperation<T, U, A>, args?: A): Pipeline<T, U> {
-    return new Pipeline([{ op: op as unknown as Operation, args: args || [] }]) as Pipeline<T, U>;
+  static fromOperation<T, U, A extends unknown[]>(
+    op: TypedOperation<T, U, A>,
+    args?: A,
+  ): Pipeline<T, U> {
+    return new Pipeline([
+      { op: op as unknown as Operation, args: args || [] },
+    ]) as Pipeline<T, U>;
   }
 
   /**
@@ -104,7 +119,9 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
    */
   static parse(raw: string): Pipeline {
     const steps = parsePipelineCore(raw);
-    return new Pipeline(steps.map(step => ({ opName: step.opName, args: step.args })));
+    return new Pipeline(
+      steps.map((step) => ({ opName: step.opName, args: step.args })),
+    );
   }
 
   /**
@@ -115,10 +132,10 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
    * @returns A new Pipeline instance with the operation appended
    */
   pipe(opName: string, args: unknown[] = []): Pipeline<TInput, TOutput> {
-    return new Pipeline([
-      ...this.steps,
-      { opName, args }
-    ]) as Pipeline<TInput, TOutput>;
+    return new Pipeline([...this.steps, { opName, args }]) as Pipeline<
+      TInput,
+      TOutput
+    >;
   }
 
   /**
@@ -128,24 +145,36 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
    * @param args - Optional arguments for the operation
    * @returns A new Pipeline instance with the operation appended
    */
-  pipeOperation<T, U, A extends unknown[]>(op: TypedOperation<T, U, A>, args?: A): Pipeline<TInput, U> {
+  pipeOperation<T, U, A extends unknown[]>(
+    op: TypedOperation<T, U, A>,
+    args?: A,
+  ): Pipeline<TInput, U> {
     return new Pipeline([
       ...this.steps,
-      { op: op as unknown as Operation, args: args || [] }
+      { op: op as unknown as Operation, args: args || [] },
     ]) as Pipeline<TInput, U>;
   }
 
   /**
    * Append a pre-configured PipelinedOperation to this pipeline
    */
-  pipePipelined<T, U>(pipelined: PipelinedOperation<T, U>): Pipeline<TInput, U> {
-    const newSteps: Array<{ opName?: string; op?: Operation; args: unknown[] }> = [...this.steps];
+  pipePipelined<T, U>(
+    pipelined: PipelinedOperation<T, U>,
+  ): Pipeline<TInput, U> {
+    const newSteps: Array<{
+      opName?: string;
+      op?: Operation;
+      args: unknown[];
+    }> = [...this.steps];
 
     for (const part of pipelined.parts) {
-      if (part instanceof OperationWithArgs) {
-        newSteps.push({ op: part.operation as unknown as Operation, args: part.args as unknown[] });
+      if ("operation" in part) {
+        newSteps.push({
+          op: part.operation as Operation,
+          args: part.args,
+        });
       } else {
-        newSteps.push({ op: part as unknown as Operation, args: [] });
+        newSteps.push({ op: part as Operation, args: [] });
       }
     }
 
@@ -165,10 +194,15 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
     for (const step of this.steps) {
       if (step.op) {
         // Direct operation instance — normalise to the declared inputType first
-        const normalised = normaliseInput(current, step.op.inputType ?? "string");
-        current = await Promise.resolve(step.op.run(
-          normalised as unknown as PipelineData,
-          step.args as unknown as unknown[]
+        const normalised = normaliseInput(
+          current,
+          step.op.inputType ?? "string",
+        );
+        current = (await Promise.resolve(
+          step.op.run(
+            normalised as unknown as PipelineData,
+            step.args as unknown as unknown[],
+          ),
         )) as PipelineData;
       } else if (step.opName) {
         // Operation by name — runOpCore normalises internally
@@ -190,7 +224,7 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
   async run(input: AnyInput): Promise<string> {
     const result = await this.execute(input as TInput);
     const output = result as unknown as PipelineData;
-    
+
     if (typeof output === "string") return output;
     if (output instanceof ArrayBuffer)
       return Buffer.from(new Uint8Array(output)).toString("utf-8");
@@ -206,7 +240,9 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
    * @param input - The input data to process
    * @returns A Promise resolving to an array of step results
    */
-  async executeWithResults(input: TInput): Promise<PipelineStepResult<TOutput>[]> {
+  async executeWithResults(
+    input: TInput,
+  ): Promise<PipelineStepResult<TOutput>[]> {
     const results: PipelineStepResult<TOutput>[] = [];
     let current: PipelineData = input as unknown as PipelineData;
     let stepIndex = 0;
@@ -217,27 +253,36 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
 
       try {
         let output: PipelineData;
-        
+
         if (step.op) {
           // Normalise to the declared inputType before running
-          const normalised = normaliseInput(current, step.op.inputType ?? "string");
+          const normalised = normaliseInput(
+            current,
+            step.op.inputType ?? "string",
+          );
           // runWithResult is available on TypedOperation; fall back to plain run for base Operation
           const typedOp = step.op as unknown as TypedOperation;
-          let result: { success: boolean; data: unknown; error: Error | null; duration?: number } | undefined;
+          let result:
+            | {
+                success: boolean;
+                data: unknown;
+                error: Error | null;
+                duration?: number;
+              }
+            | undefined;
           if (typeof typedOp.runWithResult === "function") {
             result = await typedOp.runWithResult(
               normalised as unknown as PipelineData,
-              step.args as unknown as unknown[]
+              step.args as unknown as unknown[],
             );
             output = result.data as unknown as PipelineData;
           } else {
-            output = await Promise.resolve(step.op.run(
-              normalised as unknown as PipelineData,
-              step.args
+            output = (await Promise.resolve(
+              step.op.run(normalised as unknown as PipelineData, step.args),
             )) as PipelineData;
             result = { success: true, data: output, error: null };
           }
-          
+
           results.push({
             step: stepIndex,
             operation: operationName,
@@ -260,7 +305,9 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
             duration: Date.now() - startTime,
           });
         } else {
-          throw new Error("Invalid pipeline step: neither opName nor op provided");
+          throw new Error(
+            "Invalid pipeline step: neither opName nor op provided",
+          );
         }
 
         current = output;
@@ -289,13 +336,19 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
    * This bridges between the traditional Pipeline and the new PipelinedOperation
    */
   toPipelinedOperation(): PipelinedOperation<TInput, TOutput> {
-    const parts: Array<OperationWithArgs | TypedOperation> = [];
+    const parts: Array<
+      | OperationWithArgs<unknown, unknown, unknown[]>
+      | TypedOperation<unknown, unknown, unknown[]>
+    > = [];
 
     for (const step of this.steps) {
       if (step.op) {
         // Direct operation instance: cast to TypedOperation and wrap with args if present
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const typedOp = step.op as unknown as TypedOperation<any, any, any>;
+        const typedOp = step.op as unknown as TypedOperation<
+          unknown,
+          unknown,
+          unknown[]
+        >;
         if (step.args.length > 0) {
           parts.push(new OperationWithArgs(typedOp, step.args as unknown[]));
         } else {
@@ -305,10 +358,9 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
         // For opName-based steps, create a wrapper that delegates to the runner
         const opName = step.opName;
         const stepArgs = step.args;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        class NamedWrapper extends TypedOperation<any, any, any[]> {
+        class NamedWrapper extends TypedOperation<unknown, unknown, unknown[]> {
           name = opName;
-          run(input: any, _args: any[]): any {
+          run(input: unknown, _args: unknown[]): unknown {
             return runOpCore(opName, input as AnyInput, stepArgs);
           }
         }
@@ -316,7 +368,10 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
       }
     }
 
-    return new PipelinedOperation(parts, undefined) as unknown as PipelinedOperation<TInput, TOutput>;
+    return new PipelinedOperation(
+      parts,
+      undefined,
+    ) as unknown as PipelinedOperation<TInput, TOutput>;
   }
 
   /**
@@ -330,7 +385,7 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
    * Get the names of all operations in the pipeline
    */
   get operationNames(): string[] {
-    return this.steps.map(step => step.op?.name || step.opName || "unknown");
+    return this.steps.map((step) => step.op?.name || step.opName || "unknown");
   }
 
   /**
@@ -360,7 +415,8 @@ export class Pipeline<TInput = PipelineData, TOutput = PipelineData> {
  * Builder class for constructing pipelines using a fluent API
  */
 export class PipelineBuilder {
-  private steps: Array<{ opName?: string; op?: Operation; args: unknown[] }> = [];
+  private steps: Array<{ opName?: string; op?: Operation; args: unknown[] }> =
+    [];
 
   /**
    * Add an operation by name
@@ -373,7 +429,10 @@ export class PipelineBuilder {
   /**
    * Add an operation instance
    */
-  addOperation<T, U, A extends unknown[]>(op: TypedOperation<T, U, A>, args?: A): PipelineBuilder {
+  addOperation<T, U, A extends unknown[]>(
+    op: TypedOperation<T, U, A>,
+    args?: A,
+  ): PipelineBuilder {
     this.steps.push({ op: op as unknown as Operation, args: args || [] });
     return this;
   }
@@ -405,26 +464,22 @@ export class PipelineBuilder {
  * ).run("SGVsbG8=");
  */
 export function pipe(
-  ...operations: Array<TypedOperation | Operation | { op: Operation; args: unknown[] }>
+  ...operations: Array<
+    TypedOperation | Operation | { op: Operation; args: unknown[] }
+  >
 ): PipelinedOperation {
   if (operations.length === 0) {
     return new PipelinedOperation([], undefined);
   }
 
-  const parts: Array<OperationWithArgs | TypedOperation> = [];
-  
+  const parts: Array<Operation | { operation: Operation; args: unknown[] }> =
+    [];
+
   for (const op of operations) {
-    if (op instanceof TypedOperation) {
+    if (op instanceof Operation) {
       parts.push(op);
-    } else if (op instanceof Operation) {
-      // Wrap a non-typed Operation in a TypedOperation adapter
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const adapted = op as unknown as TypedOperation<any, any, any>;
-      parts.push(adapted);
-    } else if ('op' in op && 'args' in op) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const typedOp = op.op instanceof TypedOperation ? op.op : op.op as unknown as TypedOperation<any, any, any>;
-      parts.push(new OperationWithArgs(typedOp, op.args as unknown[]));
+    } else if ("op" in op && "args" in op) {
+      parts.push({ operation: op.op, args: op.args });
     }
   }
 
@@ -432,29 +487,11 @@ export function pipe(
     return new PipelinedOperation([], undefined);
   }
 
-  const first = parts[0];
-  const rest = parts.slice(1);
-
-  let pipeline: PipelinedOperation = new PipelinedOperation([first], undefined);
-  
-  for (const part of rest) {
-    if (part instanceof OperationWithArgs) {
-      pipeline = pipeline.pipeWithArgs(part.operation, part.args as unknown[]) as PipelinedOperation;
-    } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      pipeline = pipeline.pipe(part as unknown as TypedOperation<any, any, any>) as PipelinedOperation;
-    }
-  }
-
-  return pipeline;
+  return new PipelinedOperation(parts, undefined);
 }
 
 // Re-export from Operation for convenience
-export {
-  Operation,
-  OperationResult,
-  PipelinedOperation,
-  AnyInput
-} from "./Operation";
+export { Operation, PipelinedOperation } from "./Operation";
+export type { OperationResult, AnyInput } from "./Operation";
 
 export default Pipeline;

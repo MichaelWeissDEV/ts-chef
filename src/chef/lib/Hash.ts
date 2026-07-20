@@ -16,7 +16,7 @@ import CryptoApi from "./CryptoApiCompat";
 export function runHash(
   name: string,
   input: ArrayBuffer,
-  options: any = {},
+  options: Record<string, unknown> = {},
 ): string {
   const msg = Utils.arrayBufferToStr(input, false),
     hasher = CryptoApi.getHasher(name, options);

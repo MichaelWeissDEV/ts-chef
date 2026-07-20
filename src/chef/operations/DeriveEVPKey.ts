@@ -77,14 +77,14 @@ export class DeriveEVPKey extends TypedOperation<string, AnyInput, unknown[]> {
       ),
       keySize = arg1 / 32,
       iterations = arg2,
-      hasher = arg3,
+      hasher = arg3 as keyof typeof EVP_HASHERS,
       salt = CryptoJS.enc.Latin1.parse(
         Utils.convertToByteString(arg4.string, arg4.option),
       ),
-      key = CryptoJS.EvpKDF(passphrase as any, salt as any, {
+      key = CryptoJS.EvpKDF(passphrase, salt, {
         // lgtm [js/insufficient-password-hash]
         keySize: keySize,
-        hasher: (CryptoJS.algo as any)[hasher],
+        hasher: EVP_HASHERS[hasher],
         iterations: iterations,
       });
 
@@ -93,6 +93,14 @@ export class DeriveEVPKey extends TypedOperation<string, AnyInput, unknown[]> {
 }
 
 export default DeriveEVPKey;
+
+const EVP_HASHERS = {
+  SHA1: CryptoJS.algo.SHA1,
+  SHA256: CryptoJS.algo.SHA256,
+  SHA384: CryptoJS.algo.SHA384,
+  SHA512: CryptoJS.algo.SHA512,
+  MD5: CryptoJS.algo.MD5,
+};
 
 /**
  * Overwriting the CryptoJS OpenSSL key derivation function so that it is possible to not pass a
@@ -116,11 +124,11 @@ export default DeriveEVPKey;
  * // Does not use a salt
  * var derivedParams = CryptoJS.kdf.OpenSSL.execute('Password', 256/32, 128/32, false);
  */
-(CryptoJS.kdf.OpenSSL as any).execute = function (
-  password: any,
+CryptoJS.kdf.OpenSSL.execute = function (
+  password: CryptoJS.lib.WordArray | string,
   keySize: number,
   ivSize: number,
-  salt: any,
+  salt?: CryptoJS.lib.WordArray | string | false,
 ) {
   // Generate random salt if no salt specified and not set to false
   // This line changed from `if (!salt) {` to the following
@@ -129,9 +137,16 @@ export default DeriveEVPKey;
   }
 
   // Derive key and IV
-  const key = (CryptoJS.algo.EvpKDF as any)
-    .create({ keySize: keySize + ivSize, iterations: 1 })
-    .compute(password, salt);
+  const normalizedSalt =
+    salt === false
+      ? CryptoJS.lib.WordArray.create()
+      : typeof salt === "string"
+        ? CryptoJS.enc.Utf8.parse(salt)
+        : salt;
+  const key = CryptoJS.algo.EvpKDF.create({
+    keySize: keySize + ivSize,
+    iterations: 1,
+  }).compute(password, normalizedSalt);
 
   // Separate key and IV
   const iv = CryptoJS.lib.WordArray.create(
@@ -141,7 +156,11 @@ export default DeriveEVPKey;
   key.sigBytes = keySize * 4;
 
   // Return params
-  return CryptoJS.lib.CipherParams.create({ key: key, iv: iv, salt: salt });
+  return CryptoJS.lib.CipherParams.create({
+    key,
+    iv,
+    ...(salt === false ? {} : { salt: normalizedSalt }),
+  });
 };
 
 /**
@@ -151,7 +170,7 @@ export default DeriveEVPKey;
  * @param {string} hexStr
  * @returns {CryptoJS.lib.WordArray}
  */
-(CryptoJS.enc.Hex as any).parse = function (hexStr: string) {
+CryptoJS.enc.Hex.parse = function (hexStr: string) {
   // Remove whitespace
   hexStr = hexStr.replace(/\s/g, "");
 

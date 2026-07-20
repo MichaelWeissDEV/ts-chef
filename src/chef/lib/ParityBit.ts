@@ -14,7 +14,7 @@ import OperationError from "../errors/OperationError";
  * @param {string} input - string of binary
  * @param {any[]} args - array
  */
-export function calculateParityBit(input: string, args: any[]): string {
+export function calculateParityBit(input: string, args: unknown[]): string {
   let count1s = 0;
   for (let i = 0; i < input.length; i++) {
     const character = input.charAt(i);
@@ -47,7 +47,7 @@ export function calculateParityBit(input: string, args: any[]): string {
  * @param {string} input - string of binary, encoded
  * @param {any[]} args - array
  */
-export function decodeParityBit(input: string, args: any[]): string {
+export function decodeParityBit(input: string, args: unknown[]): string {
   if (args[1] === "End") {
     return input.slice(0, -1);
   } else {

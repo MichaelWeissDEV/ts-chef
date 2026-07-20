@@ -11,6 +11,7 @@ import { TypedOperation } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { toBase64 } from "../lib/Base64";
+import type { SupportedJimpMime } from "../lib/JimpImage";
 import {
   Jimp,
   JimpMime,
@@ -26,10 +27,14 @@ import {
  * @category Image
  */
 interface JimpFontPage {
-  bitmap?: { width: number; height: number; data: any };
+  bitmap?: { width: number; height: number; data: Uint8Array };
 }
 
-export class AddTextToImage extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer>, unknown[]> {
+export class AddTextToImage extends TypedOperation<
+  ArrayBuffer,
+  Promise<ArrayBuffer>,
+  unknown[]
+> {
   /**
    * AddTextToImage constructor
    */
@@ -321,7 +326,7 @@ export class AddTextToImage extends TypedOperation<ArrayBuffer, Promise<ArrayBuf
       if (image.mime === "image/gif") {
         imageBuffer = await image.getBuffer(JimpMime.png);
       } else {
-        imageBuffer = await image.getBuffer(image.mime as any);
+        imageBuffer = await image.getBuffer(image.mime as SupportedJimpMime);
       }
       return imageBuffer.buffer as ArrayBuffer;
     } catch (err) {

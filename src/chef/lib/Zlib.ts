@@ -18,7 +18,7 @@ export const COMPRESSION_TYPE = [
 ];
 export const INFLATE_BUFFER_TYPE = ["Adaptive", "Block"];
 
-export const ZLIB_COMPRESSION_TYPE_LOOKUP: Record<string, any> = {
+export const ZLIB_COMPRESSION_TYPE_LOOKUP: Record<string, number> = {
   "Fixed Huffman Coding": Zlib.Deflate.CompressionType.FIXED,
   "Dynamic Huffman Coding": Zlib.Deflate.CompressionType.DYNAMIC,
   "None (Store)": Zlib.Deflate.CompressionType.NONE,

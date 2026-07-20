@@ -52,7 +52,6 @@ export class Fork extends TypedOperation<AnyInput, Promise<AnyInput>, unknown[]>
    * @param _args - Unused – the operation reads its config from the recipe state directly.
    * @returns The updated state of the recipe.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async run(input: AnyInput, _args: unknown[]): Promise<AnyInput> {
     // Flow-control operations receive the full recipe state as their input
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -92,8 +91,6 @@ export class Fork extends TypedOperation<AnyInput, Promise<AnyInput>, unknown[]>
 
     const recipe = new Recipe();
     const outputs: string[] = [];
-    let progress = 0;
-
     state.forkOffset += state.progress + 1;
 
     recipe.addOperations(subOpList);
@@ -116,13 +113,11 @@ export class Fork extends TypedOperation<AnyInput, Promise<AnyInput>, unknown[]>
       dish.set(inputs[i], inputType);
 
       try {
-        progress = await recipe.execute(dish, 0, state);
+        await recipe.execute(dish, 0, state);
       } catch (err: unknown) {
         if (!ignoreErrors) {
           throw err;
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        progress = (err as any).progress + 1;
       }
       outputs.push(await dish.get(outputType) as string);
     }

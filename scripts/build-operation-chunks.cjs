@@ -16,6 +16,36 @@ const projectRoot = path.resolve(__dirname, "..");
 const registryPath = path.join(projectRoot, "src", "opsRegistry.ts");
 const outputDirectory = path.join(projectRoot, "dist", "operation-chunks");
 
+// qr-image 3.2.0 still uses Node's deprecated Buffer constructor. Modernise
+// those calls while bundling so production chunks do not emit DEP0005 and
+// numeric allocations retain their original semantics.
+const moderniseQrImageBuffers = {
+  name: "modernise-qr-image-buffers",
+  setup(build) {
+    build.onLoad(
+      { filter: /node_modules[\\/]qr-image[\\/]lib[\\/].*\.js$/ },
+      (args) => {
+        let contents = fs.readFileSync(args.path, "utf8");
+        contents = contents
+          .replaceAll("new Buffer(4)", "Buffer.alloc(4)")
+          .replaceAll("new Buffer(N)", "Buffer.alloc(N)")
+          .replaceAll(
+            "new Buffer(template.data_len)",
+            "Buffer.alloc(template.data_len)",
+          )
+          .replaceAll("new Buffer((X + 1) * X)", "Buffer.alloc((X + 1) * X)")
+          .replace(/new Buffer\(([^\n]+)\)/g, "Buffer.from($1)");
+        if (contents.includes("new Buffer(")) {
+          throw new Error(
+            `Unconverted deprecated Buffer constructor in ${args.path}`,
+          );
+        }
+        return { contents, loader: "js" };
+      },
+    );
+  },
+};
+
 function stableHash(value) {
   let hash = 0x811c9dc5;
   for (const character of value) {
@@ -135,6 +165,7 @@ async function main() {
       target: "node18",
       sourcemap: true,
       define: { "require.resolve": "false" },
+      plugins: [moderniseQrImageBuffers],
       logLevel: "info",
       external: [
         "vscode",

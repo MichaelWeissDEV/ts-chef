@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation, AnyInput } from "../Operation";
+import { TypedOperation } from "../Operation";
 import OperationError from "../errors/OperationError";
 import {
   ipv4CidrRange,

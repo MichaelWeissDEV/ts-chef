@@ -201,6 +201,17 @@ export function chrEncWidth(page: number): number {
   if (page === 0) return 1;
 
   const pageStr = page.toString();
+  const codePages = cptable as unknown as Record<
+    string,
+    { dec: ArrayLike<unknown> }
+  >;
+  const utilities = cptable as unknown as {
+    utils: {
+      cache: { sbcs: string[]; dbcs: string[] };
+      magic: Record<string, unknown>;
+      encode(page: number, value: string): ArrayLike<unknown>;
+    };
+  };
   // Confirm this page is legitimate
   if (
     !Object.prototype.hasOwnProperty.call(
@@ -212,18 +223,16 @@ export function chrEncWidth(page: number): number {
 
   // Statically defined code pages
   if (Object.prototype.hasOwnProperty.call(cptable, pageStr))
-    return (cptable as any)[pageStr].dec.length > 256 ? 2 : 1;
+    return codePages[pageStr].dec.length > 256 ? 2 : 1;
 
   // Cached code pages
-  if ((cptable as any).utils.cache.sbcs.includes(pageStr)) return 1;
-  if ((cptable as any).utils.cache.dbcs.includes(pageStr)) return 2;
+  if (utilities.utils.cache.sbcs.includes(pageStr)) return 1;
+  if (utilities.utils.cache.dbcs.includes(pageStr)) return 2;
 
   // Dynamically generated code pages
-  if (
-    Object.prototype.hasOwnProperty.call((cptable as any).utils.magic, pageStr)
-  ) {
+  if (Object.prototype.hasOwnProperty.call(utilities.utils.magic, pageStr)) {
     // Generate a single character and measure it
-    const a = (cptable as any).utils.encode(page, "a");
+    const a = utilities.utils.encode(page, "a");
     return a.length;
   }
 

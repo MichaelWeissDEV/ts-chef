@@ -35,7 +35,22 @@ declare module "sql-formatter";
 declare module "ssdeep.js";
 declare module "xpath";
 declare module "rison";
-declare module "nodom";
-declare module "d3";
-declare module "d3-hexbin";
+declare module "d3-hexbin" {
+  export interface HexbinBin<Datum> extends Array<Datum> {
+    x: number;
+    y: number;
+  }
+
+  export interface Hexbin<Datum extends [number, number]> {
+    (points: Datum[]): Array<HexbinBin<Datum>>;
+    radius(value: number): Hexbin<Datum>;
+    extent(value: [[number, number], [number, number]]): Hexbin<Datum>;
+    hexagon(radius?: number): string;
+  }
+
+  export function hexbin<Datum extends [number, number]>(): Hexbin<Datum>;
+
+  const defaultExport: { hexbin: typeof hexbin };
+  export default defaultExport;
+}
 declare module "xregexp";

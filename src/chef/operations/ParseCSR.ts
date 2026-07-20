@@ -12,6 +12,32 @@ import { TypedOperation } from "../Operation";
 import { formatDnObj } from "../lib/PublicKey";
 import Utils from "../Utils";
 
+interface BigIntegerLike {
+  toString(radix?: number): string;
+  bitLength?: () => number;
+}
+
+interface CsrExtension {
+  extname: string;
+  critical?: boolean;
+  cA?: boolean;
+  pathLen?: unknown;
+  names?: string[];
+  array?: Array<string | Record<string, unknown>>;
+}
+
+interface CsrParameters {
+  subject: Parameters<typeof formatDnObj>[0];
+  sbjpubkey: string;
+  sigalg: string;
+  sighex: string;
+  extreq?: CsrExtension[];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 /**
  * Parse CSR operation
  */
@@ -57,7 +83,10 @@ export class ParseCSR extends TypedOperation<string, string, unknown[]> {
     }
 
     // Parse the CSR into JSON parameters
-    const csrParam: any = (r.KJUR.asn1.csr.CSRUtil as any).getParam(input);
+    const csrUtil = r.KJUR.asn1.csr.CSRUtil as unknown as {
+      getParam(pem: string): CsrParameters;
+    };
+    const csrParam = csrUtil.getParam(input);
 
     return `Subject\n${formatDnObj(csrParam.subject, 2)}
 Public Key${formatSubjectPublicKey(csrParam.sbjpubkey)}
@@ -79,7 +108,10 @@ function formatSignature(sigAlg: string, sigHex: string): string {
 
   if (new RegExp("withdsa", "i").test(sigAlg)) {
     const d = new r.KJUR.crypto.DSA();
-    const sigParam: any = d.parseASN1Signature(sigHex);
+    const sigParam = d.parseASN1Signature(sigHex) as unknown as [
+      BigIntegerLike,
+      BigIntegerLike,
+    ];
     out += `  Signature:
       R:          ${formatHexOntoMultiLine(absBigIntToHex(sigParam[0]))}
       S:          ${formatHexOntoMultiLine(absBigIntToHex(sigParam[1]))}\n`;
@@ -100,25 +132,40 @@ function formatSignature(sigAlg: string, sigHex: string): string {
 function formatSubjectPublicKey(publicKeyPEM: string): string {
   let out = "\n";
 
-  const publicKey = r.KEYUTIL.getKey(publicKeyPEM) as any;
+  const publicKey = r.KEYUTIL.getKey(publicKeyPEM);
   if (publicKey instanceof r.RSAKey) {
+    const rsaKey = publicKey as unknown as {
+      n: BigIntegerLike & { bitLength(): number };
+      e: number;
+    };
     out += `  Algorithm:      RSA
-  Length:         ${(publicKey as any).n.bitLength()} bits
-  Modulus:        ${formatHexOntoMultiLine(absBigIntToHex((publicKey as any).n))}
-  Exponent:       ${(publicKey as any).e} (0x${Utils.hex((publicKey as any).e)})\n`;
+  Length:         ${rsaKey.n.bitLength()} bits
+  Modulus:        ${formatHexOntoMultiLine(absBigIntToHex(rsaKey.n))}
+  Exponent:       ${rsaKey.e} (0x${Utils.hex(rsaKey.e)})\n`;
   } else if (publicKey instanceof r.KJUR.crypto.ECDSA) {
+    const ecdsaKey = publicKey as unknown as {
+      ecparams: { keylen: number };
+      pubKeyHex: string;
+      getShortNISTPCurveName(): string;
+    };
     out += `  Algorithm:      ECDSA
-  Length:         ${(publicKey as any).ecparams.keylen} bits
-  Pub:            ${formatHexOntoMultiLine((publicKey as any).pubKeyHex)}
-  ASN1 OID:       ${r.KJUR.crypto.ECDSA.getName((publicKey as any).getShortNISTPCurveName())}
-  NIST CURVE:     ${(publicKey as any).getShortNISTPCurveName()}\n`;
+  Length:         ${ecdsaKey.ecparams.keylen} bits
+  Pub:            ${formatHexOntoMultiLine(ecdsaKey.pubKeyHex)}
+  ASN1 OID:       ${r.KJUR.crypto.ECDSA.getName(ecdsaKey.getShortNISTPCurveName())}
+  NIST CURVE:     ${ecdsaKey.getShortNISTPCurveName()}\n`;
   } else if (publicKey instanceof r.KJUR.crypto.DSA) {
+    const dsaKey = publicKey as unknown as {
+      p: BigIntegerLike;
+      q: BigIntegerLike;
+      g: BigIntegerLike;
+      y: BigIntegerLike;
+    };
     out += `  Algorithm:      DSA
-  Length:         ${(publicKey as any).p.toString(16).length * 4} bits
-  Pub:            ${formatHexOntoMultiLine(absBigIntToHex((publicKey as any).y))}
-  P:              ${formatHexOntoMultiLine(absBigIntToHex((publicKey as any).p))}
-  Q:              ${formatHexOntoMultiLine(absBigIntToHex((publicKey as any).q))}
-  G:              ${formatHexOntoMultiLine(absBigIntToHex((publicKey as any).g))}\n`;
+  Length:         ${dsaKey.p.toString(16).length * 4} bits
+  Pub:            ${formatHexOntoMultiLine(absBigIntToHex(dsaKey.y))}
+  P:              ${formatHexOntoMultiLine(absBigIntToHex(dsaKey.p))}
+  Q:              ${formatHexOntoMultiLine(absBigIntToHex(dsaKey.q))}
+  G:              ${formatHexOntoMultiLine(absBigIntToHex(dsaKey.g))}\n`;
   } else {
     out += `unsupported public key algorithm\n`;
   }
@@ -131,10 +178,10 @@ function formatSubjectPublicKey(publicKeyPEM: string): string {
  * @param {any} csrParam
  * @returns {string} Multi-line string describing CSR Requested Extensions
  */
-function formatRequestedExtensions(csrParam: any): string {
+function formatRequestedExtensions(csrParam: CsrParameters): string {
   const formattedExtensions = new Array(4).fill("");
 
-  if (Object.prototype.hasOwnProperty.call(csrParam, "extreq")) {
+  if (csrParam.extreq) {
     for (const extension of csrParam.extreq) {
       let parts: string[];
       switch (extension.extname) {
@@ -183,11 +230,8 @@ function formatRequestedExtensions(csrParam: any): string {
  * @param {any} extension
  * @returns {string} String describing whether the extension is critical or not
  */
-function formatExtensionCriticalTag(extension: any): string {
-  return Object.prototype.hasOwnProperty.call(extension, "critical") &&
-    extension.critical
-    ? " critical"
-    : "";
+function formatExtensionCriticalTag(extension: CsrExtension): string {
+  return extension.critical ? " critical" : "";
 }
 
 /**
@@ -208,7 +252,7 @@ function formatHexOntoMultiLine(hex: string): string {
  * @param {any} int BigInt
  * @returns {string} String representing absolute value in Hex
  */
-function absBigIntToHex(int: any): string {
+function absBigIntToHex(int: bigint | BigIntegerLike): string {
   const bigIntVal = typeof int === "bigint" ? int : BigInt(int.toString());
   const absVal = bigIntVal < 0n ? -bigIntVal : bigIntVal;
 
@@ -254,7 +298,7 @@ function formatMultiLine(longStr: string): string {
  * @param {any} extension CSR extension with the name `basicConstraints`
  * @returns {string[]} Array of strings describing Basic Constraints
  */
-function describeBasicConstraints(extension: any): string[] {
+function describeBasicConstraints(extension: CsrExtension): string[] {
   const constraints: string[] = [];
 
   constraints.push(
@@ -272,7 +316,7 @@ function describeBasicConstraints(extension: any): string[] {
  * @param {any} extension CSR extension with the name `keyUsage`
  * @returns {string[]} Array of strings describing Key Usage extension permitted use cases
  */
-function describeKeyUsage(extension: any): string[] {
+function describeKeyUsage(extension: CsrExtension): string[] {
   const usage: string[] = [];
 
   const kuIdentifierToName: Record<string, string> = {
@@ -308,7 +352,7 @@ function describeKeyUsage(extension: any): string[] {
  * @param {any} extension CSR extension with the name `extendedKeyUsage`
  * @returns {string[]} Array of strings describing Extended Key Usage extension permitted use cases
  */
-function describeExtendedKeyUsage(extension: any): string[] {
+function describeExtendedKeyUsage(extension: CsrExtension): string[] {
   const usage: string[] = [];
 
   const ekuIdentifierToName: Record<string, string> = {
@@ -347,39 +391,51 @@ function describeExtendedKeyUsage(extension: any): string[] {
  * @param {any} extension
  * @returns {string[]} Array of strings describing Subject Alternative Name extension
  */
-function describeSubjectAlternativeName(extension: any): string[] {
+function describeSubjectAlternativeName(extension: CsrExtension): string[] {
   const names: string[] = [];
 
   if (
     Object.prototype.hasOwnProperty.call(extension, "extname") &&
     extension.extname === "subjectAltName"
   ) {
-    if (Object.prototype.hasOwnProperty.call(extension, "array")) {
+    if (extension.array) {
       for (const altName of extension.array) {
+        if (!isRecord(altName)) continue;
         Object.keys(altName).forEach((key) => {
+          const value = altName[key];
           switch (key) {
             case "rfc822":
-              names.push(`EMAIL: ${altName[key]}`);
+              names.push(`EMAIL: ${String(value)}`);
               break;
             case "dns":
-              names.push(`DNS: ${altName[key]}`);
+              names.push(`DNS: ${String(value)}`);
               break;
             case "uri":
-              names.push(`URI: ${altName[key]}`);
+              names.push(`URI: ${String(value)}`);
               break;
             case "ip":
-              names.push(`IP: ${altName[key]}`);
+              names.push(`IP: ${String(value)}`);
               break;
             case "dn":
-              names.push(`DIR: ${altName[key].str}`);
-              break;
-            case "other":
               names.push(
-                `Other: ${altName[key].oid}::${altName[key].value.utf8str.str}`,
+                `DIR: ${isRecord(value) ? String(value.str) : String(value)}`,
               );
               break;
+            case "other": {
+              const otherValue = isRecord(value) ? value : {};
+              const nestedValue = isRecord(otherValue.value)
+                ? otherValue.value
+                : {};
+              const utf8 = isRecord(nestedValue.utf8str)
+                ? nestedValue.utf8str
+                : {};
+              names.push(
+                `Other: ${String(otherValue.oid)}::${String(utf8.str)}`,
+              );
+              break;
+            }
             default:
-              names.push(`(unable to format SAN '${key}':${altName[key]})\n`);
+              names.push(`(unable to format SAN '${key}':${String(value)})\n`);
           }
         });
       }

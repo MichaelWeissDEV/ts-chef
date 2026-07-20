@@ -11,12 +11,17 @@ import { TypedOperation } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { toBase64 } from "../lib/Base64";
+import type { SupportedJimpMime } from "../lib/JimpImage";
 import { Jimp, JimpMime } from "jimp";
 
 /**
  * Crop Image operation
  */
-export class CropImage extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer>, unknown[]> {
+export class CropImage extends TypedOperation<
+  ArrayBuffer,
+  Promise<ArrayBuffer>,
+  unknown[]
+> {
   /**
    * CropImage constructor
    */
@@ -146,7 +151,7 @@ export class CropImage extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer>,
       if (image.mime === "image/gif") {
         imageBuffer = await image.getBuffer(JimpMime.png);
       } else {
-        imageBuffer = await image.getBuffer(image.mime as any);
+        imageBuffer = await image.getBuffer(image.mime as SupportedJimpMime);
       }
       return imageBuffer.buffer as ArrayBuffer;
     } catch (err) {

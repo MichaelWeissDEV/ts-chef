@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation,  AnyInput  } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 
 import { compress } from "@blu3r4y/lzma";
@@ -15,7 +15,11 @@ import { compress } from "@blu3r4y/lzma";
 /**
  * LZMA Compress operation
  */
-export class LZMACompress extends TypedOperation<ArrayBuffer, Promise<AnyInput>, unknown[]> {
+export class LZMACompress extends TypedOperation<
+  ArrayBuffer,
+  Promise<AnyInput>,
+  unknown[]
+> {
   /**
    * LZMACompress constructor
    */
@@ -52,11 +56,11 @@ export class LZMACompress extends TypedOperation<ArrayBuffer, Promise<AnyInput>,
       compress(
         new Uint8Array(input),
         mode,
-        (result, error: any) => {
+        (result, error: unknown) => {
           if (error) {
             reject(
               new OperationError(
-                `Failed to compress input: ${error?.message || error}`,
+                `Failed to compress input: ${error instanceof Error ? error.message : String(error)}`,
               ),
             );
           }

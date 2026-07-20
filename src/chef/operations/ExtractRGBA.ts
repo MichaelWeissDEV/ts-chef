@@ -17,7 +17,11 @@ import { DELIM_OPTIONS as RGBA_DELIM_OPTIONS } from "../lib/Delim";
 /**
  * Extract RGBA operation
  */
-export class ExtractRGBA extends TypedOperation<ArrayBuffer, Promise<AnyInput>, unknown[]> {
+export class ExtractRGBA extends TypedOperation<
+  ArrayBuffer,
+  Promise<AnyInput>,
+  unknown[]
+> {
   /**
    * ExtractRGBA constructor
    */
@@ -54,14 +58,15 @@ export class ExtractRGBA extends TypedOperation<ArrayBuffer, Promise<AnyInput>, 
     if (!isImage(input))
       throw new OperationError("Please enter a valid image file.");
 
-    const delimiter = args[0],
-      includeAlpha = args[1],
+    const delimiter = args[0] as string,
+      includeAlpha = args[1] as boolean,
       parsedImage = await Jimp.read(input);
 
-    let bitmap = parsedImage.bitmap.data as any;
-    bitmap = includeAlpha
-      ? bitmap
-      : bitmap.filter((val: any, idx: number) => idx % 4 !== 3);
+    const bitmap = includeAlpha
+      ? Array.from(parsedImage.bitmap.data)
+      : Array.from(parsedImage.bitmap.data).filter(
+          (_val, idx) => idx % 4 !== 3,
+        );
 
     return bitmap.join(delimiter);
   }

@@ -31,7 +31,7 @@ export interface FileSignature {
 /**
  * Helper to compare arrays
  */
-function arrayEquals(a: any[] | Uint8Array, b: any[] | Uint8Array): boolean {
+function arrayEquals(a: ArrayLike<number>, b: ArrayLike<number>): boolean {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
     if (a[i] !== b[i]) return false;

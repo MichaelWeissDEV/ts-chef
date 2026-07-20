@@ -11,10 +11,23 @@ import { TypedOperation } from "../Operation";
 import XRegExp from "xregexp";
 import Dish from "../Dish";
 
+interface RegisterState {
+  progress: number;
+  dish: Dish;
+  opList: Array<{ ingValues: unknown[]; disabled?: boolean }>;
+  forkOffset: number;
+  numRegisters: number;
+  setRegisters: (offset: number, num: number, regs: string[]) => void;
+}
+
 /**
  * Register operation
  */
-export class Register extends TypedOperation<any, any, any[]> {
+export class Register extends TypedOperation<
+  RegisterState,
+  RegisterState,
+  unknown[]
+> {
   /**
    * Register constructor
    */
@@ -60,14 +73,7 @@ export class Register extends TypedOperation<any, any, any[]> {
    * @param {Operation[]} state.opList - The list of operations in the recipe.
    * @returns {Object} The updated state of the recipe.
    */
-  async run(state: {
-    progress: number;
-    dish: Dish;
-    opList: Array<{ ingValues: unknown[]; disabled?: boolean }>;
-    forkOffset: number;
-    numRegisters: number;
-    setRegisters: (offset: number, num: number, regs: string[]) => void;
-  }) {
+  async run(state: RegisterState): Promise<RegisterState> {
     const ings = state.opList[state.progress].ingValues;
     const [extractorStr, i, m, s] = ings;
 

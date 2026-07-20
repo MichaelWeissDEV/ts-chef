@@ -16,7 +16,18 @@ import { getLabelIndex } from "../lib/FlowControl";
  *
  * @category Default
  */
-export class ConditionalJump extends TypedOperation<any, any, unknown[]> {
+interface ConditionalJumpState {
+  progress: number;
+  dish: Dish;
+  opList: Array<{ name: string; ingValues: unknown[] }>;
+  numJumps: number;
+}
+
+export class ConditionalJump extends TypedOperation<
+  ConditionalJumpState,
+  ConditionalJumpState,
+  unknown[]
+> {
   name = "Conditional Jump";
   module = "Default";
   description =
@@ -52,15 +63,9 @@ export class ConditionalJump extends TypedOperation<any, any, unknown[]> {
    * @param {any[]} _args
    * @returns {string}
    */
-  async run(state: {
-    progress: number;
-    dish: Dish;
-    opList: Array<{ name: string; ingValues: unknown[] }>;
-    numJumps: number;
-  }): Promise<typeof state> {
-    const [pattern, invert, label, maxJumps] = state.opList[
-      state.progress
-    ].ingValues as [string, boolean, string, number];
+  async run(state: ConditionalJumpState): Promise<ConditionalJumpState> {
+    const [pattern, invert, label, maxJumps] = state.opList[state.progress]
+      .ingValues as [string, boolean, string, number];
     const input = String(await state.dish.get(Dish.STRING));
     let matched: boolean;
     try {

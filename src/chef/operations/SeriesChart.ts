@@ -19,9 +19,10 @@ import { TypedOperation } from "../Operation";
 import Utils from "../Utils";
 
 const d3 = d3temp;
-const nodom = (nodomtemp as any).default
-  ? (nodomtemp as any).default
-  : nodomtemp;
+const nodomModule = nodomtemp as typeof nodomtemp & {
+  default?: typeof nodomtemp;
+};
+const nodom = nodomModule.default ?? nodomtemp;
 
 /**
  * Series chart operation
@@ -106,9 +107,9 @@ export class SeriesChart extends TypedOperation<string, string, unknown[]> {
       svgHeight = allSeriesHeight + xAxisHeight + interSeriesPadding;
 
     const document = new nodom.Document();
-    let svg: any = document.createElement("svg");
-    svg = d3
-      .select(svg)
+    const svgElement = document.createElement("svg");
+    const svg = d3
+      .select(svgElement as unknown as SVGSVGElement)
       .attr("width", "100%")
       .attr("height", "100%")
       .attr("viewBox", `0 0 ${svgWidth} ${svgHeight}`);
@@ -144,7 +145,7 @@ export class SeriesChart extends TypedOperation<string, string, unknown[]> {
     xValues.forEach((x) => {
       const tooltip: string[] = [];
 
-      series.forEach((serie: any) => {
+      series.forEach((serie) => {
         const y = serie.data[x];
         if (typeof y === "undefined") return;
 
@@ -185,7 +186,7 @@ export class SeriesChart extends TypedOperation<string, string, unknown[]> {
       .append("g")
       .attr("transform", `translate(0, ${xAxisHeight})`);
 
-    series.forEach((serie: any, seriesIndex: number) => {
+    series.forEach((serie, seriesIndex) => {
       const yExtent = d3.extent(Object.values(serie.data) as number[]) as [
           number,
           number,
@@ -226,10 +227,12 @@ export class SeriesChart extends TypedOperation<string, string, unknown[]> {
       xValues.forEach((x) => {
         const yVal = serie.data[x];
         if (typeof yVal === "undefined") return;
+        const xCoordinate = xAxis(x);
+        if (xCoordinate === undefined) return;
 
         seriesGroup
           .append("circle")
-          .attr("cx", xAxis(x))
+          .attr("cx", xCoordinate)
           .attr("cy", yAxis(yVal))
           .attr("r", pipRadius)
           .attr("fill", seriesColours[seriesIndex % seriesColours.length])
@@ -263,7 +266,7 @@ export class SeriesChart extends TypedOperation<string, string, unknown[]> {
         .text(serie.name);
     });
 
-    return (svg.node() as HTMLElement).outerHTML;
+    return svg.node()?.outerHTML ?? "";
   }
 }
 

@@ -11,12 +11,17 @@ import { TypedOperation, AnyInput } from "../Operation";
 import OperationError from "../errors/OperationError";
 import { isImage } from "../lib/FileType";
 import { toBase64 } from "../lib/Base64";
+import type { SupportedJimpMime } from "../lib/JimpImage";
 import { Jimp, JimpMime } from "jimp";
 
 /**
  * Sharpen Image operation
  */
-export class SharpenImage extends TypedOperation<AnyInput, Promise<AnyInput>, unknown[]> {
+export class SharpenImage extends TypedOperation<
+  AnyInput,
+  Promise<AnyInput>,
+  unknown[]
+> {
   /**
    * SharpenImage constructor
    */
@@ -83,20 +88,21 @@ export class SharpenImage extends TypedOperation<AnyInput, Promise<AnyInput>, un
         0,
         blurMask.bitmap.width,
         blurMask.bitmap.height,
-        function (this: any, x, y, idx) {
+        (_x, _y, idx) => {
           const blurRed = blurImage.bitmap.data[idx];
           const blurGreen = blurImage.bitmap.data[idx + 1];
           const blurBlue = blurImage.bitmap.data[idx + 2];
 
-          const normalRed = this.bitmap.data[idx];
-          const normalGreen = this.bitmap.data[idx + 1];
-          const normalBlue = this.bitmap.data[idx + 2];
+          const normalRed = blurMask.bitmap.data[idx];
+          const normalGreen = blurMask.bitmap.data[idx + 1];
+          const normalBlue = blurMask.bitmap.data[idx + 2];
 
           // Subtract blurred pixel value from normal image
-          this.bitmap.data[idx] = normalRed > blurRed ? normalRed - blurRed : 0;
-          this.bitmap.data[idx + 1] =
+          blurMask.bitmap.data[idx] =
+            normalRed > blurRed ? normalRed - blurRed : 0;
+          blurMask.bitmap.data[idx + 1] =
             normalGreen > blurGreen ? normalGreen - blurGreen : 0;
-          this.bitmap.data[idx + 2] =
+          blurMask.bitmap.data[idx + 2] =
             normalBlue > blurBlue ? normalBlue - blurBlue : 0;
         },
       );
@@ -106,14 +112,14 @@ export class SharpenImage extends TypedOperation<AnyInput, Promise<AnyInput>, un
         0,
         image.bitmap.width,
         image.bitmap.height,
-        function (this: any, x, y, idx) {
+        (_x, _y, idx) => {
           let maskRed = blurMask.bitmap.data[idx];
           let maskGreen = blurMask.bitmap.data[idx + 1];
           let maskBlue = blurMask.bitmap.data[idx + 2];
 
-          const normalRed = this.bitmap.data[idx];
-          const normalGreen = this.bitmap.data[idx + 1];
-          const normalBlue = this.bitmap.data[idx + 2];
+          const normalRed = image.bitmap.data[idx];
+          const normalGreen = image.bitmap.data[idx + 1];
+          const normalBlue = image.bitmap.data[idx + 2];
 
           // Calculate luminance
           const maskLuminance =
@@ -135,11 +141,11 @@ export class SharpenImage extends TypedOperation<AnyInput, Promise<AnyInput>, un
 
           // Only change pixel value if the difference is higher than threshold
           if ((luminanceDiff / 255) * 100 >= threshold) {
-            this.bitmap.data[idx] =
+            image.bitmap.data[idx] =
               normalRed + maskRed <= 255 ? normalRed + maskRed : 255;
-            this.bitmap.data[idx + 1] =
+            image.bitmap.data[idx + 1] =
               normalGreen + maskGreen <= 255 ? normalGreen + maskGreen : 255;
-            this.bitmap.data[idx + 2] =
+            image.bitmap.data[idx + 2] =
               normalBlue + maskBlue <= 255 ? normalBlue + maskBlue : 255;
           }
         },
@@ -149,7 +155,7 @@ export class SharpenImage extends TypedOperation<AnyInput, Promise<AnyInput>, un
       if (image.mime === "image/gif") {
         imageBuffer = await image.getBuffer(JimpMime.png);
       } else {
-        imageBuffer = await image.getBuffer(image.mime as any);
+        imageBuffer = await image.getBuffer(image.mime as SupportedJimpMime);
       }
       return imageBuffer.buffer;
     } catch (err) {

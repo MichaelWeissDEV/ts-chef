@@ -65,7 +65,7 @@ export class ParityBit extends TypedOperation<string, string, unknown[]> {
      * @param input input to be encoded or decoded
      * @param args array
      */
-    const method = (input: string, args: any[]) =>
+    const method = (input: string, args: unknown[]) =>
       args[2] === "Encode"
         ? calculateParityBit(input, args)
         : decodeParityBit(input, args);

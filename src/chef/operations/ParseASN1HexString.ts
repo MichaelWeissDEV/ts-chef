@@ -8,7 +8,7 @@
  */
 
 import r from "jsrsasign";
-import { TypedOperation, AnyInput } from "../Operation";
+import { TypedOperation } from "../Operation";
 
 /**
  * Parse ASN.1 hex string operation

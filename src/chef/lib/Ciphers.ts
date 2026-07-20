@@ -14,7 +14,7 @@ import CryptoJS from "crypto-js";
 /**
  * CryptoJS format encoders mapped by name, mirroring CyberChef's Ciphers.mjs format object.
  */
-export const format: Record<string, CryptoJS.lib.WordArray | any> = {
+export const format: Record<string, typeof CryptoJS.enc.Hex> = {
   Latin1: CryptoJS.enc.Latin1,
   UTF8: CryptoJS.enc.Utf8,
   UTF16: CryptoJS.enc.Utf16,

@@ -23,7 +23,7 @@ export async function parseQrCode(
   input: ArrayBuffer,
   normalise: boolean,
 ): Promise<string> {
-  let image: any;
+  let image: Awaited<ReturnType<typeof readJimpImage>>;
   try {
     image = await readJimpImage(input);
   } catch (err) {
@@ -84,7 +84,7 @@ export function generateQrCode(
     throw new OperationError("Unsupported QR code format.");
   }
 
-  let qrImage: any;
+  let qrImage: string | Buffer;
   try {
     qrImage = qr.imageSync(input, {
       type: format.toLowerCase() as "png" | "svg" | "eps" | "pdf",
@@ -95,7 +95,7 @@ export function generateQrCode(
         | "M"
         | "Q"
         | "H",
-    });
+    }) as string | Buffer;
   } catch (err) {
     throw new OperationError(`Error generating QR code. (${err})`);
   }
@@ -104,17 +104,6 @@ export function generateQrCode(
     throw new OperationError("Error generating QR code.");
   }
 
-  switch (format) {
-    case "SVG":
-    case "EPS":
-    case "PDF":
-      return Utils.strToArrayBuffer(qrImage);
-    case "PNG":
-      return qrImage.buffer.slice(
-        qrImage.byteOffset,
-        qrImage.byteLength + qrImage.byteOffset,
-      );
-    default:
-      throw new OperationError("Unsupported QR code format.");
-  }
+  if (typeof qrImage === "string") return Utils.strToArrayBuffer(qrImage);
+  return Uint8Array.from(qrImage).buffer;
 }

@@ -16,10 +16,19 @@ import { toHex, fromHex } from "./Hex";
  * @param {number} indent
  * @returns {string}
  */
-export function formatDnObj(dnObj: any, indent: number): string {
+interface DistinguishedNameEntry {
+  type: string;
+  value: unknown;
+}
+
+interface DistinguishedName {
+  array: DistinguishedNameEntry[][];
+}
+
+export function formatDnObj(dnObj: DistinguishedName, indent: number): string {
   let output = "";
 
-  const maxKeyLen = dnObj.array.reduce((max: number, item: any) => {
+  const maxKeyLen = dnObj.array.reduce((max: number, item) => {
     return item[0].type.length > max ? item[0].type.length : max;
   }, 0);
 

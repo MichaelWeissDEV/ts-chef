@@ -221,7 +221,7 @@ export class BombeMachine {
   ciphertext: string;
   crib: string;
   check: boolean;
-  updateFn?: (...msg: any[]) => void;
+  updateFn?: (...msg: unknown[]) => void;
   baseRotors!: CopyRotor[];
   nLoops!: number;
   wires: boolean[];
@@ -249,7 +249,7 @@ export class BombeMachine {
     ciphertext: string,
     crib: string,
     check: boolean,
-    update?: (...msg: any[]) => void,
+    update?: (...msg: unknown[]) => void,
   ) {
     if (ciphertext.length < crib.length) {
       throw new OperationError("Crib overruns supplied ciphertext");
@@ -342,7 +342,7 @@ export class BombeMachine {
     }
   }
 
-  update(...msg: any[]) {
+  update(...msg: unknown[]) {
     if (this.updateFn !== undefined) {
       this.updateFn(...msg);
     }

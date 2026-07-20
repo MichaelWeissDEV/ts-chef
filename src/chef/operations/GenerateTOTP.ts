@@ -13,7 +13,11 @@ import * as OTPAuth from "otpauth";
 /**
  * Generate TOTP operation
  */
-export class GenerateTOTP extends TypedOperation<AnyInput, AnyInput, unknown[]> {
+export class GenerateTOTP extends TypedOperation<
+  AnyInput,
+  AnyInput,
+  unknown[]
+> {
   /**
    *
    */
@@ -75,10 +79,8 @@ export class GenerateTOTP extends TypedOperation<AnyInput, AnyInput, unknown[]> 
       secret: OTPAuth.Secret.fromBase32(secret),
     });
 
-    (totp as any).epoch = epochOffset * 1000;
-
     const uri = totp.toString();
-    const code = totp.generate();
+    const code = totp.generate({ timestamp: Date.now() - epochOffset * 1000 });
 
     return `URI: ${uri}\n\nPassword: ${code}`;
   }

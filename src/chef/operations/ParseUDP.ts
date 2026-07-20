@@ -63,7 +63,13 @@ export class ParseUDP extends TypedOperation<string, AnyInput, unknown[]> {
     }
 
     // Parse Header
-    const UDPPacket: Record<string, any> = {
+    const UDPPacket: {
+      "Source port": number | undefined;
+      "Destination port": number | undefined;
+      Length: number | undefined;
+      Checksum: string;
+      Data?: string;
+    } = {
       "Source port": s.readInt(2),
       "Destination port": s.readInt(2),
       Length: s.readInt(2),

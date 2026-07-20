@@ -1,6 +1,10 @@
 import Utils from "../Utils";
 import protobuf from "protobufjs";
 
+interface FieldTypeMap {
+  [field: string]: number | FieldTypeMap;
+}
+
 /**
  * Protobuf lib. Contains functions to decode protobuf serialised
  * data without a schema or .proto file.
@@ -20,10 +24,13 @@ class Protobuf {
   VALUE: number;
   offset: number;
   LENGTH: number;
-  fieldTypes: Record<number | string, any>;
+  fieldTypes: FieldTypeMap;
 
   // Static fields used by encode/decode methods
-  static parsedProto: any;
+  static parsedProto: {
+    package?: string;
+    root: protobuf.NamespaceBase;
+  };
   static mainMessageName: string | null;
   static showUnknownFields: boolean;
   static showTypes: boolean;
@@ -99,12 +106,18 @@ class Protobuf {
    * @param {any[]} args
    * @returns {ArrayBuffer}
    */
-  static encode(input: Record<string, unknown>, args: any[]): ArrayBuffer {
-    Protobuf.updateProtoRoot(args[0]);
+  static encode(input: Record<string, unknown>, args: unknown[]): ArrayBuffer {
+    Protobuf.updateProtoRoot(String(args[0] ?? ""));
     if (!Protobuf.mainMessageName) {
       throw new Error("Schema Error: Schema not defined");
     }
-    const message = Protobuf.parsedProto.root.nested[Protobuf.mainMessageName];
+    const message =
+      Protobuf.parsedProto.root.nested?.[Protobuf.mainMessageName];
+    if (!(message instanceof protobuf.Type)) {
+      throw new Error(
+        `Schema Error: ${Protobuf.mainMessageName} is not a message`,
+      );
+    }
 
     // Convert input into instance of message, and verify instance
     input = message.fromObject(input);
@@ -126,11 +139,11 @@ class Protobuf {
    */
   static decode(
     input: number[] | Uint8Array,
-    args: any[],
+    args: unknown[],
   ): Record<string, unknown> {
-    Protobuf.updateProtoRoot(args[0]);
-    Protobuf.showUnknownFields = args[1];
-    Protobuf.showTypes = args[2];
+    Protobuf.updateProtoRoot(String(args[0] ?? ""));
+    Protobuf.showUnknownFields = Boolean(args[1]);
+    Protobuf.showTypes = Boolean(args[2]);
     return Protobuf.mergeDecodes(input);
   }
 
@@ -143,8 +156,14 @@ class Protobuf {
     try {
       Protobuf.parsedProto = protobuf.parse(protoText);
       if (Protobuf.parsedProto.package) {
-        Protobuf.parsedProto.root =
-          Protobuf.parsedProto.root.nested[Protobuf.parsedProto.package];
+        const packageRoot =
+          Protobuf.parsedProto.root.nested?.[Protobuf.parsedProto.package];
+        if (!(packageRoot instanceof protobuf.NamespaceBase)) {
+          throw new Error(
+            `Schema package not found: ${Protobuf.parsedProto.package}`,
+          );
+        }
+        Protobuf.parsedProto.root = packageRoot;
       }
       Protobuf.updateMainMessageName();
     } catch (error) {
@@ -158,14 +177,10 @@ class Protobuf {
   static updateMainMessageName(): void {
     const messageNames: string[] = [];
     const fieldTypes: string[] = [];
-    Protobuf.parsedProto.root.nestedArray.forEach((block: any) => {
+    Protobuf.parsedProto.root.nestedArray.forEach((block) => {
       if (block instanceof protobuf.Type) {
         messageNames.push(block.name);
-        Protobuf.parsedProto.root.nested[block.name].fieldsArray.forEach(
-          (field: any) => {
-            fieldTypes.push(field.type);
-          },
-        );
+        block.fieldsArray.forEach((field) => fieldTypes.push(field.type));
       }
     });
 
@@ -185,7 +200,7 @@ class Protobuf {
   static mergeDecodes(input: number[] | Uint8Array): Record<string, unknown> {
     const pb = new Protobuf(input);
     let rawDecode = pb._parse();
-    let message: any;
+    let message: protobuf.Type | undefined;
 
     if (Protobuf.showTypes) {
       rawDecode = Protobuf.showRawTypes(rawDecode, pb.fieldTypes);
@@ -195,13 +210,23 @@ class Protobuf {
     }
 
     try {
-      message = Protobuf.parsedProto.root.nested[Protobuf.mainMessageName!];
-      const packageDecode = message.toObject(message.decode(input), {
-        bytes: String,
-        longs: Number,
-        enums: String,
-        defaults: true,
-      });
+      const candidate =
+        Protobuf.parsedProto.root.nested?.[Protobuf.mainMessageName!];
+      if (!(candidate instanceof protobuf.Type)) {
+        throw new Error(`Message not found: ${Protobuf.mainMessageName}`);
+      }
+      message = candidate;
+      const packageDecode = message.toObject(
+        message.decode(
+          input instanceof Uint8Array ? input : Uint8Array.from(input),
+        ),
+        {
+          bytes: String,
+          longs: Number,
+          enums: String,
+          defaults: true,
+        },
+      );
       const output: Record<string, unknown> = {};
 
       if (Protobuf.showUnknownFields) {
@@ -226,15 +251,14 @@ class Protobuf {
    * @param {object} schemaRoot
    * @returns {object}
    */
-  static appendTypesToFieldNames(schemaRoot: any): any {
+  static appendTypesToFieldNames(
+    schemaRoot: protobuf.NamespaceBase,
+  ): protobuf.NamespaceBase {
     for (const block of schemaRoot.nestedArray) {
       if (block instanceof protobuf.Type) {
-        for (const [fieldName, fieldData] of Object.entries(block.fields) as [
-          string,
-          any,
-        ][]) {
-          schemaRoot.nested[block.name].remove(block.fields[fieldName]);
-          schemaRoot.nested[block.name].add(
+        for (const [fieldName, fieldData] of Object.entries(block.fields)) {
+          block.remove(block.fields[fieldName]);
+          block.add(
             new protobuf.Field(
               `${fieldName} (${fieldData.type})`,
               fieldData.id,
@@ -252,12 +276,12 @@ class Protobuf {
    * Add field type to field name for fields in the raw decoded output
    *
    * @param {Record<string, unknown>} rawDecode
-   * @param {Record<string, any>} fieldTypes
+   * @param {FieldTypeMap} fieldTypes
    * @returns {Record<string, unknown>}
    */
   static showRawTypes(
     rawDecode: Record<string, unknown>,
-    fieldTypes: Record<string, any>,
+    fieldTypes: FieldTypeMap,
   ): Record<string, unknown> {
     for (const [fieldNum, value] of Object.entries(rawDecode)) {
       const fieldType = fieldTypes[fieldNum];
@@ -265,19 +289,22 @@ class Protobuf {
       let outputFieldType: unknown;
 
       // Submessages
-      if (isNaN(fieldType as number)) {
+      if (typeof fieldType === "object" && fieldType !== null) {
         outputFieldType = 2;
 
         // Repeated submessages
         if (Array.isArray(value)) {
           const fieldInstances: unknown[] = [];
-          for (const instance of Object.keys(value)) {
-            if (typeof (value as any)[instance] !== "string") {
+          for (const instance of value) {
+            if (typeof instance !== "string") {
               fieldInstances.push(
-                Protobuf.showRawTypes((value as any)[instance], fieldType),
+                Protobuf.showRawTypes(
+                  instance as Record<string, unknown>,
+                  fieldType,
+                ),
               );
             } else {
-              fieldInstances.push((value as any)[instance]);
+              fieldInstances.push(instance);
             }
           }
           outputFieldValue = fieldInstances;
@@ -314,7 +341,7 @@ class Protobuf {
    */
   static compareFields(
     rawDecodedMessage: Record<string, unknown>,
-    schemaMessage: any,
+    schemaMessage: protobuf.Type,
   ): Record<string, unknown> {
     // Define message data using raw decode output and schema
     const schemaFieldProperties: Record<string, string> = {};
@@ -353,13 +380,19 @@ class Protobuf {
         if (schemaField.resolvedType instanceof protobuf.Type) {
           const subMessageType = schemaMessage.fields[schemaFieldName].type;
           const schemaSubMessage =
-            Protobuf.parsedProto.root.nested[subMessageType];
+            Protobuf.parsedProto.root.nested?.[subMessageType];
+          if (!(schemaSubMessage instanceof protobuf.Type)) continue;
           const rawSubMessages = rawDecodedMessage[fieldName];
           let rawDecodedSubMessage: Record<string, unknown> = {};
 
           // Squash multiple submessage instances into one submessage
           if (Array.isArray(rawSubMessages)) {
-            (rawSubMessages as any[]).forEach((subMessageInstance) => {
+            rawSubMessages.forEach((subMessageInstance) => {
+              if (
+                typeof subMessageInstance !== "object" ||
+                subMessageInstance === null
+              )
+                return;
               const instanceFields = Object.entries(subMessageInstance);
               instanceFields.forEach((subField) => {
                 rawDecodedSubMessage[subField[0]] = subField[1];
@@ -592,8 +625,9 @@ class Protobuf {
       field = pbObject._parse();
 
       // Set field types object
+      const existingTypes = this.fieldTypes[fieldNum];
       this.fieldTypes[fieldNum] = {
-        ...this.fieldTypes[fieldNum],
+        ...(typeof existingTypes === "object" ? existingTypes : {}),
         ...pbObject.fieldTypes,
       };
     } catch {

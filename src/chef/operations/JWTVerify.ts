@@ -7,7 +7,7 @@
  * @see {@link https://github.com/gchq/CyberChef|GCHQ CyberChef} - Original source for ported operations
  */
 
-import { TypedOperation,  AnyInput  } from "../Operation";
+import { TypedOperation, AnyInput } from "../Operation";
 import jwt from "jsonwebtoken";
 import OperationError from "../errors/OperationError";
 import { JWT_ALGORITHMS } from "../lib/JWT";
@@ -49,7 +49,7 @@ export class JWTVerify extends TypedOperation<string, AnyInput, unknown[]> {
     algos[algos.indexOf("None")] = "none";
 
     try {
-      const verified = jwt.verify(input, key, { algorithms: algos }) as any;
+      const verified = jwt.verify(input, key, { algorithms: algos });
 
       if (
         verified &&

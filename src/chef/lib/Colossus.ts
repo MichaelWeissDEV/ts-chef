@@ -9,6 +9,35 @@
 
 import { INIT_PATTERNS, ITA2_TABLE, ROTOR_SIZES } from "./Lorenz";
 
+interface QBusConditionalRow {
+  Qswitches: string[];
+  Negate: boolean;
+  Counter: string;
+}
+
+interface QBusAdditionRow {
+  Qswitches: string[];
+  Equals: string;
+  C1: boolean;
+}
+
+export interface QBusSwitches {
+  condition: QBusConditionalRow[];
+  condNegateAll: boolean;
+  addition: QBusAdditionRow[];
+  addNegateAll: boolean;
+  totalMotor: string;
+}
+
+export interface ColossusResult {
+  printout: string;
+  counters?: number[];
+  runcount?: number;
+}
+
+type CounterState = boolean | -1;
+type RotorRings = Record<"X" | "S" | "M", Record<number, number[]>>;
+
 /**
  * Simulates the Colossus codebreaking computer used at Bletchley Park to attack Lorenz-ciphered traffic.
  *
@@ -21,16 +50,16 @@ export class ColossusComputer {
   ciphertext: string;
   pattern: string;
   qbusin: { Z: string; Chi: string; Psi: string };
-  qbusswitches: any;
+  qbusswitches: QBusSwitches;
   control: { fast: string; slow: string };
-  starts: any;
+  starts: Record<string, number>;
   settotal: number;
   limitations: { X2: boolean; S1: boolean; P5: boolean };
 
   allCounters: number[] = [0, 0, 0, 0, 0];
-  Zbits: any[] = [0, 0, 0, 0, 0];
-  ZbitsOneBack: any[] = [0, 0, 0, 0, 0];
-  Qbits: any[] = [0, 0, 0, 0, 0];
+  Zbits: number[] = [0, 0, 0, 0, 0];
+  ZbitsOneBack: number[] = [0, 0, 0, 0, 0];
+  Qbits: number[] = [0, 0, 0, 0, 0];
   Xbits: number[] = [0, 0, 0, 0, 0];
   Xptr: number[] = [0, 0, 0, 0, 0];
   XbitsOneBack: number[] = [0, 0, 0, 0, 0];
@@ -41,15 +70,15 @@ export class ColossusComputer {
   rotorPtrs: Record<string, number> = {};
   totalmotor: number = 0;
   P5Zbit: number[] = [0, 0];
-  rings: any = {};
+  rings = {} as RotorRings;
 
   constructor(
     ciphertext: string,
     pattern: string,
     qbusin: { Z: string; Chi: string; Psi: string },
-    qbusswitches: any,
+    qbusswitches: QBusSwitches,
     control: { fast: string; slow: string },
-    starts: any,
+    starts: Record<string, number>,
     settotal: number,
     limit: { X2: boolean; S1: boolean; P5: boolean },
   ) {
@@ -72,8 +101,8 @@ export class ColossusComputer {
     this.initThyratrons(pattern);
   }
 
-  run(): any {
-    const result: any = {
+  run(): ColossusResult {
+    const result: ColossusResult = {
       printout: "",
     };
 
@@ -264,8 +293,8 @@ export class ColossusComputer {
     this.SbitsOneBack = [...this.Sbits];
   }
 
-  runQbusProcessingConditional(): any[] {
-    const cnt: any[] = [-1, -1, -1, -1, -1];
+  runQbusProcessingConditional(): CounterState[] {
+    const cnt: CounterState[] = [-1, -1, -1, -1, -1];
     const numrows = this.qbusswitches.condition.length;
 
     for (let r = 0; r < numrows; r++) {
@@ -294,7 +323,7 @@ export class ColossusComputer {
     return cnt;
   }
 
-  runQbusProcessingAddition(cnt: any[]): void {
+  runQbusProcessingAddition(cnt: CounterState[]): void {
     const row = this.qbusswitches.addition[0];
     const Qswitch = [...row.Qswitches];
 

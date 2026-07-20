@@ -16,7 +16,11 @@ import { promisify } from "es6-promisify";
 /**
  * PGP Encrypt operation
  */
-export class PGPEncrypt extends TypedOperation<string, Promise<string>, unknown[]> {
+export class PGPEncrypt extends TypedOperation<
+  string,
+  Promise<string>,
+  unknown[]
+> {
   /**
    * PGPEncrypt constructor
    */
@@ -68,14 +72,14 @@ export class PGPEncrypt extends TypedOperation<string, Promise<string>, unknown[
         msg: plaintextMessage,
         encrypt_for: key,
         asp: ASP,
-      }) as Promise<any>);
+      }) as Promise<unknown>);
     } catch (err) {
       throw new OperationError(
         `Couldn't encrypt message with provided public key: ${err}`,
       );
     }
 
-    return encryptedMessage.toString();
+    return String(encryptedMessage);
   }
 }
 

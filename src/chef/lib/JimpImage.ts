@@ -9,8 +9,16 @@
 import { Jimp } from "jimp";
 import { isImage } from "./FileType";
 
+export type SupportedJimpMime =
+  | "image/jpeg"
+  | "image/gif"
+  | "image/png"
+  | "image/tiff"
+  | "image/bmp"
+  | "image/x-ms-bmp";
+
 /** Decodes a supported image using the MIME type already identified by ts-chef. */
-export async function readJimpImage(input: ArrayBuffer): Promise<any> {
+export async function readJimpImage(input: ArrayBuffer) {
   const mime = isImage(input);
   if (!mime) throw new Error("Unsupported image format");
   const format = new Jimp({ width: 1, height: 1 }).formats.find(

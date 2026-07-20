@@ -11,10 +11,26 @@ import r from "jsrsasign";
 import { TypedOperation } from "../Operation";
 import OperationError from "../errors/OperationError";
 
+interface PrivateKeyComponents {
+  type?: string;
+  curve?: string;
+  generatePublicKeyHex?: () => string;
+  p?: unknown;
+  q?: unknown;
+  g?: unknown;
+  y?: unknown;
+  n?: unknown;
+  e?: unknown;
+}
+
 /**
  * Public Key from Private Key operation
  */
-export class PubKeyFromPrivKey extends TypedOperation<string, string, unknown[]> {
+export class PubKeyFromPrivKey extends TypedOperation<
+  string,
+  string,
+  unknown[]
+> {
   /**
    * PubKeyFromPrivKey constructor
    */
@@ -53,27 +69,35 @@ export class PubKeyFromPrivKey extends TypedOperation<string, string, unknown[]>
         match.index,
         indexFooter + footer.length,
       );
-      let privKey: any;
+      let privKey: PrivateKeyComponents;
       try {
-        privKey = r.KEYUTIL.getKey(privKeyPem);
+        privKey = r.KEYUTIL.getKey(
+          privKeyPem,
+        ) as unknown as PrivateKeyComponents;
       } catch (err) {
         throw new OperationError(`Unsupported key type: ${err}`);
       }
-      let pubKey: any;
+      let pubKey: unknown;
       if (privKey.type && privKey.type === "EC") {
-        pubKey = new r.KJUR.crypto.ECDSA({ curve: privKey.curve });
-        pubKey.setPublicKeyHex(privKey.generatePublicKeyHex());
+        if (!privKey.curve || !privKey.generatePublicKeyHex) {
+          throw new OperationError("Incomplete EC private key");
+        }
+        const ecPublicKey = new r.KJUR.crypto.ECDSA({ curve: privKey.curve });
+        ecPublicKey.setPublicKeyHex(privKey.generatePublicKeyHex());
+        pubKey = ecPublicKey;
       } else if (privKey.type && privKey.type === "DSA") {
         if (!privKey.y) {
           throw new OperationError(
             `DSA Private Key in PKCS#8 is not supported`,
           );
         }
-        pubKey = new r.KJUR.crypto.DSA();
-        pubKey.setPublic(privKey.p, privKey.q, privKey.g, privKey.y);
+        const dsaPublicKey = new r.KJUR.crypto.DSA();
+        dsaPublicKey.setPublic(privKey.p, privKey.q, privKey.g, privKey.y);
+        pubKey = dsaPublicKey;
       } else if (privKey.n && privKey.e) {
-        pubKey = new r.RSAKey();
-        pubKey.setPublic(privKey.n, privKey.e);
+        const rsaPublicKey = new r.RSAKey();
+        rsaPublicKey.setPublic(privKey.n, privKey.e);
+        pubKey = rsaPublicKey;
       } else {
         throw new OperationError(`Unsupported key type`);
       }

@@ -85,16 +85,16 @@ export class RSAEncrypt extends TypedOperation<string, string, unknown[]> {
         },
       );
       return eMsg;
-    } catch (err: any) {
-      if (
-        err &&
-        err.message === "RSAES-OAEP input message length is too long."
-      ) {
+    } catch (err) {
+      const rsaError = err as Error & { length?: number; maxLength?: number };
+      if (rsaError.message === "RSAES-OAEP input message length is too long.") {
         throw new OperationError(
-          `RSAES-OAEP input message length (${err.length}) is longer than the maximum allowed length (${err.maxLength}).`,
+          `RSAES-OAEP input message length (${rsaError.length}) is longer than the maximum allowed length (${rsaError.maxLength}).`,
         );
       }
-      throw new OperationError(err);
+      throw new OperationError(
+        err instanceof Error ? err.message : String(err),
+      );
     }
   }
 }

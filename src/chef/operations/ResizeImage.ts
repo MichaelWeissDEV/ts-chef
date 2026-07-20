@@ -16,7 +16,11 @@ import { Jimp, JimpMime, ResizeStrategy } from "jimp";
 /**
  * Resize Image operation
  */
-export class ResizeImage extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer>, unknown[]> {
+export class ResizeImage extends TypedOperation<
+  ArrayBuffer,
+  Promise<ArrayBuffer>,
+  unknown[]
+> {
   /**
    * ResizeImage constructor
    */
@@ -92,6 +96,7 @@ export class ResizeImage extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer
       Hermite: ResizeStrategy.HERMITE,
       Bezier: ResizeStrategy.BEZIER,
     };
+    const resizeMode = resizeMap[resizeAlg as keyof typeof resizeMap];
 
     if (!isImage(input)) {
       throw new OperationError("Invalid file type.");
@@ -113,13 +118,13 @@ export class ResizeImage extends TypedOperation<ArrayBuffer, Promise<ArrayBuffer
         image.scaleToFit({
           w: width,
           h: height,
-          mode: (resizeMap as any)[resizeAlg],
+          mode: resizeMode,
         });
       } else {
         image.resize({
           w: width,
           h: height,
-          mode: (resizeMap as any)[resizeAlg],
+          mode: resizeMode,
         });
       }
 

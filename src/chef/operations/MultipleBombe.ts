@@ -19,7 +19,11 @@ import { ROTORS, ROTORS_FOURTH, REFLECTORS, Reflector } from "../lib/Enigma";
  * @param {number} n - End index
  * @returns {string}
  */
-function rotorsFormat(rotors: any[], s: number, n: number): string {
+function rotorsFormat(
+  rotors: Array<{ value: string }>,
+  s: number,
+  n: number,
+): string {
   const res: string[] = [];
   for (const i of rotors.slice(s, n)) {
     res.push(i.value);
@@ -202,7 +206,14 @@ export class MultipleBombe extends TypedOperation<string, AnyInput, unknown[]> {
     const ciphertext = input.slice(offset);
 
     let bombe: BombeMachine | undefined = undefined;
-    const output: any = { bombeRuns: [] };
+    const output: {
+      nLoops?: number;
+      bombeRuns: Array<{
+        rotors: string[];
+        reflector: string;
+        result: [string, string, string][];
+      }>;
+    } = { bombeRuns: [] };
     // I could use a proper combinatorics algorithm here... but it would be more code to
     // write one, and we don't seem to have one in our existing libraries, so massively nested
     // for loop it is
