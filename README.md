@@ -175,24 +175,48 @@ ts-chef deliberately occupies **no keys by default**. Add any number of named en
 {
   "key": "ctrl+alt+b",
   "command": "tschef.shortcut.encode-base64",
-  "when": "editorTextFocus"
+  "when": "editorTextFocus",
 }
 ```
 
+### Adding Shortcuts (Quick guide)
+
+Quick steps to add and bind a ts-chef shortcut:
+
+- Open Settings JSON (`Preferences: Open Settings (JSON)`) and add entries under `tschef.shortcuts`. Example:
+
+```jsonc
+"tschef.shortcuts": {
+  "sharpen": "Sharpen Image(Radius=2, Amount=1, Threshold=10)",
+  "sharpen-default": "Sharpen Image"
+}
+```
+
+- Open Keyboard Shortcuts JSON (`Preferences: Open Keyboard Shortcuts (JSON)`) and bind the generated command `tschef.shortcut.<id>`:
+
+```jsonc
+{
+  "key": "ctrl+alt+s",
+  "command": "tschef.shortcut.sharpen",
+  "when": "editorTextFocus",
+}
+```
+
+Note: Allowed expressions include single operations (`Sharpen Image(...)`), full pipeline strings (`From Base64 | JSON Beautify`), saved pipelines (`pipeline:MyPipeline`), and history selectors (`history:last`, `history:3`). Use `tschef.configureShortcuts` from the Command Palette to quickly open the relevant JSON files.
 Single operations, complete pipe expressions, and saved pipelines can all be registered. `Repeat Last Operation`, backward/forward cycling, and a searchable history picker are also normal commands, so they can be bound directly. History is bounded and session-only: arguments such as cipher keys are not silently persisted. Replaying an entry does not add a duplicate, so cycling remains stable. See the [shortcut and history guide](docs/shortcuts.md) for the full syntax.
 
 ## Named operations
 
 The registry currently contains 479 operations. Search by the displayed operation name in the Operations view or Pipeline Editor. Search and activation use lightweight metadata; implementation chunks are loaded and cached only when an operation is run or its arguments are opened.
 
-| Area | Example operation names |
-| --- | --- |
-| **Encoding and decoding** | `From Base64`, `To Base64`, `From Hex`, `To hex`, `URL decode`, `URL encode` |
-| **Structured data** | `JSON Beautify`, `JSON Minify`, `CSV to JSON`, `JSON to YAML`, `YAML to JSON`, `XML Beautify` |
-| **Hashes and crypto** | `SHA2`, `BLAKE3`, `AES Encrypt`, `JWT Decode` |
-| **Compression and binary data** | `Gunzip`, `From Hexdump`, `To hexdump` |
-| **Inspection and extraction** | `Entropy`, `Strings`, `Extract URLs`, `Parse URI` |
-| **Security workflows** | `YARA Rules` plus editor-level pattern scanning, entropy heatmaps, Deep Analysis, and static malware triage |
+| Area                            | Example operation names                                                                                     |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Encoding and decoding**       | `From Base64`, `To Base64`, `From Hex`, `To hex`, `URL decode`, `URL encode`                                |
+| **Structured data**             | `JSON Beautify`, `JSON Minify`, `CSV to JSON`, `JSON to YAML`, `YAML to JSON`, `XML Beautify`               |
+| **Hashes and crypto**           | `SHA2`, `BLAKE3`, `AES Encrypt`, `JWT Decode`                                                               |
+| **Compression and binary data** | `Gunzip`, `From Hexdump`, `To hexdump`                                                                      |
+| **Inspection and extraction**   | `Entropy`, `Strings`, `Extract URLs`, `Parse URI`                                                           |
+| **Security workflows**          | `YARA Rules` plus editor-level pattern scanning, entropy heatmaps, Deep Analysis, and static malware triage |
 
 The complete generated reference is available in [docs/operations.md](docs/operations.md).
 
@@ -265,48 +289,48 @@ Open the ts-chef chef icon in the Activity Bar to access **Operations**, **Recip
 
 The following settings are available under the `tschef.` namespace:
 
-| Setting | Default | Description |
-| --- | ---: | --- |
-| `tschef.highlightingEnabled` | `true` | Highlight detected patterns in the editor. |
-| `tschef.confidenceThreshold` | `0.65` | Minimum confidence for hover conversion options. |
-| `tschef.hover.enabled` | `true` | Enable instant encoded-string and integer-literal hovers. |
-| `tschef.hover.onDemand` | `true` | Analyze the line under the cursor without requiring a document scan. |
-| `tschef.hover.integerCalculator` | `true` | Show radix and two's-complement information for integer literals. |
-| `tschef.hover.decodeChains` | `true` | Offer bounded multi-step decode previews. |
-| `tschef.hover.maxInputCharacters` | `65536` | Maximum input characters analyzed for one hover preview. |
-| `tschef.hover.maxPreviewCharacters` | `320` | Maximum decoded characters shown in a hover preview. |
-| `tschef.autoScanOnSave` | `false` | Scan documents automatically when they are saved. |
-| `tschef.patterns.followActiveEditor` | `true` | Let Found Patterns follow the active editor; disable it to pin results. |
-| `tschef.patterns.autoScanOnFocus` | `false` | Scan a document the first time it becomes active while following. |
-| `tschef.entropyMap.enabled` | `false` | Color lines by Shannon entropy. |
-| `tschef.readableLineWidth` | `100` | Target width used by Make Readable. |
-| `tschef.pipelineResultAction` | `popup` | Present results as `popup`, `replace`, `copy`, `inline`, or `panel`. |
-| `tschef.defaultPipelineScope` | `global` | Default storage scope for a saved pipeline. |
-| `tschef.defaultVariableScope` | `global` | Default storage scope for a saved variable. |
-| `tschef.shortcuts` | `{}` | Named operation, pipeline, saved-pipeline, and history command registry. |
-| `tschef.shortcutHistorySize` | `100` | Maximum session-only operation history entries. |
+| Setting                              |  Default | Description                                                              |
+| ------------------------------------ | -------: | ------------------------------------------------------------------------ |
+| `tschef.highlightingEnabled`         |   `true` | Highlight detected patterns in the editor.                               |
+| `tschef.confidenceThreshold`         |   `0.65` | Minimum confidence for hover conversion options.                         |
+| `tschef.hover.enabled`               |   `true` | Enable instant encoded-string and integer-literal hovers.                |
+| `tschef.hover.onDemand`              |   `true` | Analyze the line under the cursor without requiring a document scan.     |
+| `tschef.hover.integerCalculator`     |   `true` | Show radix and two's-complement information for integer literals.        |
+| `tschef.hover.decodeChains`          |   `true` | Offer bounded multi-step decode previews.                                |
+| `tschef.hover.maxInputCharacters`    |  `65536` | Maximum input characters analyzed for one hover preview.                 |
+| `tschef.hover.maxPreviewCharacters`  |    `320` | Maximum decoded characters shown in a hover preview.                     |
+| `tschef.autoScanOnSave`              |  `false` | Scan documents automatically when they are saved.                        |
+| `tschef.patterns.followActiveEditor` |   `true` | Let Found Patterns follow the active editor; disable it to pin results.  |
+| `tschef.patterns.autoScanOnFocus`    |  `false` | Scan a document the first time it becomes active while following.        |
+| `tschef.entropyMap.enabled`          |  `false` | Color lines by Shannon entropy.                                          |
+| `tschef.readableLineWidth`           |    `100` | Target width used by Make Readable.                                      |
+| `tschef.pipelineResultAction`        |  `popup` | Present results as `popup`, `replace`, `copy`, `inline`, or `panel`.     |
+| `tschef.defaultPipelineScope`        | `global` | Default storage scope for a saved pipeline.                              |
+| `tschef.defaultVariableScope`        | `global` | Default storage scope for a saved variable.                              |
+| `tschef.shortcuts`                   |     `{}` | Named operation, pipeline, saved-pipeline, and history command registry. |
+| `tschef.shortcutHistorySize`         |    `100` | Maximum session-only operation history entries.                          |
 
 ## Commands worth knowing
 
-| Command | Suggested access |
-| --- | --- |
-| `tschef: Quick Convert Selection` | Command Palette / assign your own key |
-| `tschef: Run Saved Pipeline` | Command Palette / assign your own key |
+| Command                                         | Suggested access                      |
+| ----------------------------------------------- | ------------------------------------- |
+| `tschef: Quick Convert Selection`               | Command Palette / assign your own key |
+| `tschef: Run Saved Pipeline`                    | Command Palette / assign your own key |
 | `tschef: Smart Format (Auto-Detect & Beautify)` | Command Palette / assign your own key |
-| `tschef: Run Registered Shortcut` | Registry picker |
-| `tschef: Repeat Last Operation` | Command Palette / assign your own key |
-| `tschef: Apply Previous Operation in History` | Command Palette / assign your own key |
-| `tschef: Apply Next Operation in History` | Command Palette / assign your own key |
-| `tschef: Repeat Operation from History...` | Searchable session history |
-| `tschef: Open Pipeline Editor` | Command Palette |
-| `tschef: Open Pipeline Graph` | Command Palette |
-| `tschef: Deep Analysis of Selection` | Editor context menu |
-| `tschef: Static Malware Triage` | Command Palette |
-| `tschef: Browse Standard Recipe Library` | Command Palette |
-| `tschef: Scan Document for Patterns` | Command Palette |
-| `tschef: Scan Workspace for Patterns` | Command Palette |
-| `tschef: YARA Scan Selection/Document` | Command Palette |
-| `tschef: Toggle Entropy Heatmap` | Command Palette |
+| `tschef: Run Registered Shortcut`               | Registry picker                       |
+| `tschef: Repeat Last Operation`                 | Command Palette / assign your own key |
+| `tschef: Apply Previous Operation in History`   | Command Palette / assign your own key |
+| `tschef: Apply Next Operation in History`       | Command Palette / assign your own key |
+| `tschef: Repeat Operation from History...`      | Searchable session history            |
+| `tschef: Open Pipeline Editor`                  | Command Palette                       |
+| `tschef: Open Pipeline Graph`                   | Command Palette                       |
+| `tschef: Deep Analysis of Selection`            | Editor context menu                   |
+| `tschef: Static Malware Triage`                 | Command Palette                       |
+| `tschef: Browse Standard Recipe Library`        | Command Palette                       |
+| `tschef: Scan Document for Patterns`            | Command Palette                       |
+| `tschef: Scan Workspace for Patterns`           | Command Palette                       |
+| `tschef: YARA Scan Selection/Document`          | Command Palette                       |
+| `tschef: Toggle Entropy Heatmap`                | Command Palette                       |
 
 Every command is available from the Command Palette under the `tschef:` prefix.
 
@@ -340,15 +364,15 @@ npm run package   # build a .vsix package
 
 Project layout:
 
-| Path | Purpose |
-| --- | --- |
-| `src/extension.ts` | VS Code extension entry point: commands, providers, and wiring. |
-| `src/chef/` | TypeScript operation engine. |
-| `src/chef/operations/` | Individual transformation operations. |
-| `src/providers/` | Sidebar, hover, scan, decoration, magic, entropy, and formatting providers. |
-| `src/commands/` | Pipeline runner and result presentation. |
-| `src/panels/` | List and graph Pipeline Editor webview. |
-| `test/` | Jest test suite. |
+| Path                   | Purpose                                                                     |
+| ---------------------- | --------------------------------------------------------------------------- |
+| `src/extension.ts`     | VS Code extension entry point: commands, providers, and wiring.             |
+| `src/chef/`            | TypeScript operation engine.                                                |
+| `src/chef/operations/` | Individual transformation operations.                                       |
+| `src/providers/`       | Sidebar, hover, scan, decoration, magic, entropy, and formatting providers. |
+| `src/commands/`        | Pipeline runner and result presentation.                                    |
+| `src/panels/`          | List and graph Pipeline Editor webview.                                     |
+| `test/`                | Jest test suite.                                                            |
 
 ## License
 
