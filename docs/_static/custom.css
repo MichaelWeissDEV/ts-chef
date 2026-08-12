@@ -1,0 +1,37 @@
+:root {
+  --tschef-blue: #2563eb;
+  --tschef-dark: #111827;
+}
+
+.wy-side-nav-search,
+.wy-nav-top {
+  background: var(--tschef-dark);
+}
+
+.wy-side-nav-search > a img.logo {
+  border-radius: 0.5rem;
+  max-width: 92px;
+}
+
+.rst-content a:not(.btn) {
+  color: #1d4ed8;
+}
+
+.rst-content code.literal {
+  color: #7c2d12;
+}
+
+.rst-content table.docutils td,
+.rst-content table.docutils th {
+  white-space: normal;
+}
+
+.hero {
+  text-align: center;
+  margin: 0.5rem 0 2rem;
+}
+
+.hero img {
+  border-radius: 0.75rem;
+  width: 112px;
+}

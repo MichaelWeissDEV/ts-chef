@@ -20,4 +20,5 @@ node_modules/
 
 # Documentation
 /docs/api/
+/docs/_build/
 notes/

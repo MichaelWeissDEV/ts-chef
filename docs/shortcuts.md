@@ -6,7 +6,7 @@ ts-chef does not claim any keyboard shortcut by default. Instead, it exposes nor
 
 Add `tschef.shortcuts` to user or workspace settings:
 
-```jsonc
+```json
 "tschef.shortcuts": {
   "base64": "To Base64",
   "decode-json": "From Base64 | JSON Beautify",
@@ -38,7 +38,7 @@ For operations requiring keys or detailed arguments, configure a saved pipeline 
 
 Open **Preferences: Open Keyboard Shortcuts (JSON)** and bind the generated command ID:
 
-```jsonc
+```json
 [
   {
     "key": "ctrl+alt+b",

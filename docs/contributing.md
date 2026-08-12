@@ -11,7 +11,7 @@ Thank you for your interest in contributing! This project follows a structured d
 
 1.  **Clone and Install:**
     ```bash
-    git clone https://github.com/michaelweiss/ts-chef.git
+    git clone https://github.com/MichaelWeissDEV/ts-chef.git
     cd ts-chef
     npm install
     ```
@@ -31,6 +31,15 @@ Thank you for your interest in contributing! This project follows a structured d
     npm run lint:fix
     npm run format
     ```
+-   **Regenerate the operation catalog:**
+    ```bash
+    npm run docs:catalog
+    ```
+-   **Build the Read the Docs site:**
+    ```bash
+    python -m pip install -r docs/requirements.txt
+    python -m sphinx -W --keep-going -b html docs docs/_build/html
+    ```
 
 ## Project Structure
 
@@ -38,9 +47,10 @@ Thank you for your interest in contributing! This project follows a structured d
 -   `src/chef/operations/`: Individual operation implementations.
 -   `src/extension.ts`: VS Code extension entry point and UI logic.
 -   `test/`: Comprehensive unit tests for the core library.
+-   `docs/`: Sphinx/MyST documentation published on Read the Docs.
 
 ## Submission Process
 
 1.  **Branch:** Create a feature branch (`feat/your-feature` or `fix/your-fix`).
-2.  **Verify:** Ensure `npm run build` and `npm test` pass.
+2.  **Verify:** Ensure `npm run build`, `npm test`, and `npm run lint` pass. For documentation changes, regenerate the catalog and build Sphinx with warnings treated as errors.
 3.  **PR:** Open a Pull Request with a clear description of your changes.

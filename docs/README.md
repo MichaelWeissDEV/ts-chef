@@ -1,18 +1,14 @@
-# ts-chef Documentation
+# ts-chef documentation sources
 
-Welcome to the internal documentation for `ts-chef`.
+The hosted documentation starts at [`index.md`](index.md) and is built with Sphinx plus MyST Markdown.
 
-## Table of Contents
+- Hosted site: <https://ts-chef.readthedocs.io/en/latest/>
+- Local build and authoring instructions: [`documentation.md`](documentation.md)
+- Read the Docs configuration: [`../.readthedocs.yaml`](../.readthedocs.yaml)
+- Python dependencies: [`requirements.txt`](requirements.txt)
 
--   [Usage Guide](usage.md) - How to use the extension in VS Code.
--   [Keyboard Shortcuts and History](shortcuts.md) - Register operations/pipelines and bind history navigation without default keys.
--   [Performance Architecture](performance.md) - Lazy operation chunks, safeguards, measurements, and regression gates.
--   [Operations & Formatters](operations.md) - Detailed list of available data transformations.
--   [Contributing Guide](contributing.md) - How to set up the environment and contribute to the project.
--   [API Reference](https://github.com/michaelweiss/ts-chef/releases) - Technical API documentation (download the offline HTML ZIP from releases).
+Run `npm run docs:catalog` after changing the operation registry, then build the site with:
 
----
-
-## Technical Overview
-
-`ts-chef` is built as a pure TypeScript port of the CyberChef core, optimized for execution within the VS Code Extension Host. It avoids browser-specific APIs and heavy worker overhead where possible to ensure maximum performance and stability.
+```bash
+python -m sphinx -W --keep-going -b html docs docs/_build/html
+```

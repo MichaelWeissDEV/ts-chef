@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/MichaelWeissDEV/ts-chef/issues"
   },
-  "homepage": "https://github.com/MichaelWeissDEV/ts-chef#readme",
+  "homepage": "https://ts-chef.readthedocs.io/en/latest/",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -499,7 +499,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,js,json}\" \"test/**/*.{ts,js,json}\"",
-    "docs": "typedoc",
+    "docs": "npm run docs:catalog",
+    "docs:api": "typedoc",
+    "docs:catalog": "node scripts/generate-operation-docs.cjs",
     "package": "vsce package",
     "release": "npm run build && npm run test && vsce package",
     "release:ci": "npm run build && npm test && vsce package",

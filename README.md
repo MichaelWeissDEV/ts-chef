@@ -24,13 +24,18 @@
   <a href="https://github.com/MichaelWeissDEV/ts-chef/actions/workflows/ci.yml">
     <img src="https://github.com/MichaelWeissDEV/ts-chef/actions/workflows/ci.yml/badge.svg?branch=master" alt="Current ts-chef continuous integration status" />
   </a>
+  <a href="https://ts-chef.readthedocs.io/en/latest/">
+    <img src="https://readthedocs.org/projects/ts-chef/badge/?version=latest" alt="Read the Docs build status" />
+  </a>
   <a href="https://github.com/MichaelWeissDEV/ts-chef/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/license-Apache--2.0-16a34a?style=flat-square" alt="Apache 2.0 license" />
   </a>
 </p>
 
 <p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=MichaelWeiss.vscode-ts-chef"><strong>Install ts-chef from the VS Code Marketplace</strong></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=MichaelWeiss.vscode-ts-chef"><strong>Install from the VS Code Marketplace</strong></a>
+  ·
+  <a href="https://ts-chef.readthedocs.io/en/latest/"><strong>Read the complete documentation</strong></a>
 </p>
 
 ## What is ts-chef?
@@ -203,7 +208,7 @@ Quick steps to add and bind a ts-chef shortcut:
 ```
 
 Note: Allowed expressions include single operations (`Sharpen Image(...)`), full pipeline strings (`From Base64 | JSON Beautify`), saved pipelines (`pipeline:MyPipeline`), and history selectors (`history:last`, `history:3`). Use `tschef.configureShortcuts` from the Command Palette to quickly open the relevant JSON files.
-Single operations, complete pipe expressions, and saved pipelines can all be registered. `Repeat Last Operation`, backward/forward cycling, and a searchable history picker are also normal commands, so they can be bound directly. History is bounded and session-only: arguments such as cipher keys are not silently persisted. Replaying an entry does not add a duplicate, so cycling remains stable. See the [shortcut and history guide](docs/shortcuts.md) for the full syntax.
+Single operations, complete pipe expressions, and saved pipelines can all be registered. `Repeat Last Operation`, backward/forward cycling, and a searchable history picker are also normal commands, so they can be bound directly. History is bounded and session-only: arguments such as cipher keys are not silently persisted. Replaying an entry does not add a duplicate, so cycling remains stable. See the [shortcut and history guide](https://ts-chef.readthedocs.io/en/latest/shortcuts.html) for the full syntax.
 
 ## Named operations
 
@@ -218,7 +223,7 @@ The registry currently contains 479 operations. Search by the displayed operatio
 | **Inspection and extraction**   | `Entropy`, `Strings`, `Extract URLs`, `Parse URI`                                                           |
 | **Security workflows**          | `YARA Rules` plus editor-level pattern scanning, entropy heatmaps, Deep Analysis, and static malware triage |
 
-The complete generated reference is available in [docs/operations.md](docs/operations.md).
+The [complete generated operation catalog](https://ts-chef.readthedocs.io/en/latest/operation-catalog.html) is available on Read the Docs.
 
 ## Editor analysis tools
 
@@ -336,12 +341,13 @@ Every command is available from the Command Palette under the `tschef:` prefix.
 
 ## Documentation
 
+- [Complete documentation on Read the Docs](https://ts-chef.readthedocs.io/en/latest/)
+- [Getting started](https://ts-chef.readthedocs.io/en/latest/getting-started.html)
+- [Pipeline and graph guide](https://ts-chef.readthedocs.io/en/latest/pipelines.html)
+- [Complete operation catalog](https://ts-chef.readthedocs.io/en/latest/operation-catalog.html)
+- [Configuration reference](https://ts-chef.readthedocs.io/en/latest/configuration.html)
+- [Troubleshooting](https://ts-chef.readthedocs.io/en/latest/troubleshooting.html)
 - [GitHub repository](https://github.com/MichaelWeissDEV/ts-chef)
-- [Usage guide](docs/usage.md)
-- [Keyboard shortcuts and operation history](docs/shortcuts.md)
-- [Performance architecture](docs/performance.md)
-- [Operations reference](docs/operations.md)
-- [Contributing guide](docs/contributing.md)
 - [Changelog](CHANGELOG.md)
 
 ## Development
