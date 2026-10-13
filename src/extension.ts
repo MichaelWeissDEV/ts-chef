@@ -55,7 +55,7 @@ import {
 } from "./commands/textEditSnapshot";
 import { InlineResultController } from "./commands/inlineResult";
 import { WebviewResultController } from "./commands/webviewResult";
-import { registerQuickWorkbenchCommand } from "./commands/quickWorkbench";
+import { registerQuickWorkbenchCommand, getQuickWorkbenchPanel } from "./commands/quickWorkbench";
 import { isOperationSafeForLive } from "./panels/pipelineLivePolicy";
 import {
   OperationsViewProvider,
@@ -284,7 +284,7 @@ function buildOpPickItems(): (vscode.QuickPickItem & { opName?: string })[] {
  *
  * @param context - The extension context used to register disposables and access storage.
  */
-export function activate(context: vscode.ExtensionContext): void {
+export function activate(context: vscode.ExtensionContext): { getQuickWorkbenchPanel: typeof getQuickWorkbenchPanel } | undefined {
   initOutputChannel(context);
   log("Extension activated");
 
@@ -1085,21 +1085,9 @@ export function activate(context: vscode.ExtensionContext): void {
       const entry = registry.find((e) => e.opName === opName);
       if (!entry) throw new Error(`Operation not found: ${opName}`);
       
-      // Normalize input to string for the existing operations
-      let inputStr: string;
-      if (typeof input === "string") {
-        inputStr = input;
-      } else if (input instanceof Buffer) {
-        inputStr = input.toString("utf8");
-      } else if (input instanceof Uint8Array) {
-        inputStr = Buffer.from(input).toString("utf8");
-      } else if (input instanceof ArrayBuffer) {
-        inputStr = Buffer.from(input).toString("utf8");
-      } else {
-        inputStr = String(input);
-      }
-      
-      const result = await runOpAsync(opName, inputStr, args);
+      const result = await runOpAsync(opName, input, args);
+      if (typeof result === "string" || result instanceof Uint8Array || result instanceof ArrayBuffer) return { result };
+      if (Array.isArray(result) && result.every(value => Number.isInteger(value) && Number(value) >= 0 && Number(value) <= 255)) return { result: Uint8Array.from(result as number[]) };
       return { result: resultToString(result, entry.factory().outputType) };
     },
     isSafeForPreview: (opName: string) => {
@@ -2060,6 +2048,8 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   context.subscriptions.push(scanState);
+  if (context.extensionMode === vscode.ExtensionMode.Test) return { getQuickWorkbenchPanel };
+
 }
 
 /** Called by VS Code when the extension is deactivated; disposables are handled via subscriptions. */

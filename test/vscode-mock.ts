@@ -225,6 +225,7 @@ export const workspace = {
 export type FakeWebviewPanel = {
   webview: {
     html: string;
+    postMessage: jest.Mock;
     onDidReceiveMessage: (cb: (msg: unknown) => void) => void;
   };
   onDidDispose: (cb: () => void) => void;
@@ -252,6 +253,7 @@ export const window = {
     const panel: FakeWebviewPanel = {
       webview: {
         html: "",
+        postMessage: jest.fn(),
         onDidReceiveMessage: (cb) => {
           messageHandler = cb;
         },

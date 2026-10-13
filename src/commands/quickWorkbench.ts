@@ -86,7 +86,7 @@ export function registerQuickWorkbenchCommand(
   deps: QuickWorkbenchDependencies,
 ): void {
   const panelDeps = createQuickWorkbenchDeps(deps);
-  quickWorkbenchPanel = new QuickWorkbenchPanel(panelDeps);
+  quickWorkbenchPanel = new QuickWorkbenchPanel({ ...panelDeps, resourceRoot: context.asAbsolutePath("dist"), stateStore: context.globalState });
 
   context.subscriptions.push(
     vscode.commands.registerCommand("tschef.openQuickWorkbench", async () => {
@@ -114,3 +114,6 @@ export async function showQuickWorkbench(): Promise<void> {
     await quickWorkbenchPanel.show();
   }
 }
+
+/** Access the singleton for the extension's own integration suite. */
+export function getQuickWorkbenchPanel(): QuickWorkbenchPanel | undefined { return quickWorkbenchPanel; }

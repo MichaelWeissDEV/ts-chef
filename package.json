@@ -495,7 +495,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run build",
-    "compile": "npm run compile:extension && npm run compile:operations",
+    "compile": "npm run compile:webview && npm run compile:extension && npm run compile:operations",
     "compile:extension": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --external:libbzip2-wasm --external:@alexaltea/capstone-js --external:@blu3r4y/lzma --external:jq-web --external:node-md6 --platform=node --format=cjs --sourcemap --define:require.resolve=false",
     "compile:operations": "node scripts/build-operation-chunks.cjs",
     "verify:bundle": "node scripts/verify-bundle.cjs && node scripts/verify-operation-chunks.cjs",
@@ -515,7 +515,11 @@
     "release": "npm run build && npm run test && vsce package",
     "release:ci": "npm run build && npm test && vsce package",
     "lint:check": "eslint . --max-warnings 0",
-    "upload": "vsce publish"
+    "upload": "vsce publish",
+    "compile:webview": "esbuild src/panels/quickWorkbench/frontend.ts --bundle --platform=browser --format=iife --outfile=dist/quickWorkbench.js && node -e \"require('fs').copyFileSync('src/panels/quickWorkbench/styles.css', 'dist/quickWorkbench.css')\"",
+    "pretest": "npm run compile:webview",
+    "typecheck": "tsc --noEmit",
+    "test:integration": "npm run build && esbuild test/integration/run.ts --bundle --platform=node --format=cjs --external:vscode --outfile=dist/integration.cjs && node scripts/test-integration.cjs"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
