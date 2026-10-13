@@ -49,6 +49,10 @@
         "title": "tschef: Quick Convert Selection"
       },
       {
+        "command": "tschef.openQuickWorkbench",
+        "title": "tschef: Open Quick Workbench"
+      },
+      {
         "command": "tschef.scanDocument",
         "title": "tschef: Scan Document for Patterns"
       },
@@ -247,6 +251,11 @@
         {
           "command": "tschef.quickConvert",
           "when": "editorHasSelection",
+          "group": "tschef"
+        },
+        {
+          "command": "tschef.openQuickWorkbench",
+          "when": "editorTextFocus",
           "group": "tschef"
         },
         {

@@ -55,6 +55,7 @@ import {
 } from "./commands/textEditSnapshot";
 import { InlineResultController } from "./commands/inlineResult";
 import { WebviewResultController } from "./commands/webviewResult";
+import { registerQuickWorkbenchCommand } from "./commands/quickWorkbench";
 import {
   OperationsViewProvider,
   type OpInfo,
@@ -1075,6 +1076,36 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     }),
   );
+
+  // Register Quick Workbench command
+  registerQuickWorkbenchCommand(context, {
+    registry,
+    argDefsFor,
+    runOperation: async (opName: string, input: string, args: unknown[]) => {
+      const entry = registry.find((e) => e.opName === opName);
+      if (!entry) throw new Error(`Operation not found: ${opName}`);
+      const result = await runOpAsync(opName, input, args);
+      return { result: resultToString(result, entry.factory().outputType) };
+    },
+    isSafeForPreview: (opName: string) => {
+      // TODO: Implement preview safety check
+      // For now, assume most operations are safe for preview
+      const unsafeOps = new Set([
+        "HTTPRequest",
+        "DNSLookup",
+        "FetchURL",
+        "AnalyseFile",
+        "Entropy",
+        "Hash",
+        "HMAC",
+        "AESEncrypt",
+        "AESDecrypt",
+        "RSAEncrypt",
+        "RSADecrypt",
+      ]);
+      return !unsafeOps.has(opName);
+    },
+  });
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
