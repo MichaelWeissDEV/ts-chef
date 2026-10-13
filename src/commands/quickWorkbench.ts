@@ -8,7 +8,10 @@
 
 import * as vscode from "vscode";
 import { QuickWorkbenchPanel } from "../panels/quickWorkbench/QuickWorkbenchPanel";
-import { captureTextEditSnapshot, replaceTextEditSnapshot } from "./textEditSnapshot";
+import { replaceTextEditSnapshot } from "./textEditSnapshot";
+import type { TextEditSnapshot } from "./textEditSnapshot";
+import type { ArgConfig } from "../chef/Operation";
+import type { OpInfo } from "../web/common/types";
 
 /**
  * Quick Workbench panel instance.
@@ -18,10 +21,10 @@ let quickWorkbenchPanel: QuickWorkbenchPanel | undefined;
 /**
  * Dependencies for Quick Workbench.
  */
-interface QuickWorkbenchDependencies {
-  registry: { opName: string; displayName: string; module: string }[];
-  argDefsFor: (opName: string) => unknown[] | undefined;
-  runOperation: (opName: string, input: string, args: unknown[]) => Promise<{ result: string; error?: string }>;
+export interface QuickWorkbenchDependencies {
+  registry: OpInfo[];
+  argDefsFor: (opName: string) => ArgConfig[] | undefined;
+  runOperation: (opName: string, input: string | Uint8Array | Buffer | ArrayBuffer, args: unknown[]) => Promise<{ result: string | Uint8Array | Buffer | ArrayBuffer; error?: string }>;
   isSafeForPreview: (opName: string) => boolean;
 }
 
@@ -29,14 +32,14 @@ interface QuickWorkbenchDependencies {
  * Create Quick Workbench deps from extension context.
  */
 export function createQuickWorkbenchDeps(deps: QuickWorkbenchDependencies): {
-  listOps: () => { opName: string; displayName: string; module: string }[];
-  argDefsFor: (opName: string) => unknown[] | undefined;
-  runOperation: (opName: string, input: string, args: unknown[]) => Promise<{ result: string; error?: string }>;
+  listOps: () => OpInfo[];
+  argDefsFor: (opName: string) => ArgConfig[] | undefined;
+  runOperation: (opName: string, input: string | Uint8Array | Buffer | ArrayBuffer, args: unknown[]) => Promise<{ result: string | Uint8Array | Buffer | ArrayBuffer; error?: string }>;
   isSafeForPreview: (opName: string) => boolean;
   getSelection: () => { text: string; editor: vscode.TextEditor | undefined };
   getDocumentText: () => string | undefined;
   getClipboardText: () => Promise<string | undefined>;
-  replaceSelection: (text: string) => Promise<boolean>;
+  replaceSelection: (snapshot: TextEditSnapshot, text: string) => Promise<boolean>;
   createNewDocument: (content: string) => Promise<void>;
 } {
   return {
@@ -62,12 +65,8 @@ export function createQuickWorkbenchDeps(deps: QuickWorkbenchDependencies): {
         return undefined;
       }
     },
-    replaceSelection: async (text: string) => {
-      const editor = vscode.window.activeTextEditor;
-      if (!editor) return false;
-      const selection = editor.selection;
-      const target = captureTextEditSnapshot(editor, selection);
-      return replaceTextEditSnapshot(target, text);
+    replaceSelection: async (snapshot: TextEditSnapshot, text: string) => {
+      return replaceTextEditSnapshot(snapshot, text);
     },
     createNewDocument: async (content: string) => {
       const doc = await vscode.workspace.openTextDocument({

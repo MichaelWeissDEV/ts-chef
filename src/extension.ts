@@ -56,6 +56,7 @@ import {
 import { InlineResultController } from "./commands/inlineResult";
 import { WebviewResultController } from "./commands/webviewResult";
 import { registerQuickWorkbenchCommand } from "./commands/quickWorkbench";
+import { isOperationSafeForLive } from "./panels/pipelineLivePolicy";
 import {
   OperationsViewProvider,
   type OpInfo,
@@ -101,7 +102,6 @@ import {
 import {
   initializeKnownOperations,
 } from "./webview/messageValidation";
-import type { OpInfo } from "./providers/operationsViewProvider";
 
 function resultToString(result: unknown, outputType?: string): string {
   const normalisedType = outputType?.toLowerCase().replace(/[^a-z]/g, "");
@@ -1081,29 +1081,30 @@ export function activate(context: vscode.ExtensionContext): void {
   registerQuickWorkbenchCommand(context, {
     registry,
     argDefsFor,
-    runOperation: async (opName: string, input: string, args: unknown[]) => {
+    runOperation: async (opName: string, input: string | Uint8Array | Buffer | ArrayBuffer, args: unknown[]) => {
       const entry = registry.find((e) => e.opName === opName);
       if (!entry) throw new Error(`Operation not found: ${opName}`);
-      const result = await runOpAsync(opName, input, args);
+      
+      // Normalize input to string for the existing operations
+      let inputStr: string;
+      if (typeof input === "string") {
+        inputStr = input;
+      } else if (input instanceof Buffer) {
+        inputStr = input.toString("utf8");
+      } else if (input instanceof Uint8Array) {
+        inputStr = Buffer.from(input).toString("utf8");
+      } else if (input instanceof ArrayBuffer) {
+        inputStr = Buffer.from(input).toString("utf8");
+      } else {
+        inputStr = String(input);
+      }
+      
+      const result = await runOpAsync(opName, inputStr, args);
       return { result: resultToString(result, entry.factory().outputType) };
     },
     isSafeForPreview: (opName: string) => {
-      // TODO: Implement preview safety check
-      // For now, assume most operations are safe for preview
-      const unsafeOps = new Set([
-        "HTTPRequest",
-        "DNSLookup",
-        "FetchURL",
-        "AnalyseFile",
-        "Entropy",
-        "Hash",
-        "HMAC",
-        "AESEncrypt",
-        "AESDecrypt",
-        "RSAEncrypt",
-        "RSADecrypt",
-      ]);
-      return !unsafeOps.has(opName);
+      // Use the centralized live policy
+      return isOperationSafeForLive(opName);
     },
   });
 
