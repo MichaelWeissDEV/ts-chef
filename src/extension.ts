@@ -97,6 +97,10 @@ import {
   type HistoryAction,
   type ShortcutBinding,
 } from "./commands/shortcutRegistry";
+import {
+  initializeKnownOperations,
+} from "./webview/messageValidation";
+import type { OpInfo } from "./providers/operationsViewProvider";
 
 function resultToString(result: unknown, outputType?: string): string {
   const normalisedType = outputType?.toLowerCase().replace(/[^a-z]/g, "");
@@ -480,6 +484,15 @@ export function activate(context: vscode.ExtensionContext): void {
       vscode.commands.executeCommand("tschef.applyOperation", opName),
     addToRecipe: (opName) => recipeView.addOperation(opName),
   });
+
+  // Initialize known operations for message validation in webviews
+  initializeKnownOperations(
+    registry.map((e) => ({
+      opName: e.opName,
+      displayName: e.displayName,
+      module: e.module || "Other",
+    })),
+  );
 
   /** Re-open and revalidate the exact text range captured by a hover action. */
   async function resolveHoverTarget(
