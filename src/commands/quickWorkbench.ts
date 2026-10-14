@@ -31,7 +31,7 @@ export interface QuickWorkbenchDependencies {
 /**
  * Create Quick Workbench deps from extension context.
  */
-export function createQuickWorkbenchDeps(deps: QuickWorkbenchDependencies): {
+export function createQuickWorkbenchDeps(deps: QuickWorkbenchDependencies, sourceEditor: () => vscode.TextEditor | undefined = () => vscode.window.activeTextEditor): {
   listOps: () => OpInfo[];
   argDefsFor: (opName: string) => ArgConfig[] | undefined;
   runOperation: (opName: string, input: string | Uint8Array | Buffer | ArrayBuffer, args: unknown[]) => Promise<{ result: string | Uint8Array | Buffer | ArrayBuffer; error?: string }>;
@@ -48,14 +48,14 @@ export function createQuickWorkbenchDeps(deps: QuickWorkbenchDependencies): {
     runOperation: deps.runOperation,
     isSafeForPreview: deps.isSafeForPreview,
     getSelection: () => {
-      const editor = vscode.window.activeTextEditor;
+      const editor = sourceEditor();
       if (!editor) return { text: "", editor: undefined };
       const selection = editor.selection;
       const text = editor.document.getText(selection);
       return { text, editor };
     },
     getDocumentText: () => {
-      const editor = vscode.window.activeTextEditor;
+      const editor = sourceEditor();
       return editor?.document.getText();
     },
     getClipboardText: async () => {
@@ -73,7 +73,7 @@ export function createQuickWorkbenchDeps(deps: QuickWorkbenchDependencies): {
         content,
         language: "plaintext",
       });
-      await vscode.window.showTextDocument(doc);
+      await vscode.window.showTextDocument(doc, vscode.ViewColumn.One);
     },
   };
 }
@@ -85,7 +85,15 @@ export function registerQuickWorkbenchCommand(
   context: vscode.ExtensionContext,
   deps: QuickWorkbenchDependencies,
 ): void {
-  const panelDeps = createQuickWorkbenchDeps(deps);
+  // Losing focus to a webview must not discard the last explicitly focused editor.
+  let editorContext = vscode.window.activeTextEditor;
+  context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editor => {
+    if (editor) editorContext = editor;
+  }));
+  const panelDeps = createQuickWorkbenchDeps(deps, () => {
+    const editor = vscode.window.activeTextEditor ?? editorContext;
+    return editor && !editor.document.isClosed && vscode.window.visibleTextEditors.includes(editor) ? editor : undefined;
+  });
   quickWorkbenchPanel = new QuickWorkbenchPanel({ ...panelDeps, resourceRoot: context.asAbsolutePath("dist"), stateStore: context.globalState });
 
   context.subscriptions.push(

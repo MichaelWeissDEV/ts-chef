@@ -14,6 +14,7 @@ ts-chef brings 479 encoding, decoding, cryptography, compression, formatting, bi
 
 :::{grid-item-card} Install and start
 :link: getting-started
+quick-workbench
 :link-type: doc
 
 Install ts-chef and complete your first Base64-to-JSON transformation.
@@ -54,6 +55,7 @@ Core transformations run in the VS Code extension host and require neither an ac
 
 overview
 getting-started
+quick-workbench
 visual-tour
 usage
 ```

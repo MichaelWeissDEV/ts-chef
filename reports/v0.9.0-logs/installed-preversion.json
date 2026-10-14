@@ -1,0 +1,11 @@
+{
+  "checks": 20,
+  "timings": {
+    "activationMs": 25.69662500000004,
+    "openMs": 0.9469159999999874,
+    "firstTransformMs": 1.4554170000000113,
+    "repeatedMeanMs": 0.08773124999999879,
+    "heapUsed": 44017980
+  },
+  "version": "0.8.1"
+}

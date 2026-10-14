@@ -115,3 +115,51 @@ test("close and reopen discards pending work and accepts fresh UI counters", asy
   expect(controller["resultState"]?.text).toBe("Hello");
   controller.dispose(); dom.window.close();
 });
+
+test("an old clipboard read cannot overwrite newer manual input", async () => {
+  const { controller, dom } = setup();
+  let finish!: (text: string) => void;
+  controller["deps"].getClipboardText = () => new Promise(resolve => { finish = resolve; });
+  const pending = controller["handleMessage"]({ type: "loadClipboard", revision: 1 });
+  await controller["handleMessage"]({ type: "inputChanged", text: "new", revision: 2 });
+  finish("old"); await pending;
+  expect(controller["inputContext"]?.text).toBe("new");
+  await controller["handleMessage"]({ type: "inputChanged", text: "stale", revision: 1 });
+  expect(controller["inputContext"]?.text).toBe("new");
+  dom.window.close();
+});
+
+test("failed source reads invalidate exports without an escaping rejection", async () => {
+  const { controller, dom } = setup();
+  await controller["handleMessage"]({ type: "inputChanged", text: "input" });
+  await controller["handleMessage"]({ type: "applyOperation", opName: "FromBase64", args: {}, requestId: 1, mode: "manual" });
+  controller["deps"].getClipboardText = async () => { throw new Error("unavailable"); };
+  await expect(controller["handleMessage"]({ type: "loadClipboard" })).resolves.toBeUndefined();
+  expect(controller["resultState"]).toBeNull();
+  expect(controller["inputContext"]).toBeNull();
+  dom.window.close();
+});
+
+test("ready handshake creates an empty context distinct from a missing source", async () => {
+  const { controller, run, dom } = setup();
+  await controller["handleMessage"]({ type: "getOps" });
+  await controller["handleMessage"]({ type: "applyOperation", opName: "FromBase64", args: {}, requestId: 1, mode: "manual" });
+  expect(run).toHaveBeenCalledWith("FromBase64", "", []);
+  await controller["handleMessage"]({ type: "loadDocument" });
+  expect(controller["inputContext"]).toBeNull();
+  expect(controller["resultState"]).toBeNull();
+  dom.window.close();
+});
+
+test("oversized source input and unavailable clipboard never create a valid empty context", async () => {
+  const { controller, run, dom } = setup();
+  controller["deps"].getDocumentText = () => "x".repeat(16 * 1024 * 1024 + 1);
+  await controller["handleMessage"]({ type: "loadDocument" });
+  expect(controller["inputContext"]).toBeNull();
+  await controller["handleMessage"]({ type: "applyOperation", opName: "FromBase64", args: {}, requestId: 1, mode: "manual" });
+  expect(run).not.toHaveBeenCalled();
+  controller["deps"].getClipboardText = async () => undefined;
+  await controller["handleMessage"]({ type: "loadClipboard" });
+  expect(controller["inputContext"]).toBeNull();
+  dom.window.close();
+});

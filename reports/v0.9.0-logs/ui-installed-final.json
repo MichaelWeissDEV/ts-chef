@@ -1,0 +1,21 @@
+{
+  "checks": [
+    "selection while webview focused",
+    "click operation, parameters and automatic preview",
+    "real original-selection replacement",
+    "real clipboard roundtrip",
+    "keyboard selection, edited number parameter, Run",
+    "new document",
+    "parameter error disables exports",
+    "favorite and reopen",
+    "empty input and successful empty output",
+    "small window without horizontal overflow",
+    "theme: Light Modern",
+    "theme: Dark Modern",
+    "theme: Dark High Contrast"
+  ],
+  "mode": "installed-vsix",
+  "platform": "darwin",
+  "arch": "arm64",
+  "vscode": "1.110.0"
+}

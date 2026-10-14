@@ -134,3 +134,7 @@
 #argsEditor label { display: flex; flex-direction: column; }
 body { overflow: auto; height: auto; min-height: 100vh; }
 @media (max-width: 450px) { .section-header { flex-wrap: wrap; gap: 8px; } }
+#argsEditor label { min-width: 0; max-width: 100%; }
+#argsEditor input, #argsEditor select { max-width: 100%; }
+.op-name { min-width: 0; overflow-wrap: anywhere; }
+select, #argsEditor input { background: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border, var(--vscode-contrastBorder, #555)); }

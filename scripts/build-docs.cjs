@@ -1,0 +1,10 @@
+const { spawnSync } = require('node:child_process');
+const { existsSync, rmSync } = require('node:fs');
+const { resolve } = require('node:path');
+const root = resolve(__dirname, '..');
+const python = process.env.TSCHEF_PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+const target = resolve(root, 'docs/_build/html');
+rmSync(target, { recursive: true, force: true });
+const result = spawnSync(python, ['-m', 'sphinx', '-W', '--keep-going', '-b', 'html', 'docs', target], { cwd: root, stdio: 'inherit', timeout: 180000 });
+if (result.error) throw result.error;
+if (result.status !== 0 || !existsSync(resolve(target, 'index.html'))) process.exit(result.status || 1);

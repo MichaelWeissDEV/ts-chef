@@ -1,8 +1,8 @@
 import { MAX_LIVE_INPUT_CHARACTERS } from "../pipelineLivePolicy";
 import type { OpInfo } from "../../web/common/types";
 import type { QuickWorkbenchIncomingMessage } from "./protocol";
-interface Definition { name: string; type: string; value: Array<string | {name: string; value: unknown}>; min?: number; max?: number; step?: number; maxLength?: number; toggleValues?: string[]; }
-type Value = string | number | boolean | null | { string: string; option: string };
+interface Definition { name: string; type: string; value: Array<string | {name: string; value: Value; on?: number[]; off?: number[]}>; min?: number; max?: number; step?: number; maxLength?: number; toggleValues?: string[]; disabled?: boolean; target?: number | number[]; }
+type Value = string | number | boolean | null | string[] | { string: string; option: string };
 declare function acquireVsCodeApi(): { postMessage(message: QuickWorkbenchIncomingMessage): void };
 function element<T extends HTMLElement>(id: string): T { return document.getElementById(id) as T; }
     (() => {
@@ -41,13 +41,29 @@ function element<T extends HTMLElement>(id: string): T { return document.getElem
         const container = element('argsEditor');
         container.replaceChildren();
         currentArgs = {};
+        defs.forEach((def, index) => { currentArgs[def.name] = defaults[index]; });
+        const rows: HTMLElement[] = [];
+        const refreshDisabled = () => {
+          const disabled = defs.map(def => !!def.disabled);
+          defs.forEach(def => {
+            if (def.type !== 'argSelector') return;
+            const selected = def.value.find(option => typeof option === 'object' && option.name === currentArgs[def.name]);
+            if (selected && typeof selected === 'object') {
+              selected.off?.forEach(i => { disabled[i] = true; });
+              selected.on?.forEach(i => { disabled[i] = false; });
+            }
+          });
+          rows.forEach((row, i) => row.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input,select,textarea').forEach(control => { control.disabled = disabled[i]; }));
+        };
         defs.forEach((def, index) => {
           const value = defaults[index];
           currentArgs[def.name] = value;
           const row = document.createElement('label');
           row.textContent = def.name + ' ';
+          rows.push(row);
           const update = (next: Value) => {
             currentArgs[def.name] = next;
+            refreshDisabled();
             invalidate();
             vscode.postMessage({ type: 'invalidate' });
           };
@@ -78,7 +94,23 @@ function element<T extends HTMLElement>(id: string): T { return document.getElem
             row.appendChild(control);
             return control;
           };
-          if (def.type === 'boolean') input(value, update, 'checkbox');
+          if (def.type === 'label') { row.className = 'arg-section'; }
+          else if (def.type === 'populateOption' || def.type === 'populateMultiOption') {
+            select(def.value, def.value.findIndex(x => typeof x === 'object' && JSON.stringify(x.value) === JSON.stringify(value)), i => {
+              const option = def.value[i];
+              if (typeof option !== 'object') return;
+              update(option.value);
+              const targets = Array.isArray(def.target) ? def.target : [def.target];
+              targets.forEach((target, offset) => {
+                if (target === undefined || !defs[target]) return;
+                const next = def.type === 'populateMultiOption' && Array.isArray(option.value) ? option.value[offset] : option.value;
+                currentArgs[defs[target].name] = next;
+                const control = rows[target]?.querySelector<HTMLInputElement>('input,textarea');
+                if (control) control.value = String(next ?? '');
+              });
+            });
+          }
+          else if (def.type === 'boolean') input(value, update, 'checkbox');
           else if (def.type === 'number') input(value, update, 'number');
           else if (def.type === 'option') select(def.value, def.value.findIndex(option => option === value), i => update(def.value[i] as Value));
           else if (def.type === 'argSelector') select(def.value, def.value.findIndex(x => typeof x === 'object' && x.name === value), i => update((def.value[i] as {name: string}).name));
@@ -89,9 +121,11 @@ function element<T extends HTMLElement>(id: string): T { return document.getElem
             let toggle = value as {string: string; option: string};
             input(toggle.string, text => { toggle = { ...toggle, string: String(text) }; update(toggle); });
             select(def.toggleValues || ['Hex'], (def.toggleValues || ['Hex']).indexOf(toggle.option), i => { toggle = { ...toggle, option: (def.toggleValues || ['Hex'])[i] }; update(toggle); });
-          } else input(value, update);
+          } else if (['string','text','binaryString','binaryShortString','shortString'].includes(def.type)) input(value, update);
+          else { throw new Error('Unsupported argument type: ' + def.type); }
           container.appendChild(row);
         });
+        refreshDisabled();
       }
 
       function escHtml(s: unknown) {
@@ -173,10 +207,6 @@ function element<T extends HTMLElement>(id: string): T { return document.getElem
       }
       function applyOperation(opName: string, mode: 'manual' | 'preview' = 'preview') {
         const text = inputText.value;
-        if (text.length === 0) {
-          showMessage('No input text', true);
-          return;
-        }
         if (mode === 'preview' && text.length > MAX_LIVE_INPUT_CHARACTERS) {
           showMessage('Input too large for automatic execution', true);
           return;
@@ -198,6 +228,11 @@ function element<T extends HTMLElement>(id: string): T { return document.getElem
       loadClipboard.addEventListener('click', () => { invalidate(); vscode.postMessage({ type: 'loadClipboard', revision: ++inputRevision }); });
       clearInput.addEventListener('click', () => { invalidate(); inputText.value = ''; updateInputInfo(); clearMessage(); vscode.postMessage({ type: 'clearInput', revision: ++inputRevision }); });
       closeBtn.addEventListener('click', () => vscode.postMessage({ type: 'close' }));
+
+      element<HTMLSelectElement>('outputFormat').addEventListener('change', () => {
+        const format = element<HTMLSelectElement>('outputFormat').value;
+        if (format === 'utf8' || format === 'hex' || format === 'base64') vscode.postMessage({ type: 'setOutputFormat', format });
+      });
 
       copyBtn.addEventListener('click', () => vscode.postMessage({ type: 'copyResult' }));
       replaceBtn.addEventListener('click', () => vscode.postMessage({ type: 'replaceSelection' }));
@@ -247,7 +282,8 @@ function element<T extends HTMLElement>(id: string): T { return document.getElem
             break;
           case 'setArgs':
             if (msg.opName !== currentOpName) break;
-            renderArgs(msg.args, msg.defaults);
+            try { renderArgs(msg.args, msg.defaults); }
+            catch (error) { showMessage(String(error), true); element<HTMLButtonElement>('runBtn').disabled = true; break; }
             element<HTMLButtonElement>('runBtn').disabled = false;
             if (currentOpName && msg.safe && inputText.value.length <= MAX_LIVE_INPUT_CHARACTERS) applyOperation(currentOpName);
             else showMessage('Choose parameters, then Run Operation.');
@@ -261,9 +297,11 @@ function element<T extends HTMLElement>(id: string): T { return document.getElem
             updateResultInfo();
             clearMessage();
             if (msg.error) showMessage(msg.error, true);
-            if (msg.binary) showMessage('Binary output — hexadecimal. Copy and New Document export the complete hex representation.');
+            if (msg.format) element<HTMLSelectElement>('outputFormat').value = msg.format;
+            if (!msg.error) showMessage((msg.binary ? 'Binary source; ' : '') + 'Copy and New Document export complete ' + (msg.format || 'utf8') + ' text.');
+            if (msg.size !== undefined) resultInfo.textContent = msg.size + ' source bytes' + (msg.isPreviewTruncated ? ' (preview truncated)' : '');
             if (msg.isPreviewTruncated) {
-              showMessage('Result truncated for display', false, true);
+              showMessage('Preview truncated. Copy and New Document export complete ' + msg.format + ' text.', false, true);
             }
             canCopy = msg.canCopy !== undefined ? msg.canCopy : (false);
             canReplace = msg.canReplace !== undefined ? msg.canReplace : false;

@@ -1,0 +1,5 @@
+{
+  "advisory": "GHSA-86w9-cpqp-85rv",
+  "version": "1.4.0",
+  "unmitigatedForgeAcceptsExtraNull": true
+}

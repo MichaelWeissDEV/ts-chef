@@ -42,6 +42,7 @@ export function buildHtml(csp: string, nonce: string, script: string, style: str
   <div class="section result-section">
     <div class="section-header">
       <span>Output</span>
+      <label>Export as <select id="outputFormat" aria-label="Output format"><option value="utf8">Text / UTF-8 (strict)</option><option value="hex">Hex</option><option value="base64">Base64</option></select></label>
       <div class="result-actions">
         <button id="copyBtn" type="button" title="Copy result to clipboard" disabled>Copy</button>
         <button id="replaceBtn" type="button" title="Replace original selection" disabled>Replace</button>

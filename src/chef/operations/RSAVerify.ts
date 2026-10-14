@@ -10,6 +10,7 @@
 import { TypedOperation } from "../Operation";
 import OperationError from "../errors/OperationError";
 import forge from "node-forge";
+import { constants, publicDecrypt, timingSafeEqual } from "node:crypto";
 import { MD_ALGORITHMS } from "../lib/RSA";
 import Utils from "../Utils";
 
@@ -72,12 +73,36 @@ export class RSAVerify extends TypedOperation<string, string, unknown[]> {
     try {
       // Load public key
       const pubKey = forge.pki.publicKeyFromPem(pemKey);
-      // Generate message digest
-      const md = MD_ALGORITHMS[mdAlgo as keyof typeof MD_ALGORITHMS].create();
+      const signature = Buffer.from(input, "latin1");
+      const expected = Math.ceil(pubKey.n.bitLength() / 8);
+      if (signature.length !== expected) {
+        throw new OperationError(`Signature length (${signature.length}) does not match expected length based on key (${expected}).`);
+      }
+      if (!Object.hasOwn(MD_ALGORITHMS, mdAlgo)) throw new OperationError("Unknown message digest algorithm.");
       const messageStr = Utils.convertToByteString(message, format);
+      const md = MD_ALGORITHMS[mdAlgo as keyof typeof MD_ALGORITHMS].create();
       md.update(messageStr, "raw");
-      // Compare signed message digest and generated message digest
-      const result = pubKey.verify(md.digest().bytes(), input);
+      const digest = md.digest().bytes();
+      // OpenSSL checks PKCS#1 type-1 padding; compare the entire DigestInfo,
+      // instead of forge's permissive ASN.1 validator (GHSA-86w9-cpqp-85rv).
+      // Keep forge's raw hash semantics and PEM parser for existing recipes.
+      const decoded = publicDecrypt({
+        key: forge.pki.publicKeyToPem(pubKey), padding: constants.RSA_PKCS1_PADDING,
+      }, signature);
+      const algorithm = mdAlgo.toLowerCase().replace("-", "");
+      const matches = (withNull: boolean) => {
+        const { asn1 } = forge;
+        const oid = asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false, asn1.oidToDer(forge.pki.oids[algorithm]).getBytes());
+        const identifier = withNull ? [oid, asn1.create(asn1.Class.UNIVERSAL, asn1.Type.NULL, false, "")] : [oid];
+        const info = asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+          asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, identifier),
+          asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false, digest),
+        ]);
+        const expectedInfo = Buffer.from(asn1.toDer(info).getBytes(), "latin1");
+        return decoded.length === expectedInfo.length && timingSafeEqual(decoded, expectedInfo);
+      };
+      // SHA AlgorithmIdentifiers historically permit omitted NULL parameters.
+      const result = matches(true) || (mdAlgo !== "MD5" && matches(false));
       return result ? "Verified OK" : "Verification Failure";
     } catch (err) {
       const rsaError = err as Error & { length?: number; expected?: number };

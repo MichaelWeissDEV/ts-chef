@@ -36,7 +36,8 @@ export class GenerateLoremIpsum extends TypedOperation<string, string, unknown[]
       {
         name: "Length",
         type: "number",
-        value: "3",
+        value: 3,
+        min: 1,
       },
       {
         name: "Length in",

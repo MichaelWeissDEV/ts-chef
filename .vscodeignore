@@ -58,3 +58,15 @@ Makefile
 typedoc.json
 tsconfig.chef.json
 tsconfig.json
+
+# Local verification evidence and downloaded test installations
+reports/**
+.vscode-test/**
+.agents/**
+.codex/**
+.aws/**
+**/.env*
+*.zip
+dist/integration.cjs
+dist/*diagnostics*
+dist/integration-tests/**

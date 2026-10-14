@@ -11,12 +11,14 @@
 
 `ts-chef` brings a CyberChef-inspired transformation workbench next to your code. Use it for quick Base64 or hex decoding, repeatable recipes, branched pipeline graphs, in-place editor actions, pattern scanning, and bounded static analysis of suspicious files.
 
+For a single conversion, run **tschef: Open Quick Workbench**, load a selection or paste input, choose an operation and its parameters, then copy the complete result or safely replace the original selection. The [Quick Workbench guide](docs/quick-workbench.md) explains binary formats, limits and keyboard use.
+
 <p align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=MichaelWeiss.vscode-ts-chef">
     <img src="https://img.shields.io/badge/VS_Code-Marketplace-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white" alt="Install ts-chef from the Visual Studio Marketplace" />
   </a>
   <a href="https://marketplace.visualstudio.com/items?itemName=MichaelWeiss.vscode-ts-chef">
-    <img src="https://img.shields.io/badge/version-0.8.1-2563eb?style=flat-square" alt="ts-chef version 0.8.1" />
+    <img src="https://img.shields.io/badge/version-0.9.0-2563eb?style=flat-square" alt="ts-chef version 0.9.0" />
   </a>
   <a href="https://marketplace.visualstudio.com/items?itemName=MichaelWeiss.vscode-ts-chef">
     <img src="https://img.shields.io/badge/VS_Code-1.85%2B-0e7490?style=flat-square&logo=visualstudiocode&logoColor=white" alt="Requires Visual Studio Code 1.85 or newer" />

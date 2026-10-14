@@ -100,7 +100,7 @@ export class AESEncrypt extends TypedOperation<string, string, unknown[]> {
       {
         name: "Input",
         type: "option",
-        value: ["Raw", "Hex"],
+        value: ["Raw", "Hex", "UTF8"],
       },
       {
         name: "Output",
@@ -145,7 +145,7 @@ export class AESEncrypt extends TypedOperation<string, string, unknown[]> {
       ToggleStringArg,
     ];
     const key = Utils.convertToByteString(keyArg.string, keyArg.option),
-      iv = Utils.convertToByteString(ivArg.string, ivArg.option),
+      iv = Utils.convertToByteString(ivArg.string, ivArg.option) || "\0".repeat(16),
       mode = modeArg.split("/")[0],
       noPadding = modeArg.endsWith("NoPadding"),
       aad = Utils.convertToByteString(aadArg.string, aadArg.option);
@@ -159,6 +159,9 @@ The following algorithms will be used based on the size of the key:
   32 bytes = AES-256`);
     }
 
+    if (inputType === "Raw" && Array.from(input).some(char => char.charCodeAt(0) > 255)) {
+      throw new OperationError("Raw input requires byte characters (0–255). Select UTF8 for Unicode text.");
+    }
     const byteInput = Utils.convertToByteString(input, inputType);
 
     // Handle NoPadding modes

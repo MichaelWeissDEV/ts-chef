@@ -41,3 +41,11 @@ Keep unknown files isolated, preserve originals, hash evidence, defang indicator
 ## Vulnerability reports
 
 Do not publish exploit details or sensitive evidence in a public issue. Use the repository's available private security-reporting channel when configured, or contact the maintainer privately through the information in the [GitHub repository](https://github.com/MichaelWeissDEV/ts-chef).
+
+## Quick Workbench exports
+
+Workbench messages are validated against registered operations, argument metadata and bounded sizes. Input revisions and independent host generations discard stale clipboard reads and transformations. Errors invalidate the prior result. Binary source bytes remain intact; UTF-8 decoding is strict, and Hex/Base64 exports are explicit. Favorites store operation identifiers only; input, outputs and secret argument values are not stored with favorites.
+
+RSA Verify uses strict comparison of the complete expected DigestInfo after native PKCS#1 padding validation, mitigating GHSA-86w9-cpqp-85rv in the retained node-forge dependency. Canonical and omitted-NULL SHA identifiers are tested; extra algorithm elements are rejected. See the local release security audit in `reports/v0.9.0-dependency-audit.md` for dependency findings and remaining development-only risks.
+
+Input and returned-output limits do not provide an operation sandbox: allocations and CPU work inside an explicitly run operation occur before its final output is checked. Avoid unbounded decompression or generation on hostile inputs.

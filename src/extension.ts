@@ -2048,7 +2048,8 @@ export function activate(context: vscode.ExtensionContext): { getQuickWorkbenchP
   }
 
   context.subscriptions.push(scanState);
-  if (context.extensionMode === vscode.ExtensionMode.Test) return { getQuickWorkbenchPanel };
+  // The same diagnostic API lets an isolated test harness verify an installed VSIX.
+  return { getQuickWorkbenchPanel };
 
 }
 

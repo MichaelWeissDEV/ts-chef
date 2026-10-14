@@ -28,7 +28,8 @@ test("valid UTF-8 bytes decode strictly, retaining BOM and original bytes", () =
   const result = renderResult(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength), limit);
   expect(result.text).toBe("\ufeffHello 🌍");
   expect(result.fullResult).toEqual(bytes);
-  expect(result.binary).toBe(false);
+  expect(result.binary).toBe(true);
+  expect(result.format).toBe("utf8");
 });
 test("enforces actual byte limit", () => {
   expect(renderResult("😀", 4).size).toBe(4);
@@ -38,9 +39,9 @@ test("enforces actual byte limit", () => {
 });
 test("metadata defaults and edited values reach real operations", () => {
   const b64 = new FromBase64();
-  expect(Buffer.from(b64.run("SGVsbG8=", resolveArguments(b64.args, {})) as ArrayBuffer).toString()).toBe("Hello");
+  expect(Buffer.from(b64.run("SGVsbG8=", resolveArguments(b64.args, {}))).toString()).toBe("Hello");
   const hex = new FromHex();
-  expect(Buffer.from(hex.run("48 69", resolveArguments(hex.args, {})) as ArrayBuffer).toString()).toBe("Hi");
+  expect(Buffer.from(hex.run("48 69", [String(resolveArguments(hex.args, {})[0])])).toString()).toBe("Hi");
   const rot = new ROT13();
   expect(Buffer.from(rot.run([...Buffer.from("aA1")], resolveArguments(rot.args, { Amount: 1, "Rotate upper case chars": false, "Rotate numbers": true }))).toString()).toBe("bA2");
   const json = new JSONBeautify();
@@ -68,4 +69,23 @@ test("cycles and unexpected fields fail without escaping exceptions", () => {
 });
 test.each(["loadSelection", "loadDocument", "loadClipboard", "clearInput", "invalidate", "copyResult", "replaceSelection", "newDocument", "close", "getOps"])("accepts %s", type => {
   expect(validateQuickWorkbenchMessage({ type }, new Set()).success).toBe(true);
+});
+
+test.each([Buffer.from("Hello 🌍"), Uint8Array.of(0, 255), new Uint8Array([1, 2]).buffer])("explicit formats preserve original bytes (%#)", bytes => {
+  const original = Buffer.from(bytes instanceof ArrayBuffer ? new Uint8Array(bytes) : bytes);
+  for (const format of ["hex", "base64"] as const) {
+    const result = renderResult(bytes, limit, format);
+    expect(result.binary).toBe(true);
+    expect(result.format).toBe(format);
+    expect(Buffer.from(result.text, format)).toEqual(original);
+    expect(result.fullResult).toEqual(original);
+  }
+});
+test("multi-megabyte output retains full exports and bounds preview", () => {
+  const text = "🌍".repeat(1024 * 1024);
+  const rendered = renderResult(text, limit);
+  expect(rendered.size).toBe(4 * 1024 * 1024);
+  expect(rendered.text).toBe(text);
+  expect(rendered.preview.length).toBe(100000);
+  expect(rendered.isPreviewTruncated).toBe(true);
 });

@@ -12,9 +12,10 @@ import { buildHtml } from "./html";
 import * as vscode from "vscode";
 import { validateQuickWorkbenchMessage } from "./protocol";
 import { MAX_LIVE_INPUT_CHARACTERS, MAX_LIVE_OUTPUT_CHARACTERS, isOperationSafeForLive } from "../pipelineLivePolicy";
-import { resolveDefaultArg } from "../../commands/argDefaults";
+import { resolveDefaultArgs } from "../../commands/argDefaults";
 import { resolveArguments } from "./arguments";
 import { renderResult } from "./result";
+import type { OutputFormat } from "./result";
 import { captureTextEditSnapshot } from "../../commands/textEditSnapshot";
 import { createWebviewCsp, generateNonce } from "../../webview/security";
 import type { OpInfo } from "../../web/common/types";
@@ -55,6 +56,7 @@ export interface ResultState {
   size: number;
   text: string;
   binary: boolean;
+  format: OutputFormat;
 }
 
 /**
@@ -90,7 +92,7 @@ export type QuickWorkbenchOutgoingMessage =
 /**
  * Maximum sizes for Quick Workbench operations.
  */
-const MAX_INPUT_LENGTH = 16 * 1024 * 1024; // 16 MiB
+const MAX_INPUT_LENGTH = 16 * 1024 * 1024; // UTF-16 code units
 const MAX_RESULT_SIZE = 50 * 1024 * 1024; // 50 MiB
 
 /**
@@ -128,6 +130,8 @@ export class QuickWorkbenchPanel {
   private nonce: string;
   private state: QuickWorkbenchState;
   private currentRequestId = 0;
+  private outputFormat: OutputFormat = "utf8";
+  private inputRevision = 0;
   private inputContext: InputContext | null = null;
   private resultState: ResultState | null = null;
   private knownOpNames: ReadonlySet<string> | null = null;
@@ -159,7 +163,7 @@ export class QuickWorkbenchPanel {
       "tschef.quickWorkbench",
       "ts-chef Quick Convert",
       { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
-      { enableScripts: true },
+      { enableScripts: true, retainContextWhenHidden: true },
     );
 
     this.panel.webview.html = this.buildHtml(csp, this.nonce);
@@ -170,6 +174,7 @@ export class QuickWorkbenchPanel {
 
     this.panel.onDidDispose(() => {
       this.panel = undefined;
+      this.inputRevision = 0;
       this.clearResult();
       this.inputContext = null;
     });
@@ -192,7 +197,7 @@ export class QuickWorkbenchPanel {
     const canReplace = this.inputContext !== null && 
                       this.inputContext.source === "selection" && 
                       this.inputContext.snapshot !== undefined &&
-                      !this.resultState?.binary &&
+                      this.resultState?.format === "utf8" &&
                       this.resultState !== null && 
                       this.resultState.success &&
                       this.resultState.inputContextId === this.inputContext.contextId;
@@ -221,6 +226,12 @@ export class QuickWorkbenchPanel {
    * Set input text with source and optional snapshot.
    */
   private setInput(text: string, source: InputSource, snapshot?: TextEditSnapshot, notify = true, revision?: number): void {
+    if (text.length > MAX_INPUT_LENGTH) {
+      this.inputContext = null;
+      this.clearResult();
+      this.panel?.webview.postMessage({ type: "showError", message: `Input too large: ${text.length} characters exceeds ${MAX_INPUT_LENGTH}` });
+      return;
+    }
     const newContext: InputContext = {
       source,
       text,
@@ -278,16 +289,23 @@ export class QuickWorkbenchPanel {
     }
 
     const message = validation.message;
+    if ("revision" in message && message.revision !== undefined) {
+      if (message.revision < this.inputRevision) return;
+      this.inputRevision = message.revision;
+    }
     
-    switch (message.type) {
+    try { switch (message.type) {
       case "getOps":
+        if (!this.inputContext) this.setInput("", "manual");
         this.persistState();
         this.panel?.webview.postMessage({ type: "setOperations", operations: this.deps.listOps() } as QuickWorkbenchOutgoingMessage);
         break;
 
       case "loadSelection": {
+        this.clearResult();
         const selection = this.deps.getSelection();
         if (!selection.editor) {
+          this.inputContext = null;
           this.panel?.webview.postMessage({ type: "showError", message: "No active editor" } as QuickWorkbenchOutgoingMessage);
           break;
         }
@@ -298,7 +316,13 @@ export class QuickWorkbenchPanel {
       }
 
       case "loadDocument": {
-        const docText = this.deps.getDocumentText() || "";
+        this.clearResult();
+        const docText = this.deps.getDocumentText();
+        if (docText === undefined) {
+          this.inputContext = null;
+          this.panel?.webview.postMessage({ type: "showError", message: "No source editor available" });
+          break;
+        }
         // For document input, no snapshot for replacement (too dangerous)
         this.setInput(docText, "document", undefined, true, message.revision);
         break;
@@ -307,8 +331,9 @@ export class QuickWorkbenchPanel {
       case "loadClipboard": {
         this.clearResult();
         const generation = this.currentRequestId;
-        const clipText = await this.deps.getClipboardText() || "";
+        const clipText = await this.deps.getClipboardText();
         if (generation !== this.currentRequestId) break;
+        if (clipText === undefined) throw new Error("Clipboard is unavailable");
         // For clipboard input, no snapshot for replacement
         this.setInput(clipText, "clipboard", undefined, true, message.revision);
         break;
@@ -329,7 +354,7 @@ export class QuickWorkbenchPanel {
       case "getArgDefs": {
         this.clearResult();
         const args = this.deps.argDefsFor(message.opName);
-        this.panel?.webview.postMessage({ type: "setArgs", opName: message.opName, args: args || [], defaults: (args || []).map(resolveDefaultArg), safe: isOperationSafeForLive(message.opName) && this.deps.isSafeForPreview(message.opName) });
+        this.panel?.webview.postMessage({ type: "setArgs", opName: message.opName, args: args || [], defaults: resolveDefaultArgs(args || []), safe: isOperationSafeForLive(message.opName) && this.deps.isSafeForPreview(message.opName) });
         break;
       }
       case "applyOperation": {
@@ -348,12 +373,12 @@ export class QuickWorkbenchPanel {
           const output = await this.deps.runOperation(opName, context.text, args);
           if (!current()) break;
           if (output.error) throw new Error(output.error);
-          const rendered = renderResult(output.result, previewMode ? MAX_LIVE_OUTPUT_CHARACTERS : MAX_RESULT_SIZE);
+          const rendered = renderResult(output.result, previewMode ? MAX_LIVE_OUTPUT_CHARACTERS : MAX_RESULT_SIZE, this.outputFormat);
           this.resultState = { ...rendered, requestId, inputContextId: context.contextId, opName, success: true };
           this.addToRecents(opName);
           this.panel?.webview.postMessage({ type: "setResult", result: rendered.preview, preview: rendered.preview,
             isPreviewTruncated: rendered.isPreviewTruncated, requestId, canCopy: true, canNewDoc: true,
-            binary: rendered.binary, canReplace: !rendered.binary && context.snapshot !== undefined });
+            binary: rendered.binary, format: rendered.format, size: rendered.size, canReplace: rendered.format === "utf8" && context.snapshot !== undefined });
           this.updateActionStates();
         } catch (error) {
           if (current()) {
@@ -375,6 +400,19 @@ export class QuickWorkbenchPanel {
         this.panel?.webview.postMessage({ type: "setState", state: this.state } as QuickWorkbenchOutgoingMessage);
         break;
 
+      case "setOutputFormat": {
+        this.outputFormat = message.format;
+        if (this.resultState) {
+          const rendered = renderResult(this.resultState.fullResult, MAX_RESULT_SIZE, this.outputFormat);
+          this.resultState = { ...this.resultState, ...rendered };
+          this.panel?.webview.postMessage({ type: "setResult", ...rendered, result: rendered.preview,
+            fullResult: undefined, text: undefined, requestId: this.resultState.requestId,
+            canCopy: true, canNewDoc: true, canReplace: rendered.format === "utf8" && !!this.inputContext?.snapshot });
+          this.updateActionStates();
+        }
+        break;
+      }
+
       case "copyResult": {
         if (this.resultState && this.resultState.success) {
             // Use full result, not preview
@@ -390,7 +428,7 @@ export class QuickWorkbenchPanel {
       }
 
       case "replaceSelection": {
-        if (!this.resultState || !this.resultState.success || this.resultState.binary || !this.inputContext) {
+        if (!this.resultState || !this.resultState.success || this.resultState.format !== "utf8" || !this.inputContext) {
           this.panel?.webview.postMessage({ type: "showError", message: "No valid result to replace" } as QuickWorkbenchOutgoingMessage);
           break;
         }
@@ -443,11 +481,17 @@ export class QuickWorkbenchPanel {
       case "close":
         this.panel?.dispose();
         break;
+    } } catch (error) {
+      this.clearResult();
+      this.inputContext = null;
+      this.panel?.webview.postMessage({ type: "showError", message: `Workbench request failed: ${error}` });
     }
   }
 
   private persistState(): void {
-    void this.deps.stateStore?.update("quickWorkbench.operations", this.state);
+    void this.deps.stateStore?.update("quickWorkbench.operations", structuredClone(this.state)).then(undefined, error => {
+      this.panel?.webview.postMessage({ type: "showError", message: `Failed to save favorites: ${error}` });
+    });
     this.panel?.webview.postMessage({ type: "setState", state: this.state });
   }
 

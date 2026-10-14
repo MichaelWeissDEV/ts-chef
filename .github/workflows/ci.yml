@@ -1,112 +1,99 @@
 name: CI
-
 on:
   push:
-    branches:
-      - master
+    branches: [master]
   pull_request:
-    branches:
-      - master
+    branches: [master]
   workflow_dispatch:
-
+  workflow_call:
+permissions:
+  contents: read
 jobs:
-  docs:
-    name: Documentation
+  static-unit:
+    name: Static checks and unit tests
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run verify:manifest
+      - run: npm run lint:check
+      - name: Typecheck production and tests
+        run: npm run typecheck
+      - run: npm run build
+      - run: npm test -- --runInBand
+      - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          python-version: "3.12"
-          cache: "pip"
+          name: unit-reports
+          path: |
+            test-report/
+            coverage/
+  integration:
+    name: VS Code host and real webview UI (${{ matrix.os }})
+    needs: static-unit
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Host integration (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run -a npm run test:integration
+      - name: UI interaction (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run -a npm run test:ui
+      - name: Host integration (macOS)
+        if: runner.os == 'macOS'
+        run: npm run test:integration
+      - name: UI interaction (macOS)
+        if: runner.os == 'macOS'
+        run: npm run test:ui
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-${{ matrix.os }}
+          path: reports/v0.9.0-logs/
+  package:
+    name: Documentation, verified VSIX and installed tests
+    needs: [static-unit, integration]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
           cache-dependency-path: docs/requirements.txt
-
-      - name: Install documentation dependencies
-        run: python -m pip install -r docs/requirements.txt
-
-      - name: Verify generated operation catalog
-        run: |
-          npm run docs:catalog
-          git diff --exit-code -- docs/operation-catalog.md
-
-      - name: Build Sphinx documentation
-        run: python -m sphinx -W --keep-going -b html docs docs/_build/html
-
-  ci:
-    name: Lint, Test & Package
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - run: npm ci
+      - run: python -m pip install -r docs/requirements.txt
+      - name: Run the same complete local release gates
+        run: xvfb-run -a npm run release:verify
+      - name: Catalog must be committed
+        run: git diff --exit-code -- docs/operation-catalog.md
+      - uses: actions/upload-artifact@v4
         with:
-          node-version: "20"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Run tests with coverage
-        run: npm test -- --coverage
-
-      - name: Build extension
-        run: npm run build
-
-      - name: Resolve VSIX name
-        id: vsix
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "name=vscode-ts-chef-${VERSION}.vsix" >> "$GITHUB_OUTPUT"
-
-      - name: Package VSIX
-        run: |
-          npx --yes @vscode/vsce package \
-            --no-dependencies \
-            --out "${{ steps.vsix.outputs.name }}"
-
-      - name: Upload VSIX artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: vsix
-          path: ${{ steps.vsix.outputs.name }}
-          retention-days: 14
-
-      - name: Upload test report
-        uses: actions/upload-artifact@v4
+          name: verified-release-artifacts
+          path: |
+            vscode-ts-chef-*.vsix
+            ts-chef-docs-*.zip
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-report
-          path: test-report/
-          retention-days: 14
-
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 14
-
-      - name: Job summary
-        if: always()
-        run: |
-          echo "## CI Results" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **vsix** — installable extension package (\`${{ steps.vsix.outputs.name }}\`)" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **test-report** — HTML report of all test cases" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **coverage-report** — code coverage metrics" >> "$GITHUB_STEP_SUMMARY"
+          name: package-evidence
+          path: reports/v0.9.0-logs/

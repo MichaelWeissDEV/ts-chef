@@ -5,7 +5,7 @@
 
 import { TypedOperation } from "../Operation";
 import { OperationError } from "../errors/OperationError";
-import { createDecipheriv } from "crypto";
+import { transformTripleDES } from "../lib/TripleDES";
 import { fromHex } from "../lib/Hex";
 import { Utils } from "../Utils";
 
@@ -91,15 +91,6 @@ export class TripleDESDecrypt extends TypedOperation<string | ArrayBuffer, Array
       throw new OperationError("IV must be 8 bytes for Triple DES");
     }
 
-    const algMap: Record<string, string> = {
-      cbc: "des-ede3-cbc",
-      cfb: "des-ede3-cfb",
-      ofb: "des-ede3-ofb",
-      ctr: "des-ede3-ctr",
-      ecb: "des-ede3-ecb",
-    };
-    const alg = algMap[mode] ?? "des-ede3-cbc";
-
     let data: Buffer;
     if (inputType === "Hex") {
       const inputStr =
@@ -115,19 +106,9 @@ export class TripleDESDecrypt extends TypedOperation<string | ArrayBuffer, Array
       }
     }
 
-    let decipher;
-    try {
-      decipher =
-        mode === "ecb"
-          ? createDecipheriv(alg, keyBytes, Buffer.alloc(0))
-          : createDecipheriv(alg, keyBytes, ivBytes);
-    } catch (err) {
-      throw new OperationError("Decryption error: " + String(err));
-    }
-
     let decrypted: Buffer;
     try {
-      decrypted = Buffer.concat([decipher.update(data), decipher.final()]);
+      decrypted = transformTripleDES(data, keyBytes, ivBytes, mode, true);
     } catch (err) {
       throw new OperationError("Decryption failed: " + String(err));
     }

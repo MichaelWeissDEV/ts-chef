@@ -6,6 +6,7 @@ export type QuickWorkbenchIncomingMessage =
   | { type: "loadClipboard"; revision?: number }
   | { type: "clearInput"; revision?: number }
   | { type: "invalidate" }
+  | { type: "setOutputFormat"; format: "utf8" | "hex" | "base64" }
   | { type: "inputChanged"; text: string; revision?: number }
   | { type: "applyOperation"; opName: string; args: Record<string, ArgValue>; requestId: number; mode?: "manual" | "preview" }
   | { type: "searchOperations"; query: string }
@@ -41,7 +42,7 @@ export function validateQuickWorkbenchMessage(
     "loadSelection", "loadDocument", "loadClipboard", "clearInput", "invalidate",
     "inputChanged", "applyOperation", "searchOperations",
     "addToFavorites", "removeFromFavorites", "copyResult",
-    "replaceSelection", "newDocument", "close", "getOps", "getArgDefs"
+    "replaceSelection", "newDocument", "close", "getOps", "getArgDefs", "setOutputFormat"
   ] as const;
 
   if (!isValidMessageType(messageType, validTypes)) {
@@ -49,10 +50,13 @@ export function validateQuickWorkbenchMessage(
   }
 
   try {
-    const fields: Record<string, string[]> = { inputChanged: ["text", "revision"], loadSelection: ["revision"], loadDocument: ["revision"], loadClipboard: ["revision"], clearInput: ["revision"], searchOperations: ["query"], applyOperation: ["opName", "args", "requestId", "mode"], getArgDefs: ["opName"], addToFavorites: ["opName"], removeFromFavorites: ["opName"] };
+    const fields: Record<string, string[]> = { setOutputFormat: ["format"], inputChanged: ["text", "revision"], loadSelection: ["revision"], loadDocument: ["revision"], loadClipboard: ["revision"], clearInput: ["revision"], searchOperations: ["query"], applyOperation: ["opName", "args", "requestId", "mode"], getArgDefs: ["opName"], addToFavorites: ["opName"], removeFromFavorites: ["opName"] };
     if (Object.keys(message).some(key => key !== "type" && !(fields[String(messageType)] || []).includes(key))) return { success: false, error: "Unexpected message field" };
     if (message.revision !== undefined && (!Number.isSafeInteger(message.revision) || Number(message.revision) < 0)) return { success: false, error: "Invalid input revision" };
     switch (messageType) {
+      case "setOutputFormat":
+        if (message.format !== "utf8" && message.format !== "hex" && message.format !== "base64") return { success: false, error: "Invalid output format" };
+        return { success: true, message: { type: "setOutputFormat", format: message.format } };
       case "loadSelection":
       case "loadDocument":
       case "loadClipboard":

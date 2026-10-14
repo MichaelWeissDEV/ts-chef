@@ -7,12 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-14
+
 ### Added
+
+- Quick Workbench with searchable operations, all catalog argument types, dependent/preset fields, keyboard selection, persisted favorites and recents.
+- Strict UTF-8, Hex and Base64 output representations that retain original binary data and export complete results separately from previews.
+- Portable pinned VS Code host tests, real Playwright webview interaction, isolated VSIX installation/upgrade checks, production/test typechecking and local `release:verify` gates.
 
 - Added an open-ended keyboard shortcut registry for operations, inline pipelines, saved pipelines, and history navigation, plus direct repeat/cycle/history-picker commands. No keys are assigned by default.
 - Added a bounded, session-only operation history with exact 1-based recall and stable backward/forward cycling across Quick Convert, hover, recipes, pipelines, sidebar operations, and registered shortcuts.
 - Added generated lazy operation chunks and a metadata-only startup registry, retaining all 479 operations while loading implementation families on demand.
 - Added shortcut/history tests, lazy-loading and packaging contracts, all-factory production validation, a bundle-size regression budget, and reproducible cold-start benchmarking.
+
+### Fixed
+
+- Workbench editor context across focus changes, stale clipboard/operation completions, empty input, failed-result export states and new-document placement.
+- RSA signature DigestInfo validation for GHSA-86w9-cpqp-85rv while retaining canonical and omitted-NULL SHA identifiers.
+- AES Unicode conversion through explicit UTF8 modes, rejection of non-byte Raw input, documented default zero IVs, and numeric Lorem Ipsum defaults.
+- Triple-DES ECB cipher naming and CFB/OFB/CTR availability across standalone Node and VS Code/Electron BoringSSL.
+- Missing external runtime/WASM files in VSIX packages built with `--no-dependencies`.
+- Release documentation archives now use verified Sphinx HTML; tag/version mismatches and failed mandatory tests stop publication.
+- Available compatible runtime dependency security updates.
+
+### Known limitations
+
+- Manual operations are not a CPU/memory sandbox; final-output limits cannot prevent intermediate allocations.
+- Remaining development-only dependency advisories and unexecuted platform coverage are disclosed in the release readiness report.
 
 ### Changed
 

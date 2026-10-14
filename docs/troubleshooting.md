@@ -98,3 +98,16 @@ Search [existing issues](https://github.com/MichaelWeissDEV/ts-chef/issues), the
 - whether the workspace is trusted.
 
 Never attach live credentials, private keys, customer data, or an active malicious payload to a public issue.
+
+## Quick Workbench
+
+- **No source editor available**: focus the intended editor, keep it visible, then choose From Selection or From Document.
+- **Source text changed**: reload the selection and rerun. Replace intentionally refuses stale document versions and closed files.
+- **Exports disabled**: run again after editing input or parameters; a failed run invalidates earlier output.
+- **Preview truncated**: Copy and New Document still export the complete representation.
+- **Binary source / Hex**: choose the required output format. Invalid UTF-8 remains lossless hexadecimal.
+- **Automatic preview unavailable**: use Run Operation. Automatic input is limited to 65,536 code units; parameter changes require explicit execution.
+
+## Local release verification
+
+Use Node 22 and Python 3.12+, run `npm ci`, install `docs/requirements.txt` in a Python virtual environment and run `npm run release:verify`. Set `TSCHEF_PYTHON` to that environment's Python executable if needed. The pinned VS Code test download requires network access on first use. Linux requires a graphical display, normally `xvfb-run -a npm run release:verify`. Missing tools or test failures stop the gate; they are never treated as successful skips.

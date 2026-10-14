@@ -13,6 +13,10 @@ Install [Visual Studio Code](https://code.visualstudio.com/) 1.85 or newer. No t
 
 You can also install it directly from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=MichaelWeiss.vscode-ts-chef). To install a locally downloaded release, run **Extensions: Install from VSIX...** and select the `.vsix` file.
 
+## Quick Workbench
+
+For a single operation with visible parameters, start with the [Quick Workbench walkthrough](quick-workbench.md). Local candidates can be installed with `code --install-extension vscode-ts-chef-0.9.0.vsix`; publishing is a separate maintainer action.
+
 ## First transformation: decode Base64 JSON
 
 Paste this example into a text editor:

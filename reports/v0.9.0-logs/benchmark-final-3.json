@@ -1,0 +1,49 @@
+{
+  "node": "v26.7.0",
+  "bundle": "dist/extension.js",
+  "coldImportMs": 18.1,
+  "rssDeltaMiB": 17.5,
+  "heapUsedDeltaMiB": 1.4,
+  "rssAfterMiB": 60.7,
+  "eagerOperationChunks": 0,
+  "operationColdLoads": [
+    {
+      "opName": "ToBase64",
+      "milliseconds": 0.7,
+      "rssDeltaMiB": 0.1,
+      "loadedChunks": [
+        "default-base64"
+      ]
+    },
+    {
+      "opName": "AESEncrypt",
+      "milliseconds": 7.5,
+      "rssDeltaMiB": 3.9,
+      "loadedChunks": [
+        "ciphers-aes",
+        "default-base64"
+      ]
+    },
+    {
+      "opName": "JSONBeautify",
+      "milliseconds": 0.9,
+      "rssDeltaMiB": 0.2,
+      "loadedChunks": [
+        "ciphers-aes",
+        "code-json",
+        "default-base64"
+      ]
+    },
+    {
+      "opName": "GenerateQRCode",
+      "milliseconds": 27.9,
+      "rssDeltaMiB": 15.2,
+      "loadedChunks": [
+        "ciphers-aes",
+        "code-json",
+        "default-base64",
+        "image-00"
+      ]
+    }
+  ]
+}

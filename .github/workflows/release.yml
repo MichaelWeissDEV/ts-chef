@@ -1,154 +1,47 @@
 name: Release
-
 on:
   push:
-    tags:
-      - "v[0-9]+.[0-9]+.[0-9]*"   # v1.0.0, v1.2.3, etc.
-  workflow_dispatch: # Allows manual release triggering
-
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: read
 jobs:
-  build-and-release:
-    name: Build, Test, and Release
+  validate:
+    name: Validate immutable tag and package version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: node scripts/verify-manifest.cjs --tag
+  gates:
+    needs: validate
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+  publish:
+    name: Publish only verified tag artifacts
+    needs: [validate, gates]
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # required to create GitHub Releases
-
+      contents: write
     steps:
-      # ── 1. Source ──────────────────────────────────────────────────────────
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # ── 2. Node ────────────────────────────────────────────────────────────
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
+      - uses: actions/download-artifact@v4
         with:
-          node-version: "20"
-          cache: "npm"
-
-      # ── 3. Version Validation ────────────────────────────────────────────
-      - name: Validate version and tag
-        id: ver
-        run: |
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            TAG_NAME="${GITHUB_REF_NAME}"
-            VERSION="${TAG_NAME#v}"
-            SOURCE="tag"
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            TAG_NAME="${{ github.ref_name }}"
-            if [[ ! "$TAG_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
-              echo "::error::Manual release must be triggered with a valid version tag (e.g., v0.9.0), not a branch name."
-              echo "VERSION=" >> "$GITHUB_OUTPUT"
-              echo "VSIX=" >> "$GITHUB_OUTPUT"
-              echo "VALID=false" >> "$GITHUB_OUTPUT"
-              exit 1
-            fi
-            VERSION="${TAG_NAME#v}"
-            SOURCE="manual"
-          else
-            echo "::error::Unexpected trigger source: ${{ github.event_name }}"
-            echo "VERSION=" >> "$GITHUB_OUTPUT"
-            echo "VSIX=" >> "$GITHUB_OUTPUT"
-            echo "VALID=false" >> "$GITHUB_OUTPUT"
-            exit 1
-          fi
-          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "VSIX=vscode-ts-chef-${VERSION}.vsix" >> "$GITHUB_OUTPUT"
-          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_OUTPUT"
-          echo "SOURCE=$SOURCE" >> "$GITHUB_OUTPUT"
-          echo "VALID=true" >> "$GITHUB_OUTPUT"
-
-      - name: Check version validity
-        run: |
-          if [[ "${{ steps.ver.outputs.VALID }}" != "true" ]]; then
-            echo "::error::Invalid version or tag format. Aborting release."
-            exit 1
-          fi
-
-      # Version consistency check - package.json must match the release version
-      - name: Verify package.json version
-        run: |
-          CURRENT=$(node -p "require('./package.json').version")
-          TARGET="${{ steps.ver.outputs.VERSION }}"
-          if [ "$CURRENT" != "$TARGET" ]; then
-            echo "::error::package.json version ($CURRENT) does not match release version ($TARGET)."
-            echo "Please update package.json to version $TARGET before creating a release."
-            exit 1
-          fi
-          echo "package.json version matches: $CURRENT"
-
-      - name: Sync version in package.json (legacy)
-        run: |
-          CURRENT=$(node -p "require('./package.json').version")
-          TARGET="${{ steps.ver.outputs.VERSION }}"
-          if [ "$CURRENT" != "$TARGET" ]; then
-            npm version "$TARGET" --no-git-tag-version
-            echo "Bumped $CURRENT → $TARGET"
-          else
-            echo "package.json already at $TARGET, nothing to do"
-          fi
-
-      # ── 4. Install & Test ──────────────────────────────────────────────────
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run Lint
-        run: npm run lint
-
-      - name: Run Tests
-        run: npm test
-
-      # ── 5. Build ───────────────────────────────────────────────────────────
-      - name: Build extension
-        run: npm run build
-
-      - name: Generate API Documentation
-        run: npm run docs
-
-      # ── 6. Package ─────────────────────────────────────────────────────────
-      - name: Package VSIX
-        run: |
-          npx --yes @vscode/vsce package \
-            --no-dependencies \
-            --out "${{ steps.ver.outputs.VSIX }}"
-
-      - name: Zip Documentation
-        run: |
-          cd docs/api
-          zip -r ../../ts-chef-docs-${{ steps.ver.outputs.VERSION }}.zip .
-          cd ../..
-
-      - name: Show VSIX & Docs info
-        run: |
-          echo "── VSIX ──────────────────────────────────"
-          ls -lh "${{ steps.ver.outputs.VSIX }}"
-          echo "── Docs ──────────────────────────────────"
-          ls -lh "ts-chef-docs-${{ steps.ver.outputs.VERSION }}.zip"
-
-      # ── 7. GitHub Release ─────────────────────────────────────────────────
+          name: verified-release-artifacts
+          path: release-artifacts
       - name: Create GitHub Release
-        if: steps.ver.outputs.VALID == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          name: "ts-chef ${{ steps.ver.outputs.TAG_NAME }}"
-          tag_name: ${{ steps.ver.outputs.TAG_NAME }}
+          tag_name: ${{ github.ref_name }}
+          target_commitish: ${{ github.sha }}
+          name: ts-chef ${{ github.ref_name }}
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          fail_on_unmatched_files: true
+          generate_release_notes: true
           files: |
-            ${{ steps.ver.outputs.VSIX }}
-            ts-chef-docs-${{ steps.ver.outputs.VERSION }}.zip
-          prerelease: ${{ contains(steps.ver.outputs.TAG_NAME, '-') }}
-          body: |
-            ## ts-chef ${{ steps.ver.outputs.TAG_NAME }}
-
-            ### Install Extension
-            1. Download **`${{ steps.ver.outputs.VSIX }}`** from the assets below.
-            2. In VS Code: **Extensions** (⇧⌘X) → **⋯** → **Install from VSIX…**
-            
-            Or via Command Line:
-            ```bash
-            code --install-extension ${{ steps.ver.outputs.VSIX }}
-            ```
-
-            ### Documentation
-            * Download **`ts-chef-docs-${{ steps.ver.outputs.VERSION }}.zip`** to view the full API documentation offline. Extract the archive and open `index.html` in your browser.
-
-            ---
-            > ⚠️ Early development — bugs possible. Please [open an issue](../../issues/new) if something breaks.
+            release-artifacts/vscode-ts-chef-*.vsix
+            release-artifacts/ts-chef-docs-*.zip

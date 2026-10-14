@@ -25,6 +25,12 @@ export function resolveDefaultArg(arg: ArgConfig): unknown {
       const idx = typeof arg.defaultIndex === "number" ? arg.defaultIndex : 0;
       return opts[idx]?.value ?? opts[0]?.value ?? "";
     }
+    case "populateOption":
+    case "populateMultiOption": {
+      const opts = arg.value as Array<{ value: unknown }>;
+      return Array.isArray(opts) ? (opts[arg.defaultIndex ?? 0]?.value ?? opts[0]?.value ?? "") : "";
+    }
+    case "label": return "";
     case "option": {
       const opts = arg.value as unknown[];
       if (!Array.isArray(opts)) return arg.value;
@@ -34,7 +40,7 @@ export function resolveDefaultArg(arg: ArgConfig): unknown {
     case "argSelector": {
       // run() receives the selected option name string (e.g. "CBC")
       const opts = arg.value as Array<{ name: string }>;
-      return Array.isArray(opts) ? (opts[0]?.name ?? "") : arg.value;
+      return Array.isArray(opts) ? (opts[arg.defaultIndex ?? 0]?.name ?? opts[0]?.name ?? "") : arg.value;
     }
     case "toggleString": {
       // run() receives { string: value, option: encoding }
@@ -46,4 +52,17 @@ export function resolveDefaultArg(arg: ArgConfig): unknown {
     default:
       return arg.value;
   }
+}
+
+/** Presets populate their target fields initially; later target edits are retained. */
+export function resolveDefaultArgs(defs: ArgConfig[]): unknown[] {
+  const values = defs.map(resolveDefaultArg);
+  defs.forEach((def, index) => {
+    if (def.type !== "populateOption" && def.type !== "populateMultiOption") return;
+    const targets = Array.isArray(def.target) ? def.target : [def.target];
+    targets.forEach((target, offset) => {
+      if (typeof target === "number" && defs[target]) values[target] = def.type === "populateMultiOption" && Array.isArray(values[index]) ? values[index][offset] : values[index];
+    });
+  });
+  return values;
 }

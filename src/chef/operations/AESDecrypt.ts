@@ -99,7 +99,7 @@ export class AESDecrypt extends TypedOperation<string, string, unknown[]> {
       {
         name: "Output",
         type: "option",
-        value: ["Raw", "Hex"],
+        value: ["Raw", "Hex", "UTF8"],
       },
       {
         name: "GCM Tag",
@@ -135,7 +135,7 @@ export class AESDecrypt extends TypedOperation<string, string, unknown[]> {
         ToggleStringArg,
       ];
     const key = Utils.convertToByteString(keyArg.string, keyArg.option),
-      iv = Utils.convertToByteString(ivArg.string, ivArg.option),
+      iv = Utils.convertToByteString(ivArg.string, ivArg.option) || "\0".repeat(16),
       mode = modeArg.split("/")[0],
       noPadding = modeArg.endsWith("NoPadding"),
       gcmTag = Utils.convertToByteString(gcmTagArg.string, gcmTagArg.option),
@@ -173,6 +173,10 @@ The following algorithms will be used based on the size of the key:
     const result = decipher.finish();
 
     if (result) {
+      if (outputType === "UTF8") {
+        try { return new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(Buffer.from(decipher.output.getBytes(), "latin1")); }
+        catch { throw new OperationError("Decrypted bytes are not valid UTF-8. Select Raw or Hex."); }
+      }
       return outputType === "Hex"
         ? decipher.output.toHex()
         : decipher.output.getBytes();

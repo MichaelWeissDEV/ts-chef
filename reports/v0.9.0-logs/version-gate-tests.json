@@ -1,0 +1,27 @@
+[
+  {
+    "name": "branch",
+    "status": 1,
+    "expectedSuccess": false
+  },
+  {
+    "name": "invalid semver tag",
+    "status": 1,
+    "expectedSuccess": false
+  },
+  {
+    "name": "mismatched version",
+    "status": 1,
+    "expectedSuccess": false
+  },
+  {
+    "name": "wrong commit",
+    "status": 1,
+    "expectedSuccess": false
+  },
+  {
+    "name": "matching immutable tag",
+    "status": 0,
+    "expectedSuccess": true
+  }
+]

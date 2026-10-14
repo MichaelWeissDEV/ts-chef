@@ -1,0 +1,14 @@
+{
+  "checks": 20,
+  "timings": {
+    "activationMs": 29.479625,
+    "openMs": 0.9664170000000354,
+    "firstTransformMs": 1.4998330000000237,
+    "repeatedMeanMs": 0.08993125000000077,
+    "heapUsed": 43975740
+  },
+  "vscode": "1.110.0",
+  "node": "v22.22.0",
+  "mode": "development",
+  "version": "0.9.0"
+}

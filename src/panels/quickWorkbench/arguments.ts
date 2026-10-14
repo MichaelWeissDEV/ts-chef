@@ -1,13 +1,14 @@
 import type { ArgConfig } from "../../chef/Operation";
-import { resolveDefaultArg } from "../../commands/argDefaults";
+import { resolveDefaultArgs } from "../../commands/argDefaults";
 import { WebviewLimits } from "../../webview/security";
 
 /** Same defaults and positional order as the recipe and pipeline editors. */
 export function resolveArguments(defs: ArgConfig[] | undefined, values: Record<string, unknown>): unknown[] {
   if (!defs) throw new Error("Argument definitions unavailable");
   for (const key of Object.keys(values)) if (!defs.some(def => def.name === key)) throw new Error(`Unknown argument: ${key}`);
-  return defs.map(def => {
-    const value = Object.hasOwn(values, def.name) ? values[def.name] : resolveDefaultArg(def);
+  const defaults = resolveDefaultArgs(defs);
+  return defs.map((def, index) => {
+    const value = Object.hasOwn(values, def.name) ? values[def.name] : defaults[index];
     const fail = () => { throw new Error(`Invalid argument: ${def.name} (${def.type})`); };
     const checkString = (v: unknown) => {
       if (typeof v !== "string" || v.length > Math.min(def.maxLength ?? Infinity, WebviewLimits.maxArgumentStringLength)) fail();
@@ -22,6 +23,10 @@ export function resolveArguments(defs: ArgConfig[] | undefined, values: Record<s
       case "argSelector":
         if (!options.some(option => typeof option === "object" && option !== null && "name" in option && option.name === value)) fail();
         break;
+      case "populateOption": case "populateMultiOption":
+        if (!options.some(option => typeof option === "object" && option !== null && "value" in option && JSON.stringify(option.value) === JSON.stringify(value))) fail();
+        break;
+      case "label": if (value !== "") fail(); break;
       case "editableOption": case "editableOptionShort":
         if (typeof value === "string") checkString(value);
         else if (!options.some(option => typeof option === "object" && option !== null && "value" in option && JSON.stringify(option.value) === JSON.stringify(value))) fail();

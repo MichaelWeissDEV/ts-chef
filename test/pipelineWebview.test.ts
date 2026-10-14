@@ -1,7 +1,14 @@
+import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 import { buildPipelineWebviewHtml } from "../src/panels/pipelineWebview";
 
 describe("pipeline graph webview", () => {
+  function graphOf(message: Record<string, unknown> | undefined): { nodes: Array<Record<string, unknown>>; edges: Array<Record<string, unknown>> } {
+    assert.ok(message && message.graph && typeof message.graph === "object");
+    const graph = message.graph as Record<string, unknown>;
+    assert.ok(Array.isArray(graph.nodes) && Array.isArray(graph.edges));
+    return { nodes: graph.nodes, edges: graph.edges };
+  }
   const html = buildPipelineWebviewHtml("vscode-webview:", "fixed-nonce");
 
   function openGraph(
@@ -304,11 +311,11 @@ describe("pipeline graph webview", () => {
       const change = posted
         .filter((message) => message.type === "graphChanged")
         .at(-1);
-      const moved = change?.graph.nodes.find(
+      const moved = graphOf(change).nodes.find(
         (node: Record<string, unknown>) => node.id === "op-1",
       );
       expect(moved).toMatchObject({ x: 345, y: 185 });
-      expect(states.at(-1)?.graph.nodes).toContainEqual(
+      expect(graphOf(states.at(-1)).nodes).toContainEqual(
         expect.objectContaining({ id: "op-1", x: 345, y: 185 }),
       );
     } finally {
@@ -332,7 +339,7 @@ describe("pipeline graph webview", () => {
       const added = posted
         .filter((message) => message.type === "graphChanged")
         .at(-1);
-      const newOutput = added?.graph.nodes.find(
+      const newOutput = graphOf(added).nodes.find(
         (node: Record<string, unknown>) =>
           node.type === "output" && node.id !== "out-a",
       );
@@ -345,13 +352,14 @@ describe("pipeline graph webview", () => {
       ).click();
       (
         dom.window.document.querySelector(
-          `.port.input[data-node-id="${newOutput.id}"]`,
+          `.port.input[data-node-id="${newOutput!.id}"]`,
         ) as HTMLButtonElement
       ).click();
 
-      const connected = posted
+      const connectedMessage = posted
         .filter((message) => message.type === "graphChanged")
-        .at(-1)?.graph;
+        .at(-1);
+      const connected = graphOf(connectedMessage);
       expect(
         connected.edges.filter(
           (edge: Record<string, unknown>) => edge.source === "op-1",
@@ -359,12 +367,12 @@ describe("pipeline graph webview", () => {
       ).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ target: "out-a" }),
-          expect.objectContaining({ target: newOutput.id }),
+          expect.objectContaining({ target: newOutput!.id }),
         ]),
       );
       expect(
         connected.edges.filter(
-          (edge: Record<string, unknown>) => edge.target === newOutput.id,
+          (edge: Record<string, unknown>) => edge.target === newOutput!.id,
         ),
       ).toHaveLength(1);
     } finally {
@@ -396,17 +404,17 @@ describe("pipeline graph webview", () => {
         .filter((message) => message.type === "graphChanged")
         .at(-1);
       expect(
-        change?.graph.nodes.filter(
+        graphOf(change).nodes.filter(
           (node: Record<string, unknown>) => node.type === "operation",
         ),
       ).toHaveLength(2);
-      expect(change?.graph.nodes).toContainEqual(
+      expect(graphOf(change).nodes).toContainEqual(
         expect.objectContaining({ type: "operation", x: 320, y: 165 }),
       );
       expect(dom.window.document.querySelectorAll(".step-card")).toHaveLength(
         2,
       );
-      expect(change?.graph.edges).toEqual(
+      expect(graphOf(change).edges).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ source: "op-1", target: "out-a" }),
           expect.objectContaining({ source: "op-1", target: "out-b" }),
@@ -438,7 +446,7 @@ describe("pipeline graph webview", () => {
         expect.objectContaining({ id: "op-1", opName: "Reverse" }),
       ]);
       expect(
-        save?.graph.nodes.filter(
+        graphOf(save).nodes.filter(
           (node: Record<string, unknown>) => node.type === "operation",
         ),
       ).toHaveLength(1);
@@ -467,7 +475,7 @@ describe("pipeline graph webview", () => {
         outputTarget: "preview",
         manualInput: "sample",
       });
-      expect(request?.graph.edges).toHaveLength(3);
+      expect(graphOf(request).edges).toHaveLength(3);
 
       dom.window.dispatchEvent(
         new dom.window.MessageEvent("message", {
@@ -661,7 +669,7 @@ describe("pipeline graph webview", () => {
       const change = posted
         .filter((message) => message.type === "graphChanged")
         .at(-1);
-      expect(change?.graph.edges).not.toContainEqual(
+      expect(graphOf(change).edges).not.toContainEqual(
         expect.objectContaining({ id: "e3" }),
       );
     } finally {

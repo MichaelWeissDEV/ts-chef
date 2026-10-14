@@ -243,3 +243,16 @@ describe("Blowfish Encrypt / Decrypt", () => {
     expect(enc1).not.toBe(enc2);
   });
 });
+
+// Electron's BoringSSL has fewer native 3DES modes than standalone Node/OpenSSL.
+describe("Triple DES platform mode compatibility", () => {
+  test.each(["CBC", "CFB", "OFB", "CTR", "ECB"])("%s round-trips 2-key and 3-key data", mode => {
+    for (const key of ["0123456789abcdeffedcba9876543210", "0123456789abcdeffedcba98765432100011223344556677"]) {
+      const common = [{ string: key, option: "Hex" }, { string: "0011223344556677", option: "Hex" }, mode];
+      const plain = new TextEncoder().encode("Hello 🌍").buffer;
+      const encrypted = new TripleDESEncrypt().run(plain, [...common, "Raw", "Raw"]);
+      const decrypted = new TripleDESDecrypt().run(encrypted, [...common, "Raw", "Raw"]);
+      expect(new TextDecoder("utf8", { fatal: true }).decode(decrypted)).toBe("Hello 🌍");
+    }
+  });
+});

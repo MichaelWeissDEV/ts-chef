@@ -15,6 +15,7 @@ describe("Quick Workbench Message Validation", () => {
     it("should accept valid loadSelection message", () => {
       const result = validateQuickWorkbenchMessage({ type: "loadSelection" }, knownOps);
       expect(result.success).toBe(true);
+      if (!result.success) throw new Error(result.error);
       expect(result.message?.type).toBe("loadSelection");
     });
 
@@ -26,6 +27,7 @@ describe("Quick Workbench Message Validation", () => {
         requestId: 1
       }, knownOps);
       expect(result.success).toBe(true);
+      if (!result.success) throw new Error(result.error);
       expect(result.message?.type).toBe("applyOperation");
     });
 
@@ -35,6 +37,7 @@ describe("Quick Workbench Message Validation", () => {
         text: "test input"
       }, knownOps);
       expect(result.success).toBe(true);
+      if (!result.success) throw new Error(result.error);
       expect(result.message?.type).toBe("inputChanged");
     });
 
@@ -44,6 +47,7 @@ describe("Quick Workbench Message Validation", () => {
         query: "base64"
       }, knownOps);
       expect(result.success).toBe(true);
+      if (!result.success) throw new Error(result.error);
       expect(result.message?.type).toBe("searchOperations");
     });
 
@@ -53,6 +57,7 @@ describe("Quick Workbench Message Validation", () => {
         opName: "FromBase64"
       }, knownOps);
       expect(result.success).toBe(true);
+      if (!result.success) throw new Error(result.error);
       expect(result.message?.type).toBe("addToFavorites");
     });
   });
@@ -63,6 +68,7 @@ describe("Quick Workbench Message Validation", () => {
         type: "unknownType"
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("Unknown message type");
     });
 
@@ -71,17 +77,20 @@ describe("Quick Workbench Message Validation", () => {
         someField: "value"
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
     });
 
     it("should reject null message", () => {
       const result = validateQuickWorkbenchMessage(null, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("must be an object");
     });
 
     it("should reject non-object message", () => {
       const result = validateQuickWorkbenchMessage("string", knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
     });
   });
 
@@ -94,6 +103,7 @@ describe("Quick Workbench Message Validation", () => {
         requestId: 1
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("Unknown operation");
     });
 
@@ -106,6 +116,7 @@ describe("Quick Workbench Message Validation", () => {
         requestId: 1
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("too long");
     });
 
@@ -117,6 +128,7 @@ describe("Quick Workbench Message Validation", () => {
         requestId: 1
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("must be a string");
     });
   });
@@ -128,6 +140,7 @@ describe("Quick Workbench Message Validation", () => {
         text: 123
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("must be a string");
     });
 
@@ -138,6 +151,7 @@ describe("Quick Workbench Message Validation", () => {
         text: longText
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("too large");
     });
   });
@@ -149,6 +163,7 @@ describe("Quick Workbench Message Validation", () => {
         query: 123
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("must be a string");
     });
 
@@ -159,6 +174,7 @@ describe("Quick Workbench Message Validation", () => {
         query: longQuery
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("too long");
     });
   });
@@ -172,6 +188,7 @@ describe("Quick Workbench Message Validation", () => {
         requestId: "not a number"
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("must be a valid number");
     });
 
@@ -183,6 +200,7 @@ describe("Quick Workbench Message Validation", () => {
         requestId: NaN
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
     });
 
     it("should reject applyOperation with Infinity requestId", () => {
@@ -193,6 +211,7 @@ describe("Quick Workbench Message Validation", () => {
         requestId: Infinity
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
     });
   });
 
@@ -205,6 +224,7 @@ describe("Quick Workbench Message Validation", () => {
         requestId: 1
       }, knownOps);
       expect(result.success).toBe(true);
+      if (!result.success) throw new Error(result.error);
     });
 
     it("should accept applyOperation with undefined args", () => {
@@ -214,6 +234,7 @@ describe("Quick Workbench Message Validation", () => {
         requestId: 1
       }, knownOps);
       expect(result.success).toBe(true);
+      if (!result.success) throw new Error(result.error);
     });
 
     it("should reject applyOperation with args array instead of object", () => {
@@ -224,6 +245,7 @@ describe("Quick Workbench Message Validation", () => {
         requestId: 1
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("must be an object");
     });
 
@@ -239,6 +261,7 @@ describe("Quick Workbench Message Validation", () => {
         requestId: 1
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("Too many arguments");
     });
 
@@ -251,6 +274,7 @@ describe("Quick Workbench Message Validation", () => {
         requestId: 1
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("Invalid argument key");
     });
 
@@ -263,6 +287,7 @@ describe("Quick Workbench Message Validation", () => {
         requestId: 1
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("too long");
     });
 
@@ -275,6 +300,7 @@ describe("Quick Workbench Message Validation", () => {
         requestId: 1
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("too many items");
     });
   });
@@ -286,6 +312,7 @@ describe("Quick Workbench Message Validation", () => {
         opName: "FromBase64"
       }, knownOps);
       expect(result.success).toBe(true);
+      if (!result.success) throw new Error(result.error);
       expect(result.message?.type).toBe("getArgDefs");
     });
 
@@ -295,6 +322,7 @@ describe("Quick Workbench Message Validation", () => {
         opName: "UnknownOp"
       }, knownOps);
       expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected validation failure");
       expect(result.error).toContain("Unknown operation");
     });
   });
