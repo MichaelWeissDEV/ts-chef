@@ -6,9 +6,12 @@ import type { QuickWorkbenchPanel } from "../../src/panels/quickWorkbench/QuickW
 
 export async function run(): Promise<void> {
   const timings: Record<string, number> = {};
+  if (process.env.TSCHEF_INTEGRATION_REPORT) writeFileSync(process.env.TSCHEF_INTEGRATION_REPORT, JSON.stringify({ status: "started", phase: "activation" }));
   const start = performance.now();
   const extension = vscode.extensions.getExtension<{ getQuickWorkbenchPanel(): QuickWorkbenchPanel }>("michaelweiss.vscode-ts-chef");
   assert.ok(extension);
+  assert.equal(extension.packageJSON.version, "0.9.0");
+  assert.equal(vscode.extensions.all.filter(item => item.id === extension.id).length, 1);
   const api = await extension.activate();
   timings.activationMs = performance.now() - start;
   const openStart = performance.now();

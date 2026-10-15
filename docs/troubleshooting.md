@@ -111,3 +111,6 @@ Never attach live credentials, private keys, customer data, or an active malicio
 ## Local release verification
 
 Use Node 22 and Python 3.12+, run `npm ci`, install `docs/requirements.txt` in a Python virtual environment and run `npm run release:verify`. Set `TSCHEF_PYTHON` to that environment's Python executable if needed. The pinned VS Code test download requires network access on first use. Linux requires a graphical display, normally `xvfb-run -a npm run release:verify`. Missing tools or test failures stop the gate; they are never treated as successful skips.
+
+
+On Ubuntu 24.04 CI, use `TSCHEF_TEST_NO_SANDBOX=1 xvfb-run -a npm run release:verify` only for the isolated test harness when Chromium cannot use the runner sandbox. Both host and UI launchers honor this explicit Linux-only setting, including installed VSIX tests. Do not change system sandbox permissions or use this flag for daily VS Code work. Structured evidence is written under `reports/test-results/<platform>/<host-or-ui>/<mode>/<run>/`; failures include sanitized VS Code logs and UI window diagnostics. Test profiles contain synthetic data and are removed after each run.

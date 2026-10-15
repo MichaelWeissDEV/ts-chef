@@ -11,8 +11,12 @@ assert.equal(manifest.main, './dist/extension.js');
 assert.equal(new Set(manifest.contributes.commands.map(c => c.command)).size, manifest.contributes.commands.length);
 if (process.argv.includes('--tag')) {
   const ref = process.env.GITHUB_REF || '';
-  assert.ok(ref.startsWith('refs/tags/'), 'Release requires an existing tag ref, never a branch');
-  assert.equal(ref.slice('refs/tags/'.length), 'v' + manifest.version, 'Tag and manifest must match exactly');
-  assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), process.env.GITHUB_SHA, 'Release commit must match the trigger commit');
+  // Reject branch/manual dispatch before resolving any untrusted git ref.
+  assert.equal(ref, 'refs/tags/v' + manifest.version, 'Release requires the exact version tag');
+  require('./release-policy.cjs').validateIdentity({ version: manifest.version,
+    lockVersion: lock.version, rootVersion: lock.packages[''].version,
+    ref, sha: process.env.GITHUB_SHA,
+    head: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+    tagCommit: execFileSync('git', ['rev-parse', ref + '^{commit}'], { encoding: 'utf8' }).trim() });
 }
 process.stdout.write(`Manifest and lockfile verified: ${manifest.version}\n`);

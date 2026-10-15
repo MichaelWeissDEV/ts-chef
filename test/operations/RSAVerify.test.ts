@@ -57,3 +57,33 @@ test.each(["SHA-1", "SHA-256", "SHA-384", "SHA-512"])("preserves omitted-NULL %s
   expect(op.run(signature, [pem, text, "Raw", algo])).toBe("Verified OK");
   expect(op.run(signature, [pem, text, "Raw", algo === "SHA-256" ? "SHA-1" : "SHA-256"])).toBe("Verification Failure");
 });
+
+test.each(["wrong-oid", "short-digest", "long-digest", "outer-extra", "non-null-parameter", "trailing-bytes"])("rejects noncanonical complete DigestInfo: %s", variant => {
+  const { asn1 } = forge;
+  const node = asn1.create;
+  const digest = forge.md.sha256.create().update(message.toString("latin1"), "raw").digest().bytes();
+  const oid = node(asn1.Class.UNIVERSAL, asn1.Type.OID, false, asn1.oidToDer(forge.pki.oids[variant === "wrong-oid" ? "sha1" : "sha256"]).getBytes());
+  const parameter = variant === "non-null-parameter"
+    ? node(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false, "")
+    : node(asn1.Class.UNIVERSAL, asn1.Type.NULL, false, "");
+  const elements = [node(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [oid, parameter]),
+    node(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false, variant === "short-digest" ? digest.slice(1) : variant === "long-digest" ? digest + "\0" : digest)];
+  if (variant === "outer-extra") elements.push(node(asn1.Class.UNIVERSAL, asn1.Type.NULL, false, ""));
+  const der = asn1.toDer(node(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, elements)).getBytes() + (variant === "trailing-bytes" ? "\0" : "");
+  const signature = forgeKey.sign(der, "NONE");
+  const pem = publicKey.export({ type: "spki", format: "pem" }).toString();
+  expect(op.run(signature, [pem, message.toString("latin1"), "Raw", "SHA-256"])).toBe("Verification Failure");
+});
+
+test("modified signature cannot verify", () => {
+  const signature = sign("sha256", message, privateKey);
+  signature[signature.length - 1] ^= 1;
+  const pem = publicKey.export({ type: "spki", format: "pem" }).toString();
+  // Padding failures are surfaced as OperationError; either path must reject.
+  try {
+    expect(op.run(signature.toString("latin1"), [pem, message.toString("latin1"), "Raw", "SHA-256"])).toBe("Verification Failure");
+  } catch (error) {
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).name).toBe("OperationError");
+  }
+});

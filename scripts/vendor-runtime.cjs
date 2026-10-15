@@ -8,7 +8,7 @@ const packages = {
   '@alexaltea/capstone-js': ['dist/capstone.js', 'dist/capstone.wasm'],
   '@blu3r4y/lzma': ['index.js', 'src/lzma_worker.js'],
   'jq-web': ['jq.js', 'jq.wasm'],
-  'node-md6': ['md6.js'],
+  'node-md6': ['md6.js', 'README.md'],
 };
 const targetRoot = path.join(root, 'dist/node_modules');
 fs.rmSync(targetRoot, { recursive: true, force: true });

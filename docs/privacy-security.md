@@ -49,3 +49,9 @@ Workbench messages are validated against registered operations, argument metadat
 RSA Verify uses strict comparison of the complete expected DigestInfo after native PKCS#1 padding validation, mitigating GHSA-86w9-cpqp-85rv in the retained node-forge dependency. Canonical and omitted-NULL SHA identifiers are tested; extra algorithm elements are rejected. See the local release security audit in `reports/v0.9.0-dependency-audit.md` for dependency findings and remaining development-only risks.
 
 Input and returned-output limits do not provide an operation sandbox: allocations and CPU work inside an explicitly run operation occur before its final output is checked. Avoid unbounded decompression or generation on hostile inputs.
+
+## Release 0.9.0 dependency assessment
+
+The 2026-10-15 audit reports 43 affected package records (35 high, 8 moderate, no critical), including one production high in node-forge 1.4.0. The [upstream advisory](https://github.com/advisories/GHSA-86w9-cpqp-85rv) still lists no patched version. The vulnerable library and its permissive verification implementation remain bundled; this is application-level mitigation, not a repaired dependency. RSA Verify delegates padding validation to native crypto and compares the entire expected DigestInfo. Regression tests reject extra elements, wrong OIDs, wrong digest lengths, changed parameters, trailing bytes and changed signatures, while preserving canonical and omitted-NULL SHA signatures. Direct application verification calls were reviewed; no additional Forge RSA verifier caller was found. This bounded review is not a guarantee about every transitive dependency path. See the release readiness report for residual risk and approval status.
+
+The Linux `--no-sandbox` exception is opt-in and restricted to the isolated test launchers. It does not alter the extension, user settings or operating-system permissions.

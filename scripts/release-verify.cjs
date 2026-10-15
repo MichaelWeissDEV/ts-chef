@@ -19,6 +19,7 @@ const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 try {
   for (const script of ['verify:manifest', 'lint:check', 'typecheck', 'build']) execute(script, npm, ['run', script]);
   execute('unit', npm, ['test', '--', '--runInBand']);
+  execute('harness regression', npm, ['run', 'test:harness']);
   execute('dependency audit', npm, ['run', 'audit:dependencies']);
   execute('host integration', npm, ['run', 'test:integration']);
   execute('webview UI', npm, ['run', 'test:ui']);
@@ -28,6 +29,9 @@ try {
   execute('package content', process.execPath, [resolve(root, 'scripts/verify-vsix.cjs'), vsix]);
   execute('installed VSIX integration', process.execPath, [resolve(root, 'scripts/test-integration.cjs')], { TSCHEF_TEST_VSIX: vsix });
   execute('installed VSIX UI', process.execPath, [resolve(root, 'scripts/test-ui.cjs')], { TSCHEF_TEST_VSIX: vsix });
+  execute('official upgrade baseline', process.execPath, [resolve(root, 'scripts/download-upgrade-baseline.cjs')]);
+  execute('upgrade installed VSIX', process.execPath, [resolve(root, 'scripts/test-integration.cjs')], { TSCHEF_TEST_VSIX: vsix, TSCHEF_UPGRADE_FROM: resolve(root, '.vscode-test/vscode-ts-chef-0.8.1.vsix') });
+  execute('artifact integrity', process.execPath, [resolve(root, 'scripts/verify-release-artifacts.cjs'), root, '--write']);
   writeFileSync(resolve(root, 'reports/v0.9.0-logs/release-verify.json'), JSON.stringify({ version, results, completed: true, artifacts: [vsix, resolve(root, `ts-chef-docs-${version}.zip`)] }, null, 2));
   process.stdout.write(`Local release verification succeeded. Artifacts: ${vsix}, ts-chef-docs-${version}.zip\n`);
 } catch (error) {

@@ -33,6 +33,19 @@ jobs:
         with:
           name: verified-release-artifacts
           path: release-artifacts
+      - uses: actions/checkout@v4
+        with:
+          path: source
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+        working-directory: source
+      - name: Revalidate downloaded artifacts and trigger commit
+        run: |
+          (cd source && node scripts/verify-manifest.cjs --tag)
+          node source/scripts/verify-vsix.cjs release-artifacts/vscode-ts-chef-0.9.0.vsix
+          node source/scripts/verify-release-artifacts.cjs release-artifacts
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:

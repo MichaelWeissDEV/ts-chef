@@ -25,6 +25,8 @@ jobs:
         run: npm run typecheck
       - run: npm run build
       - run: npm test -- --runInBand
+      - run: npm run test:harness
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -32,6 +34,23 @@ jobs:
           path: |
             test-report/
             coverage/
+  security:
+    name: Dependency security gate
+    needs: static-unit
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run audit:dependencies
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-audit
+          path: reports/v0.9.0-logs/audit*.json
   integration:
     name: VS Code host and real webview UI (${{ matrix.os }})
     needs: static-unit
@@ -49,9 +68,13 @@ jobs:
       - run: npm ci
       - name: Host integration (Linux)
         if: runner.os == 'Linux'
+        env:
+          TSCHEF_TEST_NO_SANDBOX: '1'
         run: xvfb-run -a npm run test:integration
       - name: UI interaction (Linux)
         if: runner.os == 'Linux'
+        env:
+          TSCHEF_TEST_NO_SANDBOX: '1'
         run: xvfb-run -a npm run test:ui
       - name: Host integration (macOS)
         if: runner.os == 'macOS'
@@ -63,10 +86,12 @@ jobs:
         if: always()
         with:
           name: integration-${{ matrix.os }}
-          path: reports/v0.9.0-logs/
+          path: |
+            reports/test-results/
+            reports/v0.9.0-logs/
   package:
     name: Documentation, verified VSIX and installed tests
-    needs: [static-unit, integration]
+    needs: [static-unit, integration, security]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -82,6 +107,8 @@ jobs:
       - run: npm ci
       - run: python -m pip install -r docs/requirements.txt
       - name: Run the same complete local release gates
+        env:
+          TSCHEF_TEST_NO_SANDBOX: '1'
         run: xvfb-run -a npm run release:verify
       - name: Catalog must be committed
         run: git diff --exit-code -- docs/operation-catalog.md
@@ -91,9 +118,26 @@ jobs:
           path: |
             vscode-ts-chef-*.vsix
             ts-chef-docs-*.zip
+            release-artifacts.json
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: package-evidence
-          path: reports/v0.9.0-logs/
+          path: |
+            reports/test-results/
+            reports/v0.9.0-logs/
+  readiness:
+    name: Require every release gate
+    if: always()
+    needs: [static-unit, integration, security, package]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: node scripts/release-policy.cjs
+        env:
+          TSCHEF_GATE_RESULTS: ${{ toJSON(needs) }}

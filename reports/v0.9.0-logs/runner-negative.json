@@ -1,5 +1,0 @@
-{
-  "case": "missing executable must fail",
-  "exitCode": 1,
-  "message": "Integration test failed: Error: spawnSync /private/tmp/ts-chef-missing-executable ENOENT\n    at Object.spawnSync (node:internal/child_process:1144:20)\n    at spawnSync (node:child_process:928:24)\n    at execute (/Users/michaelweiss/git/github/ts-chef/scripts/test-integration.cjs:15:20)\n    at main (/Users/michaelweiss/git/github/ts-chef/scripts/test-integration.cjs:46:5)\n    at Object.<anonymous> (/Users/michaelweiss/git/github/ts-chef/scripts/test-integration.cjs:53:1)\n    at Module._compile (node:internal/modules/cjs/loader:1934:14)\n    at Object..js (node:internal/modules/cjs/loader:2074:10)\n    at Module.load (node:internal/modules/cjs/loader:1656:32)\n    at Module._load (node:internal/modules/cjs/loader:1448:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n"
-}

@@ -1,27 +1,33 @@
 // Official downloader; every launch uses a disposable profile, never the user's profile.
 const { spawnSync } = require('node:child_process');
-const { mkdtempSync, rmSync, mkdirSync, writeFileSync } = require('node:fs');
-const { tmpdir } = require('node:os');
+const { mkdirSync, writeFileSync, readFileSync, existsSync } = require('node:fs');
+const { createEnvironment } = require('./vscode-test-environment.cjs');
 const { join, resolve } = require('node:path');
 const { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath } = require('@vscode/test-electron');
 const root = resolve(__dirname, '..');
-const version = process.env.VSCODE_TEST_VERSION || '1.110.0';
-if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error('Use a fixed VS Code version');
+
 async function main() {
-  const profile = mkdtempSync(join(tmpdir(), 'ts-chef-host-'));
-  const env = { ...process.env, TSCHEF_INTEGRATION_REPORT: resolve(root, 'reports/v0.9.0-logs/integration.json') };
-  delete env.ELECTRON_RUN_AS_NODE;
+  const context = createEnvironment('host');
+  const { profile, env, version, isolation, electronArgs, timeouts } = context;
+  let phase = 'download';
+  let exitCode, signal;
+  let processNumber = 0;
   const execute = (command, args, extraEnv = {}) => {
-    const result = spawnSync(command, args, { env: { ...env, ...extraEnv }, stdio: 'inherit', timeout: 180000 });
+    const result = spawnSync(command, args, { env: { ...env, ...extraEnv }, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, timeout: timeouts.process });
+    const output = context.redact((result.stdout || '') + (result.stderr || ''));
+    process.stdout.write(output);
+    writeFileSync(join(context.reportDir, `process-${++processNumber}.log`), output);
+    exitCode = result.status; signal = result.signal;
     if (result.error) throw result.error;
     if (result.status !== 0) throw new Error(`VS Code exited with ${result.status}, signal ${result.signal}`);
   };
   const upgrade = { baseline: null, candidate: null, failures: [] };
   try {
-    const executable = process.env.VSCODE_EXECUTABLE || await downloadAndUnzipVSCode({ version, timeout: 30000 });
-    const isolation = ['--user-data-dir', join(profile, 'user'), '--extensions-dir', join(profile, 'extensions')];
+    const executable = process.env.VSCODE_EXECUTABLE || await downloadAndUnzipVSCode({ version, timeout: timeouts.download });
+
     let developmentPath = root;
     if (process.env.TSCHEF_TEST_VSIX) {
+      phase = 'install';
       const [cli, ...cliArgs] = resolveCliArgsFromVSCodeExecutablePath(executable);
       developmentPath = join(profile, 'harness');
       mkdirSync(developmentPath);
@@ -41,7 +47,7 @@ async function main() {
           writeFileSync(env.TSCHEF_UPGRADE_STORAGE, JSON.stringify(seed));
           try {
             execute(executable, [...isolation, '--extensionDevelopmentPath=' + developmentPath,
-              '--extensionTestsPath=' + join(root, 'dist/integration-tests/upgradeSeed.js'), '--disable-gpu', '--skip-welcome', '--disable-workspace-trust']);
+              '--extensionTestsPath=' + join(root, 'dist/integration-tests/upgradeSeed.js'), ...electronArgs]);
             upgrade.baseline = 'passed';
           } catch (error) {
             // Keep the failed baseline test as a failed gate, but still test recovery
@@ -52,16 +58,23 @@ async function main() {
         }
       }
     }
+    phase = 'harness-launch';
     execute(executable, [...isolation, '--extensionDevelopmentPath=' + developmentPath,
-      '--extensionTestsPath=' + join(root, 'dist/integration-tests/run.js'), '--disable-gpu', '--skip-welcome',
-      '--skip-release-notes', '--disable-workspace-trust']);
+      '--extensionTestsPath=' + join(root, 'dist/integration-tests/run.js'), ...electronArgs]);
     if (process.env.TSCHEF_UPGRADE_FROM) {
       upgrade.candidate = 'passed';
       writeFileSync(resolve(root, 'reports/v0.9.0-logs/upgrade-summary.json'), JSON.stringify(upgrade, null, 2));
       if (upgrade.failures.length) throw new Error('Baseline upgrade gate failed; candidate recovery passed. See upgrade-summary.json');
     }
+    const checks = JSON.parse(readFileSync(env.TSCHEF_INTEGRATION_REPORT, 'utf8'));
+    context.report({ status: 'passed', phase, checksPassed: checks.checks, checksFailed: 0, exitCode, signal });
+  } catch (error) {
+    if (existsSync(env.TSCHEF_INTEGRATION_REPORT)) phase = 'extension-tests';
+    context.report({ status: 'failed', phase, checksFailed: 1, exitCode, signal, errorClass: error.name, message: error.message, stack: error.stack });
+    context.preserveLogs();
+    throw error;
   } finally {
-    rmSync(profile, { recursive: true, force: true });
+    context.cleanup();
   }
 }
 main().catch(error => { process.stderr.write(`Integration test failed: ${error.stack || error}\n`); process.exitCode = 1; });

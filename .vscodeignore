@@ -70,3 +70,4 @@ reports/**
 dist/integration.cjs
 dist/*diagnostics*
 dist/integration-tests/**
+release-artifacts.json

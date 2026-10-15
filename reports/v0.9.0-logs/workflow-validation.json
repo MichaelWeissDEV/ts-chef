@@ -1,8 +1,0 @@
-{
-  "parsed": true,
-  "mandatoryTypecheck": true,
-  "mandatoryIntegration": true,
-  "packageGated": true,
-  "releaseTagGated": true,
-  "publishDependsOnAllGates": true
-}

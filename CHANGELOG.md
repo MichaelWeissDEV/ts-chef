@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.9.0] - 2026-10-14
+## [0.9.0] - 2026-10-15
+
+### Release stabilization
+
+- Stabilize isolated Linux Electron test launches with an explicit test-only sandbox policy.
+- Reacquire and focus VS Code workbench windows after restart; test persisted favorites and cleared private state across success, errors, changed parameters and large inputs.
+- Add structured platform diagnostics, release artifact hash/commit validation and a mandatory installed upgrade gate.
+
 
 ### Added
 

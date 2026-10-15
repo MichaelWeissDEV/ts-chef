@@ -504,6 +504,7 @@
     "watch": "npm run compile:operations && npm run compile:extension -- --watch",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:harness": "node --test scripts/test-harness.test.cjs",
     "test:coverage": "jest --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

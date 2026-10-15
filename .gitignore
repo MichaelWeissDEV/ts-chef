@@ -25,3 +25,8 @@ notes/
 
 # Locally generated release documentation archives
 /ts-chef-docs-*.zip
+
+# Reproducible release evidence is uploaded by CI; keep narrative reports in Git.
+/reports/test-results/
+/reports/v0.9.0-logs/
+/release-artifacts.json

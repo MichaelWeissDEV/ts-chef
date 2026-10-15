@@ -72,3 +72,8 @@ If the sidebar is not visible:
 4. In a Restricted Mode workspace, remember that global functionality remains available but workspace storage is intentionally disabled.
 
 Continue with {doc}`usage` for day-to-day workflows or jump to the {doc}`operation-catalog`.
+
+
+## Upgrade from v0.8.1 to v0.9.0
+
+Keep the same VS Code profile and install `vscode-ts-chef-0.9.0.vsix` with **Extensions: Install from VSIX...**. Reload the window, then check version 0.9.0 in the Extensions view. The extension identifier, settings, variable files and pipeline formats are unchanged. Existing recipes should run without conversion; back up private recipes and variables before upgrading. Open **tschef: Open Quick Workbench** to use the new parameter editor and result formats. Favorites persist; inputs, parameter values and results do not survive a full restart.

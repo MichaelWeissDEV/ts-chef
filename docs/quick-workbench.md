@@ -12,7 +12,7 @@ Run **tschef: Open Quick Workbench** from the Command Palette. It opens a panel 
 6. Choose **Copy** to export the complete result, or **New Document** to open it in the first editor group.
 7. For selection input, **Replace** changes the original captured range once. Changing your selection later does not redirect the edit. Changing or closing the original document invalidates replacement.
 
-Manual input, **From Document**, and **From Clipboard** also work. An empty input is a valid input; a missing source editor is an error. Stars persist favorites between openings, and recent successful operations appear first.
+Manual input, **From Document**, and **From Clipboard** also work. An empty input is a valid input; a missing source editor is an error. Stars persist favorites between openings and full VS Code restarts, and recent successful operations appear first. Inputs, result contents and parameter values are not restored after restarting VS Code; export buttons remain disabled until a new execution succeeds.
 
 ## Parameters and keyboard use
 
