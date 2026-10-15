@@ -6,7 +6,7 @@ The extension identifier is `michaelweiss.vscode-ts-chef`. Keep it unchanged so 
 
 1. Update `package.json` and both root version fields in `package-lock.json` together. For the next patch, use `npm version patch --no-git-tag-version`.
 2. Update `CHANGELOG.md` and write English notes at `reports/v<VERSION>-release-notes.md`. Run the normal checks and commit the release changes.
-3. Push the commit and require a green CI run on Ubuntu, macOS ARM64 and macOS Intel. CI validates source, real host/UI behavior, documentation, the installed VSIX and the official 0.8.1 upgrade path.
+3. Push the commit and require a green CI run on Ubuntu, macOS ARM64 and macOS Intel. CI validates source, real host/UI behavior, documentation, the installed VSIX and the official 0.8.1 upgrade path. The immutable 0.8.1 release archive omits its external runtimes: only its historical execution receives an explicit runtime fixture. The 0.9.0 candidate must activate and run without that fixture or any inherited `NODE_PATH`.
 4. Tag that exact commit, using the package version, and push only that tag:
 
    ```sh

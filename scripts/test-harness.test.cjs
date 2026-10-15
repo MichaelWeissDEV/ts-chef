@@ -57,3 +57,19 @@ test('webview discovery tolerates detached unrelated frames but propagates real 
   const broken = { isDetached: () => false, locator: () => { throw new Error('Invalid selector'); } };
   await assert.rejects(findVisibleFrame({ frames: () => [broken] }, '#search', 1000), /Invalid selector/);
 });
+
+test('candidate environment strips inherited NODE_PATH instead of masking missing packaged runtimes', () => {
+  const { createEnvironment } = require('./vscode-test-environment.cjs');
+  const previous = process.env.NODE_PATH;
+  process.env.NODE_PATH = '/unexpected-external-runtime';
+  let context;
+  try {
+    context = createEnvironment('policy-unit');
+    assert.equal(context.env.NODE_PATH, undefined);
+    assert.equal(context.env.TSCHEF_EXPECTED_VERSION, require('../package.json').version);
+  } finally {
+    context?.cleanup();
+    if (previous === undefined) delete process.env.NODE_PATH;
+    else process.env.NODE_PATH = previous;
+  }
+});

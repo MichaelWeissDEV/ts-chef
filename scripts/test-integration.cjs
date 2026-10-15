@@ -21,7 +21,7 @@ async function main() {
     if (result.error) throw result.error;
     if (result.status !== 0) throw new Error(`VS Code exited with ${result.status}, signal ${result.signal}`);
   };
-  const upgrade = { baseline: null, candidate: null, failures: [] };
+  const upgrade = { baseline: null, candidate: null, failures: [], baselineRuntimeFixture: 'official 0.8.1 archive omits external runtimes; supplied only for historical baseline execution', candidateRuntimeFixture: false };
   try {
     const executable = process.env.VSCODE_EXECUTABLE || await downloadAndUnzipVSCode({ version, timeout: timeouts.download });
 
@@ -46,8 +46,9 @@ async function main() {
           env.TSCHEF_UPGRADE_STORAGE = join(profile, 'upgrade-storage.json');
           writeFileSync(env.TSCHEF_UPGRADE_STORAGE, JSON.stringify(seed));
           try {
+            process.stdout.write('Legacy baseline only: providing omitted external runtimes via isolated NODE_PATH fixture; candidate launches receive no NODE_PATH.\n');
             execute(executable, [...isolation, '--extensionDevelopmentPath=' + developmentPath,
-              '--extensionTestsPath=' + join(root, 'dist/integration-tests/upgradeSeed.js'), ...electronArgs]);
+              '--extensionTestsPath=' + join(root, 'dist/integration-tests/upgradeSeed.js'), ...electronArgs], { NODE_PATH: join(root, 'dist/node_modules') });
             upgrade.baseline = 'passed';
           } catch (error) {
             // Keep the failed baseline test as a failed gate, but still test recovery

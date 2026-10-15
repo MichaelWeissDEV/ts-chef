@@ -19,6 +19,7 @@ function createEnvironment(suite) {
   fs.mkdirSync(reportDir, { recursive: true });
   const env = { ...process.env, TSCHEF_EXPECTED_VERSION: require('../package.json').version, TSCHEF_INTEGRATION_REPORT: path.join(reportDir, 'checks.json') };
   delete env.ELECTRON_RUN_AS_NODE;
+  delete env.NODE_PATH; // Installed candidates must resolve only their shipped runtimes.
   const isolation = ['--user-data-dir', path.join(profile, 'user'), '--extensions-dir', path.join(profile, 'extensions')];
   const electronArgs = [...sandboxArgs(), '--disable-gpu', '--skip-welcome', '--skip-release-notes', '--disable-workspace-trust'];
   const metadata = { platform: process.platform, architecture: process.arch, nodeVersion: process.version, vscodeVersion: version, testSuite: suite, mode, sandbox: sandboxArgs().length ? 'explicit test-only no-sandbox' : 'enabled' };
