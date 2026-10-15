@@ -73,3 +73,24 @@ test('candidate environment strips inherited NODE_PATH instead of masking missin
     else process.env.NODE_PATH = previous;
   }
 });
+
+test('legacy runtime fixture resolves from an installed extension and is removed before candidate, including failure', () => {
+  const { createRequire } = require('node:module');
+  const { withLegacyRuntimeFixture } = require('./legacy-upgrade-fixture.cjs');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ts-chef-legacy-fixture-'));
+  const profile = path.join(root, 'profile');
+  const runtime = path.join(root, 'runtimes');
+  const moduleDir = path.join(runtime, 'ts-chef-fixture-probe');
+  fs.mkdirSync(moduleDir, { recursive: true });
+  fs.writeFileSync(path.join(moduleDir, 'index.js'), 'module.exports = 42;');
+  const requireFromExtension = createRequire(path.join(profile, 'extensions/michaelweiss.vscode-ts-chef-0.8.1/dist/extension.js'));
+  try {
+    assert.throws(() => requireFromExtension.resolve('ts-chef-fixture-probe'), /Cannot find module/);
+    withLegacyRuntimeFixture(profile, runtime, () => assert.equal(requireFromExtension('ts-chef-fixture-probe'), 42));
+    assert.equal(fs.existsSync(path.join(profile, 'node_modules')), false);
+    assert.throws(() => withLegacyRuntimeFixture(profile, runtime, () => { throw new Error('baseline failed'); }), /baseline failed/);
+    assert.equal(fs.existsSync(path.join(profile, 'node_modules')), false);
+    // Resolve a new module request after cleanup; no cached exports can mask it.
+    assert.throws(() => createRequire(path.join(profile, 'candidate/dist/extension.js')).resolve('ts-chef-fixture-probe'), /Cannot find module/);
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
+});

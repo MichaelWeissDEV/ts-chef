@@ -2,6 +2,7 @@
 const { spawnSync } = require('node:child_process');
 const { mkdirSync, writeFileSync, readFileSync, existsSync } = require('node:fs');
 const { createEnvironment } = require('./vscode-test-environment.cjs');
+const { withLegacyRuntimeFixture } = require('./legacy-upgrade-fixture.cjs');
 const { join, resolve } = require('node:path');
 const { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath } = require('@vscode/test-electron');
 const root = resolve(__dirname, '..');
@@ -46,9 +47,11 @@ async function main() {
           env.TSCHEF_UPGRADE_STORAGE = join(profile, 'upgrade-storage.json');
           writeFileSync(env.TSCHEF_UPGRADE_STORAGE, JSON.stringify(seed));
           try {
-            process.stdout.write('Legacy baseline only: providing omitted external runtimes via isolated NODE_PATH fixture; candidate launches receive no NODE_PATH.\n');
-            execute(executable, [...isolation, '--extensionDevelopmentPath=' + developmentPath,
-              '--extensionTestsPath=' + join(root, 'dist/integration-tests/upgradeSeed.js'), ...electronArgs], { NODE_PATH: join(root, 'dist/node_modules') });
+            process.stdout.write('Legacy baseline only: providing omitted runtimes in the isolated profile; fixture is removed before candidate installation.\n');
+            withLegacyRuntimeFixture(profile, join(root, 'dist/node_modules'), () => {
+              execute(executable, [...isolation, '--extensionDevelopmentPath=' + developmentPath,
+                '--extensionTestsPath=' + join(root, 'dist/integration-tests/upgradeSeed.js'), ...electronArgs]);
+            });
             upgrade.baseline = 'passed';
           } catch (error) {
             // Keep the failed baseline test as a failed gate, but still test recovery
