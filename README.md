@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.jpg" alt="ts-chef logo" width="112" />
+  <img src="assets/logo.png" alt="ts-chef logo" width="112" />
 </p>
 
 <h1 align="center">ts-chef</h1>
@@ -36,6 +36,8 @@ For a single conversion, run **tschef: Open Quick Workbench**, load a selection 
 
 <p align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=MichaelWeiss.vscode-ts-chef"><strong>Install from the VS Code Marketplace</strong></a>
+  ·
+  <a href="https://github.com/MichaelWeissDEV/ts-chef/releases/latest"><strong>Download VSIX</strong></a>
   ·
   <a href="https://ts-chef.readthedocs.io/en/latest/"><strong>Read the complete documentation</strong></a>
 </p>
@@ -387,6 +389,6 @@ Project layout:
 Licensed under the [Apache License 2.0](LICENSE). Many operations are ported from [GCHQ CyberChef](https://github.com/gchq/CyberChef), which is also licensed under Apache 2.0.
 
 
-### v0.9.0 release candidate verification
+### Releases and installation
 
-For installation, upgrade from 0.8.1, input sources, parameters and export limits, see the [getting started guide](docs/getting-started.md) and [Quick Workbench guide](docs/quick-workbench.md). The [release readiness report](reports/v0.9.0-release-readiness.md) records actual local results, artifact hashes, security risks and pending platform CI. A local verification pass does not authorize publication.
+For installation, upgrade from 0.8.1, input sources, parameters and export limits, see the [getting started guide](docs/getting-started.md) and [Quick Workbench guide](docs/quick-workbench.md). Download the versioned VSIX and offline documentation from [GitHub Releases](https://github.com/MichaelWeissDEV/ts-chef/releases). In VS Code, run **Extensions: Install from VSIX...**, select the downloaded file and reload. Existing installations use the same extension identifier and retain their settings. Maintainers can follow the [publishing guide](docs/publishing.md) for Marketplace and Open VSX updates.

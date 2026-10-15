@@ -119,6 +119,8 @@ jobs:
             vscode-ts-chef-*.vsix
             ts-chef-docs-*.zip
             release-artifacts.json
+            release-notes.md
+            SHA256SUMS
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()

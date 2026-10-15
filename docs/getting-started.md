@@ -15,7 +15,7 @@ You can also install it directly from the [Visual Studio Marketplace](https://ma
 
 ## Quick Workbench
 
-For a single operation with visible parameters, start with the [Quick Workbench walkthrough](quick-workbench.md). Local candidates can be installed with `code --install-extension vscode-ts-chef-0.9.0.vsix`; publishing is a separate maintainer action.
+For a single operation with visible parameters, start with the [Quick Workbench walkthrough](quick-workbench.md). Download the versioned VSIX from [GitHub Releases](https://github.com/MichaelWeissDEV/ts-chef/releases) and install it with **Extensions: Install from VSIX...**. The release also contains offline documentation and SHA-256 checksums.
 
 ## First transformation: decode Base64 JSON
 

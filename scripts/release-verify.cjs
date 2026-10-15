@@ -32,6 +32,7 @@ try {
   execute('official upgrade baseline', process.execPath, [resolve(root, 'scripts/download-upgrade-baseline.cjs')]);
   execute('upgrade installed VSIX', process.execPath, [resolve(root, 'scripts/test-integration.cjs')], { TSCHEF_TEST_VSIX: vsix, TSCHEF_UPGRADE_FROM: resolve(root, '.vscode-test/vscode-ts-chef-0.8.1.vsix') });
   execute('artifact integrity', process.execPath, [resolve(root, 'scripts/verify-release-artifacts.cjs'), root, '--write']);
+  execute('publication assets', process.execPath, [resolve(root, 'scripts/prepare-release-assets.cjs'), root]);
   writeFileSync(resolve(root, 'reports/v0.9.0-logs/release-verify.json'), JSON.stringify({ version, results, completed: true, artifacts: [vsix, resolve(root, `ts-chef-docs-${version}.zip`)] }, null, 2));
   process.stdout.write(`Local release verification succeeded. Artifacts: ${vsix}, ts-chef-docs-${version}.zip\n`);
 } catch (error) {

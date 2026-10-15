@@ -10,7 +10,7 @@ export async function run(): Promise<void> {
   const start = performance.now();
   const extension = vscode.extensions.getExtension<{ getQuickWorkbenchPanel(): QuickWorkbenchPanel }>("michaelweiss.vscode-ts-chef");
   assert.ok(extension);
-  assert.equal(extension.packageJSON.version, "0.9.0");
+  assert.equal(extension.packageJSON.version, process.env.TSCHEF_EXPECTED_VERSION);
   assert.equal(vscode.extensions.all.filter(item => item.id === extension.id).length, 1);
   const api = await extension.activate();
   timings.activationMs = performance.now() - start;

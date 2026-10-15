@@ -12,12 +12,13 @@ async function main() {
   assert.equal(manifest.name, expected.name);
   assert.equal(manifest.publisher, expected.publisher);
   assert.equal(manifest.version, expected.version);
+  assert.equal(manifest.icon, expected.icon);
   assert.deepEqual(manifest.contributes, expected.contributes);
   assert.deepEqual(manifest.activationEvents, expected.activationEvents);
   const xml = await zip.file('extension.vsixmanifest').async('string');
   assert.ok(xml.includes(`Version="${expected.version}"`));
   const required = ['dist/extension.js', 'dist/quickWorkbench.js', 'dist/quickWorkbench.css',
-    'dist/operation-chunks/manifest.json', 'assets/logo.jpg', 'media/icon.svg',
+    'dist/operation-chunks/manifest.json', expected.icon, 'media/icon.svg',
     'dist/node_modules/libbzip2-wasm/dist/libbzip2-wasm.js',
     'dist/node_modules/@alexaltea/capstone-js/dist/capstone.js', 'dist/node_modules/@alexaltea/capstone-js/dist/capstone.wasm',
     'dist/node_modules/@blu3r4y/lzma/index.js', 'dist/node_modules/@blu3r4y/lzma/src/lzma_worker.js',

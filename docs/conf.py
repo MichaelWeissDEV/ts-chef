@@ -42,7 +42,7 @@ myst_heading_anchors = 4
 myst_url_schemes = ("http", "https", "mailto")
 
 html_theme = "sphinx_rtd_theme"
-html_logo = "_static/logo.jpg"
+html_logo = "_static/logo.png"
 html_favicon = "_static/icon.svg"
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]

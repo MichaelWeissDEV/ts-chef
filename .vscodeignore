@@ -45,7 +45,7 @@ report.md
 
 # Assets: ship only the extension icon; demo media is referenced via the repo URL
 assets/**
-!assets/logo.jpg
+!assets/logo.png
 
 # Test reports, coverage and docs
 coverage/**
@@ -71,3 +71,6 @@ dist/integration.cjs
 dist/*diagnostics*
 dist/integration-tests/**
 release-artifacts.json
+
+release-notes.md
+SHA256SUMS

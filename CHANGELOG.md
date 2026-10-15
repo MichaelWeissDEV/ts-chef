@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Release stabilization
 
+- Apply the updated PNG logo to the extension, README and documentation.
+- Publish verified VSIX/download links, English release notes and SHA-256 checksums on version tags.
+- Document Marketplace/Open VSX updates and prepare the 0.9.1 maintenance checklist.
+
 - Stabilize isolated Linux Electron test launches with an explicit test-only sandbox policy.
 - Reacquire and focus VS Code workbench windows after restart; test persisted favorites and cleared private state across success, errors, changed parameters and large inputs.
 - Add structured platform diagnostics, release artifact hash/commit validation and a mandatory installed upgrade gate.

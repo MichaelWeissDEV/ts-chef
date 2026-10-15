@@ -7,6 +7,8 @@ permissions:
   contents: read
 jobs:
   validate:
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
     name: Validate immutable tag and package version
     runs-on: ubuntu-latest
     steps:
@@ -17,6 +19,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node scripts/verify-manifest.cjs --tag
+      - id: metadata
+        run: node -e 'require("fs").appendFileSync(process.env.GITHUB_OUTPUT, "version=" + require("./package.json").version + "\n")'
   gates:
     needs: validate
     uses: ./.github/workflows/ci.yml
@@ -42,10 +46,14 @@ jobs:
       - run: npm ci
         working-directory: source
       - name: Revalidate downloaded artifacts and trigger commit
+        env:
+          VERSION: ${{ needs.validate.outputs.version }}
         run: |
           (cd source && node scripts/verify-manifest.cjs --tag)
-          node source/scripts/verify-vsix.cjs release-artifacts/vscode-ts-chef-0.9.0.vsix
+          node source/scripts/verify-vsix.cjs "release-artifacts/vscode-ts-chef-${VERSION}.vsix"
           node source/scripts/verify-release-artifacts.cjs release-artifacts
+          (cd release-artifacts && sha256sum --check SHA256SUMS)
+          test -s release-artifacts/release-notes.md
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -54,7 +62,10 @@ jobs:
           name: ts-chef ${{ github.ref_name }}
           prerelease: ${{ contains(github.ref_name, '-') }}
           fail_on_unmatched_files: true
-          generate_release_notes: true
+          body_path: release-artifacts/release-notes.md
+          make_latest: ${{ !contains(github.ref_name, '-') }}
           files: |
             release-artifacts/vscode-ts-chef-*.vsix
             release-artifacts/ts-chef-docs-*.zip
+            release-artifacts/release-artifacts.json
+            release-artifacts/SHA256SUMS

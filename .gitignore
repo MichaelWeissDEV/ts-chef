@@ -30,3 +30,6 @@ notes/
 /reports/test-results/
 /reports/v0.9.0-logs/
 /release-artifacts.json
+
+release-notes.md
+SHA256SUMS

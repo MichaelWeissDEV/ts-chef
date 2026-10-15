@@ -2,7 +2,7 @@
 
 ```{raw} html
 <div class="hero">
-  <img src="_static/logo.jpg" alt="ts-chef logo">
+  <img src="_static/logo.png" alt="ts-chef logo">
   <p><strong>CyberChef-style transformations, visual pipelines, and data analysis inside Visual Studio Code.</strong></p>
 </div>
 ```
@@ -14,7 +14,6 @@ ts-chef brings 479 encoding, decoding, cryptography, compression, formatting, bi
 
 :::{grid-item-card} Install and start
 :link: getting-started
-quick-workbench
 :link-type: doc
 
 Install ts-chef and complete your first Base64-to-JSON transformation.
@@ -90,6 +89,8 @@ architecture
 performance
 contributing
 documentation
+publishing
+next-release
 changelog
 license
 ```

@@ -17,7 +17,7 @@ function createEnvironment(suite) {
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), `ts-chef-${suite}-`));
   const reportDir = path.join(root, 'reports/test-results', platform, suite, mode, run);
   fs.mkdirSync(reportDir, { recursive: true });
-  const env = { ...process.env, TSCHEF_INTEGRATION_REPORT: path.join(reportDir, 'checks.json') };
+  const env = { ...process.env, TSCHEF_EXPECTED_VERSION: require('../package.json').version, TSCHEF_INTEGRATION_REPORT: path.join(reportDir, 'checks.json') };
   delete env.ELECTRON_RUN_AS_NODE;
   const isolation = ['--user-data-dir', path.join(profile, 'user'), '--extensions-dir', path.join(profile, 'extensions')];
   const electronArgs = [...sandboxArgs(), '--disable-gpu', '--skip-welcome', '--skip-release-notes', '--disable-workspace-trust'];
