@@ -48,3 +48,12 @@ test('artifact gate rejects missing VSIX/docs, wrong version and changed tested 
     await assert.rejects(verifyArtifacts(dir, expected, evidence));
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('webview discovery tolerates detached unrelated frames but propagates real errors', async () => {
+  const { findVisibleFrame } = require('./vscode-ui-driver.cjs');
+  const detached = { isDetached: () => false, locator: () => ({ count: async () => { throw new Error('locator.count: Frame was detached'); } }) };
+  const ready = { isDetached: () => false, locator: () => ({ count: async () => 1, isVisible: async () => true }) };
+  assert.equal(await findVisibleFrame({ frames: () => [detached, ready] }, '#search', 1000), ready);
+  const broken = { isDetached: () => false, locator: () => { throw new Error('Invalid selector'); } };
+  await assert.rejects(findVisibleFrame({ frames: () => [broken] }, '#search', 1000), /Invalid selector/);
+});

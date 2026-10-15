@@ -63,14 +63,7 @@ async function main() {
     await page.locator('.editor-group-container .monaco-editor .view-lines').first().click();
     await page.keyboard.press(`${modifier}+A`);
     await command('tschef: Open Quick Workbench');
-    const getFrame = async () => {
-      const end = Date.now() + 30000;
-      while (Date.now() < end) {
-        for (const frame of page.frames()) if (await frame.locator('#inputText').count()) return frame;
-        await page.waitForTimeout(200);
-      }
-      throw new Error('Quick Workbench webview did not load');
-    };
+    const getFrame = () => driver.findVisibleFrame(page, '#inputText', 30000);
     let frame = await getFrame();
     const expectValue = async (selector, value) => {
       await frame.locator(selector).waitFor();
@@ -149,14 +142,7 @@ async function main() {
     }
     await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1400, 900));
     await command('View: Show tschef');
-    const findFrameWith = async selector => {
-      const end = Date.now() + 20000;
-      while (Date.now() < end) {
-        for (const candidate of page.frames()) if (await candidate.locator(selector).count() && await candidate.locator(selector).isVisible()) return candidate;
-        await page.waitForTimeout(100);
-      }
-      throw new Error('Missing webview ' + selector);
-    };
+    const findFrameWith = selector => driver.findVisibleFrame(page, selector);
     const opsFrame = await findFrameWith('#search');
     await opsFrame.locator('#search').fill('From Base64');
     await opsFrame.locator('[data-op="FromBase64"] .op-add').click();

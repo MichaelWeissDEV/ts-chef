@@ -46,6 +46,27 @@ async function command(app, page, text, opensPicker = false) {
   await label.click();
   if (!opensPicker) await page.locator('.quick-input-widget').waitFor({ state: 'hidden' });
 }
+async function findVisibleFrame(page, selector, timeout = 20000) {
+  let selected;
+  await expect.poll(async () => {
+    // VS Code can replace unrelated iframe documents while views initialize.
+    // Re-enumerate frames on every probe, retaining no detached frame handles.
+    for (const frame of page.frames()) {
+      if (frame.isDetached()) continue;
+      try {
+        const locator = frame.locator(selector);
+        if (await locator.count() && await locator.isVisible() && !frame.isDetached()) {
+          selected = frame;
+          return true;
+        }
+      } catch (error) {
+        if (!frame.isDetached() && !/Frame was detached|Execution context was destroyed/.test(error.message)) throw error;
+      }
+    }
+    return false;
+  }, { timeout, message: 'Missing visible webview: ' + selector }).toBe(true);
+  return selected;
+}
 async function diagnostics(app, directory) {
   const fs = require('node:fs');
   const path = require('node:path');
@@ -61,4 +82,4 @@ async function diagnostics(app, directory) {
   fs.writeFileSync(path.join(directory, 'windows.json'), JSON.stringify({ windowCount: windows.length, windows }, null, 2));
   return windows;
 }
-module.exports = { workbench, command, diagnostics };
+module.exports = { workbench, command, diagnostics, findVisibleFrame };
